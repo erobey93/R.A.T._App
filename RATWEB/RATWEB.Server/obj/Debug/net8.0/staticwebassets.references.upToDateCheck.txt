@@ -1,0 +1,1 @@
+C:\Users\earob\source\repos\RATAPP\RATAPPLibrary\RATAPPLibrary\obj\Debug\net8.0\staticwebassets.build.json

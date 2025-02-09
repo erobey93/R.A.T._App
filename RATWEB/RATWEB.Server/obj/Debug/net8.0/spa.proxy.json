@@ -1,0 +1,10 @@
+{
+"SpaProxyServer": {
+"ServerUrl": "https://localhost:50405",
+"RedirectUrl": "",
+"LaunchCommand": "npm run dev",
+"WorkingDirectory": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\..\\ratweb.client",
+"MaxTimeoutInSeconds": "120",
+"KeepRunning": "false"
+}
+}

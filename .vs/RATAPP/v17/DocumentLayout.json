@@ -3,12 +3,108 @@
   "WorkspaceRootPath": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapp\\forms\\createaccountform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|solutionrelative:ratapp\\forms\\createaccountform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.client\\src\\app.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|solutionrelative:ratweb\\ratweb.client\\src\\app.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.client\\src\\login.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|solutionrelative:ratweb\\ratweb.client\\src\\login.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.client\\src\\main.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}",
+      "RelativeMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|solutionrelative:ratweb\\ratweb.client\\src\\main.tsx||{0F2454B1-A556-402D-A7D0-1FDE7F99DEE0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\ratweb.server.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\ratweb.server.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibrary\\services\\loginservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|solutionrelative:ratapplibrary\\services\\loginservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibrary\\data\\models\\loginrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|solutionrelative:ratapplibrary\\data\\models\\loginrequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibrary\\data\\dbcontexts\\userdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|solutionrelative:ratapplibrary\\data\\dbcontexts\\userdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapp\\forms\\loginform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|solutionrelative:ratapp\\forms\\loginform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.client\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|solutionrelative:ratweb\\ratweb.client\\package.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.client\\.vscode\\launch.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}|RATWEB\\ratweb.client\\ratweb.client.esproj|solutionrelative:ratweb\\ratweb.client\\.vscode\\launch.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratweb\\ratweb.server\\ratweb.server.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}|RATWEB\\RATWEB.Server\\RATWEB.Server.csproj|solutionrelative:ratweb\\ratweb.server\\ratweb.server.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{163CA219-3A52-402E-9F6D-C1A5AF0C3DD9}|RATAPPLibraryUT\\RATAPPLibraryUT.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibraryut\\ratapplibraryut.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{163CA219-3A52-402E-9F6D-C1A5AF0C3DD9}|RATAPPLibraryUT\\RATAPPLibraryUT.csproj|solutionrelative:ratapplibraryut\\ratapplibraryut.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\ratapp\\forms\\loginform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|solutionrelative:ratapp\\forms\\loginform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibrary\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|solutionrelative:ratapplibrary\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|solutionrelative:ratapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapp\\ratapp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|solutionrelative:ratapp\\ratapp.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibrary\\data\\models\\loginresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|solutionrelative:ratapplibrary\\data\\models\\loginresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapplibrary\\data\\models\\breeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}|RATAPPLibrary\\RATAPPLibrary.csproj|solutionrelative:ratapplibrary\\data\\models\\breeder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|c:\\users\\earob\\source\\repos\\ratapp\\ratapplibrary\\ratapp\\forms\\createaccountform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7A05E31D-9B56-4810-816B-6BE0318327A3}|RATAPP\\RATAPP.csproj|solutionrelative:ratapp\\forms\\createaccountform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Panels\\HomePanel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -59,32 +155,337 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "CreateAccountForm.cs",
-              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\CreateAccountForm.cs",
-              "RelativeDocumentMoniker": "RATAPP\\Forms\\CreateAccountForm.cs",
-              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\CreateAccountForm.cs",
-              "RelativeToolTip": "RATAPP\\Forms\\CreateAccountForm.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAASAAAAAAAAAA==",
+              "Title": "App.tsx",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\src\\App.tsx",
+              "RelativeDocumentMoniker": "RATWEB\\ratweb.client\\src\\App.tsx",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\src\\App.tsx",
+              "RelativeToolTip": "RATWEB\\ratweb.client\\src\\App.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-02-08T23:14:03.622Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "main.tsx",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\src\\main.tsx",
+              "RelativeDocumentMoniker": "RATWEB\\ratweb.client\\src\\main.tsx",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\src\\main.tsx",
+              "RelativeToolTip": "RATWEB\\ratweb.client\\src\\main.tsx",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-02-08T23:26:44.622Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\appsettings.Development.json",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\appsettings.Development.json",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-02-08T23:26:26.685Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "WeatherForecast.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\WeatherForecast.cs",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\WeatherForecast.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\WeatherForecast.cs",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\WeatherForecast.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-03T02:46:40.311Z",
+              "WhenOpened": "2025-02-08T23:26:19.082Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Program.cs",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\Program.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Program.cs",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T23:26:01.747Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "RATWEB.Server",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA+AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-08T23:23:35.415Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "LoginService.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Services\\LoginService.cs",
+              "RelativeDocumentMoniker": "RATAPPLibrary\\Services\\LoginService.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Services\\LoginService.cs",
+              "RelativeToolTip": "RATAPPLibrary\\Services\\LoginService.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABkAAABxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T23:17:02.195Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "RATAPP",
+              "Title": "Login.tsx",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\src\\Login.tsx",
+              "RelativeDocumentMoniker": "RATWEB\\ratweb.client\\src\\Login.tsx",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\src\\Login.tsx",
+              "RelativeToolTip": "RATWEB\\ratweb.client\\src\\Login.tsx",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAABcAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003213|",
+              "WhenOpened": "2025-02-08T23:15:11.331Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T23:10:38.463Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "WeatherForecastController.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Controllers\\WeatherForecastController.cs",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\Controllers\\WeatherForecastController.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Controllers\\WeatherForecastController.cs",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\Controllers\\WeatherForecastController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T23:05:28.92Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "RATWEB.Server",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\RATWEB.Server.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-08T22:57:07.017Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "LoginRequest.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\Models\\LoginRequest.cs",
+              "RelativeDocumentMoniker": "RATAPPLibrary\\Data\\Models\\LoginRequest.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\Models\\LoginRequest.cs",
+              "RelativeToolTip": "RATAPPLibrary\\Data\\Models\\LoginRequest.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-03T20:10:45.247Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\appsettings.json",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\appsettings.json",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\appsettings.json",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-02-08T22:59:31.673Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "UserDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\DbContexts\\UserDbContext.cs",
+              "RelativeDocumentMoniker": "RATAPPLibrary\\Data\\DbContexts\\UserDbContext.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\DbContexts\\UserDbContext.cs",
+              "RelativeToolTip": "RATAPPLibrary\\Data\\DbContexts\\UserDbContext.cs",
+              "ViewState": "AgIAAGwAAAAAAAAAAAAAAIwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-03T20:11:03.026Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "RATWEB\\RATWEB.Server\\Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\RATWEB.Server\\Properties\\launchSettings.json",
+              "RelativeToolTip": "RATWEB\\RATWEB.Server\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-02-08T22:59:38.208Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "launch.json",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\.vscode\\launch.json",
+              "RelativeDocumentMoniker": "RATWEB\\ratweb.client\\.vscode\\launch.json",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\.vscode\\launch.json",
+              "RelativeToolTip": "RATWEB\\ratweb.client\\.vscode\\launch.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-02-08T22:59:59.702Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "LoginForm.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\LoginForm.cs",
+              "RelativeDocumentMoniker": "RATAPP\\Forms\\LoginForm.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\LoginForm.cs",
+              "RelativeToolTip": "RATAPP\\Forms\\LoginForm.cs",
+              "ViewState": "AgIAAM8AAAAAAAAAAAAAAO8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T22:04:18.514Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "package.json",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\package.json",
+              "RelativeDocumentMoniker": "RATWEB\\ratweb.client\\package.json",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATWEB\\ratweb.client\\package.json",
+              "RelativeToolTip": "RATWEB\\ratweb.client\\package.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-02-08T23:00:43.035Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "RATAPPLibraryUT.csproj",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibraryUT\\RATAPPLibraryUT.csproj",
+              "RelativeDocumentMoniker": "RATAPPLibraryUT\\RATAPPLibraryUT.csproj",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibraryUT\\RATAPPLibraryUT.csproj",
+              "RelativeToolTip": "RATAPPLibraryUT\\RATAPPLibraryUT.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-08T22:07:48.555Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "LoginForm.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\LoginForm.cs",
+              "RelativeDocumentMoniker": "RATAPP\\Forms\\LoginForm.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\LoginForm.cs [Design]",
+              "RelativeToolTip": "RATAPP\\Forms\\LoginForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T22:04:11.676Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Program.cs",
+              "RelativeDocumentMoniker": "RATAPPLibrary\\Program.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Program.cs",
+              "RelativeToolTip": "RATAPPLibrary\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T22:03:13.058Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Program.cs",
+              "RelativeDocumentMoniker": "RATAPP\\Program.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Program.cs",
+              "RelativeToolTip": "RATAPP\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-08T22:01:45.111Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "LoginResponse.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\Models\\LoginResponse.cs",
+              "RelativeDocumentMoniker": "RATAPPLibrary\\Data\\Models\\LoginResponse.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\Models\\LoginResponse.cs",
+              "RelativeToolTip": "RATAPPLibrary\\Data\\Models\\LoginResponse.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-03T20:10:44.417Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "Breeder.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\Models\\Breeder.cs",
+              "RelativeDocumentMoniker": "RATAPPLibrary\\Data\\Models\\Breeder.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPPLibrary\\Data\\Models\\Breeder.cs",
+              "RelativeToolTip": "RATAPPLibrary\\Data\\Models\\Breeder.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-03T20:10:41.253Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "CreateAccountForm.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\CreateAccountForm.cs",
+              "RelativeDocumentMoniker": "RATAPP\\Forms\\CreateAccountForm.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\CreateAccountForm.cs",
+              "RelativeToolTip": "RATAPP\\Forms\\CreateAccountForm.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-03T02:46:40.311Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "RATAPP.csproj",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\RATAPP.csproj",
               "RelativeDocumentMoniker": "RATAPP\\RATAPP.csproj",
               "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\RATAPP.csproj",
               "RelativeToolTip": "RATAPP\\RATAPP.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
               "WhenOpened": "2025-02-03T02:46:26.295Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 27,
               "Title": "PDfGenerationPanel.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Panels\\PDfGenerationPanel.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Panels\\PDfGenerationPanel.cs",
@@ -95,7 +496,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 26,
               "Title": "HomePanel.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Panels\\HomePanel.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Panels\\HomePanel.cs",
@@ -106,7 +507,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 28,
               "Title": "PDfGenerationPanel.cs [Design]",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Panels\\PDfGenerationPanel.cs",
               "RelativeDocumentMoniker": "RATAPP\\Panels\\PDfGenerationPanel.cs",
@@ -117,7 +518,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 29,
               "Title": "UpdateCredentialsForm.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Forms\\UpdateCredentialsForm.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Forms\\UpdateCredentialsForm.cs",
@@ -129,7 +530,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 30,
               "Title": "LoginForm.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Forms\\LoginForm.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Forms\\LoginForm.cs",
@@ -141,7 +542,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 31,
               "Title": "RATAppBaseForm.cs [Design]",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\RATAppBaseForm.cs",
               "RelativeDocumentMoniker": "RATAPP\\Forms\\RATAppBaseForm.cs",
@@ -152,19 +553,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 32,
               "Title": "RATAppBaseForm.cs",
-              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Forms\\RATAppBaseForm.cs",
-              "RelativeDocumentMoniker": "..\\RATAPP\\Forms\\RATAppBaseForm.cs",
-              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Forms\\RATAppBaseForm.cs",
-              "RelativeToolTip": "..\\RATAPP\\Forms\\RATAppBaseForm.cs",
+              "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\RATAppBaseForm.cs",
+              "RelativeDocumentMoniker": "RATAPP\\Forms\\RATAppBaseForm.cs",
+              "ToolTip": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Forms\\RATAppBaseForm.cs",
+              "RelativeToolTip": "RATAPP\\Forms\\RATAppBaseForm.cs",
               "ViewState": "AgIAALoAAAAAAAAAAAAAAOIAAAA5AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-01T22:16:40.795Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 33,
               "Title": "PairingsandLittersPanel.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Panels\\PairingsandLittersPanel.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Panels\\PairingsandLittersPanel.cs",
@@ -176,7 +577,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 34,
               "Title": "CreateAccountForm.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Forms\\CreateAccountForm.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Forms\\CreateAccountForm.cs",
@@ -188,7 +589,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 35,
               "Title": "PDfGenerationPanel.Designer.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Panels\\PDfGenerationPanel.Designer.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Panels\\PDfGenerationPanel.Designer.cs",
@@ -200,7 +601,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 36,
               "Title": "PairingsandLittersPanel.Designer.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Panels\\PairingsandLittersPanel.Designer.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Panels\\PairingsandLittersPanel.Designer.cs",
@@ -212,7 +613,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 37,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPP\\Program.cs",
               "RelativeDocumentMoniker": "..\\RATAPP\\Program.cs",

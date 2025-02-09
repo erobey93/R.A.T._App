@@ -1,0 +1,6 @@
+@RATWEB.Server_HostAddress = http://localhost:5124
+
+GET {{RATWEB.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

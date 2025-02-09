@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RATAPP", "RATAPP\RATAPP.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RATAPPLibrary", "RATAPPLibrary\RATAPPLibrary.csproj", "{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RATWEB.Server", "RATWEB\RATWEB.Server\RATWEB.Server.csproj", "{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "ratweb.client", "RATWEB\ratweb.client\ratweb.client.esproj", "{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,16 @@ Global
 		{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC4A36F2-8D59-49B2-82F7-E07BA11ED6E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D7BBD4B-F4FF-4E58-BDD3-6481614F327C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E12F323C-1D66-4D79-84F6-EA7ABE79AEC2}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
