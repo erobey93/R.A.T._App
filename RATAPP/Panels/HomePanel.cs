@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RATAPP.Forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,8 +23,11 @@ namespace RATAPP.Panels
         private Button searchButton;
         private DataGridView dataDisplayArea;
 
-        public HomePanel(string username, string role)
+        private RATAppBaseForm _parentForm;  // Reference to parent form (RATAppBaseForm) this tightly couples things, but it is the easiest way to use panels
+
+        public HomePanel(RATAppBaseForm parentForm, string username, string role)
         {
+            _parentForm = parentForm;
             _username = username;
             _role = role;
             InitializePanel();
@@ -170,11 +174,31 @@ namespace RATAPP.Panels
             // Add a button column for individual animal pages
             DataGridViewButtonColumn buttonColumn = new DataGridViewButtonColumn
             {
+                Name = "Individual Animal Page",  // Give it a name for easy reference
                 HeaderText = "Individual Animal Page",
                 Text = "Go to Page",
                 UseColumnTextForButtonValue = true
             };
             dataDisplayArea.Columns.Add(buttonColumn);
+            // Add an event handler for button clicks in the DataGridView
+            dataDisplayArea.CellContentClick += DataGridView_CellContentClick;
+        }
+
+        private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.ColumnIndex == dataDisplayArea.Columns["Individual Animal Page"].Index && e.RowIndex >= 0)
+            {
+                string animalName = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalName"].Value.ToString();
+                string animalID = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value.ToString();
+                string species = dataDisplayArea.Rows[e.RowIndex].Cells["Species"].Value.ToString();
+                string sex = dataDisplayArea.Rows[e.RowIndex].Cells["Sex"].Value.ToString();
+                string dob = dataDisplayArea.Rows[e.RowIndex].Cells["DOB"].Value.ToString();
+                string genotype = dataDisplayArea.Rows[e.RowIndex].Cells["Genotype"].Value.ToString();
+
+                // Create the AnimalDetailsPanel and show it using the parent form's ShowPanel method
+                var animalDetailsPanel = new AnimalPanel(_parentForm, animalName, animalID);//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
+                _parentForm.ShowPanel(animalDetailsPanel);   // Use the ShowPanel method from the parent form
+            }
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
