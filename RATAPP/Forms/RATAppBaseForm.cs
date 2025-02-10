@@ -223,7 +223,7 @@ namespace RATAPP.Forms
 
         private void HomeButton_Click(object sender, EventArgs e)
         {
-            var homePanel = new HomePanel(UserName, "role - TODO");
+            var homePanel = new HomePanel(this, UserName, "role - TODO");
             ShowPanel(homePanel);  // Show the home panel
         }
 
@@ -244,9 +244,10 @@ namespace RATAPP.Forms
         }
 
         // Method to switch panels
-        private void ShowPanel(Panel panelToShow)
+        public void ShowPanel(Panel panelToShow)
         {
-            //// Show the selected panel
+            //set the current panel contents to the panel to show
+            //panelContent = panelToShow;
 
             // Clear the existing content and add the new panel
             contentPanel.Controls.Clear();
