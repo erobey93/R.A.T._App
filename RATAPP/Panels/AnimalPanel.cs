@@ -26,6 +26,7 @@ namespace RATAPP.Panels
         private Label commentsLabel;
         private Label damLabel;
         private Label sireLabel;
+        private Label inbredLabel;
 
         private TextBox animalNameTextBox;
         private TextBox idTextBox;
@@ -39,6 +40,7 @@ namespace RATAPP.Panels
         private TextBox commentsTextBox;
         private TextBox damTextBox;
         private TextBox sireTextBox;
+        private TextBox inbredTextBox;
 
         private PictureBox animalPhotoBox;
 
