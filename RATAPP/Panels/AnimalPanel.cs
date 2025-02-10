@@ -51,8 +51,9 @@ namespace RATAPP.Panels
         private void InitializeComponent(string animalName, string animalID)
         {
             // Set panel properties
-            this.Size = new Size(1024, 768);
+            this.Size = new Size(1200, 800); // Increased panel size for better spacing
             this.BackColor = Color.White;
+            this.Padding = new Padding(20); // Add padding around the panel for better spacing
 
             // Initialize controls
             InitializeLabels();
@@ -63,27 +64,28 @@ namespace RATAPP.Panels
         }
 
         // Initialize labels take 1
-        // TODO - add functionality to populate labels with data
-        //still need to work on UI but basic idea is there and ready for data binding
         private void InitializeLabels()
         {
+            // Font settings for consistency
+            Font labelFont = new Font("Segoe UI", 10F, FontStyle.Regular);
+
             // First column (left side)
-            idLabel = CreateLabel("Registration #/ID", 10, 10);
-            animalNameLabel = CreateLabel("Animal Name", 10, 40);
-            speciesLabel = CreateLabel("Species", 10, 70);
-            sexLabel = CreateLabel("Sex", 10, 100);
-            varietyLabel = CreateLabel("Variety", 10, 130);
-            damLabel = CreateLabel("Dam", 10, 160);
+            idLabel = CreateLabel("Registration #/ID", 10, 20, labelFont);
+            animalNameLabel = CreateLabel("Animal Name", 10, 60, labelFont);
+            speciesLabel = CreateLabel("Species", 10, 100, labelFont);
+            sexLabel = CreateLabel("Sex", 10, 140, labelFont);
+            varietyLabel = CreateLabel("Variety", 10, 180, labelFont);
+            damLabel = CreateLabel("Dam", 10, 220, labelFont);
 
             // Second column (right side)
-            colorLabel = CreateLabel("Color", 390, 10);
-            geneticsLabel = CreateLabel("Genetics", 390, 40);
-            ancestryLabel = CreateLabel("Ancestry", 390, 70);
-            breederInfoLabel = CreateLabel("Breeder", 390, 100);
-            sireLabel = CreateLabel("Sire", 390, 160);
+            colorLabel = CreateLabel("Color", 380, 20, labelFont);
+            geneticsLabel = CreateLabel("Genetics", 380, 60, labelFont);
+            ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
+            breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
+            sireLabel = CreateLabel("Sire", 380, 220, labelFont);
 
             // Move commentsLabel to a new position below everything else
-            commentsLabel = CreateLabel("Comments", 20, 190);
+            commentsLabel = CreateLabel("Comments", 10, 260, labelFont);
 
             // Add labels to panel
             this.Controls.Add(animalNameLabel);
@@ -100,46 +102,45 @@ namespace RATAPP.Panels
             this.Controls.Add(sireLabel);
         }
 
-        // Method to create labels with dynamic positions
-        private Label CreateLabel(string text, int x, int y)
+        // Method to create labels with dynamic positions and fonts
+        private Label CreateLabel(string text, int x, int y, Font font)
         {
             return new Label
             {
                 Text = text,
                 Location = new Point(x, y),
                 AutoSize = true,
-                Font = new Font("Arial", 10F)
+                Font = font
             };
         }
 
-        // initialize textboxes take 1 
-        // TODO - add functionality to populate textboxes with data
-        //still need to work on UI but basic idea is there and ready for data binding
+        // initialize textboxes
         private void InitializeTextBoxes()
         {
             // First column (left side)
-            idTextBox = CreateTextBox(150, 10);
-            animalNameTextBox = CreateTextBox(150, 40);
-            speciesTextBox = CreateTextBox(150, 70);
-            sexTextBox = CreateTextBox(150, 100);
-            varietyTextBox = CreateTextBox(150, 130);
-            damTextBox = CreateTextBox(150, 160);
+            idTextBox = CreateTextBox(150, 20);
+            animalNameTextBox = CreateTextBox(150, 60);
+            speciesTextBox = CreateTextBox(150, 100);
+            sexTextBox = CreateTextBox(150, 140);
+            varietyTextBox = CreateTextBox(150, 180);
+            damTextBox = CreateTextBox(150, 220);
 
             // Second column (right side)
-            colorTextBox = CreateTextBox(490, 10);
-            geneticsTextBox = CreateTextBox(490, 40);
-            ancestryTextBox = CreateTextBox(490, 70);
-            breederInfoTextBox = CreateTextBox(490, 100);
-            sireTextBox = CreateTextBox(490, 160);
+            colorTextBox = CreateTextBox(490, 20);
+            geneticsTextBox = CreateTextBox(490, 60);
+            ancestryTextBox = CreateTextBox(490, 100);
+            breederInfoTextBox = CreateTextBox(490, 140);
+            sireTextBox = CreateTextBox(490, 220);
 
             // Move commentsTextBox below everything else and make it larger
             commentsTextBox = new TextBox
             {
-                Location = new Point(10, 210),  // Position it below the other fields
-                Width = 200,
-                Height = 100,                   // Increase the height for a larger textbox
-                Multiline = true,                // Make it multiline for longer comments
-                ScrollBars = ScrollBars.Vertical // Enable vertical scroll bars if needed
+                Location = new Point(10, 290),
+                Width = 680,
+                Height = 120,
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Font = new Font("Segoe UI", 10F) // Make it consistent with labels
             };
 
             // Add textboxes to panel
@@ -163,19 +164,20 @@ namespace RATAPP.Panels
             return new TextBox
             {
                 Location = new Point(x, y),
-                Width = 200
+                Width = 200,
+                Font = new Font("Segoe UI", 10F)
             };
         }
 
         // Method to initialize the animal's photo box
-        //TODO setup to actually contain a photo 
         private void InitializePhotoBox()
         {
             animalPhotoBox = new PictureBox
             {
-                Location = new Point(750, 10), // Positioned right of the text boxes
+                Location = new Point(750, 20),
                 Size = new Size(200, 200),
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                SizeMode = PictureBoxSizeMode.Zoom // To fit photo inside the box
             };
 
             // Add picture box to the form or panel
@@ -186,76 +188,53 @@ namespace RATAPP.Panels
         private void InitializeNavigationButtons()
         {
             // Previous button
-            Button previousButton = new Button
-            {
-                Text = "Previous",
-                Location = new Point(200, 700), // Positioned towards the left at the bottom
-                Width = 100
-            };
-            this.Controls.Add(previousButton);
+            Button previousButton = CreateButton("Previous", 200, 700);
+            previousButton.Click += (sender, e) => {/* Logic for Previous button */};
 
             // Next button
-            Button nextButton = new Button
-            {
-                Text = "Next",
-                Location = new Point(600, 700), // Positioned towards the right at the bottom
-                Width = 100
-            };
+            Button nextButton = CreateButton("Next", 600, 700);
+            nextButton.Click += (sender, e) => {/* Logic for Next button */};
+
+            this.Controls.Add(previousButton);
             this.Controls.Add(nextButton);
         }
 
-        // initialize the row of buttons at the bottom
+        // Method to create buttons
+        private Button CreateButton(string text, int x, int y)
+        {
+            return new Button
+            {
+                Text = text,
+                Location = new Point(x, y),
+                Width = 100,
+                Height = 40,
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.LightGray,
+                FlatStyle = FlatStyle.Flat
+            };
+        }
+
+        // Initialize the row of buttons at the bottom
         private void InitializeBottomButtons()
         {
             // Button 1: Update Animal Details
-            Button updateButton = new Button
-            {
-                Text = "Update Animal Details",
-                Location = new Point(50, 630), // Positioned at the left
-                Width = 160
-            };
+            Button updateButton = CreateButton("Update Animal Details", 50, 630);
 
             // Button 2: Ancestry
-            Button ancestryButton = new Button
-            {
-                Text = "Ancestry",
-                Location = new Point(220, 630), // Positioned next to the first button
-                Width = 120
-            };
+            Button ancestryButton = CreateButton("Ancestry", 220, 630);
 
             // Button 3: Genetics
-            Button geneticsButton = new Button
-            {
-                Text = "Genetics",
-                Location = new Point(360, 630), // Positioned next to the second button
-                Width = 120
-            };
+            Button geneticsButton = CreateButton("Genetics", 360, 630);
 
             // Button 4: Breeding History
-            Button breedingHistoryButton = new Button
-            {
-                Text = "Breeding History",
-                Location = new Point(500, 630), // Positioned next to the third button
-                Width = 140
-            };
+            Button breedingHistoryButton = CreateButton("Breeding History", 500, 630);
 
             // Button 5: Documents
-            Button documentsButton = new Button
-            {
-                Text = "Documents",
-                Location = new Point(650, 630), // Positioned next to the fourth button
-                Width = 120
-            };
+            Button documentsButton = CreateButton("Documents", 650, 630);
 
             // Button 6: Health
-            Button healthButton = new Button
-            {
-                Text = "Health",
-                Location = new Point(790, 630), // Positioned next to the fifth button
-                Width = 120
-            };
+            Button healthButton = CreateButton("Health", 790, 630);
 
-            // Add all buttons to the form or panel
             this.Controls.Add(updateButton);
             this.Controls.Add(ancestryButton);
             this.Controls.Add(geneticsButton);
