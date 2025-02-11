@@ -21,6 +21,7 @@ namespace RATAPP.Panels
         private ComboBox sexComboBox;
         private TextBox searchBar;
         private Button searchButton;
+        private Button addButton;
         private DataGridView dataDisplayArea;
 
         private RATAppBaseForm _parentForm;  // Reference to parent form (RATAppBaseForm) this tightly couples things, but it is the easiest way to use panels
@@ -66,6 +67,7 @@ namespace RATAPP.Panels
             InitializeSexToggleButton();
             InitializeSearchBar();
             InitializeSearchButton();
+            InitializeAddButton();
             InitializeDataDisplayArea();
         }
 
@@ -141,6 +143,22 @@ namespace RATAPP.Panels
             Controls.Add(searchButton);
         }
 
+        private void InitializeAddButton()
+        {
+            addButton = new Button
+            {
+                Text = "Add New Animal",
+                Font = new Font("Arial", 12F),
+                Width = 100,
+                Height = 30,
+                Location = new Point(1030, 100)
+            };
+
+            addButton.Click += addButton_Click;
+
+            Controls.Add(addButton);
+        }
+
         private void InitializeDataDisplayArea()
         {
             int topPanelHeight = 150;
@@ -201,6 +219,18 @@ namespace RATAPP.Panels
             }
         }
 
+        private void addButton_Click(object sender, EventArgs e)
+        {
+            //open up a window 
+            //window should contain sections for adding a new animal
+            //or, could just take to an empty animal page
+            // have to have some way to distinguish between adding a new animal and editing an existing animal
+            //maybe if the animal id is empty, then it is a new animal
+            //that check would have to be done in the animal panel
+            //go to animal panel, but pass in an empty animal id
+            var animalPanel = new AnimalPanel(_parentForm, "", ""); // Pass in an empty animal ID for a new animal
+            _parentForm.ShowPanel(animalPanel);
+        }
         private void SearchButton_Click(object sender, EventArgs e)
         {
             // Get selected filter values

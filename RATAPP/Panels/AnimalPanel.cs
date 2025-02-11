@@ -57,15 +57,21 @@ namespace RATAPP.Panels
             this.BackColor = Color.White;
             this.Padding = new Padding(20); // Add padding around the panel for better spacing
 
+            if (animalID == "")
+            {
+                InitializeTextBoxesNoID();
+            }
+            else
+            {
+                InitializeTextBoxesID(animalID, animalName);
+            }
             // Initialize controls
             InitializeLabels();
-            InitializeTextBoxes();
             InitializePhotoBox();
             InitializeNavigationButtons();
             InitializeBottomButtons();
         }
-
-        // Initialize labels take 1
+       
         private void InitializeLabels()
         {
             // Font settings for consistency
@@ -84,6 +90,7 @@ namespace RATAPP.Panels
             geneticsLabel = CreateLabel("Genetics", 380, 60, labelFont);
             ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
+            inbredLabel = CreateLabel("% Inbred", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
 
             // Move commentsLabel to a new position below everything else
@@ -102,6 +109,7 @@ namespace RATAPP.Panels
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
             this.Controls.Add(sireLabel);
+            this.Controls.Add(inbredLabel);
         }
 
         // Method to create labels with dynamic positions and fonts
@@ -116,24 +124,32 @@ namespace RATAPP.Panels
             };
         }
 
-        // initialize textboxes
-        private void InitializeTextBoxes()
+        // Initialize labels no ID
+        // WIP, but idea is that if there is no ID the animal does not exist
+        // and the text boxes will be enabled
+        // the user will have to click the add animal button
+        // to get to this version of the page 
+        // or click go to individual animal button from a blank row from
+        // home page until I fix that TODO 
+        private void InitializeTextBoxesNoID()
         {
             // First column (left side)
-            idTextBox = CreateTextBox(150, 20);
-            animalNameTextBox = CreateTextBox(150, 60);
-            speciesTextBox = CreateTextBox(150, 100);
-            sexTextBox = CreateTextBox(150, 140);
-            varietyTextBox = CreateTextBox(150, 180);
-            damTextBox = CreateTextBox(150, 220);
+            idTextBox = CreateTextBox(150, 20, "");
+            animalNameTextBox = CreateTextBox(150, 60, "");
+            speciesTextBox = CreateTextBox(150, 100, "");
+            sexTextBox = CreateTextBox(150, 140, "");
+            varietyTextBox = CreateTextBox(150, 180, "");
+            damTextBox = CreateTextBox(150, 220 , "");
 
             // Second column (right side)
-            colorTextBox = CreateTextBox(490, 20);
-            geneticsTextBox = CreateTextBox(490, 60);
-            ancestryTextBox = CreateTextBox(490, 100);
-            breederInfoTextBox = CreateTextBox(490, 140);
-            sireTextBox = CreateTextBox(490, 220);
+            colorTextBox = CreateTextBox(490, 20, "");
+            geneticsTextBox = CreateTextBox(490, 60, "");
+            ancestryTextBox = CreateTextBox(490, 100, "");
+            breederInfoTextBox = CreateTextBox(490, 140, "");
+            inbredTextBox = CreateTextBox(490, 180, "");
+            sireTextBox = CreateTextBox(490, 220, "");
 
+            //TODO calc % inbred button 
             // Move commentsTextBox below everything else and make it larger
             commentsTextBox = new TextBox
             {
@@ -158,16 +174,84 @@ namespace RATAPP.Panels
             this.Controls.Add(commentsTextBox);
             this.Controls.Add(damTextBox);
             this.Controls.Add(sireTextBox);
+            this.Controls.Add(inbredTextBox);
+        }
+
+        // initialize textboxes w/ID
+        // WIP, but idea is that if there is an ID the animal exists
+        // and the text boxes will be disabled
+        // the user will have to click the update animal details button
+        // to make changes
+        //TODO get the values from the database just for testing right now FIXME 
+        private void InitializeTextBoxesID(string id, string name)
+        {
+            string TODO = "TODO - should come from db"; //FIXME
+            // First column (left side)
+            idTextBox = CreateTextBox(150, 20, id);
+            animalNameTextBox = CreateTextBox(150, 60, name);
+            speciesTextBox = CreateTextBox(150, 100, TODO);
+            sexTextBox = CreateTextBox(150, 140, TODO);
+            varietyTextBox = CreateTextBox(150, 180, TODO);
+            damTextBox = CreateTextBox(150, 220, TODO);
+
+            // Second column (right side)
+            colorTextBox = CreateTextBox(490, 20, TODO);
+            geneticsTextBox = CreateTextBox(490, 60, TODO);
+            ancestryTextBox = CreateTextBox(490, 100, TODO);
+            breederInfoTextBox = CreateTextBox(490, 140, TODO);
+            inbredTextBox = CreateTextBox(490, 180, TODO);
+            sireTextBox = CreateTextBox(490, 220, TODO);
+
+            //TODO calc % inbred button textbox
+            // Move commentsTextBox below everything else and make it larger
+            //FIXME should have a multi line text box option
+            commentsTextBox = new TextBox
+            {
+                Location = new Point(10, 290),
+                Width = 680,
+                Height = 120,
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Font = new Font("Segoe UI", 10F), // Make it consistent with labels
+                Text = "TODO - should come from db",
+                BackColor = Color.LightGray
+            };
+
+            // Add textboxes to panel
+            this.Controls.Add(animalNameTextBox);
+            this.Controls.Add(idTextBox);
+            this.Controls.Add(speciesTextBox);
+            this.Controls.Add(sexTextBox);
+            this.Controls.Add(varietyTextBox);
+            this.Controls.Add(colorTextBox);
+            this.Controls.Add(geneticsTextBox);
+            this.Controls.Add(ancestryTextBox);
+            this.Controls.Add(breederInfoTextBox);
+            this.Controls.Add(commentsTextBox);
+            this.Controls.Add(damTextBox);
+            this.Controls.Add(sireTextBox);
+            this.Controls.Add(inbredTextBox);
+
+            //disable textboxes
+            foreach (Control control in this.Controls)
+            {
+                if (control is TextBox textBox)
+                {
+                    textBox.Enabled = false; // Disable all textboxes
+                }
+            }
         }
 
         // Method to create textboxes
-        private TextBox CreateTextBox(int x, int y)
+        private TextBox CreateTextBox(int x, int y, string text)
         {
             return new TextBox
             {
                 Location = new Point(x, y),
                 Width = 200,
-                Font = new Font("Segoe UI", 10F)
+                Font = new Font("Segoe UI", 10F),
+                Text = text,
+                BackColor = Color.LightGray
             };
         }
 
