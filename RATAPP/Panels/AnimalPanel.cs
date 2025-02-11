@@ -44,6 +44,28 @@ namespace RATAPP.Panels
 
         private PictureBox animalPhotoBox;
 
+        //TODO
+        //need to add logic to get the values from the database
+        //need to add logic to show or not show the update animal details button
+        //based on if an id is passed in or not
+        // it may actually make sense to have a state for the panel
+        // edit vs non edit mode and then just check this state
+        //like if a user is on an existing animal and they click update animal details
+        // it will enable the text boxes and allow them to make changes
+        // it will also disable the update button and enable the save button
+        // and then save button will save the changes to the database when clicked
+        // and then requery the database to get the updated values
+        // and then disable the text boxes and enable the update button again
+        // and disable the save button
+        // and then if they click cancel it will just requery the database
+        // but if they have made changes it will prompt them to save changes
+        // and then if they click yes it will save the changes
+        // and then requery the database
+        // for new animals it will just save the animal to the database
+        // and then requery the database
+        // and then disable the text boxes and enable the update button again
+        // and disable the save button
+
         // Constructor for initializing the panel
         public AnimalPanel(RATAppBaseForm parentForm, string animalName, string animalID)
         {
