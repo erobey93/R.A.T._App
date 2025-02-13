@@ -144,9 +144,6 @@ namespace RATAPP
                 var loginService = new LoginService(_context, _configuration, _passwordHashing); // Inject dependencies
                 var response = await loginService.Login(new RATAPPLibrary.Data.Models.LoginRequest { Username = username, Password = password });
 
-                // On successful login, show a message and navigate to the next form
-                MessageBox.Show($"Welcome {response.Username}! Role: {response.Role}", "Login Successful");
-
                 // Get the instance of the main form (RatAppBaseForm)
                 var baseForm = Application.OpenForms.OfType<RATAppBaseForm>().FirstOrDefault();
 
@@ -166,13 +163,13 @@ namespace RATAPP
                 {
                     // Create and show admin-specific panel
                     //TODO decide if I want to do anything differently if logged in as admin, for now logic is the same 
-                    var homePanel = new HomePanel(response.Username, response.Role); // You will need to create this panel
+                    var homePanel = new HomePanel(baseForm, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
                 else if (response.Role == "User")
                 {
                     // Create and show user-specific panel
-                    var homePanel = new HomePanel(response.Username, response.Role); // You will need to create this panel
+                    var homePanel = new HomePanel(baseForm, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
 
@@ -225,10 +222,6 @@ namespace RATAPP
         //TODO need to implement still 
         private async void BtnUpdatePassword_Click(object sender, EventArgs e)
         {
-            //first, make sure that they've entered valid credentials
-            //text boxes should be populated
-            
-
             //if valid credentials, open update form
             //updat form is still TODO just getting basic outline there for now 
             var updateCredentialsForm = new UpdateCredentialsForm(_context);

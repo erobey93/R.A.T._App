@@ -1,0 +1,6 @@
+@RATAPP_WEB.Server_HostAddress = http://localhost:5065
+
+GET {{RATAPP_WEB.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
