@@ -27,6 +27,7 @@ namespace RATAPP.Panels
         private Label damLabel;
         private Label sireLabel;
         private Label inbredLabel;
+        private Label genomeLabel;
 
         private TextBox animalNameTextBox;
         private TextBox idTextBox;
@@ -41,8 +42,10 @@ namespace RATAPP.Panels
         private TextBox damTextBox;
         private TextBox sireTextBox;
         private TextBox inbredTextBox;
+        private TextBox genomeTextBox;
 
         private PictureBox animalPhotoBox;
+        private Button inbredButton;
 
         //TODO
         //need to add logic to get the values from the database
@@ -79,19 +82,15 @@ namespace RATAPP.Panels
             this.BackColor = Color.White;
             this.Padding = new Padding(20); // Add padding around the panel for better spacing
 
-            if (animalID == "")
-            {
-                InitializeTextBoxesNoID();
-            }
-            else
-            {
-                InitializeTextBoxesID(animalID, animalName);
-            }
+           
+            InitializeTextBoxes(animalID, animalName);
+            
             // Initialize controls
             InitializeLabels();
             InitializePhotoBox();
             InitializeNavigationButtons();
             InitializeBottomButtons();
+            IntializeButtons();
         }
        
         private void InitializeLabels()
@@ -112,8 +111,9 @@ namespace RATAPP.Panels
             geneticsLabel = CreateLabel("Genetics", 380, 60, labelFont);
             ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
-            inbredLabel = CreateLabel("% Inbred", 380, 180, labelFont);
+            genomeLabel = CreateLabel("Genome", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
+            inbredLabel = CreateLabel("% Inbred", 10, 450, labelFont);
 
             // Move commentsLabel to a new position below everything else
             commentsLabel = CreateLabel("Comments", 10, 260, labelFont);
@@ -131,6 +131,7 @@ namespace RATAPP.Panels
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
             this.Controls.Add(sireLabel);
+            this.Controls.Add(genomeLabel);
             this.Controls.Add(inbredLabel);
         }
 
@@ -145,58 +146,41 @@ namespace RATAPP.Panels
                 Font = font
             };
         }
-
-        // Initialize labels no ID
-        // WIP, but idea is that if there is no ID the animal does not exist
-        // and the text boxes will be enabled
-        // the user will have to click the add animal button
-        // to get to this version of the page 
-        // or click go to individual animal button from a blank row from
-        // home page until I fix that TODO 
-        private void InitializeTextBoxesNoID()
+       
+            //TODO get the animal details from the database
+            // and populate the text boxes with the values
+            // and set the photo box with the animal's photo
+            // and set the comments text box with the comments
+            // Method to initialize the button for calculating % inbred
+        private void InbredButton()
         {
-            // First column (left side)
-            idTextBox = CreateTextBox(150, 20, "");
-            animalNameTextBox = CreateTextBox(150, 60, "");
-            speciesTextBox = CreateTextBox(150, 100, "");
-            sexTextBox = CreateTextBox(150, 140, "");
-            varietyTextBox = CreateTextBox(150, 180, "");
-            damTextBox = CreateTextBox(150, 220 , "");
-
-            // Second column (right side)
-            colorTextBox = CreateTextBox(490, 20, "");
-            geneticsTextBox = CreateTextBox(490, 60, "");
-            ancestryTextBox = CreateTextBox(490, 100, "");
-            breederInfoTextBox = CreateTextBox(490, 140, "");
-            inbredTextBox = CreateTextBox(490, 180, "");
-            sireTextBox = CreateTextBox(490, 220, "");
-
-            //TODO calc % inbred button 
-            // Move commentsTextBox below everything else and make it larger
-            commentsTextBox = new TextBox
+            //create calc % inbred button 
+            inbredButton = new Button
             {
-                Location = new Point(10, 290),
-                Width = 680,
-                Height = 120,
-                Multiline = true,
-                ScrollBars = ScrollBars.Vertical,
-                Font = new Font("Segoe UI", 10F) // Make it consistent with labels
+                Location = new Point(400, 450),
+                Width = 200,
+                Height = 30,
+                Text = "Calculate % Inbred",
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.LightGray,
+                FlatStyle = FlatStyle.Flat
             };
+            //this should be a call to the library to calculate the % inbred
+            inbredButton.Click += (sender, e) =>
+            {
+                // Logic to calculate % inbred
+                //TODO get the values from the database just for testing right now FIXME
+                string TODO = "TODO - should come from db"; //FIXME
+                inbredTextBox.Text = TODO;
+            };
+        }
 
-            // Add textboxes to panel
-            this.Controls.Add(animalNameTextBox);
-            this.Controls.Add(idTextBox);
-            this.Controls.Add(speciesTextBox);
-            this.Controls.Add(sexTextBox);
-            this.Controls.Add(varietyTextBox);
-            this.Controls.Add(colorTextBox);
-            this.Controls.Add(geneticsTextBox);
-            this.Controls.Add(ancestryTextBox);
-            this.Controls.Add(breederInfoTextBox);
-            this.Controls.Add(commentsTextBox);
-            this.Controls.Add(damTextBox);
-            this.Controls.Add(sireTextBox);
-            this.Controls.Add(inbredTextBox);
+        private void IntializeButtons()
+        {
+            // Initialize the button for calculating % inbred
+            InbredButton();
+            // Add the button to the panel
+            this.Controls.Add(inbredButton);
         }
 
         // initialize textboxes w/ID
@@ -205,7 +189,7 @@ namespace RATAPP.Panels
         // the user will have to click the update animal details button
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
-        private void InitializeTextBoxesID(string id, string name)
+        private void InitializeTextBoxes(string id, string name)
         {
             string TODO = "TODO - should come from db"; //FIXME
             // First column (left side)
@@ -221,10 +205,10 @@ namespace RATAPP.Panels
             geneticsTextBox = CreateTextBox(490, 60, TODO);
             ancestryTextBox = CreateTextBox(490, 100, TODO);
             breederInfoTextBox = CreateTextBox(490, 140, TODO);
-            inbredTextBox = CreateTextBox(490, 180, TODO);
+            genomeTextBox = CreateTextBox(490, 180, TODO);
             sireTextBox = CreateTextBox(490, 220, TODO);
 
-            //TODO calc % inbred button textbox
+            inbredTextBox = CreateTextBox(150, 450, "");
             // Move commentsTextBox below everything else and make it larger
             //FIXME should have a multi line text box option
             commentsTextBox = new TextBox
@@ -239,6 +223,28 @@ namespace RATAPP.Panels
                 BackColor = Color.LightGray
             };
 
+            if (id != null)
+            {
+                //disable textboxes
+                foreach (Control control in this.Controls)
+                {
+                    if (control is TextBox textBox)
+                    {
+                        textBox.Enabled = false; // Disable all textboxes
+                    }
+                }
+            }
+            else
+            {
+                //enable textboxes
+                foreach (Control control in this.Controls)
+                {
+                    if (control is TextBox textBox)
+                    {
+                        textBox.Enabled = true; // Enable all textboxes
+                    }
+                }
+            }
             // Add textboxes to panel
             this.Controls.Add(animalNameTextBox);
             this.Controls.Add(idTextBox);
@@ -252,16 +258,8 @@ namespace RATAPP.Panels
             this.Controls.Add(commentsTextBox);
             this.Controls.Add(damTextBox);
             this.Controls.Add(sireTextBox);
+            this.Controls.Add(genomeTextBox);
             this.Controls.Add(inbredTextBox);
-
-            //disable textboxes
-            foreach (Control control in this.Controls)
-            {
-                if (control is TextBox textBox)
-                {
-                    textBox.Enabled = false; // Disable all textboxes
-                }
-            }
         }
 
         // Method to create textboxes
