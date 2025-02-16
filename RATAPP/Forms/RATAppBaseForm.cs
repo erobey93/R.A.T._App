@@ -1,5 +1,6 @@
 ﻿using Azure;
 using RATAPP.Panels;
+using RATAPP.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,6 +32,9 @@ namespace RATAPP.Forms
         private Panel homePanel;
         private Panel pairingsAndLittersPanel;
 
+        //picture box for R.A.T. logo
+        private PictureBox logoPictureBox;
+
         // Property to hold UserName
         public string UserName { get; set; }
 
@@ -54,6 +58,7 @@ namespace RATAPP.Forms
             InitializePanels();
             InitializeLabels();
             InitializeButtons();
+            InitializeLogoPictureBox();
 
             // Add controls to form
             this.Controls.Add(contentPanel);
@@ -67,7 +72,7 @@ namespace RATAPP.Forms
             topNavPanel = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 120,
+                Height = 200, // Increased height to accommodate the logo and buttons
                 BackColor = Color.DarkBlue,
             };
 
@@ -110,33 +115,33 @@ namespace RATAPP.Forms
             };
             topNavPanel.Controls.Add(appNameLabel);
 
-            // User name label (Positioned below the app name label)
+            //// User name label (Positioned to the far right)
             userNameLabel = new Label
             {
                 Text = UserName ?? "User Name", // Default text if no name is set
                 ForeColor = Color.White,
                 Font = new Font("Arial", 10F),
                 AutoSize = true,
-                Location = new Point(10, appNameLabel.Bottom + 5) // Positioning just below the app name label
+                Location = new Point(topNavPanel.Width - 110, topMargin) // Positioning to the far right
             };
-            topNavPanel.Controls.Add(userNameLabel);
+            //topNavPanel.Controls.Add(userNameLabel);
         }
 
         private void InitializeButtons()
         {
             // Utilities button
             utilitiesButton = CreateTopNavButton("Utilities", 10, UtilitiesButton_Click);
-            utilitiesButton.Location = new Point(200, 40); // Set the Y-position manually for proper alignment
+            utilitiesButton.Location = new Point(200, 120); // Set the Y-position manually for proper alignment below the logo
             topNavPanel.Controls.Add(utilitiesButton);
 
             // Log out button
             logoutButton = CreateTopNavButton("Log Out", 10, LogoutButton_Click);
-            logoutButton.Location = new Point(utilitiesButton.Right + 10, 40); // Positioning next to the utilities button
+            logoutButton.Location = new Point(utilitiesButton.Right + 10, 120); // Positioning next to the utilities button
             topNavPanel.Controls.Add(logoutButton);
 
             // Create/View Documents button
-            createViewDocsButton = CreateTopNavButton("Create/View Docs", 10, CreateViewDocsButton_Click);
-            createViewDocsButton.Location = new Point(logoutButton.Right + 10, 40); // Positioning next to the logout button
+            createViewDocsButton = CreateTopNavButton("Refresh", 10, RefreshButton_Click);
+            createViewDocsButton.Location = new Point(logoutButton.Right + 10, 120); // Positioning next to the logout button
             topNavPanel.Controls.Add(createViewDocsButton);
 
             // Side nav buttons
@@ -216,14 +221,17 @@ namespace RATAPP.Forms
             }
         }
 
-        private void CreateViewDocsButton_Click(object sender, EventArgs e)
+        private void RefreshButton_Click(object sender, EventArgs e)
         {
-            // Handle Create/View Docs button click
+            // Handle refresh button click
+            // This button grabs the latest data from the database and refreshes the current panel
+            // For now, we will just show a message box
+            MessageBox.Show("Refresh button clicked. Implement data refresh logic here.", "Refresh", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void HomeButton_Click(object sender, EventArgs e)
         {
-            var homePanel = new HomePanel(UserName, "role - TODO");
+            var homePanel = new HomePanel(this, UserName, "role - TODO");
             ShowPanel(homePanel);  // Show the home panel
         }
 
@@ -243,10 +251,35 @@ namespace RATAPP.Forms
             // Handle Genetics button click
         }
 
-        // Method to switch panels
-        private void ShowPanel(Panel panelToShow)
+        private void InitializeLogoPictureBox()
         {
-            //// Show the selected panel
+            try
+            {
+                // Create and configure the PictureBox for the logo
+                logoPictureBox = new PictureBox
+                {
+                    //TODO - replace with the actual path to your logo image or get from database
+                    Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\RATAPPLogo.png"), // Replace with the actual path to your logo image
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Location = new Point(15, appNameLabel.Bottom + 10), // Positioning just below the app name label
+                    Size = new Size(100, 100) // Adjust the size as needed
+                };
+
+                // Add the PictureBox to the top navigation panel
+                topNavPanel.Controls.Add(logoPictureBox);
+            }
+            catch (FileNotFoundException ex)
+            {
+                MessageBox.Show($"Logo image file not found: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        // Method to switch panels
+        public void ShowPanel(Panel panelToShow)
+        {
+            //set the current panel contents to the panel to show
+            //panelContent = panelToShow;
 
             // Clear the existing content and add the new panel
             contentPanel.Controls.Clear();
