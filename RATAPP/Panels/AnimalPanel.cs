@@ -46,17 +46,17 @@ namespace RATAPP.Panels
 
         private PictureBox animalPhotoBox;
         private Button inbredButton;
+        private Button saveButton;
+        private Button updateButton;
 
         //TODO
         //need to add logic to get the values from the database
-        //need to add logic to show or not show the update animal details button
-        //based on if an id is passed in or not
-        // it may actually make sense to have a state for the panel
+
+
+        // it may actually make sense to have a state for the panel - future work
         // edit vs non edit mode and then just check this state
         //like if a user is on an existing animal and they click update animal details
-        // it will enable the text boxes and allow them to make changes
-        // it will also disable the update button and enable the save button
-        // and then save button will save the changes to the database when clicked
+       
         // and then requery the database to get the updated values
         // and then disable the text boxes and enable the update button again
         // and disable the save button
@@ -82,17 +82,16 @@ namespace RATAPP.Panels
             this.BackColor = Color.White;
             this.Padding = new Padding(20); // Add padding around the panel for better spacing
 
-           
+            //Initialize the controls for the Animal Panel, buttons first as others are dependent on them (this is probably a bad idea, but works for now) 
+            IntializeButtons();
+            InitializeBottomButtons();
             InitializeTextBoxes(animalID, animalName);
-            
-            // Initialize controls
+           
             InitializeLabels();
             InitializePhotoBox();
             InitializeNavigationButtons();
-            InitializeBottomButtons();
-            IntializeButtons();
         }
-       
+
         private void InitializeLabels()
         {
             // Font settings for consistency
@@ -146,42 +145,6 @@ namespace RATAPP.Panels
                 Font = font
             };
         }
-       
-            //TODO get the animal details from the database
-            // and populate the text boxes with the values
-            // and set the photo box with the animal's photo
-            // and set the comments text box with the comments
-            // Method to initialize the button for calculating % inbred
-        private void InbredButton()
-        {
-            //create calc % inbred button 
-            inbredButton = new Button
-            {
-                Location = new Point(400, 450),
-                Width = 200,
-                Height = 30,
-                Text = "Calculate % Inbred",
-                Font = new Font("Segoe UI", 10F),
-                BackColor = Color.LightGray,
-                FlatStyle = FlatStyle.Flat
-            };
-            //this should be a call to the library to calculate the % inbred
-            inbredButton.Click += (sender, e) =>
-            {
-                // Logic to calculate % inbred
-                //TODO get the values from the database just for testing right now FIXME
-                string TODO = "TODO - should come from db"; //FIXME
-                inbredTextBox.Text = TODO;
-            };
-        }
-
-        private void IntializeButtons()
-        {
-            // Initialize the button for calculating % inbred
-            InbredButton();
-            // Add the button to the panel
-            this.Controls.Add(inbredButton);
-        }
 
         // initialize textboxes w/ID
         // WIP, but idea is that if there is an ID the animal exists
@@ -223,28 +186,7 @@ namespace RATAPP.Panels
                 BackColor = Color.LightGray
             };
 
-            if (id != null)
-            {
-                //disable textboxes
-                foreach (Control control in this.Controls)
-                {
-                    if (control is TextBox textBox)
-                    {
-                        textBox.Enabled = false; // Disable all textboxes
-                    }
-                }
-            }
-            else
-            {
-                //enable textboxes
-                foreach (Control control in this.Controls)
-                {
-                    if (control is TextBox textBox)
-                    {
-                        textBox.Enabled = true; // Enable all textboxes
-                    }
-                }
-            }
+
             // Add textboxes to panel
             this.Controls.Add(animalNameTextBox);
             this.Controls.Add(idTextBox);
@@ -260,6 +202,61 @@ namespace RATAPP.Panels
             this.Controls.Add(sireTextBox);
             this.Controls.Add(genomeTextBox);
             this.Controls.Add(inbredTextBox);
+
+            //if ID is present than it is an existing animal
+            //show existing animal versions = no editing, Update Data button, animal's associated data
+            if (id != "")
+            {
+                AnimalExists();
+            }
+            //if ID is not present than the user is creating a new animal
+            // show new animal version = editing, save button, blank boxes 
+            else
+            {
+                NewAnimal();
+            }
+        }
+
+        // Method for existing animals 
+        //TODO need to handle data caching so I'm not constantly going to the db but for not, db it is 
+        private void AnimalExists()
+        {
+            //if ID is present than it is an existing animal
+            //show existing animal versions = no editing, Update Data button, animal's associated data
+            //no editing 
+            //disable textboxes
+            foreach (Control control in this.Controls)
+            {
+                if (control is TextBox textBox)
+                {
+                    textBox.Enabled = false; // Disable all textboxes
+                }
+            }
+
+            //hide save button
+            //show update button
+            saveButton.Hide();
+            updateButton.Show();
+
+            //display animals data TODO
+        }
+
+        //Method for new animals
+        private void NewAnimal()
+        {
+            //enable textboxes
+            foreach (Control control in this.Controls)
+            {
+                if (control is TextBox textBox)
+                {
+                    textBox.Enabled = true; // Enable all textboxes
+                }
+            }
+
+            //hide update button
+            //show save button
+            updateButton.Hide();
+            saveButton.Show();
         }
 
         // Method to create textboxes
@@ -320,11 +317,13 @@ namespace RATAPP.Panels
             };
         }
 
+        //Button UI logic below 
+        //TODO need to better organize and work on set navigation for this panel  
         // Initialize the row of buttons at the bottom
         private void InitializeBottomButtons()
         {
-            // Button 1: Update Animal Details
-            Button updateButton = CreateButton("Update Animal Details", 50, 630);
+            // Button 1: Update Animal Details TODO made seperate methods for these buttons will likely do that for each button
+            //Button updateButton = CreateButton("Update Animal Details", 50, 630);
 
             // Button 2: Ancestry
             Button ancestryButton = CreateButton("Ancestry", 220, 630);
@@ -341,12 +340,97 @@ namespace RATAPP.Panels
             // Button 6: Health
             Button healthButton = CreateButton("Health", 790, 630);
 
-            this.Controls.Add(updateButton);
             this.Controls.Add(ancestryButton);
             this.Controls.Add(geneticsButton);
             this.Controls.Add(breedingHistoryButton);
             this.Controls.Add(documentsButton);
             this.Controls.Add(healthButton);
         }
+
+
+        //TODO get the animal details from the database
+        // and populate the text boxes with the values
+        // and set the photo box with the animal's photo
+        // and set the comments text box with the comments
+        // Method to initialize the button for calculating % inbred
+        private void InbredButton()
+        {
+            //create calc % inbred button 
+            inbredButton = new Button
+            {
+                Location = new Point(400, 450),
+                Width = 200,
+                Height = 30,
+                Text = "Calculate % Inbred",
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.LightGray,
+                FlatStyle = FlatStyle.Flat
+            };
+            //this should be a call to the library to calculate the % inbred
+            inbredButton.Click += (sender, e) =>
+            {
+                // Logic to calculate % inbred
+                //TODO get the values from the database just for testing right now FIXME
+                string TODO = "TODO - should come from db"; //FIXME
+                inbredTextBox.Text = TODO;
+            };
+        }
+
+        private void SaveButton()
+        {
+            //create calc % inbred button 
+            saveButton = new Button
+            {
+                Location = new Point(10, 630),
+                Width = 150,
+                Height = 40,
+                Text = "Save Changes",
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.Green,
+                FlatStyle = FlatStyle.Popup
+            };
+            //this should be a call to the library to calculate the % inbred
+            saveButton.Click += (sender, e) =>
+            {
+                MessageBox.Show("Changes Saved - Not really, just testing");
+                //inbredTextBox.Text = TODO;
+            };
+        }
+
+        private void UpdateButton()
+        {
+            //create calc % inbred button 
+            updateButton = new Button
+            {
+                Location = new Point(10, 630),
+                Width = 150,
+                Height = 40,
+                Text = "Update Data",
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.Green,
+                FlatStyle = FlatStyle.Popup
+            };
+            //this should be a call to the library to calculate the % inbred
+            updateButton.Click += (sender, e) =>
+            {
+                // Logic to update animal data 
+                MessageBox.Show("Panel should switch to editable");
+            };
+        }
+
+        private void IntializeButtons()
+        {
+            // Initialize the button for calculating % inbred
+            InbredButton();
+            //Update and save buttons 
+            UpdateButton();
+            SaveButton();
+
+            // Add the button to the panel
+            this.Controls.Add(inbredButton);
+            this.Controls.Add(updateButton);
+            this.Controls.Add(saveButton);
+        }
+
     }
 }
