@@ -1,4 +1,4 @@
-﻿namespace RATAPPLibrary.Data.Models
+﻿namespace RATAPPLibrary.Data.Models.Requests
 {
     public class LoginResponse
     {

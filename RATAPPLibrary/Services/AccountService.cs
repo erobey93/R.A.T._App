@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Requests;
 
 namespace RATAPPLibrary.Services
 {
@@ -107,7 +108,7 @@ namespace RATAPPLibrary.Services
             }
 
             // Verify the old password matches the stored password
-            if (passwordHashing.VerifyPasswordTempFix(user.Credentials.Password, request.OldPassword))
+            if (passwordHashing.VerifyPasswordTempFix(user.Credentials.Password, request.CurrentPassword))
             {
                 // Old password is incorrect
                 Console.WriteLine("Old password is incorrect");

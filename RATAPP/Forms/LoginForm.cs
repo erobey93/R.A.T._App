@@ -142,7 +142,7 @@ namespace RATAPP
             {
                 // Create an instance of your login service and call the async Login method
                 var loginService = new LoginService(_context, _configuration, _passwordHashing); // Inject dependencies
-                var response = await loginService.Login(new RATAPPLibrary.Data.Models.LoginRequest { Username = username, Password = password });
+                var response = await loginService.Login(new RATAPPLibrary.Data.Models.Requests.LoginRequest { Username = username, Password = password });
 
                 // Get the instance of the main form (RatAppBaseForm)
                 var baseForm = Application.OpenForms.OfType<RATAppBaseForm>().FirstOrDefault();

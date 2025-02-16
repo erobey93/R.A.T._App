@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Breeding;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 

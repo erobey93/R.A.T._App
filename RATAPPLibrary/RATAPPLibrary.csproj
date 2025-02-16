@@ -19,7 +19,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Domain\Health\" />
+	  <Folder Include="Domain\AnimalManagement\" />
 	  <Folder Include="Migrations\" />
+	  <Folder Include="Domain\Genetics\" />
+	  <Folder Include="Domain\Ancestry\" />
 	</ItemGroup>
 
 </Project>

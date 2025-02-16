@@ -4,6 +4,7 @@
     using Microsoft.IdentityModel.Tokens;
     using RATAPPLibrary.Data.DbContexts;
     using RATAPPLibrary.Data.Models;
+    using RATAPPLibrary.Data.Models.Requests;
     using System;
     using System.IdentityModel.Tokens.Jwt;
     using System.Linq;

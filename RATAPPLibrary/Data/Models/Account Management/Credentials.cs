@@ -10,7 +10,7 @@ namespace RATAPPLibrary.Data.Models
     public class Credentials
     {
         public int Id { get; set; }
-        public string Username { get; set; }
-        public string Password { get; set; } // Password will be set externally
+        public required string Username { get; set; }
+        public required string Password { get; set; } // Password will be set externally
     }
 }
