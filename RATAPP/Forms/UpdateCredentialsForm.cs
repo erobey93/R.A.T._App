@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RATAPPLibrary.Data.DbContexts;
-using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Requests;
 using RATAPPLibrary.Services;
 using System;
 using System.Collections.Generic;
