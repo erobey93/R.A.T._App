@@ -74,6 +74,17 @@ namespace RATAPPLibrary.Services
 
             return false; 
         }
+
+        //get animal by id
+        public async Task<Animal> GetAnimalByIdAsync(int id)
+        {
+            var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with ID {id} not found.");
+            }
+            return animal;
+        }
     }
 
    

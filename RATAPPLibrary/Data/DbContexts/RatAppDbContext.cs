@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Genetics;
 
 namespace RATAPPLibrary.Data.DbContexts
 {
@@ -14,9 +15,6 @@ namespace RATAPPLibrary.Data.DbContexts
         public DbSet<Project> Projects { get; set; }
         public DbSet<Pairing> Pairings { get; set; }
 
-        //TODO re-using Breeder and Club as they are needed in this context but need to think through how to handle this 
-        //will probably just combined into one context when I'm not so brain dead FIXME FIXME FIXME
-
         public DbSet<User> Users { get; set; }
         public DbSet<Credentials> Credentials { get; set; }
         public DbSet<AccountType> AccountTypes { get; set; }
@@ -24,6 +22,9 @@ namespace RATAPPLibrary.Data.DbContexts
         public DbSet<Breeder> Breeders { get; set; }
         public DbSet<Club> Clubs { get; set; } // Clubs should be of type 'Club'
         public DbSet<BreederClub> BreederClubs { get; set; } // BreederClub should be a junction table for many-to-many
+
+        public DbSet<Trait> Traits { get; set; }  // This should exist
+        public DbSet<TraitType> TraitTypes { get; set; }  // This should exist
 
         // Constructor for Dependency Injection (recommended)
         public RatAppDbContext(DbContextOptions <RatAppDbContext> options) : base(options)
@@ -48,6 +49,8 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureProject(modelBuilder);
             ConfigurePairing(modelBuilder);
             ConfigureAnimalRecord(modelBuilder);
+
+            ConfigureTrait(modelBuilder);
         }
 
         // Configure the User entity
@@ -313,6 +316,35 @@ namespace RATAPPLibrary.Data.DbContexts
                 .HasOne(ar => ar.Animal)           // Each AnimalRecord has one associated Animal
                 .WithMany()                         // Animal can have many associated AnimalRecords
                 .HasForeignKey(ar => ar.AnimalId);  // Foreign key in AnimalRecord is AnimalId
+        }
+
+        private void ConfigureTrait(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TraitType>()
+                .HasKey(tt => tt.Id);
+
+            modelBuilder.Entity<TraitType>()
+                .Property(tt => tt.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<TraitType>()
+                .HasMany(tt => tt.Traits)
+                .WithOne(t => t.TraitType)
+                .HasForeignKey(t => t.TraitTypeId);
+
+            modelBuilder.Entity<Trait>()
+                .HasKey(t => t.Id);
+
+            modelBuilder.Entity<Trait>()
+                .Property(t => t.CommonName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Trait>()
+                .Property(t => t.Genotype)
+                .IsRequired()
+                .HasMaxLength(100);
         }
     }
 }
