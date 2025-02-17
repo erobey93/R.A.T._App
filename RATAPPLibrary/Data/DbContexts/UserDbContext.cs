@@ -16,7 +16,7 @@ namespace RATAPPLibrary.Data.DbContexts
         public DbSet<Club> Clubs { get; set; } // Clubs should be of type 'Club'
         public DbSet<BreederClub> BreederClubs { get; set; } // BreederClub should be a junction table for many-to-many
 
-        // Constructor for Dependency Injection (recommended)
+        // Constructor for Dependency Injection (for uts)
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         {
         }

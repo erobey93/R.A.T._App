@@ -397,6 +397,19 @@ namespace RATAPP.Panels
             };
         }
 
+        private void SaveButtonClick(object sender, EventArgs e)
+        {
+            //save the data to the database
+            //TODO method in library to save animal data
+
+            //enable the update button
+            saveButton.Hide();
+            updateButton.Show(); 
+         
+            //display the animals data (refresh the page) TODO what about when we go back to home page, how do we refresh the data?
+            //TODO method to refresh (in library?) 
+        }
+
         private void UpdateButton()
         {
             //create calc % inbred button 
@@ -420,9 +433,7 @@ namespace RATAPP.Panels
 
         private void IntializeButtons()
         {
-            // Initialize the button for calculating % inbred
             InbredButton();
-            //Update and save buttons 
             UpdateButton();
             SaveButton();
 

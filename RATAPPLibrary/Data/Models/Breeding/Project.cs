@@ -6,7 +6,7 @@
         public required string Name { get; set; } // The name of the project
         
         // Foreign Keys
-        public int LineId { get; set; } // Foreign key for the associated line
+        public required int LineId { get; set; } // Foreign key for the associated line
 
         // Project Details
         public string? Description { get; set; } // A description of the project's purpose or goals
