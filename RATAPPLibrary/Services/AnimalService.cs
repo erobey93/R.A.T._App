@@ -13,10 +13,10 @@ namespace RATAPPLibrary.Services
         private readonly Data.DbContexts.RatAppDbContext _context;
         private readonly LineService _lineService;
 
-        public AnimalService(Data.DbContexts.RatAppDbContext context, LineService lineService)
+        public AnimalService(Data.DbContexts.RatAppDbContext context)
         {
             _context = context;
-            _lineService = lineService;
+            _lineService = new LineService(context);
         }
 
         //TODO 
@@ -100,6 +100,7 @@ namespace RATAPPLibrary.Services
             {
                 Id = a.Id,
                 Name = a.Name,
+                DateOfBirth = a.DateOfBirth,
                 Sex = a.Sex,
                 Breeder = a.Line.Stock.Breeder.User.Individual.Name,
                 Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property

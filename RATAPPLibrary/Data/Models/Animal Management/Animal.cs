@@ -4,6 +4,7 @@ using RATAPPLibrary.Data.Models.Breeding;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace RATAPPLibrary.Data.Models
 {
@@ -24,6 +25,7 @@ namespace RATAPPLibrary.Data.Models
 
         //data rules for animal
 
+        //TODO allow user to set age and then calculate approximate DOB based on that 
         //get age in months and years
         public int? AgeInMonths
         {
@@ -69,6 +71,8 @@ namespace RATAPPLibrary.Data.Models
         public int Id { get; set; }
         public required string Name { get; set; }
         public required string Sex { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public DateTime? DateOfDeath { get; set; }
         public string Species { get; set; }
         public string Line { get; set; }
         public string Dam { get; set; } = string.Empty;
