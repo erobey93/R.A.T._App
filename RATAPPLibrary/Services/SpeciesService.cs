@@ -6,9 +6,9 @@ namespace RATAPPLibrary.Services
 {
     public class SpeciesService
     {
-        private readonly AnimalDbContext _context;
+        private readonly Data.DbContexts.RatAppDbContext _context;
 
-        public SpeciesService(AnimalDbContext context)
+        public SpeciesService(Data.DbContexts.RatAppDbContext context)
         {
             _context = context;
         }

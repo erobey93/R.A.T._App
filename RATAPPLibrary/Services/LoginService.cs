@@ -20,11 +20,11 @@
 
     public class LoginService
     {
-        private readonly UserDbContext _context;
+        private readonly RatAppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly PasswordHashing _passwordHashing;
 
-        public LoginService(UserDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
+        public LoginService(RatAppDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
         {
             _context = context;
             _configuration = configuration;

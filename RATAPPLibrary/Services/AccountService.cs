@@ -9,11 +9,11 @@ namespace RATAPPLibrary.Services
 {
     public class AccountService
     {
-        private readonly UserDbContext _context;
+        private readonly RatAppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly PasswordHashing _passwordHashing;
 
-        public AccountService(UserDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
+        public AccountService(RatAppDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
         {
             _context = context;
             _configuration = configuration;
