@@ -85,6 +85,32 @@ namespace RATAPPLibrary.Services
             }
             return animal;
         }
+
+        //get all animals - TODO just basic data right now as all relationships are not built out yet
+        public async Task<AnimalDto[]> GetAllAnimalsAsync()
+        {
+            // Fetch the animals and include related entities for species, line, dam, sire, and variety
+            var animals = await _context.Animals
+                .Include(a => a.Line) // Assuming Line is a navigation property 
+                //.Include(a => a.Litters).ThenInclude(l => l.Pair) // Assuming Litters is a navigation property and Dam is a navigation property on Litter TODO still need to set up ancestry and genetics so these won't be super functional right now 
+                .ToListAsync();
+
+            // Map the animals to include string values for the related entities
+            var result = animals.Select(a => new AnimalDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Sex = a.Sex,
+                Breeder = a.Line.Stock.Breeder.User.Individual.Name,
+                Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
+                Line = a.Line?.Name, // Assuming Line has a Name property
+               // Dam = a.Litters, // Assuming Dam has a Name property TODO 
+               // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
+               // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
+            }).ToArray();
+
+            return result;
+        }
     }
 
    

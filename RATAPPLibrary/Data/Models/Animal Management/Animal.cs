@@ -63,4 +63,19 @@ namespace RATAPPLibrary.Data.Models
             return $"{DisplayName} ({Sex}, Age: {AgeAsString})";
         }
     }
+
+    public class AnimalDto // DTO to return string types for animal related entities
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public required string Sex { get; set; }
+        public string Species { get; set; }
+        public string Line { get; set; }
+        public string Dam { get; set; } = string.Empty;
+        public string Sire { get; set; } = string.Empty;
+        public string Variety { get; set; } = string.Empty;
+        public string Color { get; set; } = string.Empty;
+        public string Breeder { get; set; }
+        public string Genotype { get; set; } = string.Empty;
+    }
 }
