@@ -12,12 +12,12 @@ namespace RATAPP
     public partial class LoginForm : Form
     {
         // Declare the fields to store the dependencies
-        private RATAPPLibrary.Data.DbContexts.UserDbContext _context;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
 
 
-        public LoginForm(RATAPPLibrary.Data.DbContexts.UserDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
+        public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
             InitializeComponent();
 

@@ -25,7 +25,7 @@ namespace RATAPPLibrary.Services
         public async Task<int?> GetTraitTypeIdByNameAsync(string name)
         {
             // Query the TraitType by Name and return the Id (nullable to handle non-existing types)
-            var traitType = await _context.TraitTypes
+            var traitType = await _context.TraitType
                 .FirstOrDefaultAsync(tt => tt.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
             return traitType?.Id; // Returns null if no matching trait type is found
@@ -34,7 +34,7 @@ namespace RATAPPLibrary.Services
         public async Task<TraitType> CreateTraitTypeAsync(string name, string? description = null)
         {
             // Check if the trait type already exists
-            var existingTraitType = await _context.TraitTypes
+            var existingTraitType = await _context.TraitType
                 .FirstOrDefaultAsync(tt => tt.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
             if (existingTraitType != null)
             {
@@ -46,7 +46,7 @@ namespace RATAPPLibrary.Services
                 Name = name,
                 Description = description
             };
-            _context.TraitTypes.Add(newTraitType);
+            _context.TraitType.Add(newTraitType);
             await _context.SaveChangesAsync();
             return newTraitType;
         }
@@ -55,7 +55,7 @@ namespace RATAPPLibrary.Services
         public async Task<Trait> CreateTraitAsync(string name, int traitTypeId, string? description = null)
         {
             // Check if the trait already exists
-            var existingTrait = await _context.Traits
+            var existingTrait = await _context.Trait
                 .FirstOrDefaultAsync(t => t.CommonName.Equals(name, StringComparison.OrdinalIgnoreCase) && t.TraitTypeId == traitTypeId);
             if (existingTrait != null)
             {
@@ -70,7 +70,7 @@ namespace RATAPPLibrary.Services
                 //Genotype = genotype.GenerateGenotype(name), eventually this is the goal to generate the genotype based on the trait but for not its just a string that the user enters 
 
             };
-            _context.Traits.Add(newTrait);
+            _context.Trait.Add(newTrait);
             await _context.SaveChangesAsync();
             return newTrait;
         }
@@ -78,13 +78,13 @@ namespace RATAPPLibrary.Services
         // Get all traits available in the database
         public async Task<IEnumerable<Trait>> GetAllTraitsAsync()
         {
-            return await _context.Traits.ToListAsync();  // Get all traits from the database
+            return await _context.Trait.ToListAsync();  // Get all traits from the database
         }
 
         // Get traits by TraitTypeId
         public async Task<IEnumerable<Trait>> GetTraitsByTraitTypeIdAsync(int traitTypeId)
         {
-            return await _context.Traits
+            return await _context.Trait
                 .Where(t => t.TraitTypeId == traitTypeId)  // Filter by TraitTypeId
                 .ToListAsync();
         }
@@ -92,13 +92,13 @@ namespace RATAPPLibrary.Services
         // Get all trait types available in the database
         public async Task<IEnumerable<TraitType>> GetAllTraitTypesAsync()
         {
-            return await _context.TraitTypes.ToListAsync();  // Get all trait types from the database
+            return await _context.TraitType.ToListAsync();  // Get all trait types from the database
         }
 
         // Get specific trait by Id
         public async Task<Trait> GetTraitByIdAsync(int id)
         {
-            return await _context.Traits
+            return await _context.Trait
                 .FirstOrDefaultAsync(t => t.Id == id);  // Get a trait by its Id
         }
     }

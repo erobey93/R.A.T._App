@@ -20,14 +20,13 @@ namespace RATAPP.Panels
         private Label sexLabel;
         private Label varietyLabel;
         private Label colorLabel;
-        private Label geneticsLabel;
+        private Label genotypeLabel;
         private Label ancestryLabel;
         private Label breederInfoLabel;
         private Label commentsLabel;
         private Label damLabel;
         private Label sireLabel;
         private Label inbredLabel;
-        private Label genomeLabel;
 
         private TextBox animalNameTextBox;
         private TextBox idTextBox;
@@ -35,14 +34,24 @@ namespace RATAPP.Panels
         private TextBox sexTextBox;
         private TextBox varietyTextBox;
         private TextBox colorTextBox;
-        private TextBox geneticsTextBox;
+        private TextBox genotypeTextBox;
         private TextBox ancestryTextBox;
         private TextBox breederInfoTextBox;
         private TextBox commentsTextBox;
         private TextBox damTextBox;
         private TextBox sireTextBox;
         private TextBox inbredTextBox;
-        private TextBox genomeTextBox;
+
+        private ComboBox animalNameComboBox;
+        private ComboBox idComboBox;
+        private ComboBox speciesComboBox;
+        private ComboBox sexComboBox;
+        private ComboBox varietyComboBox;
+        private ComboBox colorComboBox;
+        private ComboBox genotypeComboBox;
+        private ComboBox ancestryComboBox;
+        private ComboBox damComboBox;
+        private ComboBox sireComboBox;
 
         private PictureBox animalPhotoBox;
         private Button inbredButton;
@@ -107,10 +116,10 @@ namespace RATAPP.Panels
 
             // Second column (right side)
             colorLabel = CreateLabel("Color", 380, 20, labelFont);
-            geneticsLabel = CreateLabel("Genetics", 380, 60, labelFont);
+            genotypeLabel = CreateLabel("Genetics", 380, 60, labelFont);
             ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
-            genomeLabel = CreateLabel("Genome", 380, 180, labelFont);
+            //genomeLabel = CreateLabel("Genome", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
             inbredLabel = CreateLabel("% Inbred", 10, 450, labelFont);
 
@@ -124,13 +133,13 @@ namespace RATAPP.Panels
             this.Controls.Add(sexLabel);
             this.Controls.Add(varietyLabel);
             this.Controls.Add(colorLabel);
-            this.Controls.Add(geneticsLabel);
+            this.Controls.Add(genotypeLabel);
             this.Controls.Add(ancestryLabel);
             this.Controls.Add(breederInfoLabel);
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
             this.Controls.Add(sireLabel);
-            this.Controls.Add(genomeLabel);
+            //this.Controls.Add(genomeLabel);
             this.Controls.Add(inbredLabel);
         }
 
@@ -165,10 +174,10 @@ namespace RATAPP.Panels
 
             // Second column (right side)
             colorTextBox = CreateTextBox(490, 20, TODO);
-            geneticsTextBox = CreateTextBox(490, 60, TODO);
+            genotypeTextBox = CreateTextBox(490, 60, TODO);
             ancestryTextBox = CreateTextBox(490, 100, TODO);
             breederInfoTextBox = CreateTextBox(490, 140, TODO);
-            genomeTextBox = CreateTextBox(490, 180, TODO);
+            //genomeTextBox = CreateTextBox(490, 180, TODO);
             sireTextBox = CreateTextBox(490, 220, TODO);
 
             inbredTextBox = CreateTextBox(150, 450, "");
@@ -194,13 +203,13 @@ namespace RATAPP.Panels
             this.Controls.Add(sexTextBox);
             this.Controls.Add(varietyTextBox);
             this.Controls.Add(colorTextBox);
-            this.Controls.Add(geneticsTextBox);
+            this.Controls.Add(genotypeTextBox);
             this.Controls.Add(ancestryTextBox);
             this.Controls.Add(breederInfoTextBox);
             this.Controls.Add(commentsTextBox);
             this.Controls.Add(damTextBox);
             this.Controls.Add(sireTextBox);
-            this.Controls.Add(genomeTextBox);
+            //this.Controls.Add(genomeTextBox);
             this.Controls.Add(inbredTextBox);
 
             //if ID is present than it is an existing animal

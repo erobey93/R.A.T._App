@@ -2,29 +2,67 @@
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
+using RATAPPLibrary.Data.Models.Ancestry;
+
+using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Identity.Data;
+using RATAPPLibrary.Data.Models.Requests;
 
 namespace RATAPPLibrary.Data.DbContexts
 {
     public class RatAppDbContext : DbContext
     {
-        public DbSet<Animal> Animals { get; set; }
-        public DbSet<Stock> Stocks { get; set; }
-        public DbSet<Line> Lines { get; set; }
-        public DbSet<Litter> Litters { get; set; }
-        public DbSet<Species> Species { get; set; }
-        public DbSet<Project> Projects { get; set; }
-        public DbSet<Pairing> Pairings { get; set; }
+        public static readonly ILoggerFactory MyLoggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder.AddConsole(); // Logs to the console
+        });
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .UseSqlServer("Server=EARSLAPTOP;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
+                .UseLoggerFactory(MyLoggerFactory) // Attach the logger
+                .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
+                .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
+        }
+
+        //Account management
         public DbSet<User> Users { get; set; }
         public DbSet<Credentials> Credentials { get; set; }
         public DbSet<AccountType> AccountTypes { get; set; }
         public DbSet<Individual> Individuals { get; set; }
-        public DbSet<Breeder> Breeders { get; set; }
-        public DbSet<Club> Clubs { get; set; } // Clubs should be of type 'Club'
-        public DbSet<BreederClub> BreederClubs { get; set; } // BreederClub should be a junction table for many-to-many
 
-        public DbSet<Trait> Traits { get; set; }  // This should exist
-        public DbSet<TraitType> TraitTypes { get; set; }  // This should exist
+        //Ancestry
+        public DbSet<AncestryRecord> Ancestries { get; set; }
+        public DbSet<AncestryRecordLink> AncestorLink { get; set; }
+
+        //Animal Management
+        public DbSet<Animal> Animals { get; set; }
+        public DbSet<AnimalRecord> AnimalRecords { get; set; }
+        public DbSet<Species> Species { get; set; }
+
+        //Breeding
+        public DbSet<Breeder> Breeder { get; set; }
+        public DbSet<Club> Club { get; set; } // Clubs should be of type 'Club'
+        public DbSet<BreederClub> BreederClub { get; set; } // BreederClub should be a junction table for many-to-many
+        public DbSet<Stock> Stock { get; set; }
+        public DbSet<Line> Line { get; set; }
+        public DbSet<Litter> Litter { get; set; }
+        public DbSet<Project> Project { get; set; }
+        public DbSet<Pairing> Pairing { get; set; }
+
+        //Genetics
+        public DbSet<Trait> Trait { get; set; }  // This should exist
+        public DbSet<TraitType> TraitType { get; set; }  // This should exist  
+        public DbSet<AnimalTrait> AnimalTrait { get; set; }
+
+        //Health
+        public DbSet<HealthRecord> HealthRecord { get; set; }
+
+        //Requests
+        public DbSet<Models.Requests.LoginRequest> LoginRequest { get; set; }
+        public DbSet<UpdateCredentialsRequest> UpdateCredentialsRequest { get; set; }
+        public DbSet<LoginResponse> LoginResponse { get; set; }
 
         // Constructor for Dependency Injection (recommended)
         public RatAppDbContext(DbContextOptions <RatAppDbContext> options) : base(options)
@@ -37,6 +75,7 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureCredentials(modelBuilder);
             ConfigureAccountType(modelBuilder);
             ConfigureIndividual(modelBuilder);
+
             ConfigureBreeder(modelBuilder);
             ConfigureClub(modelBuilder);
             ConfigureBreederClub(modelBuilder);
@@ -45,12 +84,18 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureLine(modelBuilder);
             ConfigureSpecies(modelBuilder);
             ConfigureAnimal(modelBuilder);
+
             ConfigureLitter(modelBuilder);
             ConfigureProject(modelBuilder);
             ConfigurePairing(modelBuilder);
             ConfigureAnimalRecord(modelBuilder);
 
             ConfigureTrait(modelBuilder);
+
+            // Configure the Ancestry entities
+            //ConfigureAncestryRecord(modelBuilder);
+            //ConfigureAncestryRecordLink(modelBuilder);
+
         }
 
         // Configure the User entity

@@ -18,7 +18,7 @@ namespace RATAPPLibrary.Services
         public async Task<Line> GetOrCreateLineAsync(string variety)
         {
             // Find the correct LineId based on the variety
-            var line = await _context.Lines.FirstOrDefaultAsync(l => l.Name == variety);
+            var line = await _context.Line.FirstOrDefaultAsync(l => l.Name == variety);
 
             if (line == null)
             {
@@ -28,7 +28,7 @@ namespace RATAPPLibrary.Services
                     Name = variety
                 };
 
-                _context.Lines.Add(line);
+                _context.Line.Add(line);
                 await _context.SaveChangesAsync();
             }
 

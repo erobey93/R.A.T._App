@@ -17,11 +17,11 @@ namespace RATAPP.Forms
 {
     public partial class CreateAccountForm : Form
     {
-        private RATAPPLibrary.Data.DbContexts.UserDbContext _context;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
 
-        public CreateAccountForm(RATAPPLibrary.Data.DbContexts.UserDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
+        public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
             InitializeComponent();
             CreateAcctForm();

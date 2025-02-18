@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RATAPPLibrary.Data.Models
 {
-    internal class HealthRecord
+    public class HealthRecord
     {
     }
 }
