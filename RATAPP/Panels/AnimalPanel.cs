@@ -1,4 +1,5 @@
 ﻿using RATAPP.Forms;
+using RATAPPLibrary.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,6 +28,8 @@ namespace RATAPP.Panels
         private Label damLabel;
         private Label sireLabel;
         private Label inbredLabel;
+        private Label earTypeLabel;
+        private Label markingsLabel;
 
         private TextBox animalNameTextBox;
         private TextBox idTextBox;
@@ -41,6 +44,8 @@ namespace RATAPP.Panels
         private TextBox damTextBox;
         private TextBox sireTextBox;
         private TextBox inbredTextBox;
+        private TextBox earTypeTextBox;
+        private TextBox markingsTextBox;
 
         private ComboBox animalNameComboBox;
         private ComboBox idComboBox;
@@ -52,11 +57,19 @@ namespace RATAPP.Panels
         private ComboBox ancestryComboBox;
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
+        private ComboBox earTypeComboBox;
+        private ComboBox markingsComboBox;
+        private ComboBox breederInfoComboBox;
+
 
         private PictureBox animalPhotoBox;
         private Button inbredButton;
         private Button saveButton;
         private Button updateButton;
+
+        //db context & services 
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        private RATAPPLibrary.Services.AnimalService _animalService;
 
         //TODO
         //need to add logic to get the values from the database
@@ -65,7 +78,7 @@ namespace RATAPP.Panels
         // it may actually make sense to have a state for the panel - future work
         // edit vs non edit mode and then just check this state
         //like if a user is on an existing animal and they click update animal details
-       
+
         // and then requery the database to get the updated values
         // and then disable the text boxes and enable the update button again
         // and disable the save button
@@ -79,12 +92,14 @@ namespace RATAPP.Panels
         // and disable the save button
 
         // Constructor for initializing the panel
-        public AnimalPanel(RATAppBaseForm parentForm, string animalName, string animalID)
+        public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string animalName, int animalID)
         {
-            InitializeComponent(animalName, animalID);
+            _context = context;
+            _animalService = new RATAPPLibrary.Services.AnimalService(context);
+            InitializeComponent(animalName, animalID); //TODO need to re-strucutre to account for await 
         }
 
-        private void InitializeComponent(string animalName, string animalID)
+        private async Task InitializeComponent(string animalName, int animalID)
         {
             // Set panel properties
             this.Size = new Size(1200, 800); // Increased panel size for better spacing
@@ -94,11 +109,153 @@ namespace RATAPP.Panels
             //Initialize the controls for the Animal Panel, buttons first as others are dependent on them (this is probably a bad idea, but works for now) 
             IntializeButtons();
             InitializeBottomButtons();
-            InitializeTextBoxes(animalID, animalName);
-           
+
+            //if ID is present than it is an existing animal
+            //show existing animal versions = no editing, Update Data button, animal's associated data
+            //first get the animal data by id 
+            //TODO need to set to 0 and make a rule to never allow 0 as an ID 
+            if (animalID != 0)
+            {
+                AnimalDto animal = await _animalService.GetAnimalByIdAsync(animalID);
+                await InitializeTextBoxes(animal);
+            }
+            else
+            {
+                //else if ID is not present than the user is creating a new animal
+                // show new animal version = editing, save button, blank boxes
+                InitializeComboBoxes();
+                SetComboBoxes();
+            }
+
+            // Initialize the labels, photo, nav for the Animal Panel
             InitializeLabels();
             InitializePhotoBox();
             InitializeNavigationButtons();
+        }
+
+        // initialize combo boxes
+        private void InitializeComboBoxes()
+        {
+            //TODO set up the values for the combo boxes 
+            //every one should have a "create new" option though
+
+            // First column (left side)
+            idComboBox = CreateComboBox(150, 20, "");
+            animalNameComboBox = CreateComboBox(150, 60, "");
+            speciesComboBox = CreateComboBox(150, 100, "");
+            sexComboBox = CreateComboBox(150, 140, "");
+            varietyComboBox = CreateComboBox(150, 180, "");
+            damComboBox = CreateComboBox(150, 220, "");
+
+            // Second column (right side)
+            colorComboBox = CreateComboBox(490, 20, "");
+            genotypeComboBox = CreateComboBox(490, 60, "");
+            ancestryComboBox = CreateComboBox(490, 100, "");
+            breederInfoComboBox = CreateComboBox(490, 140, "");
+            earTypeComboBox = CreateComboBox(490, 180, "");
+            sireComboBox = CreateComboBox(490, 220, "");
+
+            inbredTextBox = CreateTextBox(150, 450, "TODO");
+            // Move commentsTextBox below everything else and make it larger
+            //FIXME should have a multi line text box option
+            commentsTextBox = new TextBox
+            {
+                Location = new Point(10, 290),
+                Width = 680,
+                Height = 120,
+                Multiline = true,
+                ScrollBars = ScrollBars.Vertical,
+                Font = new Font("Segoe UI", 10F), // Make it consistent with labels
+                Text = "TODO - should come from db",
+                BackColor = Color.LightGray
+            };
+
+            // Add comboboxes to panel
+            this.Controls.Add(animalNameComboBox);
+            this.Controls.Add(idComboBox);
+            this.Controls.Add(speciesComboBox);
+            this.Controls.Add(sexComboBox);
+            this.Controls.Add(varietyComboBox);
+            this.Controls.Add(colorComboBox);
+            this.Controls.Add(genotypeComboBox);
+            this.Controls.Add(ancestryComboBox);
+            this.Controls.Add(breederInfoComboBox);
+            this.Controls.Add(commentsTextBox);
+            this.Controls.Add(damComboBox);
+            this.Controls.Add(sireComboBox);
+            this.Controls.Add(earTypeComboBox);
+            this.Controls.Add(inbredTextBox);
+
+            NewAnimal(); //new animal settings
+        }
+
+        private void SetComboBoxes()
+        {
+            // Iterate through all controls on the form
+            foreach (Control control in this.Controls)
+            {
+                if (control is ComboBox comboBox)
+                {
+                    // Add "Create New" as an option
+                    comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
+                    comboBox.Items.AddRange(GetComboBoxItemsFromDatabase()); // Add database items
+                    comboBox.Items.Add("Create New");
+
+                    // Subscribe to the SelectedIndexChanged event
+                    comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+                }
+            }
+        }
+
+        // Placeholder for fetching items from the database
+        //TODO
+        private string[] GetComboBoxItemsFromDatabase()
+        {
+            // TODO: Replace with actual database query to get combo box items
+            return new[] { "Option 1", "Option 2", "Option 3" };
+        }
+
+        // Event handler for "Create New" functionality
+        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (sender is ComboBox comboBox && comboBox.SelectedItem?.ToString() == "Create New")
+            {
+                // Open a dialog to get the new item from the user
+                string newItem = PromptForNewItem();
+
+                if (!string.IsNullOrWhiteSpace(newItem))
+                {
+                    // Add the new item to the database
+                    AddNewItemToDatabase(newItem);
+
+                    // Refresh the combo box items
+                    comboBox.Items.Clear();
+                    comboBox.Items.AddRange(GetComboBoxItemsFromDatabase());
+                    comboBox.Items.Add("Create New");
+
+                    // Optionally, select the newly added item
+                    comboBox.SelectedItem = newItem;
+                }
+                else
+                {
+                    // Revert to a default selection if no new item is added
+                    comboBox.SelectedIndex = -1;
+                }
+            }
+        }
+
+        // Placeholder for a user prompt dialog
+        private string PromptForNewItem()
+        {
+            // TODO: Replace with actual UI or input dialog
+            return Microsoft.VisualBasic.Interaction.InputBox("Enter a new item:", "Create New Item", "");
+        }
+
+        // Placeholder for database insertion
+        private void AddNewItemToDatabase(string newItem)
+        {
+            // TODO: Implement database logic to save the new item
+            Console.WriteLine($"New item added to the database: {newItem}");
         }
 
         private void InitializeLabels()
@@ -119,7 +276,7 @@ namespace RATAPP.Panels
             genotypeLabel = CreateLabel("Genetics", 380, 60, labelFont);
             ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
-            //genomeLabel = CreateLabel("Genome", 380, 180, labelFont);
+            earTypeLabel = CreateLabel("Ear Type", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
             inbredLabel = CreateLabel("% Inbred", 10, 450, labelFont);
 
@@ -139,7 +296,7 @@ namespace RATAPP.Panels
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
             this.Controls.Add(sireLabel);
-            //this.Controls.Add(genomeLabel);
+            this.Controls.Add(earTypeLabel);
             this.Controls.Add(inbredLabel);
         }
 
@@ -161,26 +318,26 @@ namespace RATAPP.Panels
         // the user will have to click the update animal details button
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
-        private void InitializeTextBoxes(string id, string name)
+        //TODO ID should be a string, but leaving it for now as db edits are annoying 
+        private async Task InitializeTextBoxes(AnimalDto animal)
         {
-            string TODO = "TODO - should come from db"; //FIXME
             // First column (left side)
-            idTextBox = CreateTextBox(150, 20, id);
-            animalNameTextBox = CreateTextBox(150, 60, name);
-            speciesTextBox = CreateTextBox(150, 100, TODO);
-            sexTextBox = CreateTextBox(150, 140, TODO);
-            varietyTextBox = CreateTextBox(150, 180, TODO);
-            damTextBox = CreateTextBox(150, 220, TODO);
+            idTextBox = CreateTextBox(150, 20, animal.Id.ToString());
+            animalNameTextBox = CreateTextBox(150, 60, animal.Name);
+            speciesTextBox = CreateTextBox(150, 100, animal.Species);
+            sexTextBox = CreateTextBox(150, 140, animal.Sex);
+            varietyTextBox = CreateTextBox(150, 180, animal.Variety);
+            damTextBox = CreateTextBox(150, 220, animal.Dam);
 
             // Second column (right side)
-            colorTextBox = CreateTextBox(490, 20, TODO);
-            genotypeTextBox = CreateTextBox(490, 60, TODO);
-            ancestryTextBox = CreateTextBox(490, 100, TODO);
-            breederInfoTextBox = CreateTextBox(490, 140, TODO);
-            //genomeTextBox = CreateTextBox(490, 180, TODO);
-            sireTextBox = CreateTextBox(490, 220, TODO);
+            colorTextBox = CreateTextBox(490, 20, animal.Color);
+            genotypeTextBox = CreateTextBox(490, 60, "TODO");
+            ancestryTextBox = CreateTextBox(490, 100, "TODO");
+            breederInfoTextBox = CreateTextBox(490, 140, animal.Breeder);
+            earTypeTextBox = CreateTextBox(490, 180,"TODO");
+            sireTextBox = CreateTextBox(490, 220, animal.Sire);
 
-            inbredTextBox = CreateTextBox(150, 450, "");
+            inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
             //FIXME should have a multi line text box option
             commentsTextBox = new TextBox
@@ -195,7 +352,6 @@ namespace RATAPP.Panels
                 BackColor = Color.LightGray
             };
 
-
             // Add textboxes to panel
             this.Controls.Add(animalNameTextBox);
             this.Controls.Add(idTextBox);
@@ -209,21 +365,10 @@ namespace RATAPP.Panels
             this.Controls.Add(commentsTextBox);
             this.Controls.Add(damTextBox);
             this.Controls.Add(sireTextBox);
-            //this.Controls.Add(genomeTextBox);
+            this.Controls.Add(earTypeTextBox);
             this.Controls.Add(inbredTextBox);
 
-            //if ID is present than it is an existing animal
-            //show existing animal versions = no editing, Update Data button, animal's associated data
-            if (id != "")
-            {
-                AnimalExists();
-            }
-            //if ID is not present than the user is creating a new animal
-            // show new animal version = editing, save button, blank boxes 
-            else
-            {
-                NewAnimal();
-            }
+            AnimalExists();
         }
 
         // Method for existing animals 
@@ -246,8 +391,6 @@ namespace RATAPP.Panels
             //show update button
             saveButton.Hide();
             updateButton.Show();
-
-            //display animals data TODO
         }
 
         //Method for new animals
@@ -272,6 +415,19 @@ namespace RATAPP.Panels
         private TextBox CreateTextBox(int x, int y, string text)
         {
             return new TextBox
+            {
+                Location = new Point(x, y),
+                Width = 200,
+                Font = new Font("Segoe UI", 10F),
+                Text = text,
+                BackColor = Color.LightGray
+            };
+        }
+
+        // Method to create combobox
+        private ComboBox CreateComboBox(int x, int y, string text)
+        {
+            return new ComboBox
             {
                 Location = new Point(x, y),
                 Width = 200,
@@ -355,7 +511,6 @@ namespace RATAPP.Panels
             this.Controls.Add(documentsButton);
             this.Controls.Add(healthButton);
         }
-
 
         //TODO get the animal details from the database
         // and populate the text boxes with the values

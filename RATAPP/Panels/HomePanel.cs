@@ -25,12 +25,14 @@ namespace RATAPP.Panels
         private DataGridView dataDisplayArea;
 
         private RATAppBaseForm _parentForm;  // Reference to parent form (RATAppBaseForm) this tightly couples things, but it is the easiest way to use panels
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
 
-        public HomePanel(RATAppBaseForm parentForm, string username, string role)
+        public HomePanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
         {
             _parentForm = parentForm;
             _username = username;
             _role = role;
+            _context = context;
             InitializePanel();
         }
 
@@ -183,9 +185,9 @@ namespace RATAPP.Panels
             dataDisplayArea.Columns.Add("Genotype", "Genotype");
 
             // Add some rows for testing
-            dataDisplayArea.Rows.Add("Rat1", "001", "Rat", "Male", "01/01/2023", "A/A");
-            dataDisplayArea.Rows.Add("Rat2", "002", "Rat", "Female", "02/01/2023", "A/B");
-            dataDisplayArea.Rows.Add("Mouse1", "003", "Mouse", "Male", "03/01/2023", "B/B");
+            //dataDisplayArea.Rows.Add("Rat1", "001", "Rat", "Male", "01/01/2023", "A/A");
+            //dataDisplayArea.Rows.Add("Rat2", "002", "Rat", "Female", "02/01/2023", "A/B");
+            //dataDisplayArea.Rows.Add("Mouse1", "003", "Mouse", "Male", "03/01/2023", "B/B");
 
             Controls.Add(dataDisplayArea);
 
@@ -204,17 +206,17 @@ namespace RATAPP.Panels
 
         private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == dataDisplayArea.Columns["Individual Animal Page"].Index && e.RowIndex >= 0)
+            if (e.ColumnIndex == dataDisplayArea.Columns["Individual Animal Page"].Index && e.RowIndex >= 0 && dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value != null)
             {
                 string animalName = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalName"].Value.ToString();
-                string animalID = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value.ToString();
+                string animalID = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value.ToString(); //TODO fix this logic with string vs int 
                 string species = dataDisplayArea.Rows[e.RowIndex].Cells["Species"].Value.ToString();
                 string sex = dataDisplayArea.Rows[e.RowIndex].Cells["Sex"].Value.ToString();
                 string dob = dataDisplayArea.Rows[e.RowIndex].Cells["DOB"].Value.ToString();
                 string genotype = dataDisplayArea.Rows[e.RowIndex].Cells["Genotype"].Value.ToString();
 
                 // Create the AnimalDetailsPanel and show it using the parent form's ShowPanel method
-                var animalDetailsPanel = new AnimalPanel(_parentForm, animalName, animalID);//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
+                var animalDetailsPanel = new AnimalPanel(_parentForm, _context, animalName, int.Parse(animalID));//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
                 _parentForm.ShowPanel(animalDetailsPanel);   // Use the ShowPanel method from the parent form
             }
         }
@@ -228,7 +230,7 @@ namespace RATAPP.Panels
             //maybe if the animal id is empty, then it is a new animal
             //that check would have to be done in the animal panel
             //go to animal panel, but pass in an empty animal id
-            var animalPanel = new AnimalPanel(_parentForm, "", ""); // Pass in an empty animal ID for a new animal
+            var animalPanel = new AnimalPanel(_parentForm, _context, "", 0); // Pass in an empty animal ID for a new animal
             _parentForm.ShowPanel(animalPanel);
         }
         private void SearchButton_Click(object sender, EventArgs e)

@@ -12,8 +12,8 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    [Migration("20250218003730_initial")]
-    partial class initial
+    [Migration("20250218041204_NEWDB")]
+    partial class NEWDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -112,7 +112,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.ToTable("Animals");
+                    b.ToTable("Animal");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.AnimalRecord", b =>
@@ -139,7 +139,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("AnimalId");
 
-                    b.ToTable("AnimalRecord");
+                    b.ToTable("AnimalRecords");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Breeder", b =>
@@ -162,7 +162,7 @@ namespace RATAPPLibrary.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Breeders");
+                    b.ToTable("Breeder");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.BreederClub", b =>
@@ -177,7 +177,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("ClubId");
 
-                    b.ToTable("BreederClubs");
+                    b.ToTable("BreederClub");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Club", b =>
@@ -195,10 +195,10 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clubs");
+                    b.ToTable("Club");
                 });
 
-            modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Lines", b =>
+            modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Line", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -211,7 +211,8 @@ namespace RATAPPLibrary.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
@@ -223,7 +224,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.ToTable("Lines");
+                    b.ToTable("Line");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Litter", b =>
@@ -266,7 +267,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("PairId");
 
-                    b.ToTable("Litters");
+                    b.ToTable("Litter");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Pairing", b =>
@@ -300,7 +301,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("SireId");
 
-                    b.ToTable("Pairings");
+                    b.ToTable("Pairing");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Project", b =>
@@ -336,16 +337,13 @@ namespace RATAPPLibrary.Migrations
                     b.HasIndex("LineId")
                         .IsUnique();
 
-                    b.ToTable("Projects");
+                    b.ToTable("Project");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Stock", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BreederId")
                         .HasColumnType("int");
@@ -362,7 +360,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("SpeciesId");
 
-                    b.ToTable("Stocks");
+                    b.ToTable("Stock");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Credentials", b =>
@@ -435,7 +433,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("TraitTypeId");
 
-                    b.ToTable("Traits");
+                    b.ToTable("Trait");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Genetics.TraitType", b =>
@@ -456,7 +454,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TraitTypes");
+                    b.ToTable("TraitType");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Individual", b =>
@@ -580,10 +578,10 @@ namespace RATAPPLibrary.Migrations
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Animal", b =>
                 {
-                    b.HasOne("RATAPPLibrary.Data.Models.Breeding.Lines", "Line")
+                    b.HasOne("RATAPPLibrary.Data.Models.Breeding.Line", "Line")
                         .WithMany("Animals")
                         .HasForeignKey("LineId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RATAPPLibrary.Data.Models.Breeding.Stock", null)
@@ -634,12 +632,12 @@ namespace RATAPPLibrary.Migrations
                     b.Navigation("Club");
                 });
 
-            modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Lines", b =>
+            modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Line", b =>
                 {
                     b.HasOne("RATAPPLibrary.Data.Models.Breeding.Stock", "Stock")
                         .WithMany()
                         .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Stock");
@@ -685,7 +683,7 @@ namespace RATAPPLibrary.Migrations
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Project", b =>
                 {
-                    b.HasOne("RATAPPLibrary.Data.Models.Breeding.Lines", "Line")
+                    b.HasOne("RATAPPLibrary.Data.Models.Breeding.Line", "Line")
                         .WithOne()
                         .HasForeignKey("RATAPPLibrary.Data.Models.Breeding.Project", "LineId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -699,10 +697,16 @@ namespace RATAPPLibrary.Migrations
                     b.HasOne("RATAPPLibrary.Data.Models.Breeding.Breeder", "Breeder")
                         .WithMany()
                         .HasForeignKey("BreederId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RATAPPLibrary.Data.Models.Species", "Species")
+                        .WithMany()
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("RATAPPLibrary.Data.Models.Species", null)
                         .WithMany("Stocks")
                         .HasForeignKey("SpeciesId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -780,7 +784,7 @@ namespace RATAPPLibrary.Migrations
                     b.Navigation("BreederClubs");
                 });
 
-            modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Lines", b =>
+            modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Line", b =>
                 {
                     b.Navigation("Animals");
                 });

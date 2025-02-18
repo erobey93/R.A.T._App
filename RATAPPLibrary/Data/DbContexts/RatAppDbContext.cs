@@ -20,7 +20,7 @@ namespace RATAPPLibrary.Data.DbContexts
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlServer("Server=EARSLAPTOP;Database=master;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
+                .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
                 .UseLoggerFactory(MyLoggerFactory) // Attach the logger
                 .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
                 .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
@@ -33,12 +33,12 @@ namespace RATAPPLibrary.Data.DbContexts
         public DbSet<Individual> Individuals { get; set; }
 
         //Ancestry
-        public DbSet<AncestryRecord> Ancestries { get; set; }
-        public DbSet<AncestryRecordLink> AncestorLink { get; set; }
+        //public DbSet<AncestryRecord> Ancestries { get; set; }
+        //public DbSet<AncestryRecordLink> AncestorLink { get; set; }
 
         //Animal Management
-        public DbSet<Animal> Animals { get; set; }
-        public DbSet<AnimalRecord> AnimalRecords { get; set; }
+        public DbSet<Animal> Animal { get; set; }
+        public DbSet<AnimalRecord> AnimalRecord { get; set; }
         public DbSet<Species> Species { get; set; }
 
         //Breeding
@@ -57,12 +57,12 @@ namespace RATAPPLibrary.Data.DbContexts
         public DbSet<AnimalTrait> AnimalTrait { get; set; }
 
         //Health
-        public DbSet<HealthRecord> HealthRecord { get; set; }
+        //public DbSet<HealthRecord> HealthRecord { get; set; }
 
-        //Requests
-        public DbSet<Models.Requests.LoginRequest> LoginRequest { get; set; }
-        public DbSet<UpdateCredentialsRequest> UpdateCredentialsRequest { get; set; }
-        public DbSet<LoginResponse> LoginResponse { get; set; }
+        //Requests TODO
+        //public DbSet<Models.Requests.LoginRequest> LoginRequest { get; set; }
+        //public DbSet<UpdateCredentialsRequest> UpdateCredentialsRequest { get; set; }
+        //public DbSet<LoginResponse> LoginResponse { get; set; }
 
         // Constructor for Dependency Injection (recommended)
         public RatAppDbContext(DbContextOptions <RatAppDbContext> options) : base(options)

@@ -33,9 +33,9 @@ namespace RATAPPLibrary.Services
         public async Task<Animal> CreateAnimalAsync(int id, string variety, DateTime dateOfBirth, string sex, string commonSpecies, string? name = null, DateTime? dateOfDeath = null)
         {
             //first, check if the animal exists
-           bool exists = await DoesAnimalExist(id);
+            bool exists = await DoesAnimalExist(id);
 
-            if(!exists)
+            if (!exists)
             {
                 // Get or create the line for the animal based on the variety
                 var line = await _lineService.GetOrCreateLineAsync(variety);
@@ -47,11 +47,12 @@ namespace RATAPPLibrary.Services
                     DateOfBirth = dateOfBirth,
                     Sex = sex,
                     LineId = line.Id,
+                    StockId = line.StockId, //FIXME this should not be here but EF if fing up so leaving for now
                     Name = name, // Can be null; DisplayName will handle defaulting
                 };
 
                 // if the animal isn't already in the database (has to be based on ID + name match because technically the same name isn't that important 
-                _context.Animals.Add(newAnimal);
+                _context.Animal.Add(newAnimal);
                 await _context.SaveChangesAsync();
 
                 return newAnimal;
@@ -60,39 +61,40 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"An animal with the ID {id} already exists.");
             }
-           
+
         }
 
         //check if animal is already in database 
         private async Task<bool> DoesAnimalExist(int id)
         {
-            var existingAnimal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id);
+            var existingAnimal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
             if (existingAnimal != null)
             {
-                return true; 
+                return true;
             }
 
-            return false; 
+            return false;
         }
 
         //get animal by id
-        public async Task<Animal> GetAnimalByIdAsync(int id)
+        public async Task<AnimalDto> GetAnimalByIdAsync(int id)
         {
-            var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id);
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
             if (animal == null)
             {
                 throw new KeyNotFoundException($"Animal with ID {id} not found.");
             }
-            return animal;
+
+            return MapSingleAnimaltoDto(animal);
         }
 
         //get all animals - TODO just basic data right now as all relationships are not built out yet
         public async Task<AnimalDto[]> GetAllAnimalsAsync()
         {
             // Fetch the animals and include related entities for species, line, dam, sire, and variety
-            var animals = await _context.Animals
+            var animals = await _context.Animal
                 .Include(a => a.Line) // Assuming Line is a navigation property 
-                //.Include(a => a.Litters).ThenInclude(l => l.Pair) // Assuming Litters is a navigation property and Dam is a navigation property on Litter TODO still need to set up ancestry and genetics so these won't be super functional right now 
+                                      //.Include(a => a.Litters).ThenInclude(l => l.Pair) // Assuming Litters is a navigation property and Dam is a navigation property on Litter TODO still need to set up ancestry and genetics so these won't be super functional right now 
                 .ToListAsync();
 
             // Map the animals to include string values for the related entities
@@ -105,38 +107,80 @@ namespace RATAPPLibrary.Services
                 Breeder = a.Line.Stock.Breeder.User.Individual.Name,
                 Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
                 Line = a.Line?.Name, // Assuming Line has a Name property
-               // Dam = a.Litters, // Assuming Dam has a Name property TODO 
-               // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
-               // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
+                                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
+                                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
+                                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
             }).ToArray();
 
             return result;
         }
+
+        //convert from Animal to AnimalDto
+        public AnimalDto MapSingleAnimaltoDto(Animal a)
+        {
+            // Map the animals to include string values for the related entities
+            var result = new AnimalDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DateOfBirth = a.DateOfBirth,
+                Sex = a.Sex,
+                Breeder = a.Line.Stock.Breeder.User.Individual.Name,
+                Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
+                Line = a.Line?.Name, // Assuming Line has a Name property
+                                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
+                                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
+                                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
+            };
+
+            return result;
+        }
+
+        //Map array of animals to array of AnimalDto
+        public AnimalDto[] MapMultiAnimalsToDto(Animal[] animals)
+        {
+            // Map the animals to include string values for the related entities
+            AnimalDto[] result = animals.Select(a => new AnimalDto
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DateOfBirth = a.DateOfBirth,
+                Sex = a.Sex,
+                Breeder = a.Line.Stock.Breeder.User.Individual.Name,
+                Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
+                Line = a.Line?.Name, // Assuming Line has a Name property
+                                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
+                                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
+                                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
+            }).ToArray();
+
+            return result;
+
+
+
+            //TODO: Implement other CRUD operations for Animal entity here 
+            //GetAnimalByIdAsync
+            //UpdateAnimalAsync
+            //DeleteAnimalAsync
+            //GetAllAnimalsAsync
+            //GetAnimalsByLineAsync
+            //GetAnimalsBySpeciesAsync
+            //GetAnimalsByProjectAsync
+            //GetAnimalsByPairingAsync
+            //GetAnimalsByLitterAsync
+            //GetAnimalsByStockAsync
+            //GetAnimalsByDateOfBirthAsync
+            //GetAnimalsByDateOfDeathAsync
+            //GetAnimalsBySexAsync
+            //GetAnimalsByNameAsync
+            //GetAnimalsByLineAndSpeciesAsync
+            //GetAnimalsByLineAndProjectAsync
+            //GetAnimalsByLineAndPairingAsync
+            //GetAnimalsByLineAndLitterAsync
+            //GetAnimalsByLineAndStockAsync
+            //GetAnimalsByLineAndDateOfBirthAsync
+            //GetAnimalsByLineAndDateOfDeathAsync
+
+        }
     }
-
-   
-
-    //TODO: Implement other CRUD operations for Animal entity here 
-    //GetAnimalByIdAsync
-    //UpdateAnimalAsync
-    //DeleteAnimalAsync
-    //GetAllAnimalsAsync
-    //GetAnimalsByLineAsync
-    //GetAnimalsBySpeciesAsync
-    //GetAnimalsByProjectAsync
-    //GetAnimalsByPairingAsync
-    //GetAnimalsByLitterAsync
-    //GetAnimalsByStockAsync
-    //GetAnimalsByDateOfBirthAsync
-    //GetAnimalsByDateOfDeathAsync
-    //GetAnimalsBySexAsync
-    //GetAnimalsByNameAsync
-    //GetAnimalsByLineAndSpeciesAsync
-    //GetAnimalsByLineAndProjectAsync
-    //GetAnimalsByLineAndPairingAsync
-    //GetAnimalsByLineAndLitterAsync
-    //GetAnimalsByLineAndStockAsync
-    //GetAnimalsByLineAndDateOfBirthAsync
-    //GetAnimalsByLineAndDateOfDeathAsync
-
 }

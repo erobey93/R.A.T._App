@@ -17,6 +17,7 @@ namespace RATAPPLibrary.Data.Models
         public DateTime? DateOfDeath { get; set; } // Nullable DateTime for DateOfDeath
         public int Age { get; set; } // Nullable integer for Age
         public required string Name { get; set; } // Assuming Name is a string
+        public int StockId { get; set; } // Assuming StockId is an integer FIXME this should not be here but EF if fing up 
 
         // Navigation Properties for EF
         public Line? Line { get; set; } // Navigation property to Line table

@@ -109,7 +109,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.ToTable("Animals");
+                    b.ToTable("Animal");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.AnimalRecord", b =>
@@ -136,7 +136,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("AnimalId");
 
-                    b.ToTable("AnimalRecord");
+                    b.ToTable("AnimalRecords");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Breeder", b =>
@@ -159,7 +159,7 @@ namespace RATAPPLibrary.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("Breeders");
+                    b.ToTable("Breeder");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.BreederClub", b =>
@@ -174,7 +174,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("ClubId");
 
-                    b.ToTable("BreederClubs");
+                    b.ToTable("BreederClub");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Club", b =>
@@ -192,7 +192,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clubs");
+                    b.ToTable("Club");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Line", b =>
@@ -221,7 +221,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("StockId");
 
-                    b.ToTable("Lines");
+                    b.ToTable("Line");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Litter", b =>
@@ -264,7 +264,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("PairId");
 
-                    b.ToTable("Litters");
+                    b.ToTable("Litter");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Pairing", b =>
@@ -298,7 +298,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("SireId");
 
-                    b.ToTable("Pairings");
+                    b.ToTable("Pairing");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Project", b =>
@@ -334,7 +334,7 @@ namespace RATAPPLibrary.Migrations
                     b.HasIndex("LineId")
                         .IsUnique();
 
-                    b.ToTable("Projects");
+                    b.ToTable("Project");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Stock", b =>
@@ -357,7 +357,7 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasIndex("SpeciesId");
 
-                    b.ToTable("Stocks");
+                    b.ToTable("Stock");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Credentials", b =>

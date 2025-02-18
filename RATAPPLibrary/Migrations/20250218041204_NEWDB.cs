@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RATAPPLibrary.Migrations
 {
     /// <inheritdoc />
-    public partial class stock : Migration
+    public partial class NEWDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +25,7 @@ namespace RATAPPLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Clubs",
+                name: "Club",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -34,7 +34,7 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Clubs", x => x.Id);
+                    table.PrimaryKey("PK_Club", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -82,7 +82,7 @@ namespace RATAPPLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TraitTypes",
+                name: "TraitType",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -92,7 +92,7 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TraitTypes", x => x.Id);
+                    table.PrimaryKey("PK_TraitType", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -129,7 +129,7 @@ namespace RATAPPLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Traits",
+                name: "Trait",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -140,17 +140,17 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Traits", x => x.Id);
+                    table.PrimaryKey("PK_Trait", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Traits_TraitTypes_TraitTypeId",
+                        name: "FK_Trait_TraitType_TraitTypeId",
                         column: x => x.TraitTypeId,
-                        principalTable: "TraitTypes",
+                        principalTable: "TraitType",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Breeders",
+                name: "Breeder",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -160,9 +160,9 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Breeders", x => x.Id);
+                    table.PrimaryKey("PK_Breeder", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Breeders_Users_UserId",
+                        name: "FK_Breeder_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -170,7 +170,7 @@ namespace RATAPPLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BreederClubs",
+                name: "BreederClub",
                 columns: table => new
                 {
                     BreederId = table.Column<int>(type: "int", nullable: false),
@@ -178,23 +178,23 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BreederClubs", x => new { x.BreederId, x.ClubId });
+                    table.PrimaryKey("PK_BreederClub", x => new { x.BreederId, x.ClubId });
                     table.ForeignKey(
-                        name: "FK_BreederClubs_Breeders_BreederId",
+                        name: "FK_BreederClub_Breeder_BreederId",
                         column: x => x.BreederId,
-                        principalTable: "Breeders",
+                        principalTable: "Breeder",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BreederClubs_Clubs_ClubId",
+                        name: "FK_BreederClub_Club_ClubId",
                         column: x => x.ClubId,
-                        principalTable: "Clubs",
+                        principalTable: "Club",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Stocks",
+                name: "Stock",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
@@ -204,19 +204,19 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stocks", x => x.Id);
+                    table.PrimaryKey("PK_Stock", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Stocks_Breeders_BreederId",
+                        name: "FK_Stock_Breeder_BreederId",
                         column: x => x.BreederId,
-                        principalTable: "Breeders",
+                        principalTable: "Breeder",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Stocks_Species_Id",
+                        name: "FK_Stock_Species_Id",
                         column: x => x.Id,
                         principalTable: "Species",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Stocks_Species_SpeciesId",
+                        name: "FK_Stock_Species_SpeciesId",
                         column: x => x.SpeciesId,
                         principalTable: "Species",
                         principalColumn: "Id",
@@ -224,7 +224,7 @@ namespace RATAPPLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Lines",
+                name: "Line",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -236,16 +236,16 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Lines", x => x.Id);
+                    table.PrimaryKey("PK_Line", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Lines_Stocks_StockId",
+                        name: "FK_Line_Stock_StockId",
                         column: x => x.StockId,
-                        principalTable: "Stocks",
+                        principalTable: "Stock",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Animals",
+                name: "Animal",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -260,21 +260,21 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Animals", x => x.Id);
+                    table.PrimaryKey("PK_Animal", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Animals_Lines_LineId",
+                        name: "FK_Animal_Line_LineId",
                         column: x => x.LineId,
-                        principalTable: "Lines",
+                        principalTable: "Line",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Animals_Stocks_StockId",
+                        name: "FK_Animal_Stock_StockId",
                         column: x => x.StockId,
-                        principalTable: "Stocks",
+                        principalTable: "Stock",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Projects",
+                name: "Project",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -288,17 +288,17 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Projects", x => x.Id);
+                    table.PrimaryKey("PK_Project", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Projects_Lines_LineId",
+                        name: "FK_Project_Line_LineId",
                         column: x => x.LineId,
-                        principalTable: "Lines",
+                        principalTable: "Line",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AnimalRecord",
+                name: "AnimalRecords",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -310,11 +310,11 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AnimalRecord", x => x.Id);
+                    table.PrimaryKey("PK_AnimalRecords", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AnimalRecord_Animals_AnimalId",
+                        name: "FK_AnimalRecords_Animal_AnimalId",
                         column: x => x.AnimalId,
-                        principalTable: "Animals",
+                        principalTable: "Animal",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -332,21 +332,21 @@ namespace RATAPPLibrary.Migrations
                 {
                     table.PrimaryKey("PK_AnimalTrait", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AnimalTrait_Animals_AnimalId",
+                        name: "FK_AnimalTrait_Animal_AnimalId",
                         column: x => x.AnimalId,
-                        principalTable: "Animals",
+                        principalTable: "Animal",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AnimalTrait_Traits_TraitId",
+                        name: "FK_AnimalTrait_Trait_TraitId",
                         column: x => x.TraitId,
-                        principalTable: "Traits",
+                        principalTable: "Trait",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Pairings",
+                name: "Pairing",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -359,27 +359,27 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Pairings", x => x.Id);
+                    table.PrimaryKey("PK_Pairing", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Pairings_Animals_DamId",
+                        name: "FK_Pairing_Animal_DamId",
                         column: x => x.DamId,
-                        principalTable: "Animals",
+                        principalTable: "Animal",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Pairings_Animals_SireId",
+                        name: "FK_Pairing_Animal_SireId",
                         column: x => x.SireId,
-                        principalTable: "Animals",
+                        principalTable: "Animal",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Pairings_Projects_ProjectId",
+                        name: "FK_Pairing_Project_ProjectId",
                         column: x => x.ProjectId,
-                        principalTable: "Projects",
+                        principalTable: "Project",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Litters",
+                name: "Litter",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -396,11 +396,11 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Litters", x => x.Id);
+                    table.PrimaryKey("PK_Litter", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Litters_Pairings_PairId",
+                        name: "FK_Litter_Pairing_PairId",
                         column: x => x.PairId,
-                        principalTable: "Pairings",
+                        principalTable: "Pairing",
                         principalColumn: "Id");
                 });
 
@@ -415,15 +415,15 @@ namespace RATAPPLibrary.Migrations
                 {
                     table.PrimaryKey("PK_AnimalLitter", x => new { x.AnimalsId, x.LittersId });
                     table.ForeignKey(
-                        name: "FK_AnimalLitter_Animals_AnimalsId",
+                        name: "FK_AnimalLitter_Animal_AnimalsId",
                         column: x => x.AnimalsId,
-                        principalTable: "Animals",
+                        principalTable: "Animal",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_AnimalLitter_Litters_LittersId",
+                        name: "FK_AnimalLitter_Litter_LittersId",
                         column: x => x.LittersId,
-                        principalTable: "Litters",
+                        principalTable: "Litter",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -439,18 +439,28 @@ namespace RATAPPLibrary.Migrations
                 {
                     table.PrimaryKey("PK_LitterBreeder", x => new { x.BreederId, x.LitterId });
                     table.ForeignKey(
-                        name: "FK_LitterBreeder_Breeders_BreederId",
+                        name: "FK_LitterBreeder_Breeder_BreederId",
                         column: x => x.BreederId,
-                        principalTable: "Breeders",
+                        principalTable: "Breeder",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LitterBreeder_Litters_LitterId",
+                        name: "FK_LitterBreeder_Litter_LitterId",
                         column: x => x.LitterId,
-                        principalTable: "Litters",
+                        principalTable: "Litter",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Animal_LineId",
+                table: "Animal",
+                column: "LineId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Animal_StockId",
+                table: "Animal",
+                column: "StockId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AnimalLitter_LittersId",
@@ -458,19 +468,9 @@ namespace RATAPPLibrary.Migrations
                 column: "LittersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AnimalRecord_AnimalId",
-                table: "AnimalRecord",
+                name: "IX_AnimalRecords_AnimalId",
+                table: "AnimalRecords",
                 column: "AnimalId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Animals_LineId",
-                table: "Animals",
-                column: "LineId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Animals_StockId",
-                table: "Animals",
-                column: "StockId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AnimalTrait_AnimalId",
@@ -483,20 +483,25 @@ namespace RATAPPLibrary.Migrations
                 column: "TraitId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BreederClubs_ClubId",
-                table: "BreederClubs",
-                column: "ClubId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Breeders_UserId",
-                table: "Breeders",
+                name: "IX_Breeder_UserId",
+                table: "Breeder",
                 column: "UserId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Lines_StockId",
-                table: "Lines",
+                name: "IX_BreederClub_ClubId",
+                table: "BreederClub",
+                column: "ClubId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Line_StockId",
+                table: "Line",
                 column: "StockId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Litter_PairId",
+                table: "Litter",
+                column: "PairId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LitterBreeder_LitterId",
@@ -504,44 +509,39 @@ namespace RATAPPLibrary.Migrations
                 column: "LitterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Litters_PairId",
-                table: "Litters",
-                column: "PairId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Pairings_DamId",
-                table: "Pairings",
+                name: "IX_Pairing_DamId",
+                table: "Pairing",
                 column: "DamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pairings_ProjectId",
-                table: "Pairings",
+                name: "IX_Pairing_ProjectId",
+                table: "Pairing",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Pairings_SireId",
-                table: "Pairings",
+                name: "IX_Pairing_SireId",
+                table: "Pairing",
                 column: "SireId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Projects_LineId",
-                table: "Projects",
+                name: "IX_Project_LineId",
+                table: "Project",
                 column: "LineId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Stocks_BreederId",
-                table: "Stocks",
+                name: "IX_Stock_BreederId",
+                table: "Stock",
                 column: "BreederId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Stocks_SpeciesId",
-                table: "Stocks",
+                name: "IX_Stock_SpeciesId",
+                table: "Stock",
                 column: "SpeciesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Traits_TraitTypeId",
-                table: "Traits",
+                name: "IX_Trait_TraitTypeId",
+                table: "Trait",
                 column: "TraitTypeId");
 
             migrationBuilder.CreateIndex(
@@ -569,46 +569,46 @@ namespace RATAPPLibrary.Migrations
                 name: "AnimalLitter");
 
             migrationBuilder.DropTable(
-                name: "AnimalRecord");
+                name: "AnimalRecords");
 
             migrationBuilder.DropTable(
                 name: "AnimalTrait");
 
             migrationBuilder.DropTable(
-                name: "BreederClubs");
+                name: "BreederClub");
 
             migrationBuilder.DropTable(
                 name: "LitterBreeder");
 
             migrationBuilder.DropTable(
-                name: "Traits");
+                name: "Trait");
 
             migrationBuilder.DropTable(
-                name: "Clubs");
+                name: "Club");
 
             migrationBuilder.DropTable(
-                name: "Litters");
+                name: "Litter");
 
             migrationBuilder.DropTable(
-                name: "TraitTypes");
+                name: "TraitType");
 
             migrationBuilder.DropTable(
-                name: "Pairings");
+                name: "Pairing");
 
             migrationBuilder.DropTable(
-                name: "Animals");
+                name: "Animal");
 
             migrationBuilder.DropTable(
-                name: "Projects");
+                name: "Project");
 
             migrationBuilder.DropTable(
-                name: "Lines");
+                name: "Line");
 
             migrationBuilder.DropTable(
-                name: "Stocks");
+                name: "Stock");
 
             migrationBuilder.DropTable(
-                name: "Breeders");
+                name: "Breeder");
 
             migrationBuilder.DropTable(
                 name: "Species");

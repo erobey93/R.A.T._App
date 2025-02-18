@@ -150,7 +150,7 @@ namespace RATAPP
                 if (baseForm == null)
                 {
                     // If for some reason the base form doesn't exist, create it here
-                    baseForm = new RATAppBaseForm();
+                    baseForm = new RATAppBaseForm(_context);
                 }
 
                 // Set user info
@@ -163,13 +163,13 @@ namespace RATAPP
                 {
                     // Create and show admin-specific panel
                     //TODO decide if I want to do anything differently if logged in as admin, for now logic is the same 
-                    var homePanel = new HomePanel(baseForm, response.Username, response.Role); // You will need to create this panel
+                    var homePanel = new HomePanel(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
                 else if (response.Role == "User")
                 {
                     // Create and show user-specific panel
-                    var homePanel = new HomePanel(baseForm, response.Username, response.Role); // You will need to create this panel
+                    var homePanel = new HomePanel(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
 

@@ -32,6 +32,9 @@ namespace RATAPP.Forms
         private Panel homePanel;
         private Panel pairingsAndLittersPanel;
 
+        // Database context
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+
         //picture box for R.A.T. logo
         private PictureBox logoPictureBox;
 
@@ -41,8 +44,9 @@ namespace RATAPP.Forms
         // contentPanel is the panel where content like HomePanel or GeneticsPanel will be displayed
         public Panel contentPanel { get { return this.panelContent; } }  // panelContent is the placeholder panel for content
 
-        public RATAppBaseForm()
+        public RATAppBaseForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
+            _context = context;
             InitializeComponent();
         }
 
@@ -231,7 +235,7 @@ namespace RATAPP.Forms
 
         private void HomeButton_Click(object sender, EventArgs e)
         {
-            var homePanel = new HomePanel(this, UserName, "role - TODO");
+            var homePanel = new HomePanel(this, _context, UserName, "role - TODO");
             ShowPanel(homePanel);  // Show the home panel
         }
 
