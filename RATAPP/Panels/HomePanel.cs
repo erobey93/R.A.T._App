@@ -27,13 +27,30 @@ namespace RATAPP.Panels
         private RATAppBaseForm _parentForm;  // Reference to parent form (RATAppBaseForm) this tightly couples things, but it is the easiest way to use panels
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
 
+        private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Data.Models.AnimalDto[] _animals; //list or array, does it matter? if so, why? TODO
+
+        public async Task InitializePanelAsync()
+        {
+            await GetAnimals();  // Wait for the async method to complete before continuing
+            InitializePanel();
+        }
+
         public HomePanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
         {
             _parentForm = parentForm;
             _username = username;
             _role = role;
             _context = context;
-            InitializePanel();
+            _animalService = new RATAPPLibrary.Services.AnimalService(_context);
+
+            Task.Run(async () => await InitializePanelAsync());  // Run the async method on a separate thread
+        }
+
+        private async Task GetAnimals()
+        {
+            // Get all animals from the database
+            _animals = await _animalService.GetAllAnimalsAsync();
         }
 
         private void InitializePanel()
@@ -177,17 +194,19 @@ namespace RATAPP.Panels
             };
 
             // Add columns
-            dataDisplayArea.Columns.Add("AnimalName", "Animal Name");
-            dataDisplayArea.Columns.Add("AnimalID", "Animal ID");
             dataDisplayArea.Columns.Add("Species", "Species");
+            dataDisplayArea.Columns.Add("AnimalID", "Animal ID");
+            dataDisplayArea.Columns.Add("AnimalName", "Animal Name");
             dataDisplayArea.Columns.Add("Sex", "Sex");
             dataDisplayArea.Columns.Add("DOB", "DOB");
-            dataDisplayArea.Columns.Add("Genotype", "Genotype");
+            dataDisplayArea.Columns.Add("Variety", "Variety");
 
-            // Add some rows for testing
-            //dataDisplayArea.Rows.Add("Rat1", "001", "Rat", "Male", "01/01/2023", "A/A");
-            //dataDisplayArea.Rows.Add("Rat2", "002", "Rat", "Female", "02/01/2023", "A/B");
-            //dataDisplayArea.Rows.Add("Mouse1", "003", "Mouse", "Male", "03/01/2023", "B/B");
+            // Add rows for all animals in database 
+            //get data from db 
+            foreach (var animal in _animals)
+            {
+                dataDisplayArea.Rows.Add(animal.Species, animal.Id, animal.Name, animal.Sex, animal.DateOfBirth, animal.Variety);
+            }
 
             Controls.Add(dataDisplayArea);
 
@@ -223,12 +242,6 @@ namespace RATAPP.Panels
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            //open up a window 
-            //window should contain sections for adding a new animal
-            //or, could just take to an empty animal page
-            // have to have some way to distinguish between adding a new animal and editing an existing animal
-            //maybe if the animal id is empty, then it is a new animal
-            //that check would have to be done in the animal panel
             //go to animal panel, but pass in an empty animal id
             var animalPanel = new AnimalPanel(_parentForm, _context, "", 0); // Pass in an empty animal ID for a new animal
             _parentForm.ShowPanel(animalPanel);

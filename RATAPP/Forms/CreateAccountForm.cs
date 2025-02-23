@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace RATAPP.Forms
 {
@@ -20,6 +21,7 @@ namespace RATAPP.Forms
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
+        private RATAPPLibrary.Services.AccountService _accountService;
 
         public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
@@ -28,6 +30,7 @@ namespace RATAPP.Forms
             _context = context;
             _configuration = configuration;
             _passwordHashing = passwordHashing;
+            _accountService = new AccountService(_context, _configuration, _passwordHashing);
         }
 
         private void CreateAcctForm()
@@ -163,6 +166,8 @@ namespace RATAPP.Forms
             // Handle success or failure
             if (accountCreated)
             {
+                //add as breeder TODO this logic will need to be updated in the future based on the account type, but this is fine for now 
+                await _accountService.CreateNewBreeder(((TextBox)this.Controls["txtUsername"]).Text); //FIXME this is not adding anything to the db, need to fix this
                 MessageBox.Show("Account created successfully!", "Success");
                 BackToLogin();
             }
@@ -183,15 +188,13 @@ namespace RATAPP.Forms
             string username = ((TextBox)this.Controls["txtUsername"]).Text;
             string password = ((TextBox)this.Controls["txtPassword"]).Text;
             string accountTypeName = ((ComboBox)this.Controls["cmbAccountType"]).Text;
-
-            // Check if username already exists
-            var accountService = new AccountService(_context, _configuration, _passwordHashing); // _context should be your DbContext instance
+           
 
             //FIXME not using hashing for now as I need to get the app built before wasting more time on password handling 
             // Hash the password before sending it to the account service
             //string hashedPassword = _passwordHashing.HashPassword(password);
 
-            return await accountService.CreateAccountAsync(username, password, email, name, phone, location, accountTypeName);
+            return await _accountService.CreateAccountAsync(username, password, email, name, phone, location, accountTypeName);
         }
 
         private void BackToLogin()

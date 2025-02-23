@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+//NOTES
+// * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
 namespace RATAPP.Panels
 {
     public partial class AnimalPanel : Panel
@@ -46,9 +48,9 @@ namespace RATAPP.Panels
         private TextBox inbredTextBox;
         private TextBox earTypeTextBox;
         private TextBox markingsTextBox;
+        private TextBox dobTextBox; //TODO Date of Birth this needs to be in a specific format so I need to figure that out some checks needed for that, for now just a text box
+        private TextBox dodTextBox; // Date of Death
 
-        private ComboBox animalNameComboBox;
-        private ComboBox idComboBox;
         private ComboBox speciesComboBox;
         private ComboBox sexComboBox;
         private ComboBox varietyComboBox;
@@ -67,12 +69,16 @@ namespace RATAPP.Panels
         private Button saveButton;
         private Button updateButton;
 
+        //state of the panel
+        private bool _editMode = false;
+
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
 
         //TODO
         //need to add logic to get the values from the database
+        //can use async lambdas to "await" all needed data at beginning of the panel
 
 
         // it may actually make sense to have a state for the panel - future work
@@ -96,10 +102,11 @@ namespace RATAPP.Panels
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
-            InitializeComponent(animalName, animalID); //TODO need to re-strucutre to account for await 
+
+            InitializeComponent(animalName, animalID); //TODO need to re-structure to account for await nope, just use async lambda! 
         }
 
-        private async Task InitializeComponent(string animalName, int animalID)
+        private void InitializeComponent(string animalName, int animalID)
         {
             // Set panel properties
             this.Size = new Size(1200, 800); // Increased panel size for better spacing
@@ -114,10 +121,10 @@ namespace RATAPP.Panels
             //show existing animal versions = no editing, Update Data button, animal's associated data
             //first get the animal data by id 
             //TODO need to set to 0 and make a rule to never allow 0 as an ID 
-            if (animalID != 0)
+            //TODO work on the logic on the state, I think I need to think through "state" as a whole for the application but this is okay for now 
+            if (animalID != 0 && !_editMode)
             {
-                AnimalDto animal = await _animalService.GetAnimalByIdAsync(animalID);
-                await InitializeTextBoxes(animal);
+                LoadAnimalDataAsync(animalID);
             }
             else
             {
@@ -133,6 +140,12 @@ namespace RATAPP.Panels
             InitializeNavigationButtons();
         }
 
+        private async void LoadAnimalDataAsync(int animalID)
+        {
+            var animal = await _animalService.GetAnimalByIdAsync(animalID);
+            InitializeTextBoxes(animal);
+        }
+
         // initialize combo boxes
         private void InitializeComboBoxes()
         {
@@ -140,8 +153,8 @@ namespace RATAPP.Panels
             //every one should have a "create new" option though
 
             // First column (left side)
-            idComboBox = CreateComboBox(150, 20, "");
-            animalNameComboBox = CreateComboBox(150, 60, "");
+            idTextBox = CreateTextBox(150, 20, "");
+            animalNameTextBox = CreateTextBox(150, 60, "");
             speciesComboBox = CreateComboBox(150, 100, "");
             sexComboBox = CreateComboBox(150, 140, "");
             varietyComboBox = CreateComboBox(150, 180, "");
@@ -171,8 +184,8 @@ namespace RATAPP.Panels
             };
 
             // Add comboboxes to panel
-            this.Controls.Add(animalNameComboBox);
-            this.Controls.Add(idComboBox);
+            this.Controls.Add(animalNameTextBox);
+            this.Controls.Add(idTextBox);
             this.Controls.Add(speciesComboBox);
             this.Controls.Add(sexComboBox);
             this.Controls.Add(varietyComboBox);
@@ -245,13 +258,16 @@ namespace RATAPP.Panels
         }
 
         // Placeholder for a user prompt dialog
-        private string PromptForNewItem()
+        //this needs to run through checks for each item type but for now lets just get it working TODO
+        private string PromptForNewItem() //string itemName
         {
             // TODO: Replace with actual UI or input dialog
+            // For now, use a simple input box
             return Microsoft.VisualBasic.Interaction.InputBox("Enter a new item:", "Create New Item", "");
         }
 
         // Placeholder for database insertion
+        //this is for adding a new "type" of item such as a new species so this is not in the current scope 
         private void AddNewItemToDatabase(string newItem)
         {
             // TODO: Implement database logic to save the new item
@@ -319,7 +335,7 @@ namespace RATAPP.Panels
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
         //TODO ID should be a string, but leaving it for now as db edits are annoying 
-        private async Task InitializeTextBoxes(AnimalDto animal)
+        private void InitializeTextBoxes(AnimalDto animal)
         {
             // First column (left side)
             idTextBox = CreateTextBox(150, 20, animal.Id.ToString());
@@ -542,7 +558,7 @@ namespace RATAPP.Panels
 
         private void SaveButton()
         {
-            //create calc % inbred button 
+            //create save button
             saveButton = new Button
             {
                 Location = new Point(10, 630),
@@ -553,25 +569,96 @@ namespace RATAPP.Panels
                 BackColor = Color.Green,
                 FlatStyle = FlatStyle.Popup
             };
-            //this should be a call to the library to calculate the % inbred
-            saveButton.Click += (sender, e) =>
+            saveButton.Click += async (sender, e) => //NOTE: putting this inside of an async lambda is what allows us to use await without setting the entire method to async! 
             {
-                MessageBox.Show("Changes Saved - Not really, just testing");
-                //inbredTextBox.Text = TODO;
+                await SaveButtonClick(sender, e);
             };
         }
 
-        private void SaveButtonClick(object sender, EventArgs e)
+        //parse textbox into animal dto object
+        private RATAPPLibrary.Data.Models.AnimalDto ParseAnimalData()
         {
-            //save the data to the database
-            //TODO method in library to save animal data
+            //FIXME just for now 
+            DateTime dob = DateTime.Now;
+
+            //FIXME breeder logic is in the works
+            //there needs to be some logic to find the breeder in the db and pass that id to the animal object
+            // for now just getting this to work
+            string breeder = "0"; //this is the user's breeder id there is currently a bug that isn't storing the user as a breeder that needs to be fixed before this will actually work
+            //if (breederInfoTextBox.Text == "Test Breeder")
+            //{
+            //    breeder = "1";
+            //}
+
+            AnimalDto animal = new AnimalDto
+            {
+                Id = int.Parse(idTextBox.Text),
+                Name = animalNameTextBox.Text,
+                Sex = sexTextBox.Text, // Assuming there's a TextBox for sex
+                DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
+                DateOfDeath = string.IsNullOrWhiteSpace(dodTextBox.Text)
+        ? null
+        : DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
+                Species = speciesTextBox.Text,
+                //Line = line, // Assuming there's a TextBox for line
+                Dam = damTextBox.Text, // Assuming there's a TextBox for dam
+                Sire = sireTextBox.Text, // Assuming there's a TextBox for sire
+                Variety = varietyTextBox.Text, // Assuming there's a TextBox for variety
+                Color = colorTextBox.Text, // Assuming there's a TextBox for color
+                Breeder = breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
+                Genotype = genotypeTextBox.Text, // Assuming there's a TextBox for genotype
+            };
+
+            return animal;
+        }
+
+
+        private async Task SaveButtonClick(object sender, EventArgs e)
+        {
+            // get all of the data from the text boxes 
+            // store data in a new animal object
+            AnimalDto animal = ParseAnimalData();
+
+            // library will save the data to the database
+            if (animal != null)
+            {
+                //send to library to send to db
+                try
+                {
+                    await _animalService.CreateAnimalAsync(animal);
+                    MessageBox.Show("Animal data saved successfully!");   //show the users a message box that data save was successful, or not
+                }
+                catch (Exception ex)
+                { 
+                    MessageBox.Show($"Error: {ex.Message}, data not sent!"); //TODO retry sending data? maybe do a couple of auto retries?  //if not, ask if they would like to try again //make sure that message is clear as to what the error was
+                                                                             //for now it can be error codes, but eventually it needs to be "non-technical" language that any user could understand 
+                }
+            }
+            else
+            {
+                MessageBox.Show("Error: Animal data is invalid. TODO this should be doing more checks ");
+            }
+
+            //display the animals data (refresh the page) TODO what about when we go back to home page, how do we refresh the data?
+            //reload the page with the new data
+            if (animal != null)
+            {
+                await _animalService.GetAnimalByIdAsync(animal.Id);
+                _editMode = false;
+
+            }
 
             //enable the update button
             saveButton.Hide();
             updateButton.Show(); 
-         
-            //display the animals data (refresh the page) TODO what about when we go back to home page, how do we refresh the data?
-            //TODO method to refresh (in library?) 
+
+        }
+
+        private void Refresh()
+        {
+            //get all data from database and refresh the app
+            //TODO this should be a call to the library to refresh the data
+            //_animalService.GetAllAnimalsAsync(); need to refresh the data and repopulate with that data 
         }
 
         private void UpdateButton()
