@@ -135,7 +135,7 @@ namespace RATAPPLibrary.Services
                 throw new KeyNotFoundException($"Animal with ID {id} not found.");
             }
 
-            return MapSingleAnimaltoDto(animal);
+            return await MapSingleAnimaltoDto(animal);
         }
 
         //get all animals - TODO just basic data right now as all relationships are not built out yet
@@ -153,16 +153,18 @@ namespace RATAPPLibrary.Services
             //map each individual animal and add it to the array to be returned 
             foreach (var animal in animals)
             {
-                animalDto.Add(MapSingleAnimaltoDto(animal));
+                animalDto.Add(await MapSingleAnimaltoDto(animal));
             }
 
            return animalDto.ToArray(); //return the array of animals or a list need to research why one over the other given my use case TODO 
         }
 
         //convert from Animal to AnimalDto
-        public AnimalDto MapSingleAnimaltoDto(Animal a)
+        public async Task<AnimalDto> MapSingleAnimaltoDto(Animal a)
         {
             var line = a.LineId;
+
+            await _lineService.GetLineAsync_ById(line);
 
             // Map the animals to include string values for the related entities
             var result = new AnimalDto

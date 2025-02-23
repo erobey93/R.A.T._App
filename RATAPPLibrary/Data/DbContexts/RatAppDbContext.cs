@@ -27,34 +27,34 @@ namespace RATAPPLibrary.Data.DbContexts
         }
 
         //Account management
-        public DbSet<User> Users { get; set; }
-        public DbSet<Credentials> Credentials { get; set; }
-        public DbSet<AccountType> AccountTypes { get; set; }
-        public DbSet<Individual> Individuals { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Credentials> Credentials { get; set; }
+        public virtual DbSet<AccountType> AccountTypes { get; set; }
+        public virtual DbSet<Individual> Individuals { get; set; }
 
         //Ancestry
         //public DbSet<AncestryRecord> Ancestries { get; set; }
         //public DbSet<AncestryRecordLink> AncestorLink { get; set; }
 
         //Animal Management
-        public DbSet<Animal> Animal { get; set; }
-        public DbSet<AnimalRecord> AnimalRecord { get; set; }
-        public DbSet<Species> Species { get; set; }
+        public virtual DbSet<Animal> Animal { get; set; }
+        public virtual DbSet<AnimalRecord> AnimalRecord { get; set; }
+        public virtual DbSet<Species> Species { get; set; }
 
         //Breeding
-        public DbSet<Breeder> Breeder { get; set; }
-        public DbSet<Club> Club { get; set; } // Clubs should be of type 'Club'
-        public DbSet<BreederClub> BreederClub { get; set; } // BreederClub should be a junction table for many-to-many
-        public DbSet<Stock> Stock { get; set; }
-        public DbSet<Line> Line { get; set; }
-        public DbSet<Litter> Litter { get; set; }
-        public DbSet<Project> Project { get; set; }
-        public DbSet<Pairing> Pairing { get; set; }
+        public virtual DbSet<Breeder> Breeder { get; set; }
+        public virtual DbSet<Club> Club { get; set; } // Clubs should be of type 'Club'
+        public virtual DbSet<BreederClub> BreederClub { get; set; } // BreederClub should be a junction table for many-to-many
+        public virtual DbSet<Stock> Stock { get; set; }
+        public virtual DbSet<Line> Line { get; set; }
+        public virtual DbSet<Litter> Litter { get; set; }
+        public virtual DbSet<Project> Project { get; set; }
+        public virtual DbSet<Pairing> Pairing { get; set; }
 
         //Genetics
-        public DbSet<Trait> Trait { get; set; }  // This should exist
-        public DbSet<TraitType> TraitType { get; set; }  // This should exist  
-        public DbSet<AnimalTrait> AnimalTrait { get; set; }
+        public virtual DbSet<Trait> Trait { get; set; }  // This should exist
+        public virtual DbSet<TraitType> TraitType { get; set; }  // This should exist  
+        public virtual DbSet<AnimalTrait> AnimalTrait { get; set; }
 
         //Health
         //public DbSet<HealthRecord> HealthRecord { get; set; }
