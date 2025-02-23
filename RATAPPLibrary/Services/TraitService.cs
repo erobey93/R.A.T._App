@@ -52,8 +52,31 @@ namespace RATAPPLibrary.Services
         }
 
         //Create a new trait
-        public async Task<Trait> CreateTraitAsync(string name, int traitTypeId, string? description = null)
+        public async Task<Trait> CreateTraitAsync(string name, int traitTypeId, string species, string? description = null)
         {
+            int speciesID = 1; // 1 is mouse, 0 is rat 
+
+            //get species based on species passed in TODO: implement this
+            if (species == null)
+            {
+                throw new InvalidOperationException("Species must be provided.");
+            }
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new InvalidOperationException("Trait name must be provided.");
+            }
+            if (string.IsNullOrWhiteSpace(description)) { description = "N/A"; }
+            if (traitTypeId <= 0)
+            {
+                throw new InvalidOperationException("TraitTypeId must be provided.");
+            }
+
+            //this should be dynamically grabbed from db but for now I'm just going to hard code it TODO
+            if(species == "Rat")
+            {
+                speciesID = 0; 
+            }
+
             // Check if the trait already exists
             var existingTrait = await _context.Trait
                 .FirstOrDefaultAsync(t => t.CommonName.Equals(name, StringComparison.OrdinalIgnoreCase) && t.TraitTypeId == traitTypeId);
@@ -66,7 +89,8 @@ namespace RATAPPLibrary.Services
             {
                 CommonName = name,
                 TraitTypeId = traitTypeId,
-                Genotype = "N/A" //TODO: Implement genotype generation based on trait
+                Genotype = "N/A", //TODO: Implement genotype generation based on trait
+                SpeciesID = speciesID,
                 //Genotype = genotype.GenerateGenotype(name), eventually this is the goal to generate the genotype based on the trait but for not its just a string that the user enters 
 
             };

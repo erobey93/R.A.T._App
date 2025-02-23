@@ -7,9 +7,13 @@
         public required int TraitTypeId { get; set; } // Foreign key to TraitType- The type of the trait (e.g., color, pattern)
         public string? Genotype { get; set; } // The genetic code for the trait TODO decide if this needs to be required, probably not, but maybe for consistency
         public required string CommonName { get; set; } // The common name or description of the trait 
+        public required int SpeciesID { get; set; } // Foreign key to the Species table
 
         // Navigation property to related TraitType
         public TraitType? TraitType { get; set; }
+
+        // Navigation property to related Species
+        public Species? Species { get; set; }
 
         // Collections for related entities (if applicable)
         public ICollection<AnimalTrait>? AnimalTraits { get; set; } // Association with animals

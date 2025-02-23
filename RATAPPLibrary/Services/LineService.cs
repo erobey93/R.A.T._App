@@ -15,21 +15,38 @@ namespace RATAPPLibrary.Services
             _context = context;
         }
 
-        public async Task<Line> GetOrCreateLineAsync(string variety)
+        //get line by name is a unique case because if it doesn't exist, it should be created 
+        //since we know the species (if we're assuming stock is organized by species)
+        //and we have the name of the line, so that's all that's needed 
+        public async Task<Line> GetOrCreateLineAsync_ByName(string name)
         {
             // Find the correct LineId based on the variety
-            var line = await _context.Line.FirstOrDefaultAsync(l => l.Name == variety);
+            var line = await _context.Line.FirstOrDefaultAsync(l => l.Name == name);
 
             if (line == null)
             {
                 // Create a new Line if it doesn't exist
                 line = new Line
                 {
-                    Name = variety
+                    Name = name
                 };
 
                 _context.Line.Add(line);
                 await _context.SaveChangesAsync();
+            }
+
+            return line;
+        }
+
+        public async Task<Line> GetLineAsync_ById(int id)
+        {
+            // Find the correct LineId based on the variety
+            var line = await _context.Line.FirstOrDefaultAsync(l => l.Id == id);
+
+            if (line == null)
+            {
+                // return error message - line not found 
+                throw new Exception("Line not found");
             }
 
             return line;

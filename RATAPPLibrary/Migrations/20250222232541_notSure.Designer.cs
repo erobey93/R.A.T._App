@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250222232541_notSure")]
+    partial class notSure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,7 +103,7 @@ namespace RATAPPLibrary.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<int?>("StockId")
+                    b.Property<int>("StockId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -393,9 +396,6 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("AnimalId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SpeciesId")
-                        .HasColumnType("int");
-
                     b.Property<int>("TraitId")
                         .HasColumnType("int");
 
@@ -426,15 +426,10 @@ namespace RATAPPLibrary.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int>("SpeciesID")
-                        .HasColumnType("int");
-
                     b.Property<int>("TraitTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("SpeciesID");
 
                     b.HasIndex("TraitTypeId");
 
@@ -591,7 +586,9 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasOne("RATAPPLibrary.Data.Models.Breeding.Stock", null)
                         .WithMany("Animals")
-                        .HasForeignKey("StockId");
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Line");
                 });
@@ -743,19 +740,11 @@ namespace RATAPPLibrary.Migrations
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Genetics.Trait", b =>
                 {
-                    b.HasOne("RATAPPLibrary.Data.Models.Species", "Species")
-                        .WithMany()
-                        .HasForeignKey("SpeciesID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.TraitType", "TraitType")
                         .WithMany("Traits")
                         .HasForeignKey("TraitTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Species");
 
                     b.Navigation("TraitType");
                 });

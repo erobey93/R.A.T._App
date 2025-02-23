@@ -65,7 +65,7 @@ namespace RATAPPLibrary.Data.DbContexts
         //public DbSet<LoginResponse> LoginResponse { get; set; }
 
         // Constructor for Dependency Injection (recommended)
-        public RatAppDbContext(DbContextOptions <RatAppDbContext> options) : base(options)
+        public RatAppDbContext(DbContextOptions<RatAppDbContext> options) : base(options)
         {
         }
 
@@ -115,7 +115,7 @@ namespace RATAPPLibrary.Data.DbContexts
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Credentials)
                 .WithOne() // Each User has one Credentials
-                .HasForeignKey<User>(u => u.CredentialsId); 
+                .HasForeignKey<User>(u => u.CredentialsId);
         }
 
         // Configure the Credentials entity
@@ -336,11 +336,11 @@ namespace RATAPPLibrary.Data.DbContexts
         // Configure the Pairing entity
         private void ConfigurePairing(ModelBuilder modelBuilder)
         {
-           modelBuilder.Entity<Pairing>()
-               .HasOne(p => p.Dam)
-               .WithMany()
-               .HasForeignKey(p => p.DamId)
-               .OnDelete(DeleteBehavior.NoAction); // Prevent cascading delete
+            modelBuilder.Entity<Pairing>()
+                .HasOne(p => p.Dam)
+                .WithMany()
+                .HasForeignKey(p => p.DamId)
+                .OnDelete(DeleteBehavior.NoAction); // Prevent cascading delete
 
             modelBuilder.Entity<Pairing>()
                 .HasOne(p => p.Sire)
@@ -390,6 +390,13 @@ namespace RATAPPLibrary.Data.DbContexts
                 .Property(t => t.Genotype)
                 .IsRequired()
                 .HasMaxLength(100);
+
+            // Adding the SpeciesId relationship
+            modelBuilder.Entity<Trait>()
+               .HasOne(t => t.Species)  // Navigation property, referencing the Species entity
+               .WithMany() // No navigation property back to Trait, but you can add one if needed
+               .HasForeignKey(t => t.SpeciesID) // Foreign key in Trait pointing to Species
+               .IsRequired(true);  // Making SpeciesId required, ensuring a trait is always linked to a species
         }
     }
 }

@@ -17,7 +17,7 @@ namespace RATAPPLibrary.Data.Models
         public DateTime? DateOfDeath { get; set; } // Nullable DateTime for DateOfDeath
         public int Age { get; set; } // Nullable integer for Age
         public required string Name { get; set; } // Assuming Name is a string
-        public int StockId { get; set; } // Assuming StockId is an integer FIXME this should not be here but EF if fing up 
+        //public int StockId { get; set; } // Assuming StockId is an integer FIXME this should not be here but EF if fing up 
 
         // Navigation Properties for EF
         public Line? Line { get; set; } // Navigation property to Line table
@@ -72,15 +72,15 @@ namespace RATAPPLibrary.Data.Models
         public int Id { get; set; }
         public required string Name { get; set; }
         public required string Sex { get; set; }
-        public DateTime? DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
-        public string Species { get; set; }
-        public string Line { get; set; }
+        public required string Species { get; set; }
+        //public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
         public string Dam { get; set; } = string.Empty;
         public string Sire { get; set; } = string.Empty;
         public string Variety { get; set; } = string.Empty;
         public string Color { get; set; } = string.Empty;
-        public string Breeder { get; set; }
+        public required string Breeder { get; set; }
         public string Genotype { get; set; } = string.Empty;
     }
 }
