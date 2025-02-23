@@ -7,6 +7,6 @@
         public string? Description { get; set; } // Optional description of the trait type
 
         // Collections for related entities 
-        public ICollection<Trait>? Traits { get; set; } // Association with traits
+        public virtual ICollection<Trait>? Traits { get; set; } // Association with traits
     }
 }

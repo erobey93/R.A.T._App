@@ -9,6 +9,6 @@ namespace RATAPPLibrary.Data.Models
         public string? ScientificName { get; set; } // Assuming ScientificName is a string
 
         // Collections for related entities
-        public ICollection<Stock>? Stocks { get; set; } // Related Stocks associated with the Species
+        public virtual ICollection<Stock>? Stocks { get; set; } // Related Stocks associated with the Species
     }
 }

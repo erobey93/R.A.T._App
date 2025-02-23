@@ -20,8 +20,8 @@ namespace RATAPPLibrary.Data.Models
         //public int StockId { get; set; } // Assuming StockId is an integer FIXME this should not be here but EF if fing up 
 
         // Navigation Properties for EF
-        public Line? Line { get; set; } // Navigation property to Line table
-        public ICollection<Litter>? Litters { get; set; } // Navigation property for related litters
+        public virtual Line? Line { get; set; } // Navigation property to Line table
+        public virtual ICollection<Litter>? Litters { get; set; } // Navigation property for related litters
                                                           //may make sense to have genetics and ancestry here as well TODO - add these/think through logic 
 
         //data rules for animal

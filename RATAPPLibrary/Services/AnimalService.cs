@@ -73,7 +73,7 @@ namespace RATAPPLibrary.Services
             if (!exists)
             {
                 // Get or create the line for the animal based on the variety
-                var line = await _lineService.GetOrCreateLineAsync_ByVariety(animalDto.Variety);
+                var line = await _lineService.GetOrCreateLineAsync_ByName(animalDto.Variety);
 
                 // Find the species in the database by its scientific name
                 var species = await _context.Species.FirstOrDefaultAsync(s => s.ScientificName == animalDto.Species);

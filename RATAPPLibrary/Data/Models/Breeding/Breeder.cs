@@ -13,9 +13,9 @@ namespace RATAPPLibrary.Data.Models.Breeding
         public string? LogoPath { get; set; } // LogoPath for breeder
 
         // Navigation Property for EF - LINQ one to one or one to many 
-        public User? User { get; set; }
+        public virtual User? User { get; set; }
 
         // Navigation property for many-to-many
-        public ICollection<BreederClub>? BreederClubs { get; set; }
+        public virtual ICollection<BreederClub>? BreederClubs { get; set; }
     }
 }

@@ -7,7 +7,7 @@
         public int TraitId { get; set; } // Foreign key to the Trait table
 
         // Navigation Properties for EF
-        public Animal? Animal { get; set; } // Navigation property to Animal
-        public Trait? Trait { get; set; } // Navigation property to Trait
+        public virtual Animal? Animal { get; set; } // Navigation property to Animal
+        public virtual Trait? Trait { get; set; } // Navigation property to Trait
     }
 }

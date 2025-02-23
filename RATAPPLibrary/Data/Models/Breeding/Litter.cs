@@ -19,7 +19,7 @@
         public DateTime LastUpdated { get; set; } // The date the litter record was last updated
 
         // Navigation property to the Breeders associated with this litter
-        public ICollection<Breeder>? Breeders { get; set; } // Allows multiple breeders to be associated 
-        public ICollection<Animal>? Animals { get; set; } // The animals (offspring) in the litter
+        public virtual ICollection<Breeder>? Breeders { get; set; } // Allows multiple breeders to be associated 
+        public virtual ICollection<Animal>? Animals { get; set; } // The animals (offspring) in the litter
     }
 }

@@ -10,12 +10,12 @@
         public required int SpeciesID { get; set; } // Foreign key to the Species table
 
         // Navigation property to related TraitType
-        public TraitType? TraitType { get; set; }
+        public virtual TraitType? TraitType { get; set; }
 
         // Navigation property to related Species
-        public Species? Species { get; set; }
+        public virtual Species? Species { get; set; }
 
         // Collections for related entities (if applicable)
-        public ICollection<AnimalTrait>? AnimalTraits { get; set; } // Association with animals
+        public virtual ICollection<AnimalTrait>? AnimalTraits { get; set; } // Association with animals
     }
 }
