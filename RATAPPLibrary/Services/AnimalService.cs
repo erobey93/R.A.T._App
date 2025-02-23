@@ -162,15 +162,15 @@ namespace RATAPPLibrary.Services
         //convert from Animal to AnimalDto
         public async Task<AnimalDto> MapSingleAnimaltoDto(Animal a)
         {
-            string lineId = int(a.LineId);
+            int lineId = a.LineId;
 
             var lineObj = await _lineService.GetLineAsync_ById(lineId); //pick back up here debug and figure out why it isn't working i.e. why is the object "null" 
 
             var stockId = a.StockId;
 
-            var breederId = a.Line.Stock.BreederId;
+            var speciesObj = await _context.Species.FirstOrDefaultAsync(s => s.Id == stockId); //FIXME this is a placeholder until I fix/implement species logic
 
-            var 
+            int breederId = 5; //FIXME this is a placeholder until I fix/implement breeder logic 
 
             // Map the animals to include string values for the related entities
             var result = new AnimalDto
@@ -179,10 +179,10 @@ namespace RATAPPLibrary.Services
                 Name = a.Name,
                 DateOfBirth = a.DateOfBirth,
                 Sex = a.Sex,
-                Line = lineId,
+                Line = lineId.ToString(),
 
-                Breeder = lineObj.Stock.Breeder.User.Individual.Name,
-                Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
+                Breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name,
+                Species = speciesObj.CommonName, // Assuming Species has a Name property
                 //                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
                 //                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
                 //                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO

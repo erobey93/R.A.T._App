@@ -1,4 +1,6 @@
 ﻿using Azure;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.EntityFrameworkCore;
 using RATAPP.Panels;
 using RATAPP.Properties;
 using System;
@@ -12,6 +14,18 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 namespace RATAPP.Forms
 {
+    //require all forms to implement an interface, or "contract" for all of the side panel and top nav functionality
+    public interface INavigable
+    {
+        Task RefreshDataAsync();
+        //void NavigateToHome();
+        //void NavigateToBreeding(); these are already working, but this is an example TODO think through logic more 
+        //void NavigateToBusiness(); TODO add as implemented in the future
+        //void NavigateToGenetics();
+        //void Utilities(); 
+
+    }
+
     public partial class RATAppBaseForm : Form
     {
         // Class-level fields for controls
@@ -28,9 +42,10 @@ namespace RATAPP.Forms
         private Button businessButton;
         private Button geneticsButton;
 
-        // Panels for specific views
-        private Panel homePanel;
-        private Panel pairingsAndLittersPanel;
+        // Panels for specific views FIXME I don't think that I'm using anymore 
+        //private Panel homePanel;
+        //private Panel pairingsAndLittersPanel;
+        private INavigable _activePanel;
 
         // Database context
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
@@ -227,15 +242,29 @@ namespace RATAPP.Forms
 
         private void RefreshButton_Click(object sender, EventArgs e)
         {
-            // Handle refresh button click
-            // This button grabs the latest data from the database and refreshes the current panel
-            // For now, we will just show a message box
-            MessageBox.Show("Refresh button clicked. Implement data refresh logic here.", "Refresh", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //each panel will have its own specific data that needs to be refreshed
+            //so we will need to know what panel is currently being displayed and what data is associated with it
+            //or we could refresh all data for all panels but I'm not sure how to do that yet
+
+            //couple of options
+            //go through and refresh all
+            //foreach (Control control in this.Controls)
+            //{
+            //    if (control is Panel panel)
+            //    {
+            //        panel.RefreshData(); // Call RefreshData for each panel
+            //    }
+            //}
+
+            //just refresh the current panel - this is likely a better option since I am grabbing data live from the db currently, if I use caching, the above option may make more sense
+            _activePanel?.RefreshDataAsync();
+
         }
 
-        private void HomeButton_Click(object sender, EventArgs e)
+        private async void HomeButton_Click(object sender, EventArgs e)
         {
-            var homePanel = new HomePanel(this, _context, UserName, "role - TODO");
+            //var homePanel = new HomePanel(this, _context, UserName, "role - TODO");
+            var homePanel = await HomePanel.CreateAsync(this, _context, UserName, "role - TODO"); //switched to using an async factory pattern for creating the home panel, this should be for all panels 
             ShowPanel(homePanel);  // Show the home panel
         }
 
@@ -282,11 +311,10 @@ namespace RATAPP.Forms
         // Method to switch panels
         public void ShowPanel(Panel panelToShow)
         {
-            //set the current panel contents to the panel to show
-            //panelContent = panelToShow;
-
             // Clear the existing content and add the new panel
             contentPanel.Controls.Clear();
+
+            //set the current panel contents to the panel to show
             contentPanel.Controls.Add(panelToShow);
         }
     }

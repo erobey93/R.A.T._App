@@ -14,7 +14,7 @@ using System.Windows.Forms;
 // * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
 namespace RATAPP.Panels
 {
-    public partial class AnimalPanel : Panel
+    public partial class AnimalPanel : Panel, INavigable
     {
         // Class-level fields for controls specific to Animal Page
         private Label animalNameLabel;
@@ -585,10 +585,12 @@ namespace RATAPP.Panels
             //there needs to be some logic to find the breeder in the db and pass that id to the animal object
             // for now just getting this to work
             string breeder = "0"; //this is the user's breeder id there is currently a bug that isn't storing the user as a breeder that needs to be fixed before this will actually work
-            //if (breederInfoTextBox.Text == "Test Breeder")
-            //{
-            //    breeder = "1";
-            //}
+          
+            string line = "2"; 
+            if(speciesTextBox.Text == "Mouse")
+            {
+               line = "1";
+            }
 
             AnimalDto animal = new AnimalDto
             {
@@ -600,7 +602,7 @@ namespace RATAPP.Panels
         ? null
         : DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
                 Species = speciesTextBox.Text,
-                //Line = line, // Assuming there's a TextBox for line
+                Line = line, // Assuming there's a TextBox for line
                 Dam = damTextBox.Text, // Assuming there's a TextBox for dam
                 Sire = sireTextBox.Text, // Assuming there's a TextBox for sire
                 Variety = varietyTextBox.Text, // Assuming there's a TextBox for variety
@@ -694,5 +696,9 @@ namespace RATAPP.Panels
             this.Controls.Add(saveButton);
         }
 
+        public Task RefreshDataAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

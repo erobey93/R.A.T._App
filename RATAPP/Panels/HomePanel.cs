@@ -1,10 +1,13 @@
-﻿using RATAPP.Forms;
+﻿using Microsoft.Azure.Amqp.Framing;
+using RATAPP.Forms;
+using RATAPP.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,7 +15,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace RATAPP.Panels
 {
-    public partial class HomePanel : Panel
+    public partial class HomePanel : Panel, INavigable
     {
         private string _username;
         private string _role;
@@ -30,33 +33,32 @@ namespace RATAPP.Panels
         private RATAPPLibrary.Services.AnimalService _animalService;
         private RATAPPLibrary.Data.Models.AnimalDto[] _animals; //list or array, does it matter? if so, why? TODO
 
-        public async Task InitializePanelAsync()
-        {
-            await GetAnimals();  // Wait for the async method to complete before continuing
-            InitializePanel();
-        }
+        private PictureBox loadingSpinner; //TODO put in some kind of utility class for re-use, just testing right now 
 
-        public HomePanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
+
+        private HomePanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
         {
             _parentForm = parentForm;
             _username = username;
             _role = role;
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(_context);
-
-            Task.Run(async () => await InitializePanelAsync());  // Run the async method on a separate thread
         }
 
-        private async Task GetAnimals()
+        public static async Task<HomePanel> CreateAsync(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
         {
-            // Get all animals from the database
-            _animals = await _animalService.GetAllAnimalsAsync();
+            var panel = new HomePanel(parentForm, context, username, role);
+            await panel.InitializePanelAsync();
+            return panel;
         }
 
-        private void InitializePanel()
+        public async Task InitializePanelAsync()
         {
+            // Fetch animals asynchronously
+            await GetAnimalsAsync();
+
             // Set the panel size to match the container (RATAppBaseForm)
-            Dock = DockStyle.Fill;  // Ensure it fills the entire form
+            Dock = DockStyle.Fill;
             BackColor = Color.LightBlue;
 
             // Set the title of the panel
@@ -69,9 +71,7 @@ namespace RATAPP.Panels
             };
             Controls.Add(usernameLabel);
 
-            // Home Page Specific UI (Override Base Class functionality if needed)
-
-            // Add a label to display role (remove this later)
+            // Add a label to display role
             var roleLabel = new Label
             {
                 Text = $"Your role: {_role}",
@@ -88,6 +88,13 @@ namespace RATAPP.Panels
             InitializeSearchButton();
             InitializeAddButton();
             InitializeDataDisplayArea();
+            LoadSpinner(); 
+        }
+
+        private async Task GetAnimalsAsync()
+        {
+            // Fetch animals asynchronously
+            _animals = await _animalService.GetAllAnimalsAsync();
         }
 
         private void InitializeSpeciesToggleButton()
@@ -232,7 +239,7 @@ namespace RATAPP.Panels
                 string species = dataDisplayArea.Rows[e.RowIndex].Cells["Species"].Value.ToString();
                 string sex = dataDisplayArea.Rows[e.RowIndex].Cells["Sex"].Value.ToString();
                 string dob = dataDisplayArea.Rows[e.RowIndex].Cells["DOB"].Value.ToString();
-                string genotype = dataDisplayArea.Rows[e.RowIndex].Cells["Genotype"].Value.ToString();
+                //string genotype = dataDisplayArea.Rows[e.RowIndex].Cells["Genotype"].Value.ToString();
 
                 // Create the AnimalDetailsPanel and show it using the parent form's ShowPanel method
                 var animalDetailsPanel = new AnimalPanel(_parentForm, _context, animalName, int.Parse(animalID));//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
@@ -303,6 +310,61 @@ namespace RATAPP.Panels
             foreach (var row in sexFilteredRows)
             {
                 dataDisplayArea.Rows.Add(row);
+            }
+        }
+
+        //TODO just testing, move to utils file
+        private void LoadSpinner()
+        {
+            // Create and configure the spinner
+            loadingSpinner = new PictureBox
+            {
+                Size = new Size(50, 50), // Adjust size as needed
+                Image = Image.FromFile("C: \\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\Loading_2.gif"), // Add a GIF to your project resources
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Visible = false // Initially hidden
+            };
+
+            // Position the spinner in the center of the form
+            loadingSpinner.Location = new Point(
+                (ClientSize.Width - loadingSpinner.Width) / 2,
+                (ClientSize.Height - loadingSpinner.Height) / 2
+            );
+
+            // Add the spinner to the form
+            Controls.Add(loadingSpinner);
+
+            // Handle form resize to reposition the spinner
+            Resize += (s, e) =>
+            {
+                loadingSpinner.Location = new Point(
+                    (ClientSize.Width - loadingSpinner.Width) / 2,
+                    (ClientSize.Height - loadingSpinner.Height) / 2
+                );
+            };
+        }
+        //FIXME repeated code but getting interface working for now 
+        public async Task RefreshDataAsync()
+        {
+            try
+            {
+                // Show spinner
+                loadingSpinner.Visible = true;
+                Refresh(); // Force UI to repaint to show spinner
+
+                // Fetch animals asynchronously
+                _animals = await _animalService.GetAllAnimalsAsync();
+
+                MessageBox.Show("Data refresh complete", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Hide spinner
+                loadingSpinner.Visible = false;
             }
         }
     }
