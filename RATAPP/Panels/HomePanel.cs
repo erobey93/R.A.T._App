@@ -319,8 +319,8 @@ namespace RATAPP.Panels
             // Create and configure the spinner
             loadingSpinner = new PictureBox
             {
-                Size = new Size(50, 50), // Adjust size as needed
-                Image = Image.FromFile("C: \\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\Loading_2.gif"), // Add a GIF to your project resources
+                Size = new Size(50, 50), // Adjust size as needed "C:\Users\earob\source\repos\RATAPP\RATAPPLibrary\RATAPP\Resources\Loading_2.gif"
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\Loading_2.gif"), // Add a GIF to your project resources
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Visible = false // Initially hidden
             };
@@ -355,6 +355,14 @@ namespace RATAPP.Panels
                 // Fetch animals asynchronously
                 _animals = await _animalService.GetAllAnimalsAsync();
 
+                //for testing
+                // Wait asynchronously for 3 seconds
+                await Task.Delay(3000); // 3000 milliseconds = 3 seconds
+
+                // Hide spinner
+                loadingSpinner.Visible = false;
+                Refresh(); // Force UI to repaint to not show spinner
+
                 MessageBox.Show("Data refresh complete", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -363,8 +371,10 @@ namespace RATAPP.Panels
             }
             finally
             {
+                //this is an emergency catch really TODO fix this logic, maybe no finally? 
                 // Hide spinner
                 loadingSpinner.Visible = false;
+                Refresh(); // Force UI to repaint to not show spinner
             }
         }
     }

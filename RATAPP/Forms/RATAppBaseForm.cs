@@ -265,6 +265,7 @@ namespace RATAPP.Forms
         {
             //var homePanel = new HomePanel(this, _context, UserName, "role - TODO");
             var homePanel = await HomePanel.CreateAsync(this, _context, UserName, "role - TODO"); //switched to using an async factory pattern for creating the home panel, this should be for all panels 
+            _activePanel = homePanel; //set the active panel to the home panel FIXME need to think through this better this is an issue because it only gets set when the home BUTTON is clicked 
             ShowPanel(homePanel);  // Show the home panel
         }
 
@@ -292,7 +293,7 @@ namespace RATAPP.Forms
                 logoPictureBox = new PictureBox
                 {
                     //TODO - replace with the actual path to your logo image or get from database
-                    Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\RATAPPLogo.png"), // Replace with the actual path to your logo image
+                    Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\RATAPPLogo.png"),
                     SizeMode = PictureBoxSizeMode.StretchImage,
                     Location = new Point(15, appNameLabel.Bottom + 10), // Positioning just below the app name label
                     Size = new Size(100, 100) // Adjust the size as needed
