@@ -12,7 +12,7 @@
         public DateTime LastUpdated { get; set; } // Last updated timestamp
 
         // Navigation Properties for EF
-        public AnimalRecord? AnimalRecord { get; set; } // Navigation property to AnimalRecord
-        public Animal? ParentAnimal { get; set; } // Navigation property to the parent Animal
+        public virtual AnimalRecord? AnimalRecord { get; set; } // Navigation property to AnimalRecord
+        public virtual Animal? ParentAnimal { get; set; } // Navigation property to the parent Animal
     }
 }

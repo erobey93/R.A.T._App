@@ -7,11 +7,12 @@ using PdfSharp.Diagnostics;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
+using RATAPP.Forms;
 
 namespace RATAPP.Panels
 {
     //TODO - just messing around but not a fundamental implementation 
-    public partial class PdfGenerationPanel : Panel 
+    public partial class PdfGenerationPanel : Panel, INavigable
     {
         private ComboBox cmbAnimalOrLitterId;
         private Button btnGeneratePdf;
@@ -121,6 +122,11 @@ namespace RATAPP.Panels
 
             // Save the modified PDF to the output path
             template.Save(outputPath);
+        }
+
+        public Task RefreshDataAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

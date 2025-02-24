@@ -18,7 +18,7 @@ namespace RATAPPLibraryUT
     public class LoginServiceTests
     {
         private readonly Mock<IConfiguration> _mockConfig;
-        private readonly Mock<UserDbContext> _mockDbContext;
+        private readonly Mock<RatAppDbContext> _mockDbContext;
         private readonly Mock<PasswordHashing> _mockPasswordHashing;
         private readonly LoginService _loginService;
         private readonly string _jwtSecretKey = "secretkey12345";
@@ -35,7 +35,7 @@ namespace RATAPPLibraryUT
             _mockPasswordHashing = new Mock<PasswordHashing>();
             _mockPasswordHashing.Setup(ph => ph.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
 
-            _mockDbContext = new Mock<UserDbContext>();
+            _mockDbContext = new Mock<RatAppDbContext>();
             _loginService = new LoginService(_mockDbContext.Object, _mockConfig.Object, _mockPasswordHashing.Object);
         }
 
