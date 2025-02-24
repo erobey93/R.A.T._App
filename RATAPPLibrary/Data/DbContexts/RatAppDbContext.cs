@@ -265,6 +265,12 @@ namespace RATAPPLibrary.Data.DbContexts
                 .WithMany() // A Species can have many Stocks
                 .HasForeignKey(s => s.Id) // Foreign Key in Stock is SpeciesId
                 .OnDelete(DeleteBehavior.NoAction); // Prevent cascading delete
+
+            //Configure the relationship between Stock and Line
+            modelBuilder.Entity<Stock>()
+                .HasMany(s => s.Lines) // A Stock can have many Lines
+                .WithOne(l => l.Stock) // Each Line belongs to one Stock
+                .HasForeignKey(l => l.StockId); // Foreign key in Line table is StockId
         }
 
         // Configure the Line entity

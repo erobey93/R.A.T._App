@@ -166,7 +166,7 @@ namespace RATAPPLibrary.Services
 
             var lineObj = await _lineService.GetLineAsync_ById(lineId); //pick back up here debug and figure out why it isn't working i.e. why is the object "null" 
 
-            var stockId = a.StockId;
+            var stockId = lineObj.StockId; //TODO remove this if I fix the db 
 
             var speciesObj = await _context.Species.FirstOrDefaultAsync(s => s.Id == stockId); //FIXME this is a placeholder until I fix/implement species logic
 
@@ -210,31 +210,6 @@ namespace RATAPPLibrary.Services
             }).ToArray();
 
             return result;
-
-            
-
-            //TODO: Implement other CRUD operations for Animal entity here 
-            //GetAnimalByIdAsync
-            //UpdateAnimalAsync
-            //DeleteAnimalAsync
-            //GetAllAnimalsAsync
-            //GetAnimalsByLineAsync
-            //GetAnimalsBySpeciesAsync
-            //GetAnimalsByProjectAsync
-            //GetAnimalsByPairingAsync
-            //GetAnimalsByLitterAsync
-            //GetAnimalsByStockAsync
-            //GetAnimalsByDateOfBirthAsync
-            //GetAnimalsByDateOfDeathAsync
-            //GetAnimalsBySexAsync
-            //GetAnimalsByNameAsync
-            //GetAnimalsByLineAndSpeciesAsync
-            //GetAnimalsByLineAndProjectAsync
-            //GetAnimalsByLineAndPairingAsync
-            //GetAnimalsByLineAndLitterAsync
-            //GetAnimalsByLineAndStockAsync
-            //GetAnimalsByLineAndDateOfBirthAsync
-            //GetAnimalsByLineAndDateOfDeathAsync
 
         }
     }

@@ -12,8 +12,8 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    [Migration("20250223072656_addStockIdIntoAnimal")]
-    partial class addStockIdIntoAnimal
+    [Migration("20250224023917_checkThatStockIsRemoved")]
+    partial class checkThatStockIsRemoved
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,6 +90,9 @@ namespace RATAPPLibrary.Migrations
                     b.Property<DateTime?>("DateOfDeath")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("LineId")
                         .HasColumnType("int");
 
@@ -103,14 +106,9 @@ namespace RATAPPLibrary.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<int>("StockId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("LineId");
-
-                    b.HasIndex("StockId");
 
                     b.ToTable("Animal");
                 });
@@ -220,9 +218,14 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("StockId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StockId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("StockId");
+
+                    b.HasIndex("StockId1");
 
                     b.ToTable("Line");
                 });
@@ -589,12 +592,6 @@ namespace RATAPPLibrary.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("RATAPPLibrary.Data.Models.Breeding.Stock", null)
-                        .WithMany("Animals")
-                        .HasForeignKey("StockId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Line");
                 });
 
@@ -646,6 +643,10 @@ namespace RATAPPLibrary.Migrations
                         .HasForeignKey("StockId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("RATAPPLibrary.Data.Models.Breeding.Stock", null)
+                        .WithMany("Lines")
+                        .HasForeignKey("StockId1");
 
                     b.Navigation("Stock");
                 });
@@ -806,7 +807,7 @@ namespace RATAPPLibrary.Migrations
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Stock", b =>
                 {
-                    b.Navigation("Animals");
+                    b.Navigation("Lines");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Genetics.Trait", b =>
