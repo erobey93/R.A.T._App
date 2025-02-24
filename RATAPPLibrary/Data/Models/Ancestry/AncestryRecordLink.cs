@@ -13,7 +13,7 @@
         // The virtual keyword allows for lazy loading of related entities.
         // This means that the related entities will only be loaded from the database when they are accessed,
         // which can improve performance in some cases.
-        public AncestryRecord? AncestryRecord { get; set; } // Navigation property to AncestryRecord table
-        public Animal? Animal { get; set; } // Navigation property to Animal tables
+        public virtual AncestryRecord? AncestryRecord { get; set; } // Navigation property to AncestryRecord table
+        public virtual Animal? Animal { get; set; } // Navigation property to Animal tables
     }
 }

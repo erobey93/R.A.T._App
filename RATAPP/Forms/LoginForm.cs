@@ -12,12 +12,12 @@ namespace RATAPP
     public partial class LoginForm : Form
     {
         // Declare the fields to store the dependencies
-        private RATAPPLibrary.Data.DbContexts.UserDbContext _context;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
 
 
-        public LoginForm(RATAPPLibrary.Data.DbContexts.UserDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
+        public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
             InitializeComponent();
 
@@ -150,7 +150,7 @@ namespace RATAPP
                 if (baseForm == null)
                 {
                     // If for some reason the base form doesn't exist, create it here
-                    baseForm = new RATAppBaseForm();
+                    baseForm = new RATAppBaseForm(_context);
                 }
 
                 // Set user info
@@ -159,23 +159,25 @@ namespace RATAPP
                 // Depending on the role, show the appropriate panel
                 Panel contentPanelToShow = null;
 
+                var homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                 if (response.Role == "Admin")
                 {
                     // Create and show admin-specific panel
                     //TODO decide if I want to do anything differently if logged in as admin, for now logic is the same 
-                    var homePanel = new HomePanel(baseForm, response.Username, response.Role); // You will need to create this panel
+                    homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
                 else if (response.Role == "User")
                 {
                     // Create and show user-specific panel
-                    var homePanel = new HomePanel(baseForm, response.Username, response.Role); // You will need to create this panel
+                    homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
 
                 // Clear current controls in the content panel and add the new panel
                 baseForm.contentPanel.Controls.Clear();
                 baseForm.contentPanel.Controls.Add(contentPanelToShow);  // Add the new panel
+                baseForm.SetActivePanel(homePanel);  // Set the new panel as the active panel
 
                 // Show the base form with the correct content panel
                 baseForm.Show();

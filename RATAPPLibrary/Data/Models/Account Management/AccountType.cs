@@ -2,7 +2,7 @@
 {
     public class AccountType
     {
-        public int Id { get; set; } // Primary key
-        public required string Name { get; set; } // The type of account (e.g., Admin, User, etc.)
+        public virtual int Id { get; set; } // Primary key
+        public virtual required string Name { get; set; } // The type of account (e.g., Admin, User, etc.)
     }
 }

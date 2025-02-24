@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Services;
 
-using System.Text; // Assuming you have a LoginService
+using System.Text; 
 
 namespace RATAPPLibrary
 {
@@ -17,12 +17,16 @@ namespace RATAPPLibrary
             // Register PasswordHashing as a service for dependency injection
             builder.Services.AddScoped<PasswordHashing>();
 
-            // Register LoginService and other services
+            // Register services
             builder.Services.AddScoped<LoginService>();
+            builder.Services.AddScoped<AnimalService>();
+            builder.Services.AddScoped<SpeciesService>();
+            builder.Services.AddScoped<LineService>();
 
             // Add DbContext and other services
-            builder.Services.AddDbContext<UserDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddDbContext<RatAppDbContext>(options =>
+               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

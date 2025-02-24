@@ -9,11 +9,11 @@ namespace RATAPPLibrary.Services
 {
     public class AccountService
     {
-        private readonly UserDbContext _context;
+        private readonly RatAppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly PasswordHashing _passwordHashing;
 
-        public AccountService(UserDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
+        public AccountService(RatAppDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
         {
             _context = context;
             _configuration = configuration;
@@ -90,8 +90,42 @@ namespace RATAPPLibrary.Services
                 Console.WriteLine(ex.Message);
                 return false;
             }
+
         }
 
+        public async Task<bool> CreateNewBreeder(string userName)
+        {
+            //get the new user id 
+            var userId = await _context.Users
+                .Where(u => u.Credentials.Username == userName)
+                .Select(u => u.Id)
+                .FirstOrDefaultAsync();
+
+            //FIXME this should likely be elsewhere but for now 
+            //check if breeder exists, if not create new breeder
+            var breeder = await _context.Breeder
+                .Where(b => b.UserId == userId )
+                .FirstOrDefaultAsync();
+            if (breeder == null)
+            {
+                //create new breeder 
+                breeder = new Data.Models.Breeding.Breeder
+                {
+                    UserId = userId
+                };
+
+                //add breeder to the database
+                _context.Breeder.Add(breeder);
+                return true;
+            }
+            else
+            {
+                //breeder already exists
+                Console.WriteLine("Breeder already exists");
+                return false;
+            }
+
+        }
         public async Task<bool> UpdateCredentialsAsync(UpdateCredentialsRequest request)
         {
             PasswordHashing passwordHashing = new PasswordHashing();

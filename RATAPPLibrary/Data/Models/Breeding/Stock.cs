@@ -12,6 +12,6 @@
         public Species? Species { get; set; } // Navigation property to Species table
 
         // Collections for related entities
-        public ICollection<Animal>? Animals { get; set; } // Related Animals within the Stock
+        public virtual ICollection<Animal>? Animals { get; set; } // Related Animals within the Stock
     }
 }

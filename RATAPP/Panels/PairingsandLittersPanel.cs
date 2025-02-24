@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RATAPP.Forms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,7 +11,7 @@ using System.Windows.Forms;
 
 namespace RATAPP.Panels
 {
-    public partial class PairingsAndLittersPanel : Panel
+    public partial class PairingsAndLittersPanel : Panel, INavigable
     {
         private Button addPairingButton;
         private Button updatePairingButton;
@@ -266,6 +267,11 @@ namespace RATAPP.Panels
         private void DeleteLitterButton_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Delete Litter functionality will be implemented.");
+        }
+
+        public Task RefreshDataAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

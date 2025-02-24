@@ -23,9 +23,9 @@ namespace RATAPP
                 .Build();
 
             // Setup DbContext
-            var optionsBuilder = new DbContextOptionsBuilder<UserDbContext>();
+            var optionsBuilder = new DbContextOptionsBuilder<RatAppDbContext>();
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection")); // Ensure your connection string is in appsettings.json
-            var context = new UserDbContext(optionsBuilder.Options);
+            var context = new RatAppDbContext(optionsBuilder.Options);
 
             // Initialize PasswordHashing
             var passwordHashing = new PasswordHashing();

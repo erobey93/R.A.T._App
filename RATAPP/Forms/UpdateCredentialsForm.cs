@@ -17,11 +17,11 @@ namespace RATAPP.Forms
     public partial class UpdateCredentialsForm : Form
     {
         // Declare the fields to store the dependencies
-        private RATAPPLibrary.Data.DbContexts.UserDbContext _context;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
 
-        public UpdateCredentialsForm(UserDbContext context)
+        public UpdateCredentialsForm(RatAppDbContext context)
         {
             _context = context;
             InitializeComponent();
