@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 //NOTES
 // * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
@@ -75,11 +76,11 @@ namespace RATAPP.Panels
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Data.Models.AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
+
+        private PictureBox loadingSpinner; //TODO put in some kind of utility class for re-use, just testing right now 
 
         //TODO
-        //need to add logic to get the values from the database
-        //can use async lambdas to "await" all needed data at beginning of the panel
-
 
         // it may actually make sense to have a state for the panel - future work
         // edit vs non edit mode and then just check this state
@@ -102,8 +103,10 @@ namespace RATAPP.Panels
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
+            parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works 
 
             InitializeComponent(animalName, animalID); //TODO need to re-structure to account for await nope, just use async lambda! 
+            LoadSpinner();
         }
 
         private void InitializeComponent(string animalName, int animalID)
@@ -656,13 +659,6 @@ namespace RATAPP.Panels
 
         }
 
-        private void Refresh()
-        {
-            //get all data from database and refresh the app
-            //TODO this should be a call to the library to refresh the data
-            //_animalService.GetAllAnimalsAsync(); need to refresh the data and repopulate with that data 
-        }
-
         private void UpdateButton()
         {
             //create calc % inbred button 
@@ -696,9 +692,79 @@ namespace RATAPP.Panels
             this.Controls.Add(saveButton);
         }
 
-        public Task RefreshDataAsync()
+        //TODO just testing, move to utils file
+        private void LoadSpinner()
         {
-            throw new NotImplementedException();
+            // Create and configure the spinner
+            loadingSpinner = new PictureBox
+            {
+                Size = new Size(50, 50), // Adjust size as needed "C:\Users\earob\source\repos\RATAPP\RATAPPLibrary\RATAPP\Resources\Loading_2.gif"
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\Loading_2.gif"), // Add a GIF to your project resources
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Visible = false // Initially hidden
+            };
+
+            // Position the spinner in the center of the form
+            loadingSpinner.Location = new Point(
+                (ClientSize.Width - loadingSpinner.Width) / 2,
+                (ClientSize.Height - loadingSpinner.Height) / 2
+            );
+
+            // Add the spinner to the form
+            Controls.Add(loadingSpinner);
+
+            // Handle form resize to reposition the spinner
+            Resize += (s, e) =>
+            {
+                loadingSpinner.Location = new Point(
+                    (ClientSize.Width - loadingSpinner.Width) / 2,
+                    (ClientSize.Height - loadingSpinner.Height) / 2
+                );
+            };
+        }
+        //FIXME repeated code but getting interface working for now 
+        public async Task RefreshDataAsync()
+        {
+            int id;
+            bool success = int.TryParse(idTextBox.Text, out id);
+            if(success)
+            {
+                try
+                {
+                    // Show spinner
+                    loadingSpinner.Visible = true;
+                    Refresh(); // Force UI to repaint to show spinner
+
+                    // Fetch animals asynchronously
+                    _animal = await _animalService.GetAnimalByIdAsync(id);
+
+                    //for testing
+                    // Wait asynchronously for 3 seconds
+                    await Task.Delay(3000); // 3000 milliseconds = 3 seconds
+
+                    // Hide spinner
+                    loadingSpinner.Visible = false;
+                    Refresh(); // Force UI to repaint to not show spinner
+
+                    MessageBox.Show("Data refresh complete", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    //this is an emergency catch really TODO fix this logic, maybe no finally? 
+                    // Hide spinner
+                    loadingSpinner.Visible = false;
+                    Refresh(); // Force UI to repaint to not show spinner
+                }
+            }
+            else
+            {
+                MessageBox.Show("could not get animal", "", MessageBoxButtons.OK); 
+            }
+           
         }
     }
 }

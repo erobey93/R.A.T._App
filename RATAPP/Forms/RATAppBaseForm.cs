@@ -111,6 +111,13 @@ namespace RATAPP.Forms
             };
         }
 
+        //kind of a hack, but for now this fixes the issue of having to click buttons to set the active panel 
+        //this will set the active panel to the home panel when the form is loaded
+        public void SetActivePanel(INavigable panel)
+        {
+            _activePanel = panel; 
+        }
+
         // Method to set the username
         public void SetUserName(string username)
         {
@@ -272,6 +279,7 @@ namespace RATAPP.Forms
         private void BreedingButton_Click(object sender, EventArgs e)
         {
             var pairingsAndLittersPanel = new PairingsAndLittersPanel();
+            _activePanel = pairingsAndLittersPanel;
             ShowPanel(pairingsAndLittersPanel); // Show the breeding panel (pairings and litters)
         }
 

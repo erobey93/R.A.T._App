@@ -159,23 +159,25 @@ namespace RATAPP
                 // Depending on the role, show the appropriate panel
                 Panel contentPanelToShow = null;
 
+                var homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                 if (response.Role == "Admin")
                 {
                     // Create and show admin-specific panel
                     //TODO decide if I want to do anything differently if logged in as admin, for now logic is the same 
-                    var homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
+                    homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
                 else if (response.Role == "User")
                 {
                     // Create and show user-specific panel
-                    var homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
+                    homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
 
                 // Clear current controls in the content panel and add the new panel
                 baseForm.contentPanel.Controls.Clear();
                 baseForm.contentPanel.Controls.Add(contentPanelToShow);  // Add the new panel
+                baseForm.SetActivePanel(homePanel);  // Set the new panel as the active panel
 
                 // Show the base form with the correct content panel
                 baseForm.Show();
