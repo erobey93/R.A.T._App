@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -387,6 +388,14 @@ namespace RATAPP.Panels
             this.Controls.Add(earTypeTextBox);
             this.Controls.Add(inbredTextBox);
 
+            //add animal image
+            //TODO this should happen elsewhere
+            if(animal.imageUrl != null)
+            {
+                animalPhotoBox.Image = Image.FromFile(animal.imageUrl);
+               this.Controls.Add(animalPhotoBox);
+            }
+
             AnimalExists();
         }
 
@@ -590,7 +599,7 @@ namespace RATAPP.Panels
             string breeder = "0"; //this is the user's breeder id there is currently a bug that isn't storing the user as a breeder that needs to be fixed before this will actually work
           
             string line = "2"; 
-            if(speciesTextBox.Text == "Mouse")
+            if(speciesComboBox.Text == "Mouse")
             {
                line = "1";
             }
@@ -599,19 +608,19 @@ namespace RATAPP.Panels
             {
                 Id = int.Parse(idTextBox.Text),
                 Name = animalNameTextBox.Text,
-                Sex = sexTextBox.Text, // Assuming there's a TextBox for sex
+                Sex = sexComboBox.Text, // Assuming there's a TextBox for sex
                 DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
-                DateOfDeath = string.IsNullOrWhiteSpace(dodTextBox.Text)
-        ? null
-        : DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
-                Species = speciesTextBox.Text,
+                DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
+        //? null
+        //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
+                Species = speciesComboBox.Text,
                 Line = line, // Assuming there's a TextBox for line
-                Dam = damTextBox.Text, // Assuming there's a TextBox for dam
-                Sire = sireTextBox.Text, // Assuming there's a TextBox for sire
-                Variety = varietyTextBox.Text, // Assuming there's a TextBox for variety
-                Color = colorTextBox.Text, // Assuming there's a TextBox for color
-                Breeder = breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                Genotype = genotypeTextBox.Text, // Assuming there's a TextBox for genotype
+                Dam = "aDam",//damComboBox.Text, // Assuming there's a TextBox for dam
+                Sire = "aSIRE",//sireComboBox.Text, // Assuming there's a TextBox for sire
+                Variety = "AVARIETY",//varietyComboBox.Text, // Assuming there's a TextBox for variety
+                Color = "ACOLOR",//colorComboBox.Text, // Assuming there's a TextBox for color TODO
+                Breeder = "1",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
+                Genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
             };
 
             return animal;
