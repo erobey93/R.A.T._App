@@ -183,6 +183,7 @@ namespace RATAPPLibrary.Services
 
                 Breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name,
                 Species = speciesObj.CommonName, // Assuming Species has a Name property
+                imageUrl = a.imageUrl
                 //                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
                 //                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
                 //                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
@@ -210,31 +211,6 @@ namespace RATAPPLibrary.Services
             }).ToArray();
 
             return result;
-
-            
-
-            //TODO: Implement other CRUD operations for Animal entity here 
-            //GetAnimalByIdAsync
-            //UpdateAnimalAsync
-            //DeleteAnimalAsync
-            //GetAllAnimalsAsync
-            //GetAnimalsByLineAsync
-            //GetAnimalsBySpeciesAsync
-            //GetAnimalsByProjectAsync
-            //GetAnimalsByPairingAsync
-            //GetAnimalsByLitterAsync
-            //GetAnimalsByStockAsync
-            //GetAnimalsByDateOfBirthAsync
-            //GetAnimalsByDateOfDeathAsync
-            //GetAnimalsBySexAsync
-            //GetAnimalsByNameAsync
-            //GetAnimalsByLineAndSpeciesAsync
-            //GetAnimalsByLineAndProjectAsync
-            //GetAnimalsByLineAndPairingAsync
-            //GetAnimalsByLineAndLitterAsync
-            //GetAnimalsByLineAndStockAsync
-            //GetAnimalsByLineAndDateOfBirthAsync
-            //GetAnimalsByLineAndDateOfDeathAsync
 
         }
     }

@@ -103,6 +103,9 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("StockId")
                         .HasColumnType("int");
 
+                    b.Property<string>("imageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LineId");
@@ -396,11 +399,16 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("TraitId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TraitId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AnimalId");
 
                     b.HasIndex("TraitId");
+
+                    b.HasIndex("TraitId1");
 
                     b.ToTable("AnimalTrait");
                 });
@@ -726,14 +734,18 @@ namespace RATAPPLibrary.Migrations
                     b.HasOne("RATAPPLibrary.Data.Models.Animal", "Animal")
                         .WithMany()
                         .HasForeignKey("AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", "Trait")
-                        .WithMany("AnimalTraits")
+                        .WithMany()
                         .HasForeignKey("TraitId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", null)
+                        .WithMany("AnimalTraits")
+                        .HasForeignKey("TraitId1");
 
                     b.Navigation("Animal");
 

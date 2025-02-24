@@ -18,6 +18,7 @@ namespace RATAPPLibrary.Data.Models
         public int Age { get; set; } // Nullable integer for Age
         public required string Name { get; set; } // Assuming Name is a string
         public int StockId { get; set; } // Assuming StockId is an integer FIXME this should not be here but EF if fing up 
+        public string? imageUrl { get; set; } // Assuming imageUrl is a string
 
         // Navigation Properties for EF
         public virtual Line? Line { get; set; } // Navigation property to Line table
@@ -75,6 +76,7 @@ namespace RATAPPLibrary.Data.Models
         public DateTime DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
         public required string Species { get; set; }
+        public string? imageUrl { get; set; }   
         public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
         public string Dam { get; set; } = string.Empty;
         public string Sire { get; set; } = string.Empty;

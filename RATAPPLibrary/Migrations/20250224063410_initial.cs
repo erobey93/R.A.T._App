@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace RATAPPLibrary.Migrations
 {
     /// <inheritdoc />
-    public partial class NEWDB : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -136,11 +136,18 @@ namespace RATAPPLibrary.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TraitTypeId = table.Column<int>(type: "int", nullable: false),
                     Genotype = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CommonName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    CommonName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SpeciesID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Trait", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Trait_Species_SpeciesID",
+                        column: x => x.SpeciesID,
+                        principalTable: "Species",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Trait_TraitType_TraitTypeId",
                         column: x => x.TraitTypeId,
@@ -256,7 +263,7 @@ namespace RATAPPLibrary.Migrations
                     DateOfDeath = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Age = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    StockId = table.Column<int>(type: "int", nullable: true)
+                    StockId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -270,7 +277,8 @@ namespace RATAPPLibrary.Migrations
                         name: "FK_Animal_Stock_StockId",
                         column: x => x.StockId,
                         principalTable: "Stock",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -298,7 +306,7 @@ namespace RATAPPLibrary.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AnimalRecords",
+                name: "AnimalRecord",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -310,9 +318,9 @@ namespace RATAPPLibrary.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AnimalRecords", x => x.Id);
+                    table.PrimaryKey("PK_AnimalRecord", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AnimalRecords_Animal_AnimalId",
+                        name: "FK_AnimalRecord_Animal_AnimalId",
                         column: x => x.AnimalId,
                         principalTable: "Animal",
                         principalColumn: "Id",
@@ -326,7 +334,8 @@ namespace RATAPPLibrary.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     AnimalId = table.Column<int>(type: "int", nullable: false),
-                    TraitId = table.Column<int>(type: "int", nullable: false)
+                    TraitId = table.Column<int>(type: "int", nullable: false),
+                    TraitId1 = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -335,14 +344,17 @@ namespace RATAPPLibrary.Migrations
                         name: "FK_AnimalTrait_Animal_AnimalId",
                         column: x => x.AnimalId,
                         principalTable: "Animal",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AnimalTrait_Trait_TraitId",
                         column: x => x.TraitId,
                         principalTable: "Trait",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AnimalTrait_Trait_TraitId1",
+                        column: x => x.TraitId1,
+                        principalTable: "Trait",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -468,8 +480,8 @@ namespace RATAPPLibrary.Migrations
                 column: "LittersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AnimalRecords_AnimalId",
-                table: "AnimalRecords",
+                name: "IX_AnimalRecord_AnimalId",
+                table: "AnimalRecord",
                 column: "AnimalId");
 
             migrationBuilder.CreateIndex(
@@ -481,6 +493,11 @@ namespace RATAPPLibrary.Migrations
                 name: "IX_AnimalTrait_TraitId",
                 table: "AnimalTrait",
                 column: "TraitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AnimalTrait_TraitId1",
+                table: "AnimalTrait",
+                column: "TraitId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Breeder_UserId",
@@ -540,6 +557,11 @@ namespace RATAPPLibrary.Migrations
                 column: "SpeciesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Trait_SpeciesID",
+                table: "Trait",
+                column: "SpeciesID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Trait_TraitTypeId",
                 table: "Trait",
                 column: "TraitTypeId");
@@ -569,7 +591,7 @@ namespace RATAPPLibrary.Migrations
                 name: "AnimalLitter");
 
             migrationBuilder.DropTable(
-                name: "AnimalRecords");
+                name: "AnimalRecord");
 
             migrationBuilder.DropTable(
                 name: "AnimalTrait");
