@@ -22,34 +22,7 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            label2 = new Label();
-            SuspendLayout();
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(140, 283);
-            label2.Name = "label2";
-            label2.Size = new Size(0, 15);
-            label2.TabIndex = 5;
-            // 
-            // LoginForm
-            // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
-            Controls.Add(label2);
-            Name = "LoginForm";
-            Text = "Form1";
-            ResumeLayout(false);
-            PerformLayout();
-        }
+       
 
         #endregion
         private Label label2;

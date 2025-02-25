@@ -20,7 +20,7 @@ namespace RATAPPLibrary.Data.DbContexts
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
+                .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY2;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
                 .UseLoggerFactory(MyLoggerFactory) // Attach the logger
                 .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
                 .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
@@ -96,6 +96,26 @@ namespace RATAPPLibrary.Data.DbContexts
             //ConfigureAncestryRecord(modelBuilder);
             //ConfigureAncestryRecordLink(modelBuilder);
 
+            ConfigureAnimalTrait(modelBuilder); 
+
+        }
+
+ 
+        //Configure Animal Trait
+        private void ConfigureAnimalTrait(ModelBuilder modelBuilder)
+        {
+            //set foreign key to do nothing if deleted 
+            modelBuilder.Entity<AnimalTrait>()
+                .HasOne(at => at.Animal)
+                .WithMany()
+                .HasForeignKey(at => at.AnimalId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<AnimalTrait>()
+                .HasOne(at => at.Trait)
+                .WithMany()
+                .HasForeignKey(at => at.TraitId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         // Configure the User entity
@@ -233,6 +253,11 @@ namespace RATAPPLibrary.Data.DbContexts
             // Define `DateOfDeath` as an optional (nullable) property
             modelBuilder.Entity<Animal>()
                 .Property(a => a.DateOfDeath)
+                .IsRequired(false);  // Nullable property for date of death
+
+            // Define `DateOfDeath` as an optional (nullable) property
+            modelBuilder.Entity<Animal>()
+                .Property(a => a.imageUrl)
                 .IsRequired(false);  // Nullable property for date of death
 
             // Define `Age` as a required property

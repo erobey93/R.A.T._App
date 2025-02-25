@@ -18,17 +18,18 @@ namespace RATAPPLibrary.Services
         //get line by name is a unique case because if it doesn't exist, it should be created 
         //since we know the species (if we're assuming stock is organized by species)
         //and we have the name of the line, so that's all that's needed 
-        public async Task<Line> GetOrCreateLineAsync_ByName(string name)
+        public async Task<Line> GetOrCreateLineAsync_ByName(int lineId)
         {
             // Find the correct LineId based on the variety
-            var line = await _context.Line.FirstOrDefaultAsync(l => l.Name == name);
+            var line = await _context.Line.FirstOrDefaultAsync(l => l.Id == lineId);
 
             if (line == null)
             {
                 // Create a new Line if it doesn't exist
                 line = new Line
                 {
-                    Name = name
+                    Name = "TODO",
+                    StockId = 2 //TODO these should have some automatic way of being set unless the user is allowed to set them 
                 };
 
                 _context.Line.Add(line);

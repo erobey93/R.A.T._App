@@ -11,59 +11,15 @@ namespace RATAPPLibrary.Services
 {
     public class AnimalService
     {
-        private readonly Data.DbContexts.RatAppDbContext _context;
+        private readonly RatAppDbContext _context;
         private readonly LineService _lineService;
 
-        public AnimalService(Data.DbContexts.RatAppDbContext context)
+        public AnimalService(RatAppDbContext context)
         {
             _context = context;
             _lineService = new LineService(context);
         }
 
-        //TODO 
-        //Species should come from drop down menu
-        //user needs to create a new species to use it 
-        //Sex needs to be a drop down menu 
-        //Variety needs to be a drop down menu 
-        //Basically, when the user selects, the value has to be found via its unique id 
-        //Dam and Sire comes from drop down menu
-        //there should be an option for every box of either values that exist in the db already
-        //or an option to "add new" which opens up a box for the user to enter a new type 
-        //right now I will focus on animal specific and then move to species 
-        //I think the best way to approach this is to break each one up into a task and pre-populate the database so that I have options to choose from to start, for say, species
-        //public async Task<Animal> CreateAnimalAsync(int id, string variety, DateTime dateOfBirth, string sex, string commonSpecies, string? name = null, DateTime? dateOfDeath = null)
-        //{
-        //    //first, check if the animal exists
-        //    bool exists = await DoesAnimalExist(id);
-
-        //    if (!exists)
-        //    {
-        //        // Get or create the line for the animal based on the variety
-        //        var line = await _lineService.GetOrCreateLineAsync(variety);
-        //        var species = await _context.Species.FirstOrDefaultAsync(s => s.ScientificName == commonSpecies); //TODO Need to "create a species", but will add mouse and rat to the database first as creating a new species is another feature
-
-        //        var newAnimal = new Animal
-        //        {
-        //            Id = id,
-        //            DateOfBirth = dateOfBirth,
-        //            Sex = sex,
-        //            LineId = line.Id,
-        //            StockId = line.StockId, //FIXME this should not be here but EF if fing up so leaving for now
-        //            Name = name, // Can be null; DisplayName will handle defaulting
-        //        };
-
-        //        // if the animal isn't already in the database (has to be based on ID + name match because technically the same name isn't that important 
-        //        _context.Animal.Add(newAnimal);
-        //        await _context.SaveChangesAsync();
-
-        //        return newAnimal;
-        //    }
-        //    else
-        //    {
-        //        throw new InvalidOperationException($"An animal with the ID {id} already exists.");
-        //    }
-
-        //}
         //TODO switched to passing an animalDto object instead of individual parameters
         public async Task<Animal> CreateAnimalAsync(AnimalDto animalDto)
         {
@@ -73,10 +29,10 @@ namespace RATAPPLibrary.Services
             if (!exists)
             {
                 // Get or create the line for the animal based on the variety
-                var line = await _lineService.GetOrCreateLineAsync_ByName(animalDto.Variety);
+                var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
 
                 // Find the species in the database by its scientific name
-                var species = await _context.Species.FirstOrDefaultAsync(s => s.ScientificName == animalDto.Species);
+                var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.Species);
                 if (species == null)
                 {
                     throw new InvalidOperationException($"Species '{animalDto.Species}' not found. Please ensure it exists in the database.");
@@ -111,11 +67,55 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"An animal with the ID {animalDto.Id} already exists.");
             }
+        } 
+
+        //update animal async
+        //TODO return type should probably be bool but think through this more 
+        public async Task<Animal> UpdateAnimalAsync(AnimalDto animalDto)
+        {
+            // Check if the animal already exists based on the provided ID
+            bool exists = await DoesAnimalExist(animalDto.Id);
+
+            if (exists)
+            {
+                // Retrieve the existing animal from the context
+                var existingAnimal = await _context.Animal.FindAsync(animalDto.Id);
+                if (existingAnimal == null)
+                {
+                    throw new InvalidOperationException($"Animal with ID '{animalDto.Id}' not found.");
+                }
+
+                // Get or create the line for the animal based on the variety
+                var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
+
+                // Find the species in the database by its common  name
+                var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.Species);
+                if (species == null)
+                {
+                    throw new InvalidOperationException($"Species '{animalDto.Species}' not found. Please ensure it exists in the database.");
+                }
+
+                // Update the existing animal's properties
+                existingAnimal.Name = animalDto.Name;
+                existingAnimal.DateOfBirth = animalDto.DateOfBirth;
+                existingAnimal.DateOfDeath = animalDto.DateOfDeath;
+                existingAnimal.Sex = animalDto.Sex;
+                existingAnimal.LineId = line.Id;
+
+                // Add the new animal to the database
+                _context.Animal.Update(existingAnimal);
+                await _context.SaveChangesAsync();
+
+                return existingAnimal;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Animal does not exist, please create animal before attempting to update.");
+            }
         }
 
-
         //check if animal is already in database 
-        private async Task<bool> DoesAnimalExist(int id)
+        public async Task<bool> DoesAnimalExist(int id)
         {
             var existingAnimal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
             if (existingAnimal != null)
@@ -183,6 +183,7 @@ namespace RATAPPLibrary.Services
 
                 Breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name,
                 Species = speciesObj.CommonName, // Assuming Species has a Name property
+                imageUrl = a.imageUrl
                 //                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
                 //                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
                 //                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
@@ -210,31 +211,6 @@ namespace RATAPPLibrary.Services
             }).ToArray();
 
             return result;
-
-            
-
-            //TODO: Implement other CRUD operations for Animal entity here 
-            //GetAnimalByIdAsync
-            //UpdateAnimalAsync
-            //DeleteAnimalAsync
-            //GetAllAnimalsAsync
-            //GetAnimalsByLineAsync
-            //GetAnimalsBySpeciesAsync
-            //GetAnimalsByProjectAsync
-            //GetAnimalsByPairingAsync
-            //GetAnimalsByLitterAsync
-            //GetAnimalsByStockAsync
-            //GetAnimalsByDateOfBirthAsync
-            //GetAnimalsByDateOfDeathAsync
-            //GetAnimalsBySexAsync
-            //GetAnimalsByNameAsync
-            //GetAnimalsByLineAndSpeciesAsync
-            //GetAnimalsByLineAndProjectAsync
-            //GetAnimalsByLineAndPairingAsync
-            //GetAnimalsByLineAndLitterAsync
-            //GetAnimalsByLineAndStockAsync
-            //GetAnimalsByLineAndDateOfBirthAsync
-            //GetAnimalsByLineAndDateOfDeathAsync
 
         }
     }

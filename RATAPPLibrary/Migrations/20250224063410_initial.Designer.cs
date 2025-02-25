@@ -12,15 +12,15 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    [Migration("20250223065415_updateNavtoVirtual")]
-    partial class updateNavtoVirtual
+    [Migration("20250224063410_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.1")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -103,7 +103,7 @@ namespace RATAPPLibrary.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("nvarchar(10)");
 
-                    b.Property<int?>("StockId")
+                    b.Property<int>("StockId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -399,11 +399,16 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("TraitId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("TraitId1")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AnimalId");
 
                     b.HasIndex("TraitId");
+
+                    b.HasIndex("TraitId1");
 
                     b.ToTable("AnimalTrait");
                 });
@@ -591,7 +596,9 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasOne("RATAPPLibrary.Data.Models.Breeding.Stock", null)
                         .WithMany("Animals")
-                        .HasForeignKey("StockId");
+                        .HasForeignKey("StockId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Line");
                 });
@@ -727,14 +734,18 @@ namespace RATAPPLibrary.Migrations
                     b.HasOne("RATAPPLibrary.Data.Models.Animal", "Animal")
                         .WithMany()
                         .HasForeignKey("AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", "Trait")
-                        .WithMany("AnimalTraits")
+                        .WithMany()
                         .HasForeignKey("TraitId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", null)
+                        .WithMany("AnimalTraits")
+                        .HasForeignKey("TraitId1");
 
                     b.Navigation("Animal");
 
