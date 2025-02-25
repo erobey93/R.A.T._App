@@ -13,12 +13,13 @@ namespace RATAPPLibrary.Data.Models
         public int Id { get; set; } // Assuming Id is an integer
         public int LineId { get; set; } // Assuming LineId is an integer
         public required string Sex { get; set; } // Assuming Sex is stored as a string (e.g., "Male", "Female", "Intersex", "Unknown")
-        public DateTime DateOfBirth { get; set; } // Assuming DateOfBirth is stored as a DateTime
+        public DateTime DateOfBirth { get; set; } // Date of birth is currently required but I'm setting it in my RATAPP to the current date what I'd like to do is to autoset it to the day that the animal is created on until the user updates it in this library
         public DateTime? DateOfDeath { get; set; } // Nullable DateTime for DateOfDeath
-        public int Age { get; set; } // Nullable integer for Age
-        public required string Name { get; set; } // Assuming Name is a string
-        public int StockId { get; set; } // Assuming StockId is an integer FIXME this should not be here but EF if fing up 
-        public string? imageUrl { get; set; } // Assuming imageUrl is a string
+        public int Age { get; set; } //age should be auto calculated or set by user and then DOB calculated 
+        public required string Name { get; set; } 
+        public int StockId { get; set; } // FIXME this should not be here but EF if fing up need to research shadow properties more and better understand EF
+        public string? imageUrl { get; set; } 
+        public string? comment { get; set; } 
 
         // Navigation Properties for EF
         public virtual Line? Line { get; set; } // Navigation property to Line table
@@ -85,5 +86,6 @@ namespace RATAPPLibrary.Data.Models
         public string Color { get; set; } = string.Empty;
         public required string Breeder { get; set; }
         public string Genotype { get; set; } = string.Empty;
+        public string? Comment { get; set; } = string.Empty;
     }
 }

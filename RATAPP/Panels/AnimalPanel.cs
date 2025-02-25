@@ -413,7 +413,7 @@ namespace RATAPP.Panels
         private TextBox sireTextBox;
         private TextBox inbredTextBox;
         private TextBox earTypeTextBox;
-        private TextBox markingsTextBox;
+        private TextBox markingsTextBox; //TODO
         private TextBox dobTextBox; //TODO Date of Birth this needs to be in a specific format so I need to figure that out some checks needed for that, for now just a text box
         private TextBox dodTextBox; // Date of Death
 
@@ -540,6 +540,7 @@ namespace RATAPP.Panels
             string dam = "";
             string sire = "";
             string inbred = "";
+            string imageUrl = ""; 
 
 
             //check if animal exists, this is the update case 
@@ -559,9 +560,10 @@ namespace RATAPP.Panels
                 dam = _animal.Dam;
                 sire = _animal.Sire;
                 inbred = "TODO";
+                imageUrl = _animal.imageUrl;
 
                 InitializePhotoBox();
-                Controls.Add(animalPhotoBox);
+                animalPhotoBox.Image = Image.FromFile(imageUrl); //TODO clean up this logic 
             }
             // First column (left side)
             idTextBox = CreateTextBox(150, 20, id);
@@ -798,7 +800,7 @@ namespace RATAPP.Panels
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 Font = new Font("Segoe UI", 10F), // Make it consistent with labels
-                Text = "TODO - should come from db",
+                Text = _animal.comments, //TODO
                 BackColor = Color.LightGray
             };
 
