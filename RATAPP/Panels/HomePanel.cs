@@ -242,7 +242,11 @@ namespace RATAPP.Panels
                 //string genotype = dataDisplayArea.Rows[e.RowIndex].Cells["Genotype"].Value.ToString();
 
                 // Create the AnimalDetailsPanel and show it using the parent form's ShowPanel method
-                var animalDetailsPanel = new AnimalPanel(_parentForm, _context, animalName, int.Parse(animalID));//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
+                //interesting problem/question here: where should the getting be done for the single animal? Here? or in the Animal panel?
+                int animalId = int.Parse(animalID);
+                //get the animal from the list of animals
+                var animal = _animals.FirstOrDefault(a => a.Id == animalId);
+                var animalDetailsPanel = new AnimalPanel(_parentForm, _context, _animals, animal);//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
                 _parentForm.ShowPanel(animalDetailsPanel);   // Use the ShowPanel method from the parent form
             }
         }
@@ -250,7 +254,7 @@ namespace RATAPP.Panels
         private void addButton_Click(object sender, EventArgs e)
         {
             //go to animal panel, but pass in an empty animal id
-            var animalPanel = new AnimalPanel(_parentForm, _context, "", 0); // Pass in an empty animal ID for a new animal
+            var animalPanel = new AnimalPanel(_parentForm, _context, _animals, null); // Pass in an empty animal ID for a new animal
             _parentForm.ShowPanel(animalPanel);
         }
         private void SearchButton_Click(object sender, EventArgs e)

@@ -7,6 +7,7 @@ using System.Data;
 using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -72,17 +73,20 @@ namespace RATAPP.Panels
         private Button updateButton;
 
         //state of the panel
-        private bool _editMode = false;
+        private bool _isEditMode = false;
 
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
-        private RATAPPLibrary.Data.Models.AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
+        private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
+        //this is likely temporary but I want to test out the idea of going to the next and previous animal
+        private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
 
         private PictureBox loadingSpinner; //TODO put in some kind of utility class for re-use, just testing right now 
 
         //TODO
-
+        //think through data caching of animals, right now I am passing the entire list of animals and having to navigate through an array
+        //this is not efficient and I am making data base calls for the current animal instead of using the data that I already have so this is a big FIXME 
         // it may actually make sense to have a state for the panel - future work
         // edit vs non edit mode and then just check this state
         //like if a user is on an existing animal and they click update animal details
@@ -100,18 +104,22 @@ namespace RATAPP.Panels
         // and disable the save button
 
         // Constructor for initializing the panel
-        public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string animalName, int animalID)
+        public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, AnimalDto[] allAnimals, AnimalDto currAnimal)
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
             parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works 
+            _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
+            _animal = currAnimal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
 
-            InitializeComponent(animalName, animalID); //TODO need to re-structure to account for await nope, just use async lambda! 
+            InitializeComponent(currAnimal); //TODO need to re-structure to account for await nope, just use async lambda! 
             LoadSpinner();
         }
 
-        private void InitializeComponent(string animalName, int animalID)
+        private void InitializeComponent(AnimalDto animal)
         {
+            //TODO should this just be _animal? Why or why not? follow this variable through and make sure I can make that switch first 
+
             // Set panel properties
             this.Size = new Size(1200, 800); // Increased panel size for better spacing
             this.BackColor = Color.White;
@@ -125,14 +133,14 @@ namespace RATAPP.Panels
             //show existing animal versions = no editing, Update Data button, animal's associated data
             //first get the animal data by id 
             //TODO need to set to 0 and make a rule to never allow 0 as an ID 
-            //TODO work on the logic on the state, I think I need to think through "state" as a whole for the application but this is okay for now 
-            if (animalID != 0 && !_editMode)
+            //TODO work on the logic on the state, I think I need to think through "state" as a whole for the application but this is okay for now
+            if (animal != null && !_isEditMode)
             {
-                LoadAnimalDataAsync(animalID);
+                LoadAnimalDataAsync(animal.Id);
             }
             else
             {
-                //else if ID is not present than the user is creating a new animal
+                //else if ID is not present than the user is creating a new animal or updating an existing animal 
                 // show new animal version = editing, save button, blank boxes
                 InitializeComboBoxes();
                 SetComboBoxes();
@@ -147,30 +155,61 @@ namespace RATAPP.Panels
         private async void LoadAnimalDataAsync(int animalID)
         {
             var animal = await _animalService.GetAnimalByIdAsync(animalID);
+            _animal = animal; //FIXME 
             InitializeTextBoxes(animal);
         }
 
         // initialize combo boxes
         private void InitializeComboBoxes()
         {
-            //TODO set up the values for the combo boxes 
-            //every one should have a "create new" option though
+            string id = "";
+            string name = "";
+            string species = "";
+            string sex = "";
+            string variety = "";
+            string color = "";
+            string genotype = "";
+            string ancestry = "";
+            string breeder = "";
+            string earType = "";
+            string dam = "";
+            string sire = "";
+            string inbred = "";
 
+
+            //check if animal exists, this is the update case 
+            //if it does, then we need to get the data from the database and populate the text boxes with the values
+            if (_animal != null)
+            {
+                id = _animal.Id.ToString();
+                name = _animal.Name;
+                species = _animal.Species;
+                sex = _animal.Sex;
+                variety = _animal.Variety;
+                color = _animal.Color;
+                genotype = "TODO";
+                ancestry = "TODO";
+                breeder = _animal.Breeder;
+                earType = "TODO";
+                dam = _animal.Dam;
+                sire = _animal.Sire;
+                inbred = "TODO";
+            }
             // First column (left side)
-            idTextBox = CreateTextBox(150, 20, "");
-            animalNameTextBox = CreateTextBox(150, 60, "");
-            speciesComboBox = CreateComboBox(150, 100, "");
-            sexComboBox = CreateComboBox(150, 140, "");
-            varietyComboBox = CreateComboBox(150, 180, "");
-            damComboBox = CreateComboBox(150, 220, "");
+            idTextBox = CreateTextBox(150, 20, id);
+            animalNameTextBox = CreateTextBox(150, 60, name);
+            speciesComboBox = CreateComboBox(150, 100, species);
+            sexComboBox = CreateComboBox(150, 140, sex);
+            varietyComboBox = CreateComboBox(150, 180, variety);
+            damComboBox = CreateComboBox(150, 220, dam);
 
             // Second column (right side)
-            colorComboBox = CreateComboBox(490, 20, "");
-            genotypeComboBox = CreateComboBox(490, 60, "");
-            ancestryComboBox = CreateComboBox(490, 100, "");
-            breederInfoComboBox = CreateComboBox(490, 140, "");
-            earTypeComboBox = CreateComboBox(490, 180, "");
-            sireComboBox = CreateComboBox(490, 220, "");
+            colorComboBox = CreateComboBox(490, 20, color);
+            genotypeComboBox = CreateComboBox(490, 60, genotype);
+            ancestryComboBox = CreateComboBox(490, 100, ancestry);
+            breederInfoComboBox = CreateComboBox(490, 140, breeder);
+            earTypeComboBox = CreateComboBox(490, 180, earType);
+            sireComboBox = CreateComboBox(490, 220, sire);
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -424,7 +463,7 @@ namespace RATAPP.Panels
         //Method for new animals
         private void NewAnimal()
         {
-            //enable textboxes
+            //if an controls are disabled, enable them
             foreach (Control control in this.Controls)
             {
                 if (control is TextBox textBox)
@@ -485,14 +524,80 @@ namespace RATAPP.Panels
         {
             // Previous button
             Button previousButton = CreateButton("Previous", 200, 700);
-            previousButton.Click += (sender, e) => {/* Logic for Previous button */};
+            previousButton.Click += (sender, e) => { PreviousButtonClick(sender, e); };
 
             // Next button
             Button nextButton = CreateButton("Next", 600, 700);
-            nextButton.Click += (sender, e) => {/* Logic for Next button */};
+            nextButton.Click += (sender, e) => { NextButtonClick(sender, e); };
 
             this.Controls.Add(previousButton);
             this.Controls.Add(nextButton);
+        }
+
+        //would really be helpful to just know the index 
+        private void PreviousButtonClick(object sender, EventArgs e)
+        {
+            int i = 0;
+            foreach (AnimalDto animal in _allAnimals)
+            {
+                //once we get to animal
+                if (animal.Id == _animal.Id && i > 0) //make sure there is a previous if there's not maybe go to the end of the line like a loop? For now, just stop 
+                {
+                    //go to the previous animal 
+                    //get the next animal based on the index of the current animal + 1
+                    LoadAnimalDataAsync(_allAnimals[i-1].Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
+                    this.Refresh();
+                    break;
+                }
+
+                //keep track of index 
+                i++;
+            }
+
+        }
+
+        //next button click 
+        private void NextButtonClick(object sender, EventArgs e)
+        {
+            //get data for next animal in collection
+            //which would be from the _animals object 
+            //so we probably want to store these when they're loaded on the main page 
+            //flow would be 
+            //next button clicked
+            //if there is another animal in the collection, go to that animal
+            //another way to do it would be to get the data from the grid if it is still there
+            //another thing to consider is if we have already organized by species
+            //maybe next and previous should make assumptions about species based on the animal that the user is on
+            //this is a future consideration
+            //for now, just get next animal in collection 
+            //current problem to solve is stashed data 
+
+            //find the current animal in the collection
+            //get its index
+            //go to the next index 
+            //get the animal at that index
+            //load the animal data
+            //if there is no next animal, do nothing
+            //maybe a list would be better here so that I could do next and previous vs. having to find index but not sure yet 
+            int i = 0; 
+            foreach (AnimalDto animal in _allAnimals)
+            { 
+                if(i == 1)
+                {
+                    //get the next animal based on the index of the current animal + 1
+                    LoadAnimalDataAsync(animal.Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
+                    //if there is no next animal, do nothing
+
+                    //if there is a next animal, refresh the panel with the new animal data
+                    this.Refresh();
+                    //and break out of the loop
+                    break;
+                }
+                if (animal.Id == _animal.Id )
+                {
+                    i++;
+                }
+            }
         }
 
         // Method to create buttons
@@ -588,7 +693,7 @@ namespace RATAPP.Panels
         }
 
         //parse textbox into animal dto object
-        private RATAPPLibrary.Data.Models.AnimalDto ParseAnimalData()
+        private AnimalDto ParseAnimalData()
         {
             //FIXME just for now 
             DateTime dob = DateTime.Now;
@@ -626,48 +731,6 @@ namespace RATAPP.Panels
             return animal;
         }
 
-
-        private async Task SaveButtonClick(object sender, EventArgs e)
-        {
-            // get all of the data from the text boxes 
-            // store data in a new animal object
-            AnimalDto animal = ParseAnimalData();
-
-            // library will save the data to the database
-            if (animal != null)
-            {
-                //send to library to send to db
-                try
-                {
-                    await _animalService.CreateAnimalAsync(animal);
-                    MessageBox.Show("Animal data saved successfully!");   //show the users a message box that data save was successful, or not
-                }
-                catch (Exception ex)
-                { 
-                    MessageBox.Show($"Error: {ex.Message}, data not sent!"); //TODO retry sending data? maybe do a couple of auto retries?  //if not, ask if they would like to try again //make sure that message is clear as to what the error was
-                                                                             //for now it can be error codes, but eventually it needs to be "non-technical" language that any user could understand 
-                }
-            }
-            else
-            {
-                MessageBox.Show("Error: Animal data is invalid. TODO this should be doing more checks ");
-            }
-
-            //display the animals data (refresh the page) TODO what about when we go back to home page, how do we refresh the data?
-            //reload the page with the new data
-            if (animal != null)
-            {
-                await _animalService.GetAnimalByIdAsync(animal.Id);
-                _editMode = false;
-
-            }
-
-            //enable the update button
-            saveButton.Hide();
-            updateButton.Show(); 
-
-        }
-
         private void UpdateButton()
         {
             //create calc % inbred button 
@@ -685,7 +748,11 @@ namespace RATAPP.Panels
             updateButton.Click += (sender, e) =>
             {
                 // Logic to update animal data 
-                MessageBox.Show("Panel should switch to editable");
+                _isEditMode = true;
+
+                //first clear out old controls
+                this.Controls.Clear();
+                InitializeComponent(_animal); 
             };
         }
 
@@ -775,5 +842,182 @@ namespace RATAPP.Panels
             }
            
         }
+
+        //save and update animal logic below 
+
+        private async Task SaveButtonClick(object sender, EventArgs e)
+        {
+            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes
+
+            if (animalDto == null) //if the data is invalid, show an error message and return
+            {
+                ShowMessage("Error: Animal data is invalid. Please check required fields.");
+                return;
+            }
+
+            try
+            {
+                Animal animal = await _animalService.CreateAnimalAsync(animalDto); //start by creating the animal not using the method I created as it returns an error TODO on this 
+                CompleteSaveProcess(animalDto, "Animal data saved successfully!");
+                await GetAndResetAnimalData(animal); //TODO do I need to be passing back an entire animal object? why, or why not? 
+            }
+            catch (InvalidOperationException) //FIXME check this exception type but also that it contains: already exists
+            {
+                if (PromptUserToUpdate())
+                {
+                    await HandleUpdateAsync(animalDto); //if the animal already exists, prompt the user to update it
+                }
+                else
+                {
+                    ShowMessage("IDs must be unique. Please create a new animal record."); //if user chooses no, let them know they need a unique ID to create a new animal 
+                }
+            }
+            catch (Exception ex) //if any other exceptions occur, log the error and notify the user
+            {
+                // Log the error and notify the user
+                LogError(ex);
+                ShowMessage("An unexpected error occurred. Please try again.");
+            }
+        }
+
+        // Handle the create new animal process 
+        private async Task HandleCreateNewAsync(AnimalDto animalDto)
+        {
+            try
+            {
+                Animal animal = await _animalService.CreateAnimalAsync(animalDto);
+                await _animalService.GetAnimalByIdAsync(animal.Id);
+                CompleteSaveProcess(animalDto, "Animal data saved successfully!");
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                ShowMessage("Failed to save the animal record. Please try again.");
+            }
+        }
+
+        //get and reset animal data 
+        //set _isEditMode to false 
+        //get an AnimalDto object back by id
+        //use this to reset the text boxes with the updated data 
+        //TODO likely a more efficient way to do this but for now this is working
+        private async Task GetAndResetAnimalData(Animal animal)
+        {
+            _isEditMode = false;
+            _animal = await _animalService.GetAnimalByIdAsync(animal.Id); //get the animal to re-populate the text boxes with the updated data
+            this.Controls.Clear();// clear the controls, should go back to text boxes and buttons populated with new animal data
+            this.InitializeComponent(_animal);
+            this.Refresh();
+        }
+
+        // Handle the update process for an existing animal
+        private async Task HandleUpdateAsync(AnimalDto animalDto)
+        {
+            try
+            {
+                Animal animal = await _animalService.UpdateAnimalAsync(animalDto);
+                CompleteSaveProcess(animalDto, "Animal data updated successfully!");
+                await GetAndResetAnimalData(animal); //get the updated animal data and reset the text boxes
+            }
+            catch (Exception ex)
+            {
+                LogError(ex);
+                ShowMessage("Failed to update the animal record. Please try again.");
+            }
+        }
+
+        // Helper methods for handling the high level save process
+        private void CompleteSaveProcess(AnimalDto animalDto, string successMessage)
+        {
+            ShowMessage(successMessage);
+            ToggleButtons(false);
+        }
+
+        // Helper methods for handling user update prompt 
+        private bool PromptUserToUpdate()
+        {
+            DialogResult result = MessageBox.Show(
+                "Update existing animal?",
+                "Confirmation",
+                MessageBoxButtons.YesNo);
+            return result == DialogResult.Yes;
+        }
+
+        private void ToggleButtons(bool isEditMode)
+        {
+            saveButton.Visible = isEditMode;//if edit mode is true, show the save button
+            updateButton.Visible = !isEditMode; //if edit mode is false, show the update button
+        }
+
+        private void ShowMessage(string message)
+        {
+            MessageBox.Show(message);
+        }
+
+        //logging logic, TODO will be creating a logging service for this but not yet implemented 
+        private void LogError(Exception ex)
+        {
+            // Add logging logic here (e.g., log to a file or monitoring system)
+            Console.WriteLine(ex.Message);
+        }
+
+        //old logic below
+        //private async Task SaveButtonClick(object sender, EventArgs e)
+        //{
+        //    // get all of the data from the text boxes 
+        //    // store data in a new animal object
+        //    AnimalDto animal = ParseAnimalData();
+
+        //    // library will save the data to the database
+        //    if (animal != null)
+        //    {
+        //        //send to library to send to db
+        //        try
+        //        {
+        //            //if it does, ask user if they want to update an existing animal
+        //            //if yes, update the animal
+        //            //if no, ask for a new id and create a new animal or let them know to create a new animal they need a unique ID 
+        //            await _animalService.CreateAnimalAsync(animal);
+        //            await _animalService.GetAnimalByIdAsync(animal.Id);
+        //            _isEditMode = false;
+        //            MessageBox.Show("Animal data saved successfully!");   //show the users a message box that data save was successful, or not
+        //                                                                  //enable the update button
+        //            saveButton.Hide();
+        //            updateButton.Show();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            DialogResult result = MessageBox.Show("Update existing animal?", "", MessageBoxButtons.YesNo);
+        //            if (result.Equals(DialogResult.Yes))
+        //            {
+        //                //TODO check that its the correct error but just testing this for now 
+        //                await _animalService.UpdateAnimalAsync(animal);
+        //                await _animalService.GetAnimalByIdAsync(animal.Id);
+        //                _isEditMode = false;
+        //                MessageBox.Show("Animal data updated successfully!");   //show the users a message box that data save was successful, or not FIXME need to manage this repeated code 
+        //                                                                        //enable the update button
+        //                saveButton.Hide();
+        //                updateButton.Show();
+        //            }
+        //            else
+        //            {
+        //                MessageBox.Show("Ids must be unique. Please create a new animal before trying to update."); //TODO this should be more user friendly
+        //            }
+
+
+        //            //if (ex.Message.Contains("animal "))
+        //            //{
+        //            //    MessageBox.Show("Error: Animal ID already exists, please enter a unique ID"); //TODO this should be more user friendly 
+        //            //}
+        //            //MessageBox.Show($"Error: {ex.Message}, data not sent!"); //TODO retry sending data? maybe do a couple of auto retries?  //if not, ask if they would like to try again //make sure that message is clear as to what the error was
+        //            //for now it can be error codes, but eventually it needs to be "non-technical" language that any user could understand 
+        //        }
+        //    }
+        //    else
+        //    {
+        //        MessageBox.Show("Error: Animal data is invalid. TODO this should be doing more checks ");
+        //        //What data is required? 
+        //    }
+        //}
     }
 }
