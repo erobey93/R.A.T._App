@@ -78,6 +78,7 @@ namespace RATAPPLibrary.Data.Models
         public required string Species { get; set; }
         public string? imageUrl { get; set; }   
         public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
+        public string? earType { get; set; }
         public string Dam { get; set; } = string.Empty;
         public string Sire { get; set; } = string.Empty;
         public string Variety { get; set; } = string.Empty;

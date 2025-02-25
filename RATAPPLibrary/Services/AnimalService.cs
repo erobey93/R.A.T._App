@@ -11,10 +11,10 @@ namespace RATAPPLibrary.Services
 {
     public class AnimalService
     {
-        private readonly Data.DbContexts.RatAppDbContext _context;
+        private readonly RatAppDbContext _context;
         private readonly LineService _lineService;
 
-        public AnimalService(Data.DbContexts.RatAppDbContext context)
+        public AnimalService(RatAppDbContext context)
         {
             _context = context;
             _lineService = new LineService(context);

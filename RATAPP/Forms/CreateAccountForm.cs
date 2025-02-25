@@ -25,7 +25,6 @@ namespace RATAPP.Forms
 
         public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
-            InitializeComponent();
             CreateAcctForm();
             _context = context;
             _configuration = configuration;

@@ -19,8 +19,6 @@ namespace RATAPP
 
         public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
-            InitializeComponent();
-
             // Store the dependencies
             _context = context;
             _configuration = configuration;

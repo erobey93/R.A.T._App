@@ -38,16 +38,17 @@ namespace RATAPPLibraryUT
         public async Task GetOrCreateLineAsync_LineExists_HappyPath()
         {
             // Arrange
-            var name = "Fancy";
+            int line = 1;
             int stockId = 1;
-            var existingLine = new Line { Id = 1, StockId = stockId, Name = name };
+            string name = "Standard";
+            var existingLine = new Line { Id = line, StockId = stockId, Name = name };
 
             // Add the existing line to the in-memory database
             _dbContext.Line.Add(existingLine);
             await _dbContext.SaveChangesAsync(); // Make sure to persist the changes to the in-memory database
 
             // Act
-            var result = await _lineService.GetOrCreateLineAsync_ByName(name);
+            var result = await _lineService.GetOrCreateLineAsync_ByName(line);
 
             // Assert
             // Verify that the line was created
@@ -64,23 +65,23 @@ namespace RATAPPLibraryUT
         public async Task GetOrCreateLineAsync_LineDoesNotExist_CreatesNewLineWithAppropriateStockId()
         {
             // Arrange
-            var name = "Standard"; // The name of the line you're testing for
+            int line = 1; // The name of the line you're testing for
             var expectedStockId = 1; // Expected stock ID based on species or business logic
 
             // Act: Verify the line does not exist initially
-            var existingLine = await _dbContext.Line.FirstOrDefaultAsync(l => l.Name == name);
+            var existingLine = await _dbContext.Line.FirstOrDefaultAsync(l => l.Id == line);
             Assert.Null(existingLine); // Ensure the line doesn't exist before creating it
 
             // Act: Call the method to create the line
-            var result = await _lineService.GetOrCreateLineAsync_ByName(name);
+            var result = await _lineService.GetOrCreateLineAsync_ByName(line);
 
             // Assert: Ensure the result is not null (a new line was created)
             Assert.NotNull(result);
-            Assert.Equal(name, result.Name); // Check that the line created has the correct name
+            Assert.Equal(line, result.Id); // Check that the line created has the correct name
             Assert.Equal(expectedStockId, result.StockId); // Check that the stock ID is appropriate based on species
 
             // Act: Verify that the line is now in the in-memory database
-            var lineInDb = await _dbContext.Line.FirstOrDefaultAsync(l => l.Name == name);
+            var lineInDb = await _dbContext.Line.FirstOrDefaultAsync(l => l.Id == line);
             Assert.NotNull(lineInDb); // Ensure that the line was added to the database
 
             // Assert that the stock ID was set correctly for the new line
