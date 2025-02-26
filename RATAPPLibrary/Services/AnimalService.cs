@@ -47,6 +47,7 @@ namespace RATAPPLibrary.Services
                     DateOfDeath = animalDto.DateOfDeath,
                     Sex = animalDto.Sex,
                     LineId = line.Id,
+                    comment = animalDto.Comment,
                     //StockId = line.StockId, // FIXME: Leaving this here as noted even though stock id should not be in the animal object (EF won't let me update this)
                     //S = species.Id, // Assuming a SpeciesId FK exists in the Animal table
                     //Dam = animalDto.Dam,
@@ -101,6 +102,7 @@ namespace RATAPPLibrary.Services
                 existingAnimal.DateOfDeath = animalDto.DateOfDeath;
                 existingAnimal.Sex = animalDto.Sex;
                 existingAnimal.LineId = line.Id;
+                existingAnimal.comment = animalDto.Comment;
 
                 // Add the new animal to the database
                 _context.Animal.Update(existingAnimal);
@@ -180,6 +182,7 @@ namespace RATAPPLibrary.Services
                 DateOfBirth = a.DateOfBirth,
                 Sex = a.Sex,
                 Line = lineId.ToString(),
+                Comment = a.comment,
 
                 Breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name,
                 Species = speciesObj.CommonName, // Assuming Species has a Name property
@@ -205,6 +208,7 @@ namespace RATAPPLibrary.Services
                 Breeder = a.Line.Stock.Breeder.User.Individual.Name,
                 Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
                 Line = a.Line?.Name, // Assuming Line has a Name property
+                Comment = a.comment,
                 //                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
                 //                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
                 //                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
