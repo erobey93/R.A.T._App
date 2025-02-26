@@ -41,7 +41,8 @@ namespace RATAPPLibrary.Services
                 // Map the AnimalDto to the Animal database model
                 var newAnimal = new Animal
                 {
-                    Id = animalDto.Id,
+                    //Id = animalDto.Id,
+                    StockId = 1, //FIXME this should be set automatically based on the species of the animal
                     Name = animalDto.Name,
                     DateOfBirth = animalDto.DateOfBirth,
                     DateOfDeath = animalDto.DateOfDeath,

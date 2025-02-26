@@ -10,7 +10,7 @@ namespace RATAPPLibrary.Data.Models
 {
     public class Animal
     {
-        public int Id { get; set; } // Assuming Id is an integer
+        public int Id { get; set; } // Assuming Id is an integer FIXME there needs to be a registration number or something like that instead of just an ID 
         public int LineId { get; set; } // Assuming LineId is an integer
         public required string Sex { get; set; } // Assuming Sex is stored as a string (e.g., "Male", "Female", "Intersex", "Unknown")
         public DateTime DateOfBirth { get; set; } // Date of birth is currently required but I'm setting it in my RATAPP to the current date what I'd like to do is to autoset it to the day that the animal is created on until the user updates it in this library
