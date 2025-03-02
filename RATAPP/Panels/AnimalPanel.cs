@@ -638,7 +638,8 @@ namespace RATAPP.Panels
         private Button inbredButton;
         private Button saveButton;
         private Button updateButton;
-        private Button cancelButton; 
+        private Button cancelButton;
+        private Button documentsButton; 
 
         //state of the panel
         private bool _isEditMode = false;
@@ -1498,7 +1499,8 @@ namespace RATAPP.Panels
             Button breedingHistoryButton = CreateButton("Breeding History", 500, 630);
 
             // Button 5: Documents
-            Button documentsButton = CreateButton("Documents", 650, 630);
+            //Button documentsButton = CreateButton("Documents", 650, 630);
+            DocumentsButton(); //create button and set click event 
 
             // Button 6: Health
             Button healthButton = CreateButton("Health", 790, 630);
@@ -1508,6 +1510,23 @@ namespace RATAPP.Panels
             this.Controls.Add(breedingHistoryButton);
             this.Controls.Add(documentsButton);
             this.Controls.Add(healthButton);
+        }
+
+        //documents button
+        private void DocumentsButton()
+        {
+            //create documents button
+            documentsButton = CreateButton("Documents", 650, 630);
+            documentsButton.Click += (sender, e) =>
+            {
+                // Logic to show documents
+                //TODO get the documents from the database
+                // and display them in a new window
+                // Open the CreateAccountForm
+                var documentForm = new DocumentsForm(_parentForm, _context);
+                documentForm.Show();
+                //this.Hide();
+            };
         }
 
         //TODO get the animal details from the database

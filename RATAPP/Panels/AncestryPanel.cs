@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace RatApp.Panels
+namespace RATAPP.Panels
 {
-    public partial class AncestryPanel : RATAppBaseForm
+    public partial class AncestryPanel : Panel, INavigable
     {
         private TreeView ancestryTree;
         private Panel infoPanel;
@@ -25,7 +25,7 @@ namespace RatApp.Panels
         // The currently selected rodent
         private Rodent selectedRodent;
 
-        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, AnimalDto[] allAnimals, AnimalDto currAnimal)
+        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
         {
             _parentForm = parentForm;
             _context = context;
@@ -428,6 +428,11 @@ namespace RatApp.Panels
             // {
             //     // Export logic based on selected format
             // }
+        }
+
+        public Task RefreshDataAsync()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

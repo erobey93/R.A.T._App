@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="iTextSharp" Version="5.5.13.4" />
     <PackageReference Include="Microsoft.Azure.Amqp" Version="2.6.9" />
     <PackageReference Include="PDFsharp" Version="6.1.1" />
   </ItemGroup>
