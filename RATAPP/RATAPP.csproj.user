@@ -13,6 +13,9 @@
     <Compile Update="Forms\UpdateCredentialsForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Panels\AncestryPanel.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Panels\AnimalPanel.cs">
       <SubType>Component</SubType>
     </Compile>
