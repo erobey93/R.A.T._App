@@ -647,6 +647,9 @@ namespace RATAPP.Panels
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Services.TraitService _traitService;
+        private RATAPPLibrary.Services.SpeciesService _speciesService;
+
         private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
         //this is likely temporary but I want to test out the idea of going to the next and previous animal
         private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
@@ -681,6 +684,8 @@ namespace RATAPP.Panels
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
+            _traitService = new RATAPPLibrary.Services.TraitService(context);
+            _speciesService = new RATAPPLibrary.Services.SpeciesService(context);
             parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _parentForm = parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
@@ -764,7 +769,7 @@ namespace RATAPP.Panels
                 color = _animal.Color;
                 genotype = "TODO";
                 marking = "TODO";
-                breeder = _animal.Breeder;
+                breeder = "TODO";
                 earType = "TODO";//_animal.earType; //TODO make ear type species specific 
                 dam = _animal.Dam;
                 sire = _animal.Sire;
@@ -783,16 +788,24 @@ namespace RATAPP.Panels
             sexComboBox = CreateComboBox(150, 140, sex);
             sexComboBox.Name = "sexComboBox";
             varietyComboBox = CreateComboBox(150, 180, variety);
+            varietyComboBox.Name = "varietyComboBox";
 
             damComboBox = CreateComboBox(150, 220, dam);
+            damComboBox.Name = "damComboBox";
 
             // Second column (right side)
             colorComboBox = CreateComboBox(490, 20, color);
+            colorComboBox.Name = "colorComboBox";
             genotypeComboBox = CreateComboBox(490, 60, genotype);
+            genotypeComboBox.Name = "genotypeComboBox";
             markingComboBox = CreateComboBox(490, 100, marking);
+            markingComboBox.Name = "markingComboBox";
             breederInfoComboBox = CreateComboBox(490, 140, breeder);
+            breederInfoComboBox.Name = "breederInfoComboBox";
             earTypeComboBox = CreateComboBox(490, 180, earType);
+            earTypeComboBox.Name = "earTypeComboBox";
             sireComboBox = CreateComboBox(490, 220, sire);
+            sireComboBox.Name = "sireComboBox";
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -830,16 +843,19 @@ namespace RATAPP.Panels
             SetComboBoxes();
         }
 
-        private void SetComboBoxes()
+        private async void SetComboBoxes()
         {
             // Iterate through all controls on the form
             foreach (Control control in this.Controls)
             {
                 if (control is ComboBox comboBox)
                 {
-                    // Add "Create New" as an option
+                    //get the list of values from the db 
+                    List<string> items = await GetComboBoxItemsFromDatabase(control); // Add database items
+                    
+                    // Add "Create New" as an option TODO need to set Create New as a button 
                     comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
-                    comboBox.Items.AddRange(GetComboBoxItemsFromDatabase(control).ToArray()); // Add database items
+                    comboBox.Items.AddRange(items.ToArray()); // Add database items
                     comboBox.Items.Add("Create New");
 
                     // Subscribe to the SelectedIndexChanged event
@@ -852,31 +868,143 @@ namespace RATAPP.Panels
         //TODO
         //this is going to be getting a list of options from each table in the database
         //which means that the libary will handle most of this 
-        private List<string> GetComboBoxItemsFromDatabase(Control control)
+        private async Task<List<string>> GetComboBoxItemsFromDatabase(Control control)
         {
             var options = new List<string>();
-            //if the combo box is species, then get the species from the database
-            //if the combo box is sex, then get the sex from the database (or just populate for now)
 
-            if (control.Name == "speciesComboBox")
+            // Use switch statement to handle different ComboBox names
+            switch (control.Name)
             {
-                //get species from the database //FIXME this is just for testing
-                options.AddRange(new[] { "Mouse", "Rat" });
-            }
-            else if (control.Name == "sexComboBox")
-            {
-                options.AddRange(new[] { "Male", "Female", "Unknown", "Other" }); //FIXME this is just for testing
-            }
-            else
-            {
-                options.AddRange(new[] { "Option1", "Option2", "Option3" }); //FIXME this is just for testing
+                case "speciesComboBox":
+                    // Get species from the database
+                    List<string> species = (List<string>)await _speciesService.GetAllSpeciesAsync();
+                    options.AddRange(species);
+                    break;
+
+                case "sexComboBox":
+                    // Use sex options (for now just populating for testing)
+                    options.AddRange(new[] { "Male", "Female", "Unknown", "Other" }); // FIXME: for testing
+                    break;
+
+                case "varietyComboBox":
+                    // Handle variety-related options (update as needed)
+                    options.AddRange(new[] { "Variety1", "Variety2", "Variety3" }); // FIXME: for testing
+                    break;
+
+                case "colorComboBox":
+                    // Handle color-related options (update as needed)
+                    options.AddRange(new[] { "Red", "Blue", "Green" }); // FIXME: for testing
+                    break;
+
+                case "genotypeComboBox":
+                    // Handle genotype-related options (update as needed)
+                    options.AddRange(new[] { "Genotype1", "Genotype2", "Genotype3" }); // FIXME: for testing
+                    break;
+
+                case "damComboBox":
+                    string animalSpecies = GetAnimalSpecies();
+                    string animalSex = "Female";
+                    //if we are creating a new animal show all female (dam) options 
+                    //or if they've filled in the species field, get it from there 
+
+                    //Unknown means nothing filled out, so we need to get all Female options other option is to have a pop up box that says "Please fill out the species field first"
+                    if (animalSpecies != "Unknown")
+                    {
+                        // Handle dam-related options (fetch data from database or service as needed)
+                        AnimalDto[] dams = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var dam in dams)
+                        {
+                            options.Add(dam.Name);
+                        }
+                    }
+                    else
+                    {
+                        // if no species, show all for appropriate sex 
+                        // TODO handle mismatch in selected species and dam/sire type 
+                        AnimalDto[] dams = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var dam in dams)
+                        {
+                            options.Add(dam.Name);
+                        }
+                    }
+
+                        break;
+
+                case "sireComboBox":
+                    animalSpecies = GetAnimalSpecies();
+                    animalSex = "Male";
+                    //if we are creating a new animal show all female (dam) options 
+                    //or if they've filled in the species field, get it from there 
+
+                    //Unknown means nothing filled out, so we need to get all Female options other option is to have a pop up box that says "Please fill out the species field first"
+                    if (animalSpecies != "Unknown")
+                    {
+                        // Handle dam-related options (fetch data from database or service as needed)
+                        AnimalDto[] sires = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var sire in sires)
+                        {
+                            options.Add(sire.Name);
+                        }
+                    }
+                    else
+                    {
+                        // if no species, show all for appropriate sex 
+                        // TODO handle mismatch in selected species and dam/sire type 
+                        AnimalDto[] sires = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var sire in sires)
+                        {
+                            options.Add(sire.Name);
+                        }  
+                    }
+
+                    break;
+
+                case "earTypeComboBox":
+                    // Handle ear type-related options (update as needed)
+                    options.AddRange(new[] { "EarType1", "EarType2", "EarType3" }); // FIXME: for testing
+                    break;
+
+                case "markingComboBox":
+                    // Handle marking-related options (update as needed)
+                    options.AddRange(new[] { "Marking1", "Marking2", "Marking3" }); // FIXME: for testing
+                    break;
+
+                case "breederInfoComboBox":
+                    // Handle breeder information-related options (update as needed)
+                    options.AddRange(new[] { "Breeder1", "Breeder2", "Breeder3" }); // FIXME: for testing
+                    break;
+
+                default:
+                    // For other ComboBoxes, just add some default options for now
+                    options.AddRange(new[] { "Option1", "Option2", "Option3" }); // FIXME: for testing
+                    break;
             }
 
             return options;
         }
 
+        //find species
+        private string GetAnimalSpecies()
+        {
+            //first, check if _animal is populated
+            if (_animal != null)
+            {
+                return _animal.Species;
+            }
+            else if (speciesComboBox.SelectedItem != null && speciesComboBox.Text != "Add New") //FIXME make sure this is the correct text
+            {
+                return speciesComboBox.SelectedItem.ToString(); //or .Text? FIXME 
+            }
+            else
+            {
+                //return unknown, use to tell the user that they need to fill out the species field first
+                return "Unknown";
+                //TODO handle case where species is unknown, this should be a pop up box that says "Please fill out the species field first"  MessageBox.Show("Please fill out the species field first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // Event handler for "Create New" functionality
-        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (sender is ComboBox comboBox && comboBox.SelectedItem?.ToString() == "Create New")
             {
@@ -888,9 +1016,12 @@ namespace RATAPP.Panels
                     // Add the new item to the database
                     AddNewItemToDatabase(newItem);
 
+                    //get the updated data from the database 
+                    List<string> items = await GetComboBoxItemsFromDatabase(comboBox);
+
                     // Refresh the combo box items
                     comboBox.Items.Clear();
-                    comboBox.Items.AddRange(GetComboBoxItemsFromDatabase(comboBox).ToArray());
+                    comboBox.Items.AddRange(items.ToArray());
                     comboBox.Items.Add("Create New"); //TODO
 
                     // Optionally, select the newly added item

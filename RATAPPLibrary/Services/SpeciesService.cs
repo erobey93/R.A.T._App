@@ -6,25 +6,35 @@ namespace RATAPPLibrary.Services
 {
     public class SpeciesService
     {
-        private readonly Data.DbContexts.RatAppDbContext _context;
+        private readonly RatAppDbContext _context;
 
-        public SpeciesService(Data.DbContexts.RatAppDbContext context)
+        public SpeciesService(RatAppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Species> GetSpeciesAsync(string scientificName)
+        public async Task<Species> GetSpeciesAsync(string commonName)
         {
             // Find the correct Species based on the common name
-            var species = await _context.Species.FirstOrDefaultAsync(s => s.ScientificName == scientificName);
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == commonName);
 
             if (species == null)
             {
                 // Throw an exception if the species is not found and creation is not implemented yet will be a feature in a later release 
-                throw new KeyNotFoundException($"Species with scientific name '{scientificName}' not found.");
+                throw new KeyNotFoundException($"Species with scientific name '{commonName}' not found.");
             }
 
             return species;
+        }
+
+        //get all species in the database 
+        //returned as a list of species common names
+        public async Task<IEnumerable<string>> GetAllSpeciesAsync()
+        {
+            // Query all Species and return the common names
+            return await _context.Species
+                .Select(s => s.CommonName)
+                .ToListAsync();
         }
 
         //create a new species 
@@ -62,5 +72,12 @@ namespace RATAPPLibrary.Services
             await _context.SaveChangesAsync();
             return species;
         }
+
+        //get species by id
+        //get species by name
+        //get species by scientific name
+        //get species by common name
+        //get species by stock id
+        //this is actually getting the species via the stock id
     }
 }

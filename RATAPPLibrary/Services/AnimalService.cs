@@ -69,7 +69,87 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"An animal with the ID {animalDto.Id} already exists.");
             }
-        } 
+        }
+
+        //get all animal info by sex 
+        public async Task<AnimalDto[]> GetAnimalInfoBySexAndSpecies(string sex, string species)
+        {
+            //Get all animals of the correct sex 
+            var bySex = await GetAnimalsBySex(sex);
+
+            List<AnimalDto> animalDto = new List<AnimalDto>();
+
+            //then find all animals that match the provided sex 
+            foreach (var animal in bySex)
+            {
+                if (animal.Species.Equals(species))
+                {
+                    //add to the list of animals that match the requested sex 
+                    animalDto.Add(animal);
+                }
+            }
+
+            return animalDto.ToArray();
+        }
+
+        //get all animals by sex 
+        public async Task<AnimalDto[]> GetAnimalsBySex(string sex)
+        {
+            // Find all animals that match sex
+            var animals = await _context.Animal.Where(a => a.Sex.Equals(sex)).ToListAsync();
+
+            //store to a list of animalDto
+            List<AnimalDto> animalDto = new List<AnimalDto>();
+
+            //then return the array of animals
+            foreach (var animal in animals)
+            {
+                animalDto.Add(await MapSingleAnimaltoDto(animal));
+            }
+
+            return animalDto.ToArray();
+        }
+
+        public async Task<AnimalDto[]> GetAnimalInfoBySpecies(string species)
+        {
+            // Find all animals that match the provided species
+            var animals = await _context.Animal.Where(a => a.StockId.Equals(species)).ToListAsync();
+            //get the names and ids of all animals that have that species id
+            List<AnimalDto> animalDto = new List<AnimalDto>();
+            //then return the array of animals
+            foreach (var animal in animals)
+            {
+                animalDto.Add(await MapSingleAnimaltoDto(animal));
+            }
+            return animalDto.ToArray();
+        }
+
+        //get animal species
+        //this must come via line -> stock -> species so putting in an easy way to access this here 
+        public async Task<string> GetAnimalSpecies(int id)
+        {
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with ID {id} not found.");
+            }
+            var line = await _context.Line.FirstOrDefaultAsync(l => l.Id == animal.LineId);
+            if (line == null)
+            {
+                throw new KeyNotFoundException($"Line with ID {animal.LineId} not found.");
+            }
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.Id == line.StockId);
+            if (stock == null)
+            {
+                throw new KeyNotFoundException($"Stock with ID {line.StockId} not found.");
+            }
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.Id == stock.SpeciesId);
+            if (species == null)
+            {
+                throw new KeyNotFoundException($"Species with ID {stock.SpeciesId} not found.");
+            }
+            return species.CommonName;
+        }
 
         //update animal async
         //TODO return type should probably be bool but think through this more 
