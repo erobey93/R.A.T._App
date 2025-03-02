@@ -31,6 +31,22 @@ namespace RATAPPLibrary.Services
             return traitType?.Id; // Returns null if no matching trait type is found
         }
 
+        //get all traits by type and species 
+        public async Task<IEnumerable<Trait>> GetTraitsByTypeAndSpeciesAsync(string type, string species)
+        {
+            // Query the TraitType by Name and return the Id (nullable to handle non-existing types)
+            var traitType = await _context.TraitType
+                .FirstOrDefaultAsync(tt => tt.Name.Equals(type, StringComparison.OrdinalIgnoreCase));
+            if (traitType == null)
+            {
+                throw new InvalidOperationException($"Trait type '{type}' does not exist.");
+            }
+            // Query the Traits by TraitTypeId and SpeciesID
+            return await _context.Trait
+                .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == (species == "Rat" ? 0 : 1))
+                .ToListAsync();
+        }
+
         public async Task<TraitType> CreateTraitTypeAsync(string name, string? description = null)
         {
             // Check if the trait type already exists

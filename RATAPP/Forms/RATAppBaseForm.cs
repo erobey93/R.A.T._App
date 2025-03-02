@@ -244,7 +244,7 @@ namespace RATAPP.Forms
             }
         }
 
-        private async void HomeButton_Click(object sender, EventArgs e)
+        public async void HomeButton_Click(object sender, EventArgs e)
         {
             var homePanel = await HomePanel.CreateAsync(this, _context, UserName, "role - TODO");
             _activePanel = homePanel;

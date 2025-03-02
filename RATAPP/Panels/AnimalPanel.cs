@@ -630,7 +630,7 @@ namespace RATAPP.Panels
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
         private ComboBox earTypeComboBox;
-        private ComboBox markingsComboBox;
+        private ComboBox markingComboBox;
         private ComboBox breederInfoComboBox;
 
 
@@ -638,6 +638,7 @@ namespace RATAPP.Panels
         private Button inbredButton;
         private Button saveButton;
         private Button updateButton;
+        private Button cancelButton; 
 
         //state of the panel
         private bool _isEditMode = false;
@@ -649,6 +650,7 @@ namespace RATAPP.Panels
         private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
         //this is likely temporary but I want to test out the idea of going to the next and previous animal
         private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
+        private RATAppBaseForm _parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
 
         private PictureBox loadingSpinner; //TODO put in some kind of utility class for re-use, just testing right now 
 
@@ -679,7 +681,8 @@ namespace RATAPP.Panels
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
-            parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works 
+            parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works
+            _parentForm = parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
             _animal = currAnimal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
 
@@ -740,7 +743,7 @@ namespace RATAPP.Panels
             string variety = "";
             string color = "";
             string genotype = "";
-            string ancestry = "";
+            string marking = "";
             string breeder = "";
             string earType = "";
             string dam = "";
@@ -760,7 +763,7 @@ namespace RATAPP.Panels
                 variety = _animal.Variety;
                 color = _animal.Color;
                 genotype = "TODO";
-                ancestry = "TODO";
+                marking = "TODO";
                 breeder = _animal.Breeder;
                 earType = "TODO";//_animal.earType; //TODO make ear type species specific 
                 dam = _animal.Dam;
@@ -786,7 +789,7 @@ namespace RATAPP.Panels
             // Second column (right side)
             colorComboBox = CreateComboBox(490, 20, color);
             genotypeComboBox = CreateComboBox(490, 60, genotype);
-            ancestryComboBox = CreateComboBox(490, 100, ancestry);
+            markingComboBox = CreateComboBox(490, 100, marking);
             breederInfoComboBox = CreateComboBox(490, 140, breeder);
             earTypeComboBox = CreateComboBox(490, 180, earType);
             sireComboBox = CreateComboBox(490, 220, sire);
@@ -821,6 +824,7 @@ namespace RATAPP.Panels
             this.Controls.Add(sireComboBox);
             this.Controls.Add(earTypeComboBox);
             this.Controls.Add(inbredTextBox);
+            this.Controls.Add(markingComboBox);
 
             NewAnimal(); //new animal settings
             SetComboBoxes();
@@ -957,7 +961,7 @@ namespace RATAPP.Panels
             // Second column (right side)
             colorLabel = CreateLabel("Color", 380, 20, labelFont);
             genotypeLabel = CreateLabel("Genetics", 380, 60, labelFont);
-            ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
+            markingsLabel = CreateLabel("Markings", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
             earTypeLabel = CreateLabel("Ear Type", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
@@ -974,7 +978,7 @@ namespace RATAPP.Panels
             this.Controls.Add(varietyLabel);
             this.Controls.Add(colorLabel);
             this.Controls.Add(genotypeLabel);
-            this.Controls.Add(ancestryLabel);
+            this.Controls.Add(markingsLabel);
             this.Controls.Add(breederInfoLabel);
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
@@ -1035,20 +1039,6 @@ namespace RATAPP.Panels
                 BackColor = Color.LightGray
             };
 
-            //if there are already values in the text boxes, clear them 
-            //this is for the update case
-            //if (_isNavMode)
-            //{
-            //    foreach (Control control in this.Controls)
-            //    {
-            //        if (control is TextBox textBox)
-            //        {
-            //            //delete the control 
-            //            textBox.Clear();
-            //        }
-            //    }
-            //}
-
             // Add textboxes to panel
             this.Controls.Add(animalNameTextBox);
             this.Controls.Add(idTextBox);
@@ -1106,6 +1096,7 @@ namespace RATAPP.Panels
             //hide save button
             //show update button
             saveButton.Hide();
+            cancelButton.Hide();
             updateButton.Show();
         }
 
@@ -1125,6 +1116,8 @@ namespace RATAPP.Panels
             //show save button
             updateButton.Hide();
             saveButton.Show();
+            //TODO set up cancel here but it should return to home page 
+            cancelButton.Show();
         }
 
         // Method to create textboxes
@@ -1209,6 +1202,94 @@ namespace RATAPP.Panels
                 i++;
             }
 
+        }
+
+        private void UpdateButtonClick(object sender, EventArgs e)
+        {
+            // Logic to update animal data 
+            _isEditMode = true;
+
+            //first clear out old controls
+            this.Controls.Clear();
+            InitializeComponent(_animal);
+        }
+
+        private async Task CancelButtonClick(object sender, EventArgs e)
+        {
+            // Make sure that we're in edit mode. If we aren't, we shouldn't be here anyways, but just in case, check.
+            if (_isEditMode)
+            {
+                // Show message box with prompt to save changes.
+                DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?",
+                                                      "Confirm Cancel",
+                                                      MessageBoxButtons.YesNoCancel,
+                                                      MessageBoxIcon.Question);
+
+                // If the user clicks 'Yes', save changes
+                if (result == DialogResult.Yes)
+                {
+                    // Save changes (implement the actual saving logic here)
+                    await SaveButtonClick(sender, e);
+                }
+                // If the user clicks 'No', don't save changes
+                else if (result == DialogResult.No)
+                {
+                    // Set edit mode to false after deciding what to do with the changes
+                    _isEditMode = false;
+
+                    //clear the controls
+                    this.Controls.Clear();
+
+                    // Reload the page in non-edit mode (or update the UI to reflect the changes)
+                    InitializeComponent(_animal);
+                }
+                // If the user clicks 'Cancel', do nothing and return to edit mode
+                else if (result == DialogResult.Cancel)
+                {
+                    return; // Do nothing, keep the user in edit mode
+                } 
+            }
+            else
+            {
+                // adding a new animal so check if there is data in the text boxes TODO
+                //if //data in the text boxes 
+                   // {
+                    // if there is, prompt the user to save the data
+                    // Show message box with prompt to save changes.
+                    DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?",
+                                                          "Confirm Cancel",
+                                                          MessageBoxButtons.YesNoCancel,
+                                                          MessageBoxIcon.Question);
+
+                    // If the user clicks 'Yes', save changes
+                    if (result == DialogResult.Yes)
+                    {
+                        // Save changes (implement the actual saving logic here)
+                        await SaveButtonClick(sender, e);
+                    }
+                    // If the user clicks 'No', don't save changes
+                    else if (result == DialogResult.No)
+                    {
+                        // Set edit mode to false after deciding what to do with the changes
+                        _isEditMode = false;
+
+                    //return to home page
+                    _parentForm.HomeButton_Click(sender, e);
+
+                    //clear the controls
+                    //this.Controls.Clear();
+
+                    // Reload the page in non-edit mode (or update the UI to reflect the changes)
+                    //InitializeComponent(_animal);
+                }
+                // If the user clicks 'Cancel', do nothing and return to edit mode
+                else if (result == DialogResult.Cancel)
+                    {
+                        return; // Do nothing, keep the user in edit mode
+                    }
+                }
+               
+           // }
         }
 
         //next button click 
@@ -1356,6 +1437,7 @@ namespace RATAPP.Panels
             // for now just getting this to work
             string breeder = "0"; //this is the user's breeder id there is currently a bug that isn't storing the user as a breeder that needs to be fixed before this will actually work
 
+            //FIXME this is just for testing right now need a way to manage lines i.e. "add new" or "select from list" 
             string line = "2";
             if (speciesComboBox.Text == "Mouse")
             {
@@ -1411,16 +1493,39 @@ namespace RATAPP.Panels
             };
         }
 
+        //allow the user to cancel making updating, or making a new animal 
+        private void CancelButton()
+        {
+            //create calc % inbred button 
+            cancelButton = new Button
+            {
+                Location = new Point(10, 680),
+                Width = 150,
+                Height = 40,
+                Text = "Cancel",
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.Red,
+                FlatStyle = FlatStyle.Popup
+            };
+            //this should be a call to the library to calculate the % inbred
+            cancelButton.Click += async (sender, e) =>
+            {
+                await CancelButtonClick(sender, e); 
+            };
+        }
+
         private void IntializeButtons()
         {
             InbredButton();
             UpdateButton();
             SaveButton();
+            CancelButton();
 
             // Add the button to the panel
             this.Controls.Add(inbredButton);
             this.Controls.Add(updateButton);
             this.Controls.Add(saveButton);
+            this.Controls.Add(cancelButton);
         }
 
         //TODO just testing, move to utils file
@@ -1603,6 +1708,7 @@ namespace RATAPP.Panels
         private void ToggleButtons(bool isEditMode)
         {
             saveButton.Visible = isEditMode;//if edit mode is true, show the save button
+            cancelButton.Visible = isEditMode; //if edit mode is true, show the cancel button
             updateButton.Visible = !isEditMode; //if edit mode is false, show the update button
         }
 
