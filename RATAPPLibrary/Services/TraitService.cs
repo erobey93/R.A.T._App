@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using System.Security.AccessControl;
 
@@ -25,29 +27,98 @@ namespace RATAPPLibrary.Services
             _speciesService = new SpeciesService(context);
         }
 
+        // Get TraitTypeId by Name
         public async Task<int?> GetTraitTypeIdByNameAsync(string name)
         {
-            // Query the TraitType by Name and return the Id (nullable to handle non-existing types)
-            var traitType = await _context.TraitType
-                .FirstOrDefaultAsync(tt => tt.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Trait type name cannot be null or empty.", nameof(name));
+            }
 
-            return traitType?.Id; // Returns null if no matching trait type is found
+            // Query the TraitType by Name
+            var traitType = await _context.TraitType
+                .FirstOrDefaultAsync(tt => tt.Name.ToLower() == name.ToLower());
+
+            if (traitType == null)
+            {
+                throw new InvalidOperationException($"Trait type with name '{name}' does not exist.");
+            }
+
+            return traitType.Id; // Return the Id if found
         }
 
-        //get all traits by type and species 
-        public async Task<IEnumerable<Trait>> GetTraitsByTypeAndSpeciesAsync(string type, string species)
+        // Get Trait by Name
+        public async Task<Trait> GetTraitByNameAsync(string name)
         {
-            // Query the TraitType by Name and return the Id (nullable to handle non-existing types)
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Trait name cannot be null or empty.", nameof(name));
+            }
+
+            // Query the Trait by Name
+            var trait = await _context.Trait
+                .FirstOrDefaultAsync(t => t.CommonName.ToLower() == name.ToLower());
+
+            if (trait == null)
+            {
+                throw new InvalidOperationException($"Trait with name '{name}' does not exist.");
+            }
+
+            return trait; // Return the Trait if found
+        }
+
+        public async Task<List<Trait>> GetTraitObjectsByTypeAndSpeciesAsync(string type, string species)
+        {
+            List<string> traitList = new List<string>();
+            // Query the TraitType by Name without using StringComparison
             var traitType = await _context.TraitType
-                .FirstOrDefaultAsync(tt => tt.Name.Equals(type, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefaultAsync(tt => tt.Name.ToLower() == type.ToLower());
             if (traitType == null)
             {
                 throw new InvalidOperationException($"Trait type '{type}' does not exist.");
             }
+
             // Query the Traits by TraitTypeId and SpeciesID
-            return await _context.Trait
-                .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == (species == "Rat" ? 0 : 1))
+            var speciesId = _context.Species
+                .Where(s => s.CommonName.ToLower() == species.ToLower())
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
+            var traits = await _context.Trait
+                .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == speciesId)
                 .ToListAsync();
+
+            return traits;
+        }
+
+        //get all trait names by type and species 
+        public async Task<List<string>> GetTraitsByTypeAndSpeciesAsync(string type, string species)
+        {
+            List<string> traitList = new List<string>();
+            // Query the TraitType by Name without using StringComparison
+            var traitType = await _context.TraitType
+                .FirstOrDefaultAsync(tt => tt.Name.ToLower() == type.ToLower());
+            if (traitType == null)
+            {
+                throw new InvalidOperationException($"Trait type '{type}' does not exist.");
+            }
+
+            // Query the Traits by TraitTypeId and SpeciesID
+            var speciesId = _context.Species
+                .Where(s => s.CommonName.ToLower() == species.ToLower())
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
+            var traits = await _context.Trait
+                .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == speciesId)
+                .ToListAsync();
+
+            foreach (var trait in traits)
+            {
+                traitList.Add(trait.CommonName);
+            }
+
+            return traitList; 
         }
 
         //get all traits by species
@@ -167,35 +238,86 @@ namespace RATAPPLibrary.Services
                 .FirstOrDefaultAsync(t => t.Id == id);  // Get a trait by its Id
         }
 
-        //create new entry in the animal trait table
-        public async Task<AnimalTrait> CreateAnimalTraitAsync(int animalId, int traitId)
+        //get colors for animal
+        public async Task<IEnumerable<Trait>> GetColorTraitsForSingleAnimal(int animalId, string traitType, string species)
         {
-            // Check if the animal trait already exists
-            var existingAnimalTrait = await _context.AnimalTrait
-                .FirstOrDefaultAsync(at => at.AnimalId == animalId && at.TraitId == traitId);
-            if (existingAnimalTrait != null)
+            // Query the AnimalTrait by animal id, get all traits
+            List<int> traitIds = new List<int>();
+            // return the list of color traits (TODO for right now, this will just be 1 trait) 
+            try
             {
-                throw new InvalidOperationException($"AnimalTrait for AnimalId '{animalId}' and TraitId '{traitId}' already exists.");
+                //get all traits for the given species and trait type 
+                var allTraitsofType = await GetTraitObjectsByTypeAndSpeciesAsync(traitType, species);
+                foreach (var trait in allTraitsofType)
+                {
+                    //get all traits for the animal
+                    traitIds.Append(trait.Id);
+                }
+
+                // Query the AnimalTrait by animal id and trait id
+                //this should return all the traitType traits for the animal
+                var animalTraits = await _context.AnimalTrait
+                    .Where(at => at.AnimalId == animalId && traitIds.Contains(at.TraitId))
+                    .Select(at => at.Trait)
+                    .ToListAsync();
+
+                //return the list of color traits for the animal
+                return animalTraits;
             }
-            // Create the new animal trait
-            var newAnimalTrait = new AnimalTrait
+            catch (KeyNotFoundException)
             {
-                AnimalId = animalId,
-                TraitId = traitId
-            };
-            _context.AnimalTrait.Add(newAnimalTrait);
-            await _context.SaveChangesAsync();
-            return newAnimalTrait;
+                throw new InvalidOperationException($"Species '{species}' does not exist.");
+            }
         }
 
-        // Get all traits for a specific animal by AnimalId (from the AnimalTrait table)
-        public async Task<IEnumerable<Trait>> GetTraitsByAnimalIdAsync(int animalId)
+        //create new entry in the animal trait table
+        public async Task<AnimalTrait> CreateAnimalTraitAsync( int traitId, int animalId)
         {
-            return await _context.AnimalTrait
-                .Where(at => at.AnimalId == animalId)
-                .Select(at => at.Trait)
-                .ToListAsync();
+            try
+            {
+                // Check if the animal trait already exists
+                var existingAnimalTrait = await _context.AnimalTrait
+                    .FirstOrDefaultAsync(at => at.AnimalId == animalId && at.TraitId == traitId);
+
+                if (existingAnimalTrait != null)
+                {
+                    throw new InvalidOperationException($"AnimalTrait for AnimalId '{animalId}' and TraitId '{traitId}' already exists.");
+                }
+
+                // Create the new animal trait
+                var newAnimalTrait = new AnimalTrait
+                {
+                    AnimalId = animalId,
+                    TraitId = traitId
+                };
+
+                // Add and save to the database
+                _context.AnimalTrait.Add(newAnimalTrait);
+                await _context.SaveChangesAsync();
+
+                return newAnimalTrait;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Log the detailed error message
+                Console.WriteLine($"DbUpdateException: {dbEx.Message}");
+
+                // Check if there's an inner exception with more details
+                if (dbEx.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {dbEx.InnerException.Message}");
+                }
+
+                // Optional: You can also log the SQL error if available
+                if (dbEx.InnerException is SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    Console.WriteLine($"SQL Error Code: {sqlEx.Number}");
+                }
+                throw;
+            }
         }
+
 
         //get all traits for a specific animal by animal id and trait id 
         //this is used to get all trait types for a single animal

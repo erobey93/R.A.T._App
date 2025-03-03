@@ -86,12 +86,10 @@ namespace RATAPPLibrary.Data.Models
         public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
         public string? earType { get; set; }
         public string? markings { get; set; }
-        public string variety { get; set; } = string.Empty;
-        public string color { get; set; } = string.Empty;
+        public string? variety { get; set; } = string.Empty;
+        public string? color { get; set; }
         public string dam { get; set; } = string.Empty;
         public string sire { get; set; } = string.Empty;
-        public int damId { get; set; }
-        public int sireId { get; set; }
         public required string breeder { get; set; }
         public string genotype { get; set; } = string.Empty;
         public string? comment { get; set; } = string.Empty;

@@ -55,6 +55,7 @@ namespace RATAPPLibrary.Data.DbContexts
         public virtual DbSet<Trait> Trait { get; set; }  // This should exist
         public virtual DbSet<TraitType> TraitType { get; set; }  // This should exist  
         public virtual DbSet<AnimalTrait> AnimalTrait { get; set; }
+        public DbContextOptions<RatAppDbContext> Options { get; internal set; }
 
         //Health
         //public DbSet<HealthRecord> HealthRecord { get; set; }
@@ -100,20 +101,18 @@ namespace RATAPPLibrary.Data.DbContexts
 
         }
 
- 
-        //Configure Animal Trait
+
         private void ConfigureAnimalTrait(ModelBuilder modelBuilder)
         {
-            //set foreign key to do nothing if deleted 
             modelBuilder.Entity<AnimalTrait>()
                 .HasOne(at => at.Animal)
-                .WithMany()
+                .WithMany(a => a.Traits)  // Define the inverse navigation property on Animal
                 .HasForeignKey(at => at.AnimalId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<AnimalTrait>()
                 .HasOne(at => at.Trait)
-                .WithMany()
+                .WithMany(t => t.AnimalTraits)  // Define the inverse navigation property on Trait
                 .HasForeignKey(at => at.TraitId)
                 .OnDelete(DeleteBehavior.NoAction);
         }
