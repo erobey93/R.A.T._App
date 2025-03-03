@@ -32,21 +32,26 @@ namespace RATAPPLibrary.Services
                 var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
 
                 // Find the species in the database by its scientific name
-                var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.Species);
+                var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.species);
                 if (species == null)
                 {
-                    throw new InvalidOperationException($"Species '{animalDto.Species}' not found. Please ensure it exists in the database.");
+                    throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
                 }
 
                 // Map the AnimalDto to the Animal database model
                 var newAnimal = new Animal
                 {
-                    Id = animalDto.Id,
-                    Name = animalDto.Name,
+                    registrationNumber = animalDto.regNum,
+                    StockId = 1, //FIXME this should be set automatically based on the species of the animal
+                    Name = animalDto.name,
                     DateOfBirth = animalDto.DateOfBirth,
                     DateOfDeath = animalDto.DateOfDeath,
-                    Sex = animalDto.Sex,
+                    Sex = animalDto.sex,
                     LineId = line.Id,
+                    comment = animalDto.comment,
+                    imageUrl = animalDto.imageUrl,
+                    damId = animalDto.damId,
+                    sireId = animalDto.sireId,
                     //StockId = line.StockId, // FIXME: Leaving this here as noted even though stock id should not be in the animal object (EF won't let me update this)
                     //S = species.Id, // Assuming a SpeciesId FK exists in the Animal table
                     //Dam = animalDto.Dam,
@@ -67,7 +72,87 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"An animal with the ID {animalDto.Id} already exists.");
             }
-        } 
+        }
+
+        //get all animal info by sex 
+        public async Task<AnimalDto[]> GetAnimalInfoBySexAndSpecies(string sex, string species)
+        {
+            //Get all animals of the correct sex 
+            var bySex = await GetAnimalsBySex(sex);
+
+            List<AnimalDto> animalDto = new List<AnimalDto>();
+
+            //then find all animals that match the provided sex 
+            foreach (var animal in bySex)
+            {
+                if (animal.species.Equals(species))
+                {
+                    //add to the list of animals that match the requested sex 
+                    animalDto.Add(animal);
+                }
+            }
+
+            return animalDto.ToArray();
+        }
+
+        //get all animals by sex 
+        public async Task<AnimalDto[]> GetAnimalsBySex(string sex)
+        {
+            // Find all animals that match sex
+            var animals = await _context.Animal.Where(a => a.Sex.Equals(sex)).ToListAsync();
+
+            //store to a list of animalDto
+            List<AnimalDto> animalDto = new List<AnimalDto>();
+
+            //then return the array of animals
+            foreach (var animal in animals)
+            {
+                animalDto.Add(await MapSingleAnimaltoDto(animal));
+            }
+
+            return animalDto.ToArray();
+        }
+
+        public async Task<AnimalDto[]> GetAnimalInfoBySpecies(string species)
+        {
+            // Find all animals that match the provided species
+            var animals = await _context.Animal.Where(a => a.StockId.Equals(species)).ToListAsync();
+            //get the names and ids of all animals that have that species id
+            List<AnimalDto> animalDto = new List<AnimalDto>();
+            //then return the array of animals
+            foreach (var animal in animals)
+            {
+                animalDto.Add(await MapSingleAnimaltoDto(animal));
+            }
+            return animalDto.ToArray();
+        }
+
+        //get animal species
+        //this must come via line -> stock -> species so putting in an easy way to access this here 
+        public async Task<string> GetAnimalSpecies(int id)
+        {
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with ID {id} not found.");
+            }
+            var line = await _context.Line.FirstOrDefaultAsync(l => l.Id == animal.LineId);
+            if (line == null)
+            {
+                throw new KeyNotFoundException($"Line with ID {animal.LineId} not found.");
+            }
+            var stock = await _context.Stock.FirstOrDefaultAsync(s => s.Id == line.StockId);
+            if (stock == null)
+            {
+                throw new KeyNotFoundException($"Stock with ID {line.StockId} not found.");
+            }
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.Id == stock.SpeciesId);
+            if (species == null)
+            {
+                throw new KeyNotFoundException($"Species with ID {stock.SpeciesId} not found.");
+            }
+            return species.CommonName;
+        }
 
         //update animal async
         //TODO return type should probably be bool but think through this more 
@@ -80,6 +165,7 @@ namespace RATAPPLibrary.Services
             {
                 // Retrieve the existing animal from the context
                 var existingAnimal = await _context.Animal.FindAsync(animalDto.Id);
+                
                 if (existingAnimal == null)
                 {
                     throw new InvalidOperationException($"Animal with ID '{animalDto.Id}' not found.");
@@ -89,18 +175,22 @@ namespace RATAPPLibrary.Services
                 var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
 
                 // Find the species in the database by its common  name
-                var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.Species);
+                var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.species);
                 if (species == null)
                 {
-                    throw new InvalidOperationException($"Species '{animalDto.Species}' not found. Please ensure it exists in the database.");
+                    throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
                 }
 
                 // Update the existing animal's properties
-                existingAnimal.Name = animalDto.Name;
+                existingAnimal.Name = animalDto.name;
                 existingAnimal.DateOfBirth = animalDto.DateOfBirth;
                 existingAnimal.DateOfDeath = animalDto.DateOfDeath;
-                existingAnimal.Sex = animalDto.Sex;
+                existingAnimal.Sex = animalDto.sex;
                 existingAnimal.LineId = line.Id;
+                existingAnimal.comment = animalDto.comment;
+                existingAnimal.imageUrl = animalDto.imageUrl;
+                existingAnimal.damId = animalDto.damId;
+                existingAnimal.sireId = animalDto.sireId;
 
                 // Add the new animal to the database
                 _context.Animal.Update(existingAnimal);
@@ -172,20 +262,27 @@ namespace RATAPPLibrary.Services
 
             int breederId = 5; //FIXME this is a placeholder until I fix/implement breeder logic 
 
+            //string dam = GetAnimalByIdAsync(a.damId).Result.name; 
+           //string sire = GetAnimalByIdAsync(a.sireId).Result.name; FIXME this needs to come from a litter, this is ridiculous 
+
             // Map the animals to include string values for the related entities
             var result = new AnimalDto
             {
                 Id = a.Id,
-                Name = a.Name,
+                regNum = a.registrationNumber,
+                name = a.Name,
                 DateOfBirth = a.DateOfBirth,
-                Sex = a.Sex,
+                sex = a.Sex,
                 Line = lineId.ToString(),
+                comment = a.comment,
 
-                Breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name,
-                Species = speciesObj.CommonName, // Assuming Species has a Name property
-                imageUrl = a.imageUrl
-                //                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
-                //                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
+                breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name, TODO this should be grabbing the breeders name from the breeder db (actually the user db)
+                species = speciesObj.CommonName, // Assuming Species has a Name property
+                imageUrl = a.imageUrl,
+                //dam = dam,
+                //sire = sire, 
+                //damId = a.damId,
+                //sireId = a.sireId, //FIXME this isn't great logic i.e. the ids and names being passed back for dam and sire, I need to figure out if I even want dam and sire in my animal object or if I should be using a different object for this like a litter object or something else (maybe I could create a new litter when a dam and sire is entered? TODO future feature 
                 //                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
             };
 
@@ -199,12 +296,14 @@ namespace RATAPPLibrary.Services
             AnimalDto[] result = animals.Select(a => new AnimalDto
             {
                 Id = a.Id,
-                Name = a.Name,
+                regNum = a.registrationNumber,
+                name = a.Name,
                 DateOfBirth = a.DateOfBirth,
-                Sex = a.Sex,
-                Breeder = a.Line.Stock.Breeder.User.Individual.Name,
-                Species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
+                sex = a.Sex,
+                breeder = a.Line.Stock.Breeder.User.Individual.Name,
+                species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
                 Line = a.Line?.Name, // Assuming Line has a Name property
+                comment = a.comment,
                 //                     // Dam = a.Litters, // Assuming Dam has a Name property TODO 
                 //                     // Sire = a.Sire?.Name, // Assuming Sire has a Name property TODO 
                 //                     // Variety = a.Variety?.Name, // Assuming Variety has a Name property TODO
@@ -213,5 +312,20 @@ namespace RATAPPLibrary.Services
             return result;
 
         }
+
+        // delete animal by id
+        public async Task DeleteAnimalByIdAsync(int id)
+        {
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with ID {id} not found.");
+            }
+            _context.Animal.Remove(animal);
+            await _context.SaveChangesAsync();
+        }
+
+        //get animal 
+
     }
 }

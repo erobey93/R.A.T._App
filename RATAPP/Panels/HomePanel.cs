@@ -98,8 +98,13 @@ namespace RATAPP.Panels
                 Padding = new Padding(20, 10, 20, 10)
             };
 
-            speciesComboBox = CreateComboBox(new string[] { "All Species", "Rats", "Mice" }, 0);
-            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female" }, 190);
+            //var dbSpecies = getDbSpecies();
+            //string[] speciesArray = dbSpecies.Result.ToArray();
+
+            //speciesComboBox = CreateComboBox(speciesArray, 0); //TODO get from db 
+
+            speciesComboBox = CreateComboBox(new string[] { "All Species", "Rat", "Mouse" }, 0); //TODO get from db 
+            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female", "Unknown" }, 190);
 
             searchBar = new TextBox
             {

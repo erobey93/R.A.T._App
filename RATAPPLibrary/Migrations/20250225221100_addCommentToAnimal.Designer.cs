@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250225221100_addCommentToAnimal")]
+    partial class addCommentToAnimal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,17 +109,8 @@ namespace RATAPPLibrary.Migrations
                     b.Property<string>("comment")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("damId")
-                        .HasColumnType("int");
-
                     b.Property<string>("imageUrl")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("registrationNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("sireId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -408,9 +402,6 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("AnimalId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("AnimalId1")
-                        .HasColumnType("int");
-
                     b.Property<int>("TraitId")
                         .HasColumnType("int");
 
@@ -420,8 +411,6 @@ namespace RATAPPLibrary.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AnimalId");
-
-                    b.HasIndex("AnimalId1");
 
                     b.HasIndex("TraitId");
 
@@ -754,10 +743,6 @@ namespace RATAPPLibrary.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("RATAPPLibrary.Data.Models.Animal", null)
-                        .WithMany("Traits")
-                        .HasForeignKey("AnimalId1");
-
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", "Trait")
                         .WithMany()
                         .HasForeignKey("TraitId")
@@ -817,11 +802,6 @@ namespace RATAPPLibrary.Migrations
                     b.Navigation("Credentials");
 
                     b.Navigation("Individual");
-                });
-
-            modelBuilder.Entity("RATAPPLibrary.Data.Models.Animal", b =>
-                {
-                    b.Navigation("Traits");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Breeder", b =>

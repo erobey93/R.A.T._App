@@ -11,128 +11,66 @@ namespace RATAPP
 {
     public partial class LoginForm : Form
     {
-        // Declare the fields to store the dependencies
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
-        private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
+        private IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
-
 
         public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
-            // Store the dependencies
             _context = context;
             _configuration = configuration;
             _passwordHashing = passwordHashing;
 
-            // Create the login form controls
             CreateLoginForm();
         }
 
         private void CreateLoginForm()
         {
-            // Set form properties
             this.Text = "RAT App Login";
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new System.Drawing.Size(450, 350);
-            this.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.Size = new Size(600, 650);
+            this.BackColor = Color.FromArgb(240, 240, 240);
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
 
-            // Create and configure the username label
-            Label lblUsername = new Label
+            var logo = new PictureBox
             {
-                Text = "Username:",
-                Location = new System.Drawing.Point(50, 50),
-                AutoSize = true,
-                Font = new System.Drawing.Font("Segoe UI", 10)
+                Size = new Size(220, 220),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"),
+                Location = new Point((this.ClientSize.Width - 220) / 2, 20)
             };
 
-            // Create and configure the username textbox
-            TextBox txtUsername = new TextBox
-            {
-                Name = "txtUsername",
-                Location = new System.Drawing.Point(150, 50),
-                Width = 200,
-                Font = new System.Drawing.Font("Segoe UI", 10)
-            };
+            var lblUsername = CreateLabel(Text = "Username", 300);
+            var lblPassword = CreateLabel(Text = "Password", 370);
 
-            // Create and configure the password label
-            Label lblPassword = new Label
-            {
-                Text = "Password:",
-                Location = new System.Drawing.Point(50, 100),
-                AutoSize = true,
-                Font = new System.Drawing.Font("Segoe UI", 10)
-            };
+            var txtUsername = CreateTextBox("txtUsername", "Username", 260);
+            var txtPassword = CreateTextBox("txtPassword", "Password", 330);
+            txtPassword.PasswordChar = '•';
 
-            // Create and configure the password textbox
-            TextBox txtPassword = new TextBox
-            {
-                Name = "txtPassword",
-                Location = new System.Drawing.Point(150, 100),
-                Width = 200,
-                PasswordChar = '*',
-                Font = new System.Drawing.Font("Segoe UI", 10)
-            };
+            var btnLogin = CreateButton("Login", 410, Color.FromArgb(0, 120, 215));
+            var btnCreateAccount = CreateButton("Create Account", 460, Color.FromArgb(0, 150, 136));
+            var btnChangePassword = CreateButton("Change Password", 510, Color.FromArgb(158, 158, 158));
 
-            // Create and configure the login button
-            Button btnLogin = new Button
-            {
-                Text = "Login",
-                Location = new System.Drawing.Point(150, 150),
-                Width = 90,
-                Height = 30,
-                Font = new System.Drawing.Font("Segoe UI", 9)
-            };
             btnLogin.Click += BtnLogin_Click;
-
-            // Create and configure the cancel button
-            Button btnCancel = new Button
-            {
-                Text = "Cancel",
-                Location = new System.Drawing.Point(260, 150),
-                Width = 90,
-                Height = 30,
-                Font = new System.Drawing.Font("Segoe UI", 9)
-            };
-            btnCancel.Click += BtnCancel_Click;
-
-            // Create and configure the Create Account button
-            Button btnCreateAccount = new Button
-            {
-                Text = "Create Account",
-                Location = new System.Drawing.Point(150, 200),
-                Width = 200,
-                Height = 30,
-                Font = new System.Drawing.Font("Segoe UI", 9)
-            };
             btnCreateAccount.Click += BtnCreateAccount_Click;
-
-            // Create and configure the Change Password button
-            Button btnChangePassword = new Button
-            {
-                Text = "Change Password",
-                Location = new System.Drawing.Point(150, 250),
-                Width = 200,
-                Height = 30,
-                Font = new System.Drawing.Font("Segoe UI", 9)
-            };
             btnChangePassword.Click += BtnUpdatePassword_Click;
 
-            // Add controls to the form
-            this.Controls.Add(lblUsername);
-            this.Controls.Add(txtUsername);
-            this.Controls.Add(lblPassword);
-            this.Controls.Add(txtPassword);
-            this.Controls.Add(btnLogin);
-            this.Controls.Add(btnCancel);
-            this.Controls.Add(btnCreateAccount);
-            this.Controls.Add(btnChangePassword);
+            //TODO took label out for now 
+            this.Controls.AddRange(new Control[] { logo, txtUsername, txtPassword, btnLogin, btnCreateAccount, btnChangePassword, lblUsername, lblPassword });
         }
 
         // Login to existing account
-        // Make the event handler async
         private async void BtnLogin_Click(object sender, EventArgs e)
         {
-            // Get the username and password from the text boxes
+            // Check if the username and password text boxes are empty
+            if (string.IsNullOrWhiteSpace(((TextBox)this.Controls["txtUsername"]).Text) || string.IsNullOrWhiteSpace(((TextBox)this.Controls["txtPassword"]).Text))
+            {
+                MessageBox.Show("Please enter a username and password.", "Login Failed");
+                return;
+            }
+
+            // If boxes are populated, get the username and password from the text boxes
             string username = ((TextBox)this.Controls["txtUsername"]).Text;
             string password = ((TextBox)this.Controls["txtPassword"]).Text;
 
@@ -191,6 +129,72 @@ namespace RATAPP
             }
         }
 
+        private Label CreateLabel(string text, int y)
+        {
+            return new Label
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 10),
+                Location = new Point((this.ClientSize.Width - 100) / 2, y),
+                AutoSize = true
+            };
+        }
+
+        //generic text box to be used for all login text boxes
+        private TextBox CreateTextBox(string name, string placeholder, int y)
+        {
+            var textBox = new TextBox
+            {
+                Name = name,
+                Font = new Font("Segoe UI", 12),
+                Size = new Size(300, 30),
+                Location = new Point((this.ClientSize.Width - 300) / 2, y)
+            };
+
+            textBox.Enter += (s, e) => { if (textBox.Text == placeholder) { textBox.Text = ""; textBox.ForeColor = System.Drawing.Color.Black; } };
+            textBox.Leave += (s, e) => { if (string.IsNullOrWhiteSpace(textBox.Text)) { textBox.Text = placeholder; textBox.ForeColor = System.Drawing.Color.Gray; } };
+            textBox.Text = placeholder;
+            textBox.ForeColor = Color.Gray;
+
+            return textBox;
+        }
+
+        //generic button to be used for all login buttons
+        private Button CreateButton(string text, int y, System.Drawing.Color color)
+        {
+            return new Button
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 12),
+                Size = new Size(300, 50),
+                Location = new Point((this.ClientSize.Width - 300) / 2, y),
+                BackColor = color,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+        }
+
+        // check the user wants to quit before quitting 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                DialogResult result = MessageBox.Show(
+                    "Are you sure you want to close the application?",
+                    "Confirm Exit",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+                if (result == DialogResult.No)
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
+
         //create a new account 
         private void BtnCreateAccount_Click(object sender, EventArgs e)
         {
@@ -200,6 +204,7 @@ namespace RATAPP
             this.Hide();
         }
 
+        // allow the user to cancel the login
         private void BtnCancel_Click(object sender, EventArgs e)
         {
             // Display a confirmation dialog with Yes and No options
@@ -220,13 +225,14 @@ namespace RATAPP
 
         //TODO need to do assertion testing but wanted basic formatting to be there 
         //TODO need to implement still 
-        private async void BtnUpdatePassword_Click(object sender, EventArgs e)
+        private void BtnUpdatePassword_Click(object sender, EventArgs e)
         {
             //if valid credentials, open update form
-            //updat form is still TODO just getting basic outline there for now 
+            //update form is still TODO just getting basic outline there for now 
             var updateCredentialsForm = new UpdateCredentialsForm(_context);
             updateCredentialsForm.Show();
             this.Hide();
         }
     }
+
 }

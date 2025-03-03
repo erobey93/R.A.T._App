@@ -7,6 +7,8 @@
 //using RATAPP.Forms;
 //using RATAPPLibrary.Data.Models;
 //using RATAPPLibrary.Services;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+//using Button = System.Windows.Forms.Button;
 
 //namespace RATAPP.Panels
 //{
@@ -24,9 +26,9 @@
 //        private PictureBox animalPhotoBox;
 //        private PictureBox loadingSpinner;
 
-//        private Button saveButton;
-//        private Button updateButton;
-//        private Button calculateInbredButton;
+//        private System.Windows.Forms.Button saveButton;
+//        private System.Windows.Forms.Button updateButton;
+//        private System.Windows.Forms.Button calculateInbredButton;
 
 //        private Dictionary<string, Control> formControls = new Dictionary<string, Control>();
 
@@ -57,6 +59,7 @@
 //            InitializeFormFields();
 //            InitializeNavigationButtons();
 
+//            // Check if we're adding a new animal, or viewing/updating an existing animal 
 //            if (_animal != null && !_isEditMode)
 //            {
 //                LoadAnimalDataAsync(_animal.Id);
@@ -87,6 +90,7 @@
 //            this.Controls.Add(mainLayout);
 //        }
 
+//        //set up the bottom buttons
 //        private void InitializeButtonPanel()
 //        {
 //            buttonPanel = new FlowLayoutPanel
@@ -108,6 +112,16 @@
 //            mainLayout.Controls.Add(buttonPanel, 0, 1);
 //        }
 
+//        //set up the button click event
+//        private void ButtonClick(object sender, EventArgs e)
+//        {
+//            //go to associated page for the specific animal 
+//            //TODO implement this logic
+//            //for now display a message box with the button text
+//            var button = (Button)sender;
+//            MessageBox.Show($"Navigating to {button.Text} page...");
+//        }
+//        //set up animal photo box 
 //        private void InitializePhotoBox()
 //        {
 //            animalPhotoBox = new PictureBox
@@ -120,6 +134,7 @@
 //            mainLayout.Controls.Add(animalPhotoBox, 2, 0);
 //        }
 
+//        //set up data fields 
 //        private void InitializeFormFields()
 //        {
 //            var leftPanel = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 8 };
@@ -135,8 +150,13 @@
 //            mainLayout.Controls.Add(rightPanel, 1, 0);
 //        }
 
+//        //set up the panel for the data field
 //        private void InitializePanel(TableLayoutPanel panel, string[] fields, int column)
 //        {
+//            //  for each field in the array, create a label and a text box
+//            //  add the label to the left column and the text box to the right column
+//            // add the text box to the formControls dictionary for later use
+//            // this makes it easier to access the text box values later on without cluttering up the code
 //            for (int i = 0; i < fields.Length; i++)
 //            {
 //                var label = new Label { Text = fields[i], Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleRight };
@@ -145,24 +165,20 @@
 //                Control field;
 //                if (fields[i] == "Comments")
 //                {
-//                    field = new TextBox { Multiline = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill };
+//                    field = new System.Windows.Forms.TextBox { Multiline = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill };
 //                }
 //                else if (new[] { "Species", "Sex", "Variety", "Color", "Ancestry", "Ear Type" }.Contains(fields[i]))
 //                {
-//                    field = new ComboBox { Dock = DockStyle.Fill };
+//                    field = new System.Windows.Forms.ComboBox { Dock = DockStyle.Fill };
 //                }
 //                else
 //                {
-//                    field = new TextBox { Dock = DockStyle.Fill };
+//                    field = new System.Windows.Forms.TextBox { Dock = DockStyle.Fill };
 //                }
 
 //                panel.Controls.Add(field, 1, i);
 //                formControls[fields[i]] = field;
 //            }
-
-//            calculateInbredButton = CreateButton("Calculate % Inbred", CalculateInbred);
-//            panel.Controls.Add(calculateInbredButton, 1, 7);
-//            calculateInbredButton.Dock = DockStyle.Fill;
 //        }
 
 //        private void InitializeNavigationButtons()
@@ -176,7 +192,7 @@
 
 //        private Button CreateButton(string text, EventHandler clickHandler)
 //        {
-//            var button = new Button
+//            var button = new System.Windows.Forms.Button
 //            {
 //                Text = text,
 //                AutoSize = true,
@@ -257,7 +273,7 @@
 //                formControls["Sire"].Text = animal.Sire;
 //                formControls["DOB"].Text = animal.DateOfBirth.ToString("yyyy-MM-dd");
 //                formControls["DOD"].Text = animal.DateOfDeath?.ToString("yyyy-MM-dd") ?? "";
-//                // Populate other fields...
+//                // Populate other fields... TODO
 
 //                if (!string.IsNullOrEmpty(animal.imageUrl))
 //                {
@@ -280,6 +296,33 @@
 
 //        private void InbredButton()
 //        {
+
+//        }
+
+//        //save animal data to database 
+//        private void SaveButton()
+//        {
+//            //create save button
+//            saveButton = new System.Windows.Forms.Button
+//            {
+//                Location = new Point(10, 630),
+//                Width = 150,
+//                Height = 40,
+//                Text = "Save Changes",
+//                Font = new Font("Segoe UI", 10F),
+//                BackColor = Color.Green,
+//                FlatStyle = FlatStyle.Popup
+//            };
+//            saveButton.Click += async (sender, e) => //NOTE: putting this inside of an async lambda is what allows us to use await without setting the entire method to async! 
+//            {
+//                await SaveButtonClick(sender, e);
+//            };
+//        }
+
+//        //TODO
+//        private void CalculateInbred(object sender, EventArgs e)
+//        {
+//            // Implement inbreeding calculation logic
 //            //create calc % inbred button 
 //            calculateInbredButton = new Button
 //            {
@@ -297,37 +340,8 @@
 //                // Logic to calculate % inbred
 //                //TODO get the values from the database just for testing right now FIXME
 //                string TODO = "TODO - should come from db"; //FIXME
-//                calculateInbredTextBox.Text = TODO;
+//                ((System.Windows.Forms.TextBox)formControls["% Inbred"]).Text = TODO;
 //            };
-//        }
-
-//        private void SaveButton()
-//        {
-//            //create save button
-//            saveButton = new Button
-//            {
-//                Location = new Point(10, 630),
-//                Width = 150,
-//                Height = 40,
-//                Text = "Save Changes",
-//                Font = new Font("Segoe UI", 10F),
-//                BackColor = Color.Green,
-//                FlatStyle = FlatStyle.Popup
-//            };
-//            saveButton.Click += async (sender, e) => //NOTE: putting this inside of an async lambda is what allows us to use await without setting the entire method to async! 
-//            {
-//                await SaveButtonClick(sender, e);
-//            };
-//        }
-
-//        private void ButtonClick(object sender, EventArgs e)
-//        {
-//            // Handle button clicks
-//        }
-
-//        private void CalculateInbred(object sender, EventArgs e)
-//        {
-//            // Implement inbreeding calculation logic
 //        }
 
 //        private void PreviousButtonClick(object sender, EventArgs e)
@@ -357,7 +371,196 @@
 //            }
 //        }
 
+//        private void UpdateButton()
+//        {
+//            //create calc % inbred button 
+//            updateButton = new Button
+//            {
+//                Location = new Point(10, 630),
+//                Width = 150,
+//                Height = 40,
+//                Text = "Update Data",
+//                Font = new Font("Segoe UI", 10F),
+//                BackColor = Color.Green,
+//                FlatStyle = FlatStyle.Popup
+//            };
+//            //this should be a call to the library to calculate the % inbred
+//            updateButton.Click += (sender, e) =>
+//            {
+//                // Logic to update animal data 
+//                _isEditMode = true;
+
+//                //first clear out old controls
+//                this.Controls.Clear();
+//                InitializeComponent();
+//            };
+//        }
+
 //        // Implement SaveButtonClick, UpdateButtonClick, and other necessary methods...
+//        //save and update animal logic below 
+
+//        private async Task SaveButtonClick(object sender, EventArgs e)
+//        {
+//            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes
+
+//            if (animalDto == null) //if the data is invalid, show an error message and return
+//            {
+//                ShowMessage("Error: Animal data is invalid. Please check required fields.");
+//                return;
+//            }
+
+//            try
+//            {
+//                Animal animal = await _animalService.CreateAnimalAsync(animalDto); //start by creating the animal not using the method I created as it returns an error TODO on this 
+//                CompleteSaveProcess(animalDto, "Animal data saved successfully!");
+//                await GetAndResetAnimalData(animal); //TODO do I need to be passing back an entire animal object? why, or why not? 
+//            }
+//            catch (InvalidOperationException) //FIXME check this exception type but also that it contains: already exists
+//            {
+//                if (PromptUserToUpdate())
+//                {
+//                    await HandleUpdateAsync(animalDto); //if the animal already exists, prompt the user to update it
+//                }
+//                else
+//                {
+//                    ShowMessage("IDs must be unique. Please create a new animal record."); //if user chooses no, let them know they need a unique ID to create a new animal 
+//                }
+//            }
+//            catch (Exception ex) //if any other exceptions occur, log the error and notify the user
+//            {
+//                // Log the error and notify the user
+//                LogError(ex);
+//                ShowMessage("An unexpected error occurred. Please try again.");
+//            }
+//        }
+
+//        // Handle the create new animal process TODO
+//        private async Task HandleCreateNewAsync(AnimalDto animalDto)
+//        {
+//            throw new NotImplementedException();
+//            try
+//            {
+//                Animal animal = await _animalService.CreateAnimalAsync(animalDto);
+//                await _animalService.GetAnimalByIdAsync(animal.Id);
+//                CompleteSaveProcess(animalDto, "Animal data saved successfully!");
+//            }
+//            catch (Exception ex)
+//            {
+//                LogError(ex);
+//                ShowMessage("Failed to save the animal record. Please try again.");
+//            }
+//        }
+
+//        //parse textbox into animal dto object
+//        private AnimalDto ParseAnimalData()
+//        {
+//            // Default values for fields with unresolved logic
+//            DateTime dob = DateTime.Now; // FIXME: Replace with parsed value when DOB field is implemented.
+//            DateTime? dod = null; // Allowing null for Date of Death.
+//            string breeder = "0"; // FIXME: Replace with logic to retrieve or create breeder ID.
+//            string line = ((System.Windows.Forms.ComboBox)formControls["Species"]).Text == "Mouse" ? "1" : "2";
+
+//            try
+//            {
+//                AnimalDto animal = new AnimalDto
+//                {
+//                    Id = int.TryParse(((System.Windows.Forms.TextBox)formControls["Registration #/ID"]).Text, out int id) ? id : 0,
+//                    Name = ((System.Windows.Forms.TextBox)formControls["Animal Name"]).Text,
+//                    Sex = ((System.Windows.Forms.ComboBox)formControls["Sex"]).SelectedItem?.ToString(),
+//                    DateOfBirth = dob, // FIXME: Replace with parsed value from formControls["DOB"].
+//                    DateOfDeath = dod, // FIXME: Replace with parsed value or null if not provided.
+//                    Species = ((System.Windows.Forms.ComboBox)formControls["Species"]).SelectedItem?.ToString(),
+//                    Variety = ((System.Windows.Forms.ComboBox)formControls["Variety"]).SelectedItem?.ToString(),
+//                    Color = ((System.Windows.Forms.ComboBox)formControls["Color"]).SelectedItem?.ToString(),
+//                    Dam = ((System.Windows.Forms.TextBox)formControls["Dam"]).Text,
+//                    Sire = ((System.Windows.Forms.TextBox)formControls["Sire"]).Text,
+//                    Line = line,
+//                    Breeder = breeder, // FIXME: Replace with logic to retrieve breeder ID based on input.
+//                    Comment = ((System.Windows.Forms.TextBox)formControls["Comments"]).Text,
+//                    Genotype = ((System.Windows.Forms.TextBox)formControls["Genetics"]).Text,
+//                    imageUrl = _animal.imageUrl // Assuming this is already set by another process.
+//                };
+
+//                return animal;
+//            }
+//            catch (Exception ex)
+//            {
+//                MessageBox.Show(
+//                    $"Error parsing animal data: {ex.Message}",
+//                    "Error",
+//                    MessageBoxButtons.OK,
+//                    MessageBoxIcon.Error
+//                );
+//                return null;
+//            }
+//        }
+
+//        //get and reset animal data 
+//        //set _isEditMode to false 
+//        //get an AnimalDto object back by id
+//        //use this to reset the text boxes with the updated data 
+//        //TODO likely a more efficient way to do this but for now this is working
+//        private async Task GetAndResetAnimalData(Animal animal)
+//        {
+//            _isEditMode = false;
+//            _animal = await _animalService.GetAnimalByIdAsync(animal.Id); //get the animal to re-populate the text boxes with the updated data
+//            this.Controls.Clear();// clear the controls, should go back to text boxes and buttons populated with new animal data
+//            //this.InitializeComponent(_animal); FIXME I believe this is needed but just need to figure out how to implement it with new design 
+//            this.InitializeComponent(); //reinitialize the component with the new data
+//            this.Refresh();
+//        }
+
+//        // Handle the update process for an existing animal
+//        private async Task HandleUpdateAsync(AnimalDto animalDto)
+//        {
+//            try
+//            {
+//                Animal animal = await _animalService.UpdateAnimalAsync(animalDto);
+//                CompleteSaveProcess(animalDto, "Animal data updated successfully!");
+//                await GetAndResetAnimalData(animal); //get the updated animal data and reset the text boxes
+//            }
+//            catch (Exception ex)
+//            {
+//                LogError(ex);
+//                ShowMessage("Failed to update the animal record. Please try again.");
+//            }
+//        }
+
+//        // Helper methods for handling the high level save process
+//        private void CompleteSaveProcess(AnimalDto animalDto, string successMessage)
+//        {
+//            ShowMessage(successMessage);
+//            ToggleButtons(false);
+//        }
+
+//        // Helper methods for handling user update prompt 
+//        private bool PromptUserToUpdate()
+//        {
+//            DialogResult result = MessageBox.Show(
+//                "Update existing animal?",
+//                "Confirmation",
+//                MessageBoxButtons.YesNo);
+//            return result == DialogResult.Yes;
+//        }
+
+//        private void ToggleButtons(bool isEditMode)
+//        {
+//            saveButton.Visible = isEditMode;//if edit mode is true, show the save button
+//            updateButton.Visible = !isEditMode; //if edit mode is false, show the update button
+//        }
+
+//        //these should go into a utilities class TODO 
+//        //logging logic, TODO will be creating a logging service for this but not yet implemented 
+//        private void LogError(Exception ex)
+//        {
+//            // Add logging logic here (e.g., log to a file or monitoring system)
+//            Console.WriteLine(ex.Message);
+//        }
+
+//        private void ShowMessage(string message)
+//        {
+//            MessageBox.Show(message);
+//        }
 //    }
 //}
 
@@ -374,6 +577,7 @@ using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 //NOTES
@@ -413,7 +617,7 @@ namespace RATAPP.Panels
         private TextBox sireTextBox;
         private TextBox inbredTextBox;
         private TextBox earTypeTextBox;
-        private TextBox markingsTextBox;
+        private TextBox markingsTextBox; //TODO
         private TextBox dobTextBox; //TODO Date of Birth this needs to be in a specific format so I need to figure that out some checks needed for that, for now just a text box
         private TextBox dodTextBox; // Date of Death
 
@@ -426,7 +630,7 @@ namespace RATAPP.Panels
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
         private ComboBox earTypeComboBox;
-        private ComboBox markingsComboBox;
+        private ComboBox markingComboBox;
         private ComboBox breederInfoComboBox;
 
 
@@ -434,16 +638,23 @@ namespace RATAPP.Panels
         private Button inbredButton;
         private Button saveButton;
         private Button updateButton;
+        private Button cancelButton;
+        private Button documentsButton; 
 
         //state of the panel
         private bool _isEditMode = false;
+        //private bool _isNavMode = false; 
 
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Services.TraitService _traitService;
+        private RATAPPLibrary.Services.SpeciesService _speciesService;
+
         private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
         //this is likely temporary but I want to test out the idea of going to the next and previous animal
         private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
+        private RATAppBaseForm _parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
 
         private PictureBox loadingSpinner; //TODO put in some kind of utility class for re-use, just testing right now 
 
@@ -474,7 +685,10 @@ namespace RATAPP.Panels
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
-            parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works 
+            _traitService = new RATAPPLibrary.Services.TraitService(context);
+            _speciesService = new RATAPPLibrary.Services.SpeciesService(context);
+            parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works
+            _parentForm = parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
             _animal = currAnimal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
 
@@ -485,6 +699,7 @@ namespace RATAPP.Panels
         private void InitializeComponent(AnimalDto animal)
         {
             //TODO should this just be _animal? Why or why not? follow this variable through and make sure I can make that switch first 
+            _animal = animal; 
 
             // Set panel properties
             this.Size = new Size(1200, 800); // Increased panel size for better spacing
@@ -521,7 +736,7 @@ namespace RATAPP.Panels
         {
             var animal = await _animalService.GetAnimalByIdAsync(animalID);
             _animal = animal; //FIXME 
-            InitializeTextBoxes(animal);
+            InitializeTextBoxes(_animal);//probably don't need to pass anything here, but for clarity I guess 
         }
 
         // initialize combo boxes
@@ -534,12 +749,13 @@ namespace RATAPP.Panels
             string variety = "";
             string color = "";
             string genotype = "";
-            string ancestry = "";
+            string marking = "";
             string breeder = "";
             string earType = "";
             string dam = "";
             string sire = "";
             string inbred = "";
+            string imageUrl = "";
 
 
             //check if animal exists, this is the update case 
@@ -553,15 +769,17 @@ namespace RATAPP.Panels
                 variety = _animal.Variety;
                 color = _animal.Color;
                 genotype = "TODO";
-                ancestry = "TODO";
-                breeder = _animal.Breeder;
+                marking = "TODO";
+                breeder = "TODO";
                 earType = "TODO";//_animal.earType; //TODO make ear type species specific 
                 dam = _animal.Dam;
                 sire = _animal.Sire;
                 inbred = "TODO";
 
                 InitializePhotoBox();
-                Controls.Add(animalPhotoBox);
+                AddImageToAnimalTextbox(_animal);
+                //animalPhotoBox.Image = Image.FromFile(imageUrl); //TODO clean up this logic 
+
             }
             // First column (left side)
             idTextBox = CreateTextBox(150, 20, id);
@@ -571,16 +789,24 @@ namespace RATAPP.Panels
             sexComboBox = CreateComboBox(150, 140, sex);
             sexComboBox.Name = "sexComboBox";
             varietyComboBox = CreateComboBox(150, 180, variety);
+            varietyComboBox.Name = "varietyComboBox";
 
             damComboBox = CreateComboBox(150, 220, dam);
+            damComboBox.Name = "damComboBox";
 
             // Second column (right side)
             colorComboBox = CreateComboBox(490, 20, color);
+            colorComboBox.Name = "colorComboBox";
             genotypeComboBox = CreateComboBox(490, 60, genotype);
-            ancestryComboBox = CreateComboBox(490, 100, ancestry);
+            genotypeComboBox.Name = "genotypeComboBox";
+            markingComboBox = CreateComboBox(490, 100, marking);
+            markingComboBox.Name = "markingComboBox";
             breederInfoComboBox = CreateComboBox(490, 140, breeder);
+            breederInfoComboBox.Name = "breederInfoComboBox";
             earTypeComboBox = CreateComboBox(490, 180, earType);
+            earTypeComboBox.Name = "earTypeComboBox";
             sireComboBox = CreateComboBox(490, 220, sire);
+            sireComboBox.Name = "sireComboBox";
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -612,21 +838,25 @@ namespace RATAPP.Panels
             this.Controls.Add(sireComboBox);
             this.Controls.Add(earTypeComboBox);
             this.Controls.Add(inbredTextBox);
+            this.Controls.Add(markingComboBox);
 
             NewAnimal(); //new animal settings
             SetComboBoxes();
         }
 
-        private void SetComboBoxes()
+        private async void SetComboBoxes()
         {
             // Iterate through all controls on the form
             foreach (Control control in this.Controls)
             {
                 if (control is ComboBox comboBox)
                 {
-                    // Add "Create New" as an option
+                    //get the list of values from the db 
+                    List<string> items = await GetComboBoxItemsFromDatabase(control); // Add database items
+                    
+                    // Add "Create New" as an option TODO need to set Create New as a button 
                     comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
-                    comboBox.Items.AddRange(GetComboBoxItemsFromDatabase(control).ToArray()); // Add database items
+                    comboBox.Items.AddRange(items.ToArray()); // Add database items
                     comboBox.Items.Add("Create New");
 
                     // Subscribe to the SelectedIndexChanged event
@@ -639,31 +869,143 @@ namespace RATAPP.Panels
         //TODO
         //this is going to be getting a list of options from each table in the database
         //which means that the libary will handle most of this 
-        private List<string> GetComboBoxItemsFromDatabase(Control control)
+        private async Task<List<string>> GetComboBoxItemsFromDatabase(Control control)
         {
             var options = new List<string>();
-            //if the combo box is species, then get the species from the database
-            //if the combo box is sex, then get the sex from the database (or just populate for now)
 
-            if (control.Name == "speciesComboBox")
+            // Use switch statement to handle different ComboBox names
+            switch (control.Name)
             {
-                //get species from the database //FIXME this is just for testing
-                options.AddRange(new[] { "Mouse", "Rat" });
-            }
-            else if (control.Name == "sexComboBox")
-            {
-                options.AddRange(new[] { "Male", "Female", "Unknown", "Other" }); //FIXME this is just for testing
-            }
-            else
-            {
-                options.AddRange(new[] { "Option1", "Option2", "Option3" }); //FIXME this is just for testing
+                case "speciesComboBox":
+                    // Get species from the database
+                    List<string> species = (List<string>)await _speciesService.GetAllSpeciesAsync();
+                    options.AddRange(species);
+                    break;
+
+                case "sexComboBox":
+                    // Use sex options (for now just populating for testing)
+                    options.AddRange(new[] { "Male", "Female", "Unknown", "Other" }); // FIXME: for testing
+                    break;
+
+                case "varietyComboBox":
+                    // Handle variety-related options (update as needed)
+                    options.AddRange(new[] { "Variety1", "Variety2", "Variety3" }); // FIXME: for testing
+                    break;
+
+                case "colorComboBox":
+                    // Handle color-related options (update as needed)
+                    options.AddRange(new[] { "Red", "Blue", "Green" }); // FIXME: for testing
+                    break;
+
+                case "genotypeComboBox":
+                    // Handle genotype-related options (update as needed)
+                    options.AddRange(new[] { "Genotype1", "Genotype2", "Genotype3" }); // FIXME: for testing
+                    break;
+
+                case "damComboBox":
+                    string animalSpecies = GetAnimalSpecies();
+                    string animalSex = "Female";
+                    //if we are creating a new animal show all female (dam) options 
+                    //or if they've filled in the species field, get it from there 
+
+                    //Unknown means nothing filled out, so we need to get all Female options other option is to have a pop up box that says "Please fill out the species field first"
+                    if (animalSpecies != "Unknown")
+                    {
+                        // Handle dam-related options (fetch data from database or service as needed)
+                        AnimalDto[] dams = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var dam in dams)
+                        {
+                            options.Add(dam.Name);
+                        }
+                    }
+                    else
+                    {
+                        // if no species, show all for appropriate sex 
+                        // TODO handle mismatch in selected species and dam/sire type 
+                        AnimalDto[] dams = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var dam in dams)
+                        {
+                            options.Add(dam.Name);
+                        }
+                    }
+
+                        break;
+
+                case "sireComboBox":
+                    animalSpecies = GetAnimalSpecies();
+                    animalSex = "Male";
+                    //if we are creating a new animal show all female (dam) options 
+                    //or if they've filled in the species field, get it from there 
+
+                    //Unknown means nothing filled out, so we need to get all Female options other option is to have a pop up box that says "Please fill out the species field first"
+                    if (animalSpecies != "Unknown")
+                    {
+                        // Handle dam-related options (fetch data from database or service as needed)
+                        AnimalDto[] sires = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var sire in sires)
+                        {
+                            options.Add(sire.Name);
+                        }
+                    }
+                    else
+                    {
+                        // if no species, show all for appropriate sex 
+                        // TODO handle mismatch in selected species and dam/sire type 
+                        AnimalDto[] sires = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var sire in sires)
+                        {
+                            options.Add(sire.Name);
+                        }  
+                    }
+
+                    break;
+
+                case "earTypeComboBox":
+                    // Handle ear type-related options (update as needed)
+                    options.AddRange(new[] { "EarType1", "EarType2", "EarType3" }); // FIXME: for testing
+                    break;
+
+                case "markingComboBox":
+                    // Handle marking-related options (update as needed)
+                    options.AddRange(new[] { "Marking1", "Marking2", "Marking3" }); // FIXME: for testing
+                    break;
+
+                case "breederInfoComboBox":
+                    // Handle breeder information-related options (update as needed)
+                    options.AddRange(new[] { "Breeder1", "Breeder2", "Breeder3" }); // FIXME: for testing
+                    break;
+
+                default:
+                    // For other ComboBoxes, just add some default options for now
+                    options.AddRange(new[] { "Option1", "Option2", "Option3" }); // FIXME: for testing
+                    break;
             }
 
             return options;
         }
 
+        //find species
+        private string GetAnimalSpecies()
+        {
+            //first, check if _animal is populated
+            if (_animal != null)
+            {
+                return _animal.Species;
+            }
+            else if (speciesComboBox.SelectedItem != null && speciesComboBox.Text != "Add New") //FIXME make sure this is the correct text
+            {
+                return speciesComboBox.SelectedItem.ToString(); //or .Text? FIXME 
+            }
+            else
+            {
+                //return unknown, use to tell the user that they need to fill out the species field first
+                return "Unknown";
+                //TODO handle case where species is unknown, this should be a pop up box that says "Please fill out the species field first"  MessageBox.Show("Please fill out the species field first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         // Event handler for "Create New" functionality
-        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private async void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (sender is ComboBox comboBox && comboBox.SelectedItem?.ToString() == "Create New")
             {
@@ -675,9 +1017,12 @@ namespace RATAPP.Panels
                     // Add the new item to the database
                     AddNewItemToDatabase(newItem);
 
+                    //get the updated data from the database 
+                    List<string> items = await GetComboBoxItemsFromDatabase(comboBox);
+
                     // Refresh the combo box items
                     comboBox.Items.Clear();
-                    comboBox.Items.AddRange(GetComboBoxItemsFromDatabase(comboBox).ToArray());
+                    comboBox.Items.AddRange(items.ToArray());
                     comboBox.Items.Add("Create New"); //TODO
 
                     // Optionally, select the newly added item
@@ -689,6 +1034,30 @@ namespace RATAPP.Panels
                     comboBox.SelectedIndex = -1;
                 }
             }
+        }
+
+        private void AnimalImageClicked(object sender, EventArgs e)
+        {
+            // Open a file dialog to select an image
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Filter = "Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)|*.jpg;*.jpeg;*.png;*.gif;*.bmp",
+                Title = "Select an Image"
+            };
+
+            // If the user selects an image, update the image box
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                animalPhotoBox.Image = Image.FromFile(dialog.FileName);
+                _animal.imageUrl = dialog.FileName; //FIXME not sure that this logic will work, but checking it out 
+                ShowMessage("Image updated successfully!" + _animal.imageUrl);
+                Refresh(); // refresh to show the new image? 
+            }
+
+            //Update the image address in the db
+            //this should happen when "save" is clicked
+            //Dispose of the dialog to free up resources
+            dialog.Dispose();
         }
 
         // Placeholder for a user prompt dialog
@@ -724,7 +1093,7 @@ namespace RATAPP.Panels
             // Second column (right side)
             colorLabel = CreateLabel("Color", 380, 20, labelFont);
             genotypeLabel = CreateLabel("Genetics", 380, 60, labelFont);
-            ancestryLabel = CreateLabel("Ancestry", 380, 100, labelFont);
+            markingsLabel = CreateLabel("Markings", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
             earTypeLabel = CreateLabel("Ear Type", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
@@ -741,7 +1110,7 @@ namespace RATAPP.Panels
             this.Controls.Add(varietyLabel);
             this.Controls.Add(colorLabel);
             this.Controls.Add(genotypeLabel);
-            this.Controls.Add(ancestryLabel);
+            this.Controls.Add(markingsLabel);
             this.Controls.Add(breederInfoLabel);
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
@@ -772,20 +1141,20 @@ namespace RATAPP.Panels
         private void InitializeTextBoxes(AnimalDto animal)
         {
             // First column (left side)
-            idTextBox = CreateTextBox(150, 20, animal.Id.ToString());
-            animalNameTextBox = CreateTextBox(150, 60, animal.Name);
-            speciesTextBox = CreateTextBox(150, 100, animal.Species);
-            sexTextBox = CreateTextBox(150, 140, animal.Sex);
-            varietyTextBox = CreateTextBox(150, 180, animal.Variety);
-            damTextBox = CreateTextBox(150, 220, animal.Dam);
+            idTextBox = CreateTextBox(150, 20, _animal.Id.ToString());
+            animalNameTextBox = CreateTextBox(150, 60, _animal.Name);
+            speciesTextBox = CreateTextBox(150, 100, _animal.Species);
+            sexTextBox = CreateTextBox(150, 140, _animal.Sex);
+            varietyTextBox = CreateTextBox(150, 180, _animal.Variety);
+            damTextBox = CreateTextBox(150, 220, _animal.Dam);
 
             // Second column (right side)
-            colorTextBox = CreateTextBox(490, 20, animal.Color);
+            colorTextBox = CreateTextBox(490, 20, _animal.Color);
             genotypeTextBox = CreateTextBox(490, 60, "TODO");
-            ancestryTextBox = CreateTextBox(490, 100, "TODO");
-            breederInfoTextBox = CreateTextBox(490, 140, animal.Breeder);
+            markingsTextBox = CreateTextBox(490, 100, "TODO");
+            breederInfoTextBox = CreateTextBox(490, 140, _animal.Breeder);
             earTypeTextBox = CreateTextBox(490, 180, "TODO");
-            sireTextBox = CreateTextBox(490, 220, animal.Sire);
+            sireTextBox = CreateTextBox(490, 220, _animal.Sire);
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -798,7 +1167,7 @@ namespace RATAPP.Panels
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 Font = new Font("Segoe UI", 10F), // Make it consistent with labels
-                Text = "TODO - should come from db",
+                Text = _animal.Comment,
                 BackColor = Color.LightGray
             };
 
@@ -810,7 +1179,7 @@ namespace RATAPP.Panels
             this.Controls.Add(varietyTextBox);
             this.Controls.Add(colorTextBox);
             this.Controls.Add(genotypeTextBox);
-            this.Controls.Add(ancestryTextBox);
+            this.Controls.Add(markingsTextBox);
             this.Controls.Add(breederInfoTextBox);
             this.Controls.Add(commentsTextBox);
             this.Controls.Add(damTextBox);
@@ -818,15 +1187,26 @@ namespace RATAPP.Panels
             this.Controls.Add(earTypeTextBox);
             this.Controls.Add(inbredTextBox);
 
+            Refresh();
+
             //add animal image
-            //TODO this should happen elsewhere
+            AddImageToAnimalTextbox(_animal);
+
+            //Update the state of the panel
+            AnimalExists();
+        }
+
+        // Add image to textbox
+        private void AddImageToAnimalTextbox(AnimalDto animal)
+        {
             if (animal.imageUrl != null)
             {
                 animalPhotoBox.Image = Image.FromFile(animal.imageUrl);
-                this.Controls.Add(animalPhotoBox);
+                if(_isEditMode)
+                {
+                    animalPhotoBox.Click += AnimalImageClicked;
+                }
             }
-
-            AnimalExists();
         }
 
         // Method for existing animals 
@@ -848,6 +1228,7 @@ namespace RATAPP.Panels
             //hide save button
             //show update button
             saveButton.Hide();
+            cancelButton.Hide();
             updateButton.Show();
         }
 
@@ -867,6 +1248,8 @@ namespace RATAPP.Panels
             //show save button
             updateButton.Hide();
             saveButton.Show();
+            //TODO set up cancel here but it should return to home page 
+            cancelButton.Show();
         }
 
         // Method to create textboxes
@@ -929,6 +1312,7 @@ namespace RATAPP.Panels
         private void PreviousButtonClick(object sender, EventArgs e)
         {
             int i = 0;
+            //_isNavMode = true; //set the navigation mode to true
             foreach (AnimalDto animal in _allAnimals)
             {
                 //once we get to animal
@@ -936,8 +1320,13 @@ namespace RATAPP.Panels
                 {
                     //go to the previous animal 
                     //get the next animal based on the index of the current animal + 1
-                    LoadAnimalDataAsync(_allAnimals[i - 1].Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
-                    this.Refresh();
+                    //LoadAnimalDataAsync(_allAnimals[i - 1].Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
+                    // Logic to update animal data 
+                    _isEditMode = true;
+
+                    //first clear out old controls
+                    this.Controls.Clear();
+                    InitializeComponent(_allAnimals[i - 1]);
                     break;
                 }
 
@@ -945,6 +1334,94 @@ namespace RATAPP.Panels
                 i++;
             }
 
+        }
+
+        private void UpdateButtonClick(object sender, EventArgs e)
+        {
+            // Logic to update animal data 
+            _isEditMode = true;
+
+            //first clear out old controls
+            this.Controls.Clear();
+            InitializeComponent(_animal);
+        }
+
+        private async Task CancelButtonClick(object sender, EventArgs e)
+        {
+            // Make sure that we're in edit mode. If we aren't, we shouldn't be here anyways, but just in case, check.
+            if (_isEditMode)
+            {
+                // Show message box with prompt to save changes.
+                DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?",
+                                                      "Confirm Cancel",
+                                                      MessageBoxButtons.YesNoCancel,
+                                                      MessageBoxIcon.Question);
+
+                // If the user clicks 'Yes', save changes
+                if (result == DialogResult.Yes)
+                {
+                    // Save changes (implement the actual saving logic here)
+                    await SaveButtonClick(sender, e);
+                }
+                // If the user clicks 'No', don't save changes
+                else if (result == DialogResult.No)
+                {
+                    // Set edit mode to false after deciding what to do with the changes
+                    _isEditMode = false;
+
+                    //clear the controls
+                    this.Controls.Clear();
+
+                    // Reload the page in non-edit mode (or update the UI to reflect the changes)
+                    InitializeComponent(_animal);
+                }
+                // If the user clicks 'Cancel', do nothing and return to edit mode
+                else if (result == DialogResult.Cancel)
+                {
+                    return; // Do nothing, keep the user in edit mode
+                } 
+            }
+            else
+            {
+                // adding a new animal so check if there is data in the text boxes TODO
+                //if //data in the text boxes 
+                   // {
+                    // if there is, prompt the user to save the data
+                    // Show message box with prompt to save changes.
+                    DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?",
+                                                          "Confirm Cancel",
+                                                          MessageBoxButtons.YesNoCancel,
+                                                          MessageBoxIcon.Question);
+
+                    // If the user clicks 'Yes', save changes
+                    if (result == DialogResult.Yes)
+                    {
+                        // Save changes (implement the actual saving logic here)
+                        await SaveButtonClick(sender, e);
+                    }
+                    // If the user clicks 'No', don't save changes
+                    else if (result == DialogResult.No)
+                    {
+                        // Set edit mode to false after deciding what to do with the changes
+                        _isEditMode = false;
+
+                    //return to home page
+                    _parentForm.HomeButton_Click(sender, e);
+
+                    //clear the controls
+                    //this.Controls.Clear();
+
+                    // Reload the page in non-edit mode (or update the UI to reflect the changes)
+                    //InitializeComponent(_animal);
+                }
+                // If the user clicks 'Cancel', do nothing and return to edit mode
+                else if (result == DialogResult.Cancel)
+                    {
+                        return; // Do nothing, keep the user in edit mode
+                    }
+                }
+               
+           // }
         }
 
         //next button click 
@@ -971,16 +1448,17 @@ namespace RATAPP.Panels
             //if there is no next animal, do nothing
             //maybe a list would be better here so that I could do next and previous vs. having to find index but not sure yet 
             int i = 0;
+            //_isNavMode = true;
             foreach (AnimalDto animal in _allAnimals)
             {
                 if (i == 1)
                 {
                     //get the next animal based on the index of the current animal + 1
-                    LoadAnimalDataAsync(animal.Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
+                    //LoadAnimalDataAsync(animal.Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
                     //if there is no next animal, do nothing
-
-                    //if there is a next animal, refresh the panel with the new animal data
-                    this.Refresh();
+                    //first clear out old controls
+                    this.Controls.Clear();
+                    InitializeComponent(animal);
                     //and break out of the loop
                     break;
                 }
@@ -1011,9 +1489,6 @@ namespace RATAPP.Panels
         // Initialize the row of buttons at the bottom
         private void InitializeBottomButtons()
         {
-            // Button 1: Update Animal Details TODO made seperate methods for these buttons will likely do that for each button
-            //Button updateButton = CreateButton("Update Animal Details", 50, 630);
-
             // Button 2: Ancestry
             Button ancestryButton = CreateButton("Ancestry", 220, 630);
 
@@ -1024,7 +1499,8 @@ namespace RATAPP.Panels
             Button breedingHistoryButton = CreateButton("Breeding History", 500, 630);
 
             // Button 5: Documents
-            Button documentsButton = CreateButton("Documents", 650, 630);
+            //Button documentsButton = CreateButton("Documents", 650, 630);
+            DocumentsButton(); //create button and set click event 
 
             // Button 6: Health
             Button healthButton = CreateButton("Health", 790, 630);
@@ -1034,6 +1510,23 @@ namespace RATAPP.Panels
             this.Controls.Add(breedingHistoryButton);
             this.Controls.Add(documentsButton);
             this.Controls.Add(healthButton);
+        }
+
+        //documents button
+        private void DocumentsButton()
+        {
+            //create documents button
+            documentsButton = CreateButton("Documents", 650, 630);
+            documentsButton.Click += (sender, e) =>
+            {
+                // Logic to show documents
+                //TODO get the documents from the database
+                // and display them in a new window
+                // Open the CreateAccountForm
+                var documentForm = new DocumentsForm(_parentForm, _context);
+                documentForm.Show();
+                //this.Hide();
+            };
         }
 
         //TODO get the animal details from the database
@@ -1094,6 +1587,7 @@ namespace RATAPP.Panels
             // for now just getting this to work
             string breeder = "0"; //this is the user's breeder id there is currently a bug that isn't storing the user as a breeder that needs to be fixed before this will actually work
 
+            //FIXME this is just for testing right now need a way to manage lines i.e. "add new" or "select from list" 
             string line = "2";
             if (speciesComboBox.Text == "Mouse")
             {
@@ -1102,7 +1596,7 @@ namespace RATAPP.Panels
 
             AnimalDto animal = new AnimalDto
             {
-                Id = int.Parse(idTextBox.Text),
+                Id = 0,//int.Parse(idTextBox.Text), TODO 
                 Name = animalNameTextBox.Text,
                 Sex = sexComboBox.Text, // Assuming there's a TextBox for sex
                 DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
@@ -1110,6 +1604,8 @@ namespace RATAPP.Panels
                                            //? null
                                            //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
                 Species = speciesComboBox.Text,
+                Comment = commentsTextBox.Text,
+                imageUrl = "aURL",//_animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
                 Line = line, // Assuming there's a TextBox for line
                 Dam = "aDam",//damComboBox.Text, // Assuming there's a TextBox for dam
                 Sire = "aSIRE",//sireComboBox.Text, // Assuming there's a TextBox for sire
@@ -1147,16 +1643,39 @@ namespace RATAPP.Panels
             };
         }
 
+        //allow the user to cancel making updating, or making a new animal 
+        private void CancelButton()
+        {
+            //create calc % inbred button 
+            cancelButton = new Button
+            {
+                Location = new Point(10, 680),
+                Width = 150,
+                Height = 40,
+                Text = "Cancel",
+                Font = new Font("Segoe UI", 10F),
+                BackColor = Color.Red,
+                FlatStyle = FlatStyle.Popup
+            };
+            //this should be a call to the library to calculate the % inbred
+            cancelButton.Click += async (sender, e) =>
+            {
+                await CancelButtonClick(sender, e); 
+            };
+        }
+
         private void IntializeButtons()
         {
             InbredButton();
             UpdateButton();
             SaveButton();
+            CancelButton();
 
             // Add the button to the panel
             this.Controls.Add(inbredButton);
             this.Controls.Add(updateButton);
             this.Controls.Add(saveButton);
+            this.Controls.Add(cancelButton);
         }
 
         //TODO just testing, move to utils file
@@ -1189,6 +1708,7 @@ namespace RATAPP.Panels
                 );
             };
         }
+
         //FIXME repeated code but getting interface working for now 
         public async Task RefreshDataAsync()
         {
@@ -1274,6 +1794,7 @@ namespace RATAPP.Panels
         // Handle the create new animal process 
         private async Task HandleCreateNewAsync(AnimalDto animalDto)
         {
+            throw new NotImplementedException();
             try
             {
                 Animal animal = await _animalService.CreateAnimalAsync(animalDto);
@@ -1337,6 +1858,7 @@ namespace RATAPP.Panels
         private void ToggleButtons(bool isEditMode)
         {
             saveButton.Visible = isEditMode;//if edit mode is true, show the save button
+            cancelButton.Visible = isEditMode; //if edit mode is true, show the cancel button
             updateButton.Visible = !isEditMode; //if edit mode is false, show the update button
         }
 

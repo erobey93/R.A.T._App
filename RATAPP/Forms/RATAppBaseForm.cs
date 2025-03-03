@@ -198,6 +198,14 @@ namespace RATAPP.Forms
             MessageBox.Show("Utilities button clicked");
         }
 
+        private void AncestryButton_Click(object sender, EventArgs e)
+        {
+            // Handle Ancestry button click
+            var ancestryPanel = new AncestryPanel(this, _context); // Create a new instance of the ReportsPanel
+            _activePanel = ancestryPanel;
+            ShowPanel(ancestryPanel);
+        }
+
         private void SettingsButton_Click(object sender, EventArgs e)
         {
             // Handle Settings button click
@@ -207,13 +215,9 @@ namespace RATAPP.Forms
         private void AdopterButton_Click(object sender, EventArgs e)
         {
             // Handle Adopter Management button click
-            MessageBox.Show("Adopter Management button clicked");
-        }
-
-        private void AncestryButton_Click(object sender, EventArgs e)
-        {
-            // Handle Ancestry button click
-            MessageBox.Show("Ancestry button clicked");
+            var adopterPanel = new AdopterManagementPanel(this, _context); // Create a new instance of the ReportsPanel
+            _activePanel = adopterPanel;
+            ShowPanel(adopterPanel);
         }
 
         private void ResearchButton_Click(object sender, EventArgs e)
@@ -244,7 +248,7 @@ namespace RATAPP.Forms
             }
         }
 
-        private async void HomeButton_Click(object sender, EventArgs e)
+        public async void HomeButton_Click(object sender, EventArgs e)
         {
             var homePanel = await HomePanel.CreateAsync(this, _context, UserName, "role - TODO");
             _activePanel = homePanel;

@@ -8,9 +8,9 @@ namespace RATAPPLibrary.Services
 {
     public class LineService
     {
-        private readonly Data.DbContexts.RatAppDbContext _context;
+        private readonly RatAppDbContext _context;
 
-        public LineService(Data.DbContexts.RatAppDbContext context)
+        public LineService(RatAppDbContext context)
         {
             _context = context;
         }
