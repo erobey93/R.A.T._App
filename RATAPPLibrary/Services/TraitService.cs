@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RATAPPLibrary.Data.Models.Genetics;
+using System.Security.AccessControl;
 
 namespace RATAPPLibrary.Services
 {
@@ -15,11 +16,13 @@ namespace RATAPPLibrary.Services
         //markings 
         //tail type
         private readonly Data.DbContexts.RatAppDbContext _context;
+        private SpeciesService _speciesService;
 
         // Constructor to initialize the context
         public TraitService(Data.DbContexts.RatAppDbContext context)
         {
             _context = context;
+            _speciesService = new SpeciesService(context);
         }
 
         public async Task<int?> GetTraitTypeIdByNameAsync(string name)
@@ -47,6 +50,28 @@ namespace RATAPPLibrary.Services
                 .ToListAsync();
         }
 
+        //get all traits by species
+        public async Task<IEnumerable<Trait>> GetTraitsBySpeciesAsync(string species)
+        {
+            List<Trait> traitList = new List<Trait>();
+
+            // Query the Species by CommonName and return the Id
+            try
+            {
+                var speciesID = await _speciesService.GetSpeciesIdByCommonNameAsync(species); // Get the SpeciesID
+                traitList = await _context.Trait
+                    .Where(t => t.SpeciesID == speciesID)
+                    .ToListAsync();
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new InvalidOperationException($"Species '{species}' does not exist.");
+            }
+            // Query the Traits by SpeciesID
+            return traitList; // Return the list of traits for the specified species
+        }
+
+        //create a new trait type i.e. each trait has a type (e.g. color, pattern, etc.) so this is not species specific 
         public async Task<TraitType> CreateTraitTypeAsync(string name, string? description = null)
         {
             // Check if the trait type already exists
@@ -67,11 +92,9 @@ namespace RATAPPLibrary.Services
             return newTraitType;
         }
 
-        //Create a new trait
+        //Create a new trait i.e. a trait within a trait type, so this is species specific 
         public async Task<Trait> CreateTraitAsync(string name, int traitTypeId, string species, string? description = null)
         {
-            int speciesID = 1; // 1 is mouse, 0 is rat 
-
             //get species based on species passed in TODO: implement this
             if (species == null)
             {
@@ -87,11 +110,12 @@ namespace RATAPPLibrary.Services
                 throw new InvalidOperationException("TraitTypeId must be provided.");
             }
 
-            //this should be dynamically grabbed from db but for now I'm just going to hard code it TODO
-            if(species == "Rat")
-            {
-                speciesID = 0; 
-            }
+            // get species id from the database 
+            // TODO may be better to look for either the common name or scientific name 
+            var speciesID = await _context.Species
+                .Where(s => s.CommonName.Equals(species, StringComparison.OrdinalIgnoreCase))
+                .Select(s => s.Id)
+                .FirstOrDefaultAsync();
 
             // Check if the trait already exists
             var existingTrait = await _context.Trait
@@ -100,6 +124,7 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"Trait '{name}' already exists for TraitTypeId '{traitTypeId}'.");
             }
+
             // Create the new trait
             var newTrait = new Trait
             {
@@ -115,7 +140,7 @@ namespace RATAPPLibrary.Services
             return newTrait;
         }
 
-        // Get all traits available in the database
+        // Get all traits available in the database (for all species)
         public async Task<IEnumerable<Trait>> GetAllTraitsAsync()
         {
             return await _context.Trait.ToListAsync();  // Get all traits from the database
@@ -140,6 +165,48 @@ namespace RATAPPLibrary.Services
         {
             return await _context.Trait
                 .FirstOrDefaultAsync(t => t.Id == id);  // Get a trait by its Id
+        }
+
+        //create new entry in the animal trait table
+        public async Task<AnimalTrait> CreateAnimalTraitAsync(int animalId, int traitId)
+        {
+            // Check if the animal trait already exists
+            var existingAnimalTrait = await _context.AnimalTrait
+                .FirstOrDefaultAsync(at => at.AnimalId == animalId && at.TraitId == traitId);
+            if (existingAnimalTrait != null)
+            {
+                throw new InvalidOperationException($"AnimalTrait for AnimalId '{animalId}' and TraitId '{traitId}' already exists.");
+            }
+            // Create the new animal trait
+            var newAnimalTrait = new AnimalTrait
+            {
+                AnimalId = animalId,
+                TraitId = traitId
+            };
+            _context.AnimalTrait.Add(newAnimalTrait);
+            await _context.SaveChangesAsync();
+            return newAnimalTrait;
+        }
+
+        // Get all traits for a specific animal by AnimalId (from the AnimalTrait table)
+        public async Task<IEnumerable<Trait>> GetTraitsByAnimalIdAsync(int animalId)
+        {
+            return await _context.AnimalTrait
+                .Where(at => at.AnimalId == animalId)
+                .Select(at => at.Trait)
+                .ToListAsync();
+        }
+
+        //get all traits for a specific animal by animal id and trait id 
+        //this is used to get all trait types for a single animal
+        // eventually this will be used to get/create the genotype for the animal
+        // and to "stack" traits together to make new traits, for example angora + rex = texel
+        public async Task<Trait> GetTraitByAnimalIdAndTraitIdAsync(int animalId, int traitId)
+        {
+            return await _context.AnimalTrait
+                .Where(at => at.AnimalId == animalId && at.TraitId == traitId)
+                .Select(at => at.Trait)
+                .FirstOrDefaultAsync();
         }
     }
 }

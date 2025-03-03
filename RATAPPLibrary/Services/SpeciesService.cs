@@ -74,10 +74,44 @@ namespace RATAPPLibrary.Services
         }
 
         //get species by id
-        //get species by name
-        //get species by scientific name
+        public async Task<Species> GetSpeciesByIdAsync(int id)
+        {
+            // Find the correct Species based on the ID
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.Id == id);
+            if (species == null)
+            {
+                // Throw an exception if the species is not found
+                throw new KeyNotFoundException($"Species with ID '{id}' not found.");
+            }
+            return species;
+        }
+
         //get species by common name
-        //get species by stock id
-        //this is actually getting the species via the stock id
+        public async Task<Species> GetSpeciesByCommonNameAsync(string commonName)
+        {
+            // Find the correct Species based on the common name
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == commonName);
+            if (species == null)
+            {
+                // Throw an exception if the species is not found
+                throw new KeyNotFoundException($"Species with common name '{commonName}' not found.");
+            }
+            return species;
+        }
+
+        //get species by scientific name
+
+        //get species id by common name - don't return the whole object if we don't need it, this will de-clutter the code in other classes/services 
+        public async Task<int> GetSpeciesIdByCommonNameAsync(string commonName)
+        {
+            // Find the correct Species based on the common name and return the ID
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == commonName);
+            if (species == null)
+            {
+                // Throw an exception if the species is not found
+                throw new KeyNotFoundException($"Species with common name '{commonName}' not found.");
+            }
+            return species.Id;
+        }
     }
 }
