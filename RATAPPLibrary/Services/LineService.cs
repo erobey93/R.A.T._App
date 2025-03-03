@@ -10,6 +10,8 @@ namespace RATAPPLibrary.Services
     {
         private readonly RatAppDbContext _context;
 
+        public LineService() { }
+
         public LineService(RatAppDbContext context)
         {
             _context = context;

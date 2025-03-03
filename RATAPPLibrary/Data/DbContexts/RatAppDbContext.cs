@@ -19,12 +19,15 @@ namespace RATAPPLibrary.Data.DbContexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY2;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
-                .UseLoggerFactory(MyLoggerFactory) // Attach the logger
-                .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
-                .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
-        }
+            if (optionsBuilder == null)
+            {
+                optionsBuilder
+                    .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY2;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
+                    .UseLoggerFactory(MyLoggerFactory) // Attach the logger
+                    .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
+                    .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
+            }
+            }
 
         //Account management
         public virtual DbSet<User> Users { get; set; }
