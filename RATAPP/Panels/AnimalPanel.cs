@@ -641,6 +641,7 @@ namespace RATAPP.Panels
         private Button updateButton;
         private Button cancelButton;
         private Button documentsButton;
+        private Button indAncestryButton; // Individual Ancestry Button vs Ancestry Page
         private Button prevButton;
         private Button nextButton;
 
@@ -1612,7 +1613,8 @@ namespace RATAPP.Panels
         private void InitializeBottomButtons()
         {
             // Button 2: Ancestry
-            Button ancestryButton = CreateButton("Ancestry", 220, 630);
+            //Button ancestryButton = CreateButton("Ancestry", 220, 630);
+            AncestryButton();
 
             // Button 3: Genetics
             Button geneticsButton = CreateButton("Genetics", 360, 630);
@@ -1627,7 +1629,7 @@ namespace RATAPP.Panels
             // Button 6: Health
             Button healthButton = CreateButton("Health", 790, 630);
 
-            this.Controls.Add(ancestryButton);
+            this.Controls.Add(indAncestryButton);
             this.Controls.Add(geneticsButton);
             this.Controls.Add(breedingHistoryButton);
             this.Controls.Add(documentsButton);
@@ -1635,6 +1637,9 @@ namespace RATAPP.Panels
         }
 
         //documents button
+        //TODO just testing out 
+        //I would like this to have ALL documents for the animal
+        //I may end up deleting this and making a health button instead though
         private void DocumentsButton()
         {
             //create documents button
@@ -1647,6 +1652,25 @@ namespace RATAPP.Panels
                 // Open the CreateAccountForm
                 var documentForm = new DocumentsForm(_parentForm, _context);
                 documentForm.Show();
+                //this.Hide();
+            };
+        }
+
+        //ancestry button 
+        //TODO just the start 
+        //I would like this to have a way to update ancestry, print 
+        private void AncestryButton()
+        {
+            //create ancestry button
+            indAncestryButton = CreateButton("Ancestry", 220, 630);
+            indAncestryButton.Click += (sender, e) =>
+            {
+                // Logic to show ancestry
+                //TODO get the ancestry from the database
+                // and display it in a new window
+                // Open the CreateAccountForm
+                var ancestryForm = new IndividualAnimalAncestryForm(_parentForm, _context, _animal); //TODO change name to form if I decide to keep it that way, maybe do a form and a panel option for different buttons and ask folks which they like best 
+                ancestryForm.Show();
                 //this.Hide();
             };
         }
