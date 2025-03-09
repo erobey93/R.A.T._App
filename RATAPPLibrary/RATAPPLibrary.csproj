@@ -7,6 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Domain\**" />
+	  <Content Remove="Domain\**" />
+	  <EmbeddedResource Remove="Domain\**" />
+	  <None Remove="Domain\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- Use latest versions compatible with .NET 8.0 -->
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.2" />
@@ -15,16 +22,14 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="MSTest.TestAdapter" Version="3.8.2" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.8.2" />
 		<PackageReference Include="PDFsharp" Version="6.1.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Domain\AnimalManagement\" />
-	  <Folder Include="Domain\Health\" />
 	  <Folder Include="Migrations\" />
-	  <Folder Include="Domain\Genetics\" />
-	  <Folder Include="Domain\Ancestry\" />
 	</ItemGroup>
 
 </Project>

@@ -64,8 +64,8 @@ namespace RATAPP.Panels
 
             var welcomeLabel = new Label
             {
-                Text = $"Welcome, {_username}!",
-                Font = new Font("Segoe UI", 18, FontStyle.Bold),
+                Text = $"{_username}",
+                Font = new Font("Segoe UI", 25, FontStyle.Bold),
                 ForeColor = Color.FromArgb(0, 120, 212),
                 AutoSize = true,
                 Location = new Point(0, 0)
@@ -80,7 +80,7 @@ namespace RATAPP.Panels
                 AutoSize = true,
                 Location = new Point(0, welcomeLabel.Bottom + 5)
             };
-            headerPanel.Controls.Add(roleLabel);
+            //headerPanel.Controls.Add(roleLabel); FIXME I don't think that I want this
 
             this.Controls.Add(headerPanel);
 
@@ -98,8 +98,13 @@ namespace RATAPP.Panels
                 Padding = new Padding(20, 10, 20, 10)
             };
 
-            speciesComboBox = CreateComboBox(new string[] { "All Species", "Rats", "Mice" }, 0);
-            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female" }, 190);
+            //var dbSpecies = getDbSpecies();
+            //string[] speciesArray = dbSpecies.Result.ToArray();
+
+            //speciesComboBox = CreateComboBox(speciesArray, 0); //TODO get from db 
+
+            speciesComboBox = CreateComboBox(new string[] { "All Species", "Rat", "Mouse" }, 0); //TODO get from db 
+            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female", "Unknown" }, 190);
 
             searchBar = new TextBox
             {
@@ -219,7 +224,7 @@ namespace RATAPP.Panels
             dataDisplayArea.Rows.Clear();
             foreach (var animal in _animals)
             {
-                dataDisplayArea.Rows.Add(animal.Species, animal.Id, animal.Name, animal.Sex, animal.DateOfBirth, animal.Variety);
+                dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
             }
         }
 
@@ -251,15 +256,15 @@ namespace RATAPP.Panels
             string searchTerm = searchBar.Text.ToLower();
 
             var filteredAnimals = _animals.Where(animal =>
-                (speciesFilter == "All Species" || animal.Species == speciesFilter) &&
-                (sexFilter == "All Sexes" || animal.Sex == sexFilter) &&
-                (animal.Name.ToLower().Contains(searchTerm) || animal.Id.ToString().Contains(searchTerm))
+                (speciesFilter == "All Species" || animal.species == speciesFilter) &&
+                (sexFilter == "All Sexes" || animal.sex == sexFilter) &&
+                (animal.name.ToLower().Contains(searchTerm) || animal.Id.ToString().Contains(searchTerm))
             );
 
             dataDisplayArea.Rows.Clear();
             foreach (var animal in filteredAnimals)
             {
-                dataDisplayArea.Rows.Add(animal.Species, animal.Id, animal.Name, animal.Sex, animal.DateOfBirth, animal.Variety);
+                dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
             }
         }
 

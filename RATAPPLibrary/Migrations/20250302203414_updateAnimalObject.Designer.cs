@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250302203414_updateAnimalObject")]
+    partial class updateAnimalObject
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -408,14 +411,24 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("AnimalId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("AnimalId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("TraitId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TraitId1")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AnimalId");
 
+                    b.HasIndex("AnimalId1");
+
                     b.HasIndex("TraitId");
+
+                    b.HasIndex("TraitId1");
 
                     b.ToTable("AnimalTrait");
                 });
@@ -739,16 +752,24 @@ namespace RATAPPLibrary.Migrations
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Genetics.AnimalTrait", b =>
                 {
                     b.HasOne("RATAPPLibrary.Data.Models.Animal", "Animal")
-                        .WithMany("Traits")
+                        .WithMany()
                         .HasForeignKey("AnimalId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("RATAPPLibrary.Data.Models.Animal", null)
+                        .WithMany("Traits")
+                        .HasForeignKey("AnimalId1");
+
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", "Trait")
-                        .WithMany("AnimalTraits")
+                        .WithMany()
                         .HasForeignKey("TraitId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", null)
+                        .WithMany("AnimalTraits")
+                        .HasForeignKey("TraitId1");
 
                     b.Navigation("Animal");
 
