@@ -8,6 +8,7 @@ using System.Drawing;
 using Microsoft.Identity.Client;
 using PdfSharp.Charting;
 using RATAPPLibrary.Data.Models.Genetics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace RATAPPLibrary.Services
 {
@@ -144,6 +145,9 @@ namespace RATAPPLibrary.Services
             //then find all animals that match the provided sex 
             foreach (var animal in bySex)
             {
+                //get the traits for that animal 
+                var traits = await _traitService.GetTraitMapForSingleAnimal(animal.Id); //FIXME changed this wihtout checkout functionality 
+
                 if (animal.species.Equals(species))
                 {
                     //add to the list of animals that match the requested sex 
@@ -345,25 +349,7 @@ namespace RATAPPLibrary.Services
 
             int breederId = 5; //FIXME this is a placeholder until I fix/implement breeder logic 
 
-            // Assuming colorList is an IEnumerable<IEnumerable<string>>
-            var colorList = await _traitService.GetColorTraitsForSingleAnimal(a.Id, "color", species);
-
-            string color = "no colors found"; // Default value if no colors are found
-            
-            // Filter out the empty sequences, then get the first non-empty one
-            var nonEmptyColorList = colorList.Where(list => list.CommonName.Any()).FirstOrDefault();
-
-            if (nonEmptyColorList != null)
-            {
-                // Use the first element from the first non-empty list
-                color = nonEmptyColorList.CommonName;
-                Console.WriteLine(color);
-            }
-            else
-            {
-                // Handle the case where all lists are empty
-                Console.WriteLine("No colors found.");
-            }
+            var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
 
             //TODO can do above logic for all traits and then just loop through them to get
 
@@ -384,7 +370,10 @@ namespace RATAPPLibrary.Services
                 breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name, TODO this should be grabbing the breeders name from the breeder db (actually the user db)
                 species = speciesObj.CommonName, // Assuming Species has a Name property
                 imageUrl = a.imageUrl,
-                color = color, //TODO this might break the world since its assuming multiple colors FIXME 
+                color = animalTraits["Color"].LastOrDefault(), //TODO this might break the world since its assuming multiple colors FIXME this is just going to print all colors as a list of strings which will work for 1, but not once i start stacking them
+                markings = animalTraits["Markings"].LastOrDefault(), //TODO this might break the world since its assuming multiple markings FIXME this is just going to print all markings as a list of strings which will work for 1, but not once i start stacking them
+                earType = animalTraits["Ear Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple ear types FIXME this is just going to print all ear types as a list of strings which will work for 1, but not once i start stacking them
+                variety = animalTraits["Coat Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple coat types FIXME this is just going to print all coat types as a list of strings which will work for 1, but not once i start stacking them
                 //dam = dam,
                 //sire = sire, 
                 //damId = a.damId,
@@ -393,6 +382,54 @@ namespace RATAPPLibrary.Services
             };
 
             return result;
+        }
+
+        //get animal's traits 
+        public async Task<Dictionary<string,List<string>>> GetAnimalTraits(int id)
+        {
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with ID {id} not found.");
+            }
+            
+            Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
+            try
+            {
+                traitMap = await _traitService.GetTraitMapForSingleAnimal(id);
+            }
+            catch(Exception e) //for now just catch exceptions and set default trait values to avoid breaking the world FIXME 
+            {
+                //throw new KeyNotFoundException($"Traits for animal with ID {id} not found.");
+                //animal doesn't have to have traits, at least not right now TODO 
+                Console.WriteLine($"Traits for animal with ID {id} not found.");
+                traitMap["Color"] = new List<string> { "No color found" };
+                traitMap["Markings"] = new List<string> { "No markings found" };
+                traitMap["Ear Type"] = new List<string> { "No ear type found" };
+                traitMap["Coat Type"] = new List<string> { "No coat type found" };
+            }
+
+            if (traitMap.Count < 4) //FIXME this is assuming we have 4 traits just to auto set traits for now for now just make sure we have the 4 traits we're looking for
+            {
+                if(traitMap.ContainsKey("Color") == false)
+                {
+                    traitMap["Color"] = new List<string> { "No color found" };
+                }
+                if (traitMap.ContainsKey("Markings") == false)
+                {
+                    traitMap["Markings"] = new List<string> { "No markings found" };
+                }
+                if (traitMap.ContainsKey("Ear Type") == false)
+                {
+                    traitMap["Ear Type"] = new List<string> { "No ear type found" };
+                }
+                if (traitMap.ContainsKey("Coat Type") == false)
+                {
+                    traitMap["Coat Type"] = new List<string> { "No coat type found" };
+                }
+            }
+
+            return traitMap;
         }
 
         //Map array of animals to array of AnimalDto

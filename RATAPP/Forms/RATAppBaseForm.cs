@@ -97,41 +97,41 @@ namespace RATAPP.Forms
                 Location = new Point(60, 15)
             };
 
-            userNameLabel = new Label
-            {
-                Text = UserName ?? "User Name",
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 12),
-                AutoSize = true,
-                Location = new Point(topNavPanel.Width - 150, 20)
-            };
+            //userNameLabel = new Label FIXME I don't think that I want this 
+            //{
+            //    Text = UserName ?? "User Name",
+            //    ForeColor = Color.White,
+            //    Font = new Font("Segoe UI", 12),
+            //    AutoSize = true,
+            //    Location = new Point(topNavPanel.Width - 150, 20)
+            //};
 
-            var refreshButton = CreateTopNavButton("Refresh", RefreshButton_Click);
-            var utilitiesButton = CreateTopNavButton("Utilities", UtilitiesButton_Click);
-            var logoutButton = CreateTopNavButton("Log Out", LogoutButton_Click);
-            var settingsButton = CreateTopNavButton("Settings", SettingsButton_Click);
+            var refreshButton = CreateTopNavButton("Refresh", 0, RefreshButton_Click);
+            var utilitiesButton = CreateTopNavButton("Utilities", 1, UtilitiesButton_Click);
+            var logoutButton = CreateTopNavButton("Log Out", 2, LogoutButton_Click);
+            var settingsButton = CreateTopNavButton("Settings",3, SettingsButton_Click);
 
-            topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, userNameLabel, refreshButton, utilitiesButton, logoutButton });
+            topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, refreshButton, utilitiesButton, logoutButton });
         }
 
         private void InitializeSideNav()
         {
             var buttons = new[]
-            {
-                CreateSideNavButton("Home", HomeButton_Click),
-                CreateSideNavButton("Breeding", BreedingButton_Click),
+             {
+                CreateSideNavButton("Research", ResearchButton_Click),
+                CreateSideNavButton("Financial", FinancialButton_Click),
+                CreateSideNavButton("Reports", ReportsButton_Click),
+                CreateSideNavButton("Adopter Management", AdopterButton_Click),
                 CreateSideNavButton("Genetics", GeneticsButton_Click),
                 CreateSideNavButton("Ancestry", AncestryButton_Click),
-                CreateSideNavButton("Research", ResearchButton_Click),
-                CreateSideNavButton("Reports", ReportsButton_Click),
-                CreateSideNavButton("Financial", FinancialButton_Click),
-                CreateSideNavButton("Adopter Management", AdopterButton_Click),
+                CreateSideNavButton("Breeding", BreedingButton_Click),
+                CreateSideNavButton("Home", HomeButton_Click),
             };
 
             sideNavPanel.Controls.AddRange(buttons);
         }
 
-        private Button CreateTopNavButton(string text, EventHandler onClick)
+        private Button CreateTopNavButton(string text, int count, EventHandler onClick)
         {
             var button = new Button
             {
@@ -141,7 +141,7 @@ namespace RATAPP.Forms
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10),
                 Size = new Size(100, 40),
-                Location = new Point(topNavPanel.Controls.Count * 110 + 200, 10),
+                Location = new Point(count * 110 + 200, 10),
                 FlatAppearance = { BorderSize = 0 }
             };
             button.Click += onClick;
@@ -175,7 +175,7 @@ namespace RATAPP.Forms
         public void SetUserName(string username)
         {
             UserName = username;
-            userNameLabel.Text = UserName;
+            //userNameLabel.Text = UserName;
         }
 
         public void ShowPanel(Panel panelToShow)

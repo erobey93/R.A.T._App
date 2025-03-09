@@ -28,6 +28,9 @@
     <Compile Update="Panels\HomePanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Update="Panels\IndividualAnimalAncestry.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="Panels\PairingsandLittersPanel.cs">
       <SubType>Component</SubType>
     </Compile>

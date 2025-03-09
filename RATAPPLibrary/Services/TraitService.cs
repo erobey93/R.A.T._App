@@ -9,14 +9,6 @@ namespace RATAPPLibrary.Services
     public class TraitService
     {
         //get all phenotypes - aka traits
-        // this will require creating new trait types, setting the values for each trait type, and then adding the trait type to the animal
-        //variety
-        //coat color
-        //ear type
-        //ear set  (rat) TODO haven't implemented this yet i.e. distinguish between rat and mouse ear types
-        //eye color 
-        //markings 
-        //tail type
         private readonly Data.DbContexts.RatAppDbContext _context;
         private SpeciesService _speciesService;
 
@@ -67,6 +59,7 @@ namespace RATAPPLibrary.Services
             return trait; // Return the Trait if found
         }
 
+        // Get a list of trait objects based on the traitType and species names converted into ID for searching the database
         public async Task<List<Trait>> GetTraitObjectsByTypeAndSpeciesAsync(string type, string species)
         {
             List<string> traitList = new List<string>();
@@ -91,7 +84,7 @@ namespace RATAPPLibrary.Services
             return traits;
         }
 
-        //get all trait names by type and species 
+        //get all trait names by type and species - don't return full object just the names
         public async Task<List<string>> GetTraitsByTypeAndSpeciesAsync(string type, string species)
         {
             List<string> traitList = new List<string>();
@@ -121,7 +114,7 @@ namespace RATAPPLibrary.Services
             return traitList; 
         }
 
-        //get all traits by species
+        //get all traits by species - return a trait object for each trait associated with a specific species 
         public async Task<IEnumerable<Trait>> GetTraitsBySpeciesAsync(string species)
         {
             List<Trait> traitList = new List<Trait>();
@@ -238,6 +231,74 @@ namespace RATAPPLibrary.Services
                 .FirstOrDefaultAsync(t => t.Id == id);  // Get a trait by its Id
         }
 
+        // get all traits for a specific animal by animal id
+        // returns a map of trait type and trait name 
+        public async Task<Dictionary<string, List<string>>> GetTraitMapForSingleAnimal(int animalId)
+        {
+            IEnumerable<Trait> traits = new List<Trait>();
+
+            //check that animal exists 
+            var animal = await _context.Animal.FindAsync(animalId);
+            if (animal == null)
+            {
+                throw new InvalidOperationException($"Animal with id '{animalId}' does not exist.");
+            }
+            else
+            {
+                // query the AnimalTrait table by animal id
+                // if the animal has traits associated with it
+                //return the list of traits
+                if (_context.AnimalTrait.Any(at => at.AnimalId == animalId))
+                {
+                    traits = await _context.AnimalTrait
+                        .Where(at => at.AnimalId == animalId)
+                        .Select(at => at.Trait)
+                        .ToListAsync();
+
+                }
+                else
+                {
+                    //throw new InvalidOperationException($"Animal with id '{animalId}' does not have any traits."); FIXME, for now do nothing 
+                }
+            }
+
+            //now that we have the traits create our map of trait type and trait name
+            Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
+
+            //then set that to the corresponding trait name
+            await MapTraitTypeAndNameAsync(traits).ContinueWith(t => traitMap = t.Result);
+
+            return traitMap; // Return the list of traits for the specified animal
+
+        }
+
+        //map trait type and name
+        private async Task<Dictionary<string, List<string>>> MapTraitTypeAndNameAsync(IEnumerable<Trait> traits)
+        {
+            Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
+            foreach (var trait in traits)
+            {
+                //get the trait type name
+                var traitType = await _context.TraitType.FindAsync(trait.TraitTypeId);
+                //if the trait type name is already in the map
+                if (traitMap.ContainsKey(traitType.Name))
+                {
+                    //add the trait name to the list of traits for that trait type
+                    traitMap[traitType.Name].Add(trait.CommonName);
+                }
+                else
+                {
+                    //create a new list of traits for the trait type
+                    List<string> traitList = new List<string>();
+                    //add the trait name to the list
+                    traitList.Add(trait.CommonName);
+                    //add the trait type and list of traits to the map
+                    traitMap.Add(traitType.Name, traitList);
+                }
+            }
+            return traitMap;
+        }
+
         //get colors for animal
         public async Task<IEnumerable<Trait>> GetColorTraitsForSingleAnimal(int animalId, string traitType, string species)
         {
@@ -251,7 +312,7 @@ namespace RATAPPLibrary.Services
                 foreach (var trait in allTraitsofType)
                 {
                     //get all traits for the animal
-                    traitIds.Append(trait.Id);
+                    traitIds.Add(trait.Id);
                 }
 
                 // Query the AnimalTrait by animal id and trait id
@@ -329,6 +390,13 @@ namespace RATAPPLibrary.Services
                 .Where(at => at.AnimalId == animalId && at.TraitId == traitId)
                 .Select(at => at.Trait)
                 .FirstOrDefaultAsync();
+        }
+
+        //get trait type name by id 
+        private async Task<string> GetTraitTypeNameByIdAsync(int traitTypeId)
+        {
+            var traitType = await _context.TraitType.FindAsync(traitTypeId);
+            return traitType.Name;
         }
     }
 }

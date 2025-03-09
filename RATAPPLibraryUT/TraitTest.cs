@@ -29,7 +29,7 @@ namespace RATAPPLibraryUT
             _context = new RatAppDbContext(_options);
             _traitService = new TraitService(_context);
 
-            _context.Database.EnsureDeleted();
+            //_context.Database.EnsureDeleted();
             _context.Database.EnsureCreated();
 
             SeedData().Wait();
@@ -41,8 +41,9 @@ namespace RATAPPLibraryUT
             _context.Species.Add(species);
             await _context.SaveChangesAsync();
 
+
             var traitTypeColor = new TraitType { Id = 1, Name = "Color", Description = "Coat Color" };
-            var traitTypePattern = new TraitType { Id = 2, Name = "Pattern", Description = "Coat Pattern" };
+            var traitTypePattern = new TraitType { Id = 2, Name = "Markings", Description = "Coat Pattern/Markings" };
             _context.TraitType.AddRange(traitTypeColor, traitTypePattern);
             await _context.SaveChangesAsync();
 
@@ -192,6 +193,14 @@ namespace RATAPPLibraryUT
             Assert.IsNotNull(trait);
             Assert.AreEqual("Black", trait.CommonName);
         }
+
+        //[TestMethod]
+        //public async Task Test_GetTraitByAnimalIdAndTraitIdAsync_SuccessfullyGetsTraitByAnimalAndTraitId()
+        //{
+        //    var trait = await _traitService.GetTraitByAnimalIdAndTraitIdAsync(1, 1);
+        //    Assert.IsNotNull(trait);
+        //    Assert.AreEqual("Black", trait.CommonName);
+        //}
 
         [TestCleanup]
         public void Cleanup()
