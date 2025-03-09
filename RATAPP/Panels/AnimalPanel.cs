@@ -566,6 +566,7 @@
 
 using RATAPP.Forms;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Genetics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -588,7 +589,7 @@ namespace RATAPP.Panels
     {
         // Class-level fields for controls specific to Animal Page
         private Label animalNameLabel;
-        private Label idLabel;
+        private Label regNumLabel;
         private Label speciesLabel;
         private Label sexLabel;
         private Label varietyLabel;
@@ -604,7 +605,7 @@ namespace RATAPP.Panels
         private Label markingsLabel;
 
         private TextBox animalNameTextBox;
-        private TextBox idTextBox;
+        private TextBox regNumTextBox;
         private TextBox speciesTextBox;
         private TextBox sexTextBox;
         private TextBox varietyTextBox;
@@ -639,11 +640,14 @@ namespace RATAPP.Panels
         private Button saveButton;
         private Button updateButton;
         private Button cancelButton;
-        private Button documentsButton; 
+        private Button documentsButton;
+        private Button prevButton;
+        private Button nextButton;
+
+        private FlowLayoutPanel thumbnailPanel; // Panel to hold the thumbnails
 
         //state of the panel
         private bool _isEditMode = false;
-        //private bool _isNavMode = false; 
 
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
@@ -652,7 +656,6 @@ namespace RATAPP.Panels
         private RATAPPLibrary.Services.SpeciesService _speciesService;
 
         private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
-        //this is likely temporary but I want to test out the idea of going to the next and previous animal
         private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
         private RATAppBaseForm _parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
 
@@ -677,8 +680,14 @@ namespace RATAPP.Panels
         // and then disable the text boxes and enable the update button again
         // and disable the save button
 
-
-        //how do I "name" controllers? 
+        // Test image paths TODO should be getting from an AnimalImage table in the database - future feature 
+        private List<string> imagePaths = new List<string>
+        {
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00S0S_e4sHXNFmkdY_0t20CI_1200x900.jpg",
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00v0v_hu4XyatVj1Q_0t20CI_1200x900.jpg",
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_0214.JPG",
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
+        };
 
         // Constructor for initializing the panel
         public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, AnimalDto[] allAnimals, AnimalDto currAnimal)
@@ -699,7 +708,7 @@ namespace RATAPP.Panels
         private void InitializeComponent(AnimalDto animal)
         {
             //TODO should this just be _animal? Why or why not? follow this variable through and make sure I can make that switch first 
-            _animal = animal; 
+            _animal = animal;
 
             // Set panel properties
             this.Size = new Size(1200, 800); // Increased panel size for better spacing
@@ -729,12 +738,12 @@ namespace RATAPP.Panels
             // Initialize the labels, photo, nav for the Animal Panel
             InitializeLabels();
             InitializePhotoBox();
-            InitializeNavigationButtons();
+            InitializeThumbnailPanel(); //TODO this is for the thumbnails of the animals, not yet fully implemented
         }
 
         private async void LoadAnimalDataAsync(int animalID)
         {
-            var animal = await _animalService.GetAnimalByIdAsync(animalID);
+            var animal = await _animalService.GetAnimalByIdAsync(animalID); //get the animal data from the database FIXME should just set global variable and use that instead of passing around 
             _animal = animal; //FIXME 
             InitializeTextBoxes(_animal);//probably don't need to pass anything here, but for clarity I guess 
         }
@@ -742,7 +751,7 @@ namespace RATAPP.Panels
         // initialize combo boxes
         private void InitializeComboBoxes()
         {
-            string id = "";
+            string regNum = "";
             string name = "";
             string species = "";
             string sex = "";
@@ -762,18 +771,19 @@ namespace RATAPP.Panels
             //if it does, then we need to get the data from the database and populate the text boxes with the values
             if (_animal != null)
             {
-                id = _animal.Id.ToString();
-                name = _animal.Name;
-                species = _animal.Species;
-                sex = _animal.Sex;
-                variety = _animal.Variety;
-                color = _animal.Color;
+                regNum = _animal.regNum.ToString();
+                name = _animal.name;
+                species = _animal.species;
+                sex = _animal.sex;
+                variety = _animal.variety;
+                color = _animal.color;
                 genotype = "TODO";
-                marking = "TODO";
-                breeder = "TODO";
-                earType = "TODO";//_animal.earType; //TODO make ear type species specific 
-                dam = _animal.Dam;
-                sire = _animal.Sire;
+                marking = _animal.markings;
+                breeder = _animal.breeder;
+                earType = _animal.earType;//_animal.earType; //TODO make ear type species specific 
+                dam = _animal.dam;
+                sire = _animal.sire;
+                imageUrl = _animal.imageUrl;
                 inbred = "TODO";
 
                 InitializePhotoBox();
@@ -782,7 +792,7 @@ namespace RATAPP.Panels
 
             }
             // First column (left side)
-            idTextBox = CreateTextBox(150, 20, id);
+            regNumTextBox = CreateTextBox(150, 20, regNum);
             animalNameTextBox = CreateTextBox(150, 60, name);
             speciesComboBox = CreateComboBox(150, 100, species);
             speciesComboBox.Name = "speciesComboBox"; //TODO this is how you set the names 
@@ -825,7 +835,7 @@ namespace RATAPP.Panels
 
             // Add comboboxes to panel
             this.Controls.Add(animalNameTextBox);
-            this.Controls.Add(idTextBox);
+            this.Controls.Add(regNumTextBox);
             this.Controls.Add(speciesComboBox);
             this.Controls.Add(sexComboBox);
             this.Controls.Add(varietyComboBox);
@@ -872,6 +882,7 @@ namespace RATAPP.Panels
         private async Task<List<string>> GetComboBoxItemsFromDatabase(Control control)
         {
             var options = new List<string>();
+            string animalSpecies = GetAnimalSpecies();
 
             // Use switch statement to handle different ComboBox names
             switch (control.Name)
@@ -894,7 +905,9 @@ namespace RATAPP.Panels
 
                 case "colorComboBox":
                     // Handle color-related options (update as needed)
-                    options.AddRange(new[] { "Red", "Blue", "Green" }); // FIXME: for testing
+                    //get colors by species from the db 
+                    List<string> animalTraits = await GetSpeciesTraitsByType(animalSpecies, "Color");
+                    options.AddRange(animalTraits.ToArray()); // FIXME: for testing
                     break;
 
                 case "genotypeComboBox":
@@ -903,7 +916,6 @@ namespace RATAPP.Panels
                     break;
 
                 case "damComboBox":
-                    string animalSpecies = GetAnimalSpecies();
                     string animalSex = "Female";
                     //if we are creating a new animal show all female (dam) options 
                     //or if they've filled in the species field, get it from there 
@@ -915,7 +927,7 @@ namespace RATAPP.Panels
                         AnimalDto[] dams = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
                         foreach (var dam in dams)
                         {
-                            options.Add(dam.Name);
+                            options.Add(dam.name);
                         }
                     }
                     else
@@ -925,7 +937,7 @@ namespace RATAPP.Panels
                         AnimalDto[] dams = await _animalService.GetAnimalsBySex(animalSex);
                         foreach (var dam in dams)
                         {
-                            options.Add(dam.Name);
+                            options.Add(dam.name);
                         }
                     }
 
@@ -944,7 +956,7 @@ namespace RATAPP.Panels
                         AnimalDto[] sires = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
                         foreach (var sire in sires)
                         {
-                            options.Add(sire.Name);
+                            options.Add(sire.name);
                         }
                     }
                     else
@@ -954,7 +966,7 @@ namespace RATAPP.Panels
                         AnimalDto[] sires = await _animalService.GetAnimalsBySex(animalSex);
                         foreach (var sire in sires)
                         {
-                            options.Add(sire.Name);
+                            options.Add(sire.name);
                         }  
                     }
 
@@ -984,13 +996,30 @@ namespace RATAPP.Panels
             return options;
         }
 
+        private async Task <List<string>> GetSpeciesTraitsByType(string species, string type)
+        {
+            try
+            {
+                //get the traits for the species from the database 
+                List<string> traits = (List<string>)await _traitService.GetTraitsByTypeAndSpeciesAsync(type, species);
+                return traits;
+            }
+            catch (Exception ex)
+            {
+                // Log the error and notify the user
+                LogError(ex);
+                ShowMessage("Failed to get traits for the species. Please try again.");
+                return null; 
+            }
+        }
+
         //find species
         private string GetAnimalSpecies()
         {
             //first, check if _animal is populated
             if (_animal != null)
             {
-                return _animal.Species;
+                return _animal.species;
             }
             else if (speciesComboBox.SelectedItem != null && speciesComboBox.Text != "Add New") //FIXME make sure this is the correct text
             {
@@ -1048,16 +1077,61 @@ namespace RATAPP.Panels
             // If the user selects an image, update the image box
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                animalPhotoBox.Image = Image.FromFile(dialog.FileName);
-                _animal.imageUrl = dialog.FileName; //FIXME not sure that this logic will work, but checking it out 
-                ShowMessage("Image updated successfully!" + _animal.imageUrl);
-                Refresh(); // refresh to show the new image? 
-            }
+                try
+                {
+                    // Get the selected file path
+                    string selectedFilePath = dialog.FileName;
 
-            //Update the image address in the db
-            //this should happen when "save" is clicked
-            //Dispose of the dialog to free up resources
-            dialog.Dispose();
+                    // Ensure the file exists and is a valid image
+                    if (File.Exists(selectedFilePath))
+                    {
+                        // Check if the file is an image by looking at the file extension
+                        string[] validImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff" };
+                        string fileExtension = Path.GetExtension(selectedFilePath).ToLower();
+
+                        if (validImageExtensions.Contains(fileExtension))
+                        {
+                            // Load the image from the file
+                            Image newImage = Image.FromFile(selectedFilePath);
+
+                            // Set the image in the animalPhotoBox
+                            animalPhotoBox.Image = newImage;
+
+                            // Normalize the file path (this removes double slashes)
+                            string normalizedFilePath = CleanFilePath(selectedFilePath);
+
+                            // Update the image URL for the animal (using the normalized file path)
+                            _animal.imageUrl = normalizedFilePath;
+
+                            // Show a message confirming the image update
+                            ShowMessage("Image updated successfully! Image URL: " + _animal.imageUrl);
+
+                            // Refresh the control to ensure the new image is displayed
+                            Refresh();  // This should update the UI to reflect the new image
+                        }
+                        else
+                        {
+                            ShowMessage("Error: The selected file is not a valid image. Please choose a valid image file.");
+                        }
+                    }
+                    else
+                    {
+                        ShowMessage("Error: The selected file does not exist.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle any errors (e.g., if the file isn't a valid image or any other exceptions)
+                    ShowMessage("Error updating image: " + ex.Message);
+                }
+            }
+        }
+
+        // Method to normalize the file path (removes extra slashes and normalizes path separators)
+        private string CleanFilePath(string filePath)
+        {
+            // Replace double backslashes with a single backslash
+            return filePath.Replace(@"\\", @"\");
         }
 
         // Placeholder for a user prompt dialog
@@ -1083,7 +1157,7 @@ namespace RATAPP.Panels
             Font labelFont = new Font("Segoe UI", 10F, FontStyle.Regular);
 
             // First column (left side)
-            idLabel = CreateLabel("Registration #/ID", 10, 20, labelFont);
+            regNumLabel = CreateLabel("Registration #/ID", 10, 20, labelFont);
             animalNameLabel = CreateLabel("Animal Name", 10, 60, labelFont);
             speciesLabel = CreateLabel("Species", 10, 100, labelFont);
             sexLabel = CreateLabel("Sex", 10, 140, labelFont);
@@ -1104,7 +1178,7 @@ namespace RATAPP.Panels
 
             // Add labels to panel
             this.Controls.Add(animalNameLabel);
-            this.Controls.Add(idLabel);
+            this.Controls.Add(regNumLabel);
             this.Controls.Add(speciesLabel);
             this.Controls.Add(sexLabel);
             this.Controls.Add(varietyLabel);
@@ -1141,20 +1215,20 @@ namespace RATAPP.Panels
         private void InitializeTextBoxes(AnimalDto animal)
         {
             // First column (left side)
-            idTextBox = CreateTextBox(150, 20, _animal.Id.ToString());
-            animalNameTextBox = CreateTextBox(150, 60, _animal.Name);
-            speciesTextBox = CreateTextBox(150, 100, _animal.Species);
-            sexTextBox = CreateTextBox(150, 140, _animal.Sex);
-            varietyTextBox = CreateTextBox(150, 180, _animal.Variety);
-            damTextBox = CreateTextBox(150, 220, _animal.Dam);
+            regNumTextBox = CreateTextBox(150, 20, _animal.regNum);
+            animalNameTextBox = CreateTextBox(150, 60, _animal.name);
+            speciesTextBox = CreateTextBox(150, 100, _animal.species);
+            sexTextBox = CreateTextBox(150, 140, _animal.sex);
+            varietyTextBox = CreateTextBox(150, 180, _animal.variety);
+            damTextBox = CreateTextBox(150, 220, _animal.dam);
 
             // Second column (right side)
-            colorTextBox = CreateTextBox(490, 20, _animal.Color);
+            colorTextBox = CreateTextBox(490, 20, _animal.color);
             genotypeTextBox = CreateTextBox(490, 60, "TODO");
-            markingsTextBox = CreateTextBox(490, 100, "TODO");
-            breederInfoTextBox = CreateTextBox(490, 140, _animal.Breeder);
-            earTypeTextBox = CreateTextBox(490, 180, "TODO");
-            sireTextBox = CreateTextBox(490, 220, _animal.Sire);
+            markingsTextBox = CreateTextBox(490, 100, _animal.markings);
+            breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
+            earTypeTextBox = CreateTextBox(490, 180, _animal.earType);
+            sireTextBox = CreateTextBox(490, 220, _animal.sire);
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -1167,13 +1241,13 @@ namespace RATAPP.Panels
                 Multiline = true,
                 ScrollBars = ScrollBars.Vertical,
                 Font = new Font("Segoe UI", 10F), // Make it consistent with labels
-                Text = _animal.Comment,
+                Text = _animal.comment,
                 BackColor = Color.LightGray
             };
 
             // Add textboxes to panel
             this.Controls.Add(animalNameTextBox);
-            this.Controls.Add(idTextBox);
+            this.Controls.Add(regNumTextBox);
             this.Controls.Add(speciesTextBox);
             this.Controls.Add(sexTextBox);
             this.Controls.Add(varietyTextBox);
@@ -1187,8 +1261,6 @@ namespace RATAPP.Panels
             this.Controls.Add(earTypeTextBox);
             this.Controls.Add(inbredTextBox);
 
-            Refresh();
-
             //add animal image
             AddImageToAnimalTextbox(_animal);
 
@@ -1201,8 +1273,16 @@ namespace RATAPP.Panels
         {
             if (animal.imageUrl != null)
             {
-                animalPhotoBox.Image = Image.FromFile(animal.imageUrl);
+                string imageUrl = CleanFilePath(animal.imageUrl);
+                animalPhotoBox.Image = Image.FromFile(imageUrl);
                 if(_isEditMode)
+                {
+                    animalPhotoBox.Click += AnimalImageClicked;
+                }
+            }
+            else
+            {
+                if (_isEditMode)
                 {
                     animalPhotoBox.Click += AnimalImageClicked;
                 }
@@ -1279,6 +1359,7 @@ namespace RATAPP.Panels
         }
 
         // Method to initialize the animal's photo box
+        //TODO work on formatting a bit more
         private void InitializePhotoBox()
         {
             animalPhotoBox = new PictureBox
@@ -1293,24 +1374,76 @@ namespace RATAPP.Panels
             this.Controls.Add(animalPhotoBox);
         }
 
+        // Initialize the scrollable thumbnail panel
+        private void InitializeThumbnailPanel()
+        {
+            // Initialize the FlowLayoutPanel (which will allow scrolling)
+            thumbnailPanel = new FlowLayoutPanel
+            {
+                Size = new Size(200, 100), // Adjust size as needed for thumbnails
+                Location = new Point(750, 240), // Adjust location to be below the main image
+                AutoScroll = true, // Enable scrolling if thumbnails overflow
+                FlowDirection = FlowDirection.LeftToRight // Arrange thumbnails horizontally
+            };
+            this.Controls.Add(thumbnailPanel);
+
+            // Add thumbnails to the panel
+            foreach (var imagePath in imagePaths)
+            {
+                PictureBox thumbnail = new PictureBox
+                {
+                    Image = Image.FromFile(imagePath), // Load the thumbnail image
+                    Size = new Size(50, 50), // Set the thumbnail size
+                    SizeMode = PictureBoxSizeMode.Zoom, // Scale the image to fit
+                    Margin = new Padding(5), // Add spacing between thumbnails
+                    Cursor = Cursors.Hand // Change cursor to hand on hover
+                };
+
+                // Event handler to update the main image when the thumbnail is clicked
+                thumbnail.Click += (sender, e) => OnThumbnailClick(imagePath);
+
+                // Add the thumbnail to the panel
+                thumbnailPanel.Controls.Add(thumbnail);
+            }
+        }
+
+        // Handle the click event on a thumbnail
+        private void OnThumbnailClick(string imagePath)
+        {
+            // Change the main image box to the selected thumbnail's image
+            animalPhotoBox.Image = Image.FromFile(imagePath);
+        }
+
         // Method to initialize the navigation buttons (Next and Previous)
         private void InitializeNavigationButtons()
         {
-            // Previous button
-            Button previousButton = CreateButton("Previous", 200, 700);
-            previousButton.Click += (sender, e) => { PreviousButtonClick(sender, e); };
+            // Remove any existing buttons with the same name
+            var buttonsToRemove = this.Controls.OfType<Button>()
+                .Where(b => b.Name == "Previous" || b.Name == "Next").ToList();
+            foreach (var button in buttonsToRemove)
+            {
+                this.Controls.Remove(button);
+            }
 
-            // Next button
-            Button nextButton = CreateButton("Next", 600, 700);
-            nextButton.Click += (sender, e) => { NextButtonClick(sender, e); };
+            // Create and re-add buttons
+            prevButton = CreateButton("Previous", 200, 700);
+            prevButton.Click += PreviousButtonClick;
 
-            this.Controls.Add(previousButton);
+            nextButton = CreateButton("Next", 600, 700);
+            nextButton.Click += NextButtonClick;
+
+            this.Controls.Add(prevButton);
             this.Controls.Add(nextButton);
         }
 
         //would really be helpful to just know the index 
         private void PreviousButtonClick(object sender, EventArgs e)
         {
+            if (prevButton == null)
+            {
+                MessageBox.Show("Previous button is not initialized!");
+                return;
+            }
             int i = 0;
             //_isNavMode = true; //set the navigation mode to true
             foreach (AnimalDto animal in _allAnimals)
@@ -1319,11 +1452,6 @@ namespace RATAPP.Panels
                 if (animal.Id == _animal.Id && i > 0) //make sure there is a previous if there's not maybe go to the end of the line like a loop? For now, just stop 
                 {
                     //go to the previous animal 
-                    //get the next animal based on the index of the current animal + 1
-                    //LoadAnimalDataAsync(_allAnimals[i - 1].Id); //FIXME this logic doesn't make sense need to think through it but just for testing purposes 
-                    // Logic to update animal data 
-                    _isEditMode = true;
-
                     //first clear out old controls
                     this.Controls.Clear();
                     InitializeComponent(_allAnimals[i - 1]);
@@ -1407,12 +1535,6 @@ namespace RATAPP.Panels
 
                     //return to home page
                     _parentForm.HomeButton_Click(sender, e);
-
-                    //clear the controls
-                    //this.Controls.Clear();
-
-                    // Reload the page in non-edit mode (or update the UI to reflect the changes)
-                    //InitializeComponent(_animal);
                 }
                 // If the user clicks 'Cancel', do nothing and return to edit mode
                 else if (result == DialogResult.Cancel)
@@ -1596,23 +1718,24 @@ namespace RATAPP.Panels
 
             AnimalDto animal = new AnimalDto
             {
-                Id = 0,//int.Parse(idTextBox.Text), TODO 
-                Name = animalNameTextBox.Text,
-                Sex = sexComboBox.Text, // Assuming there's a TextBox for sex
+                Id = _animal.Id,
+                regNum = regNumTextBox.Text,
+                name = animalNameTextBox.Text,
+                sex = sexComboBox.Text, // Assuming there's a TextBox for sex
                 DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
                 DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
                                            //? null
                                            //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
-                Species = speciesComboBox.Text,
-                Comment = commentsTextBox.Text,
-                imageUrl = "aURL",//_animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
+                species = speciesComboBox.Text,
+                comment = commentsTextBox.Text,
+                imageUrl = _animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
                 Line = line, // Assuming there's a TextBox for line
-                Dam = "aDam",//damComboBox.Text, // Assuming there's a TextBox for dam
-                Sire = "aSIRE",//sireComboBox.Text, // Assuming there's a TextBox for sire
-                Variety = "AVARIETY",//varietyComboBox.Text, // Assuming there's a TextBox for variety
-                Color = "ACOLOR",//colorComboBox.Text, // Assuming there's a TextBox for color TODO
-                Breeder = "1",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                Genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
+                dam = "aDam",//damComboBox.Text, // Assuming there's a TextBox for dam
+                sire = "aSIRE",//sireComboBox.Text, // Assuming there's a TextBox for sire
+                variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
+                color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
+                breeder = "1",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
+                genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
             };
 
             return animal;
@@ -1670,12 +1793,15 @@ namespace RATAPP.Panels
             UpdateButton();
             SaveButton();
             CancelButton();
+            InitializeNavigationButtons(); //initialize the navigation buttons
 
             // Add the button to the panel
             this.Controls.Add(inbredButton);
             this.Controls.Add(updateButton);
             this.Controls.Add(saveButton);
             this.Controls.Add(cancelButton);
+            this.Controls.Add(nextButton);
+            this.Controls.Add(prevButton);
         }
 
         //TODO just testing, move to utils file
@@ -1713,7 +1839,7 @@ namespace RATAPP.Panels
         public async Task RefreshDataAsync()
         {
             int id;
-            bool success = int.TryParse(idTextBox.Text, out id);
+            bool success = int.TryParse(regNumTextBox.Text, out id);
             if (success)
             {
                 try
@@ -1723,7 +1849,7 @@ namespace RATAPP.Panels
                     Refresh(); // Force UI to repaint to show spinner
 
                     // Fetch animals asynchronously
-                    _animal = await _animalService.GetAnimalByIdAsync(id);
+                    _animal = await _animalService.GetAnimalByIdAsync(_animal.Id);
 
                     //for testing
                     // Wait asynchronously for 3 seconds
@@ -1819,7 +1945,6 @@ namespace RATAPP.Panels
             _animal = await _animalService.GetAnimalByIdAsync(animal.Id); //get the animal to re-populate the text boxes with the updated data
             this.Controls.Clear();// clear the controls, should go back to text boxes and buttons populated with new animal data
             this.InitializeComponent(_animal);
-            this.Refresh();
         }
 
         // Handle the update process for an existing animal

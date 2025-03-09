@@ -19,12 +19,15 @@ namespace RATAPPLibrary.Data.DbContexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY2;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
-                .UseLoggerFactory(MyLoggerFactory) // Attach the logger
-                .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
-                .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
-        }
+            if (optionsBuilder == null)
+            {
+                optionsBuilder
+                    .UseSqlServer("Server=EARSLAPTOP;Database=RATAPPLIBRARY2;Integrated Security=True;Encrypt=True;TrustServerCertificate=True;")
+                    .UseLoggerFactory(MyLoggerFactory) // Attach the logger
+                    .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
+                    .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
+            }
+            }
 
         //Account management
         public virtual DbSet<User> Users { get; set; }
@@ -55,6 +58,7 @@ namespace RATAPPLibrary.Data.DbContexts
         public virtual DbSet<Trait> Trait { get; set; }  // This should exist
         public virtual DbSet<TraitType> TraitType { get; set; }  // This should exist  
         public virtual DbSet<AnimalTrait> AnimalTrait { get; set; }
+        public DbContextOptions<RatAppDbContext> Options { get; internal set; }
 
         //Health
         //public DbSet<HealthRecord> HealthRecord { get; set; }
@@ -100,20 +104,18 @@ namespace RATAPPLibrary.Data.DbContexts
 
         }
 
- 
-        //Configure Animal Trait
+
         private void ConfigureAnimalTrait(ModelBuilder modelBuilder)
         {
-            //set foreign key to do nothing if deleted 
             modelBuilder.Entity<AnimalTrait>()
                 .HasOne(at => at.Animal)
-                .WithMany()
+                .WithMany(a => a.Traits)  // Define the inverse navigation property on Animal
                 .HasForeignKey(at => at.AnimalId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<AnimalTrait>()
                 .HasOne(at => at.Trait)
-                .WithMany()
+                .WithMany(t => t.AnimalTraits)  // Define the inverse navigation property on Trait
                 .HasForeignKey(at => at.TraitId)
                 .OnDelete(DeleteBehavior.NoAction);
         }

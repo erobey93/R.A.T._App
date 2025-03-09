@@ -12,10 +12,29 @@ namespace RATAPPLibrary
     {
         public static void Main(string[] args)
         {
+            
             var builder = WebApplication.CreateBuilder(args);
 
-            // Register PasswordHashing as a service for dependency injection
-            builder.Services.AddScoped<PasswordHashing>();
+            // Manually set the environment if needed
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development"); //FIXME set to to production after testing 
+
+            // After setting the environment, you can configure services
+            var _env = builder.Environment;
+
+            if (_env.IsDevelopment())  // For development or tests, use InMemory
+            {
+                builder.Services.AddDbContext<RatAppDbContext>(options =>
+                    options.UseInMemoryDatabase("TestDatabase"));
+            }
+            else  // For production, use SQL Server
+            {
+                builder.Services.AddDbContext<RatAppDbContext>(options =>
+                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            }
+
+
+        // Register PasswordHashing as a service for dependency injection
+        builder.Services.AddScoped<PasswordHashing>();
 
             // Register services
             builder.Services.AddScoped<LoginService>();
@@ -25,8 +44,8 @@ namespace RATAPPLibrary
 
             // Add DbContext and other services
 
-            builder.Services.AddDbContext<RatAppDbContext>(options =>
-               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            //builder.Services.AddDbContext<RatAppDbContext>(options =>
+            //   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

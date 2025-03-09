@@ -6,6 +6,9 @@ using System;
 using System.Data;
 using System.Drawing;
 using Microsoft.Identity.Client;
+using PdfSharp.Charting;
+using RATAPPLibrary.Data.Models.Genetics;
+using System.Reflection.Metadata.Ecma335;
 
 namespace RATAPPLibrary.Services
 {
@@ -13,11 +16,13 @@ namespace RATAPPLibrary.Services
     {
         private readonly RatAppDbContext _context;
         private readonly LineService _lineService;
+        private readonly TraitService _traitService;
 
         public AnimalService(RatAppDbContext context)
         {
             _context = context;
             _lineService = new LineService(context);
+            _traitService = new TraitService(context);
         }
 
         //TODO switched to passing an animalDto object instead of individual parameters
@@ -30,6 +35,10 @@ namespace RATAPPLibrary.Services
             {
                 // Get or create the line for the animal based on the variety
                 var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
+                if (line == null)
+                {
+                    throw new InvalidOperationException($"Line '{animalDto.Line}' not found. Please ensure it exists in the database.");
+                }
 
                 // Find the species in the database by its scientific name
                 var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.species);
@@ -38,6 +47,23 @@ namespace RATAPPLibrary.Services
                     throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
                 }
 
+                // set animal's color 
+                //get the color from the string and find the id in the database
+                //then store the animal id + color id in the animal_color table
+                // Get the trait by name
+                if(animalDto.color != null)
+                {
+                    try
+                    {
+                        await CreateAnimalTraitAsync(animalDto.Id, animalDto.color);
+                    }
+                    catch(Exception e)
+                    {
+                        //color isn't required so if it doesn't exist, just continue? FIXME 
+                    }
+
+                }
+              
                 // Map the AnimalDto to the Animal database model
                 var newAnimal = new Animal
                 {
@@ -50,14 +76,14 @@ namespace RATAPPLibrary.Services
                     LineId = line.Id,
                     comment = animalDto.comment,
                     imageUrl = animalDto.imageUrl,
-                    damId = animalDto.damId,
-                    sireId = animalDto.sireId,
+                    //damId = animalDto.damId,
+                    //sireId = animalDto.sireId,
                     //StockId = line.StockId, // FIXME: Leaving this here as noted even though stock id should not be in the animal object (EF won't let me update this)
                     //S = species.Id, // Assuming a SpeciesId FK exists in the Animal table
                     //Dam = animalDto.Dam,
                     //Sire = animalDto.Sire,
                     //Variety = animalDto.Variety, line is being set based on variety so this is not needed
-                    //Color = animalDto.Color, //TODO missing color and markings I guess? Gonna get the db working first then I'll update this, maybe I was planning on storing this in a phenotype object but idk
+                    //TODO missing color and markings I guess? Gonna get the db working first then I'll update this, maybe I was planning on storing this in a phenotype object but idk
                     //Breeder = animalDto.Breeder, //TODO not yet implemented 
                     //Genotype = animalDto.Genotype //TODO not yet implemented
                 };
@@ -74,6 +100,40 @@ namespace RATAPPLibrary.Services
             }
         }
 
+        //create new animal trait
+        public async Task CreateAnimalTraitAsync(int animalId, string traitName)
+        {
+            try
+            {
+                var trait = await _traitService.GetTraitByNameAsync(traitName); //FIXME: Placeholder for color logic
+                if (trait == null)
+                {
+                    throw new InvalidOperationException($"Common name '{traitName}' for trait could not be found.");
+                }
+
+                int traitId = trait.Id;
+
+                //check if the trait already exists for the animal
+                var existingTrait = await _context.AnimalTrait.FirstOrDefaultAsync(t => t.TraitId == traitId && t.AnimalId == animalId);
+                if (existingTrait != null)
+                {
+                    throw new InvalidOperationException($"Trait with ID {traitId} already exists for animal with ID {animalId}.");
+                }
+
+                //make a new entry in the animal trait table for the color of the animal
+                await _traitService.CreateAnimalTraitAsync(traitId, animalId);
+            }
+            catch (Exception ex)
+            {
+                // Log the error details to the console or a logging service
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // throw the exception again to propagate further
+                throw;
+            }
+        }
+
         //get all animal info by sex 
         public async Task<AnimalDto[]> GetAnimalInfoBySexAndSpecies(string sex, string species)
         {
@@ -85,6 +145,9 @@ namespace RATAPPLibrary.Services
             //then find all animals that match the provided sex 
             foreach (var animal in bySex)
             {
+                //get the traits for that animal 
+                var traits = await _traitService.GetTraitMapForSingleAnimal(animal.Id); //FIXME changed this wihtout checkout functionality 
+
                 if (animal.species.Equals(species))
                 {
                     //add to the list of animals that match the requested sex 
@@ -173,6 +236,10 @@ namespace RATAPPLibrary.Services
 
                 // Get or create the line for the animal based on the variety
                 var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
+                if (line == null)
+                {
+                    throw new InvalidOperationException($"Line '{animalDto.Line}' not found. Please ensure it exists in the database.");
+                }
 
                 // Find the species in the database by its common  name
                 var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.species);
@@ -180,6 +247,25 @@ namespace RATAPPLibrary.Services
                 {
                     throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
                 }
+
+                // add updated traits if they don't already exist 
+                // set animal's color 
+                //get the color from the string and find the id in the database
+                //then store the animal id + color id in the animal_color table
+                // Get the trait by name
+                if (animalDto.color != null)
+                {
+                    try
+                    {
+                        await CreateAnimalTraitAsync(animalDto.Id, animalDto.color);
+                    }
+                    catch (Exception e)
+                    {
+                        //color isn't required so if it doesn't exist, just continue? FIXME 
+                    }
+
+                }
+
 
                 // Update the existing animal's properties
                 existingAnimal.Name = animalDto.name;
@@ -189,8 +275,8 @@ namespace RATAPPLibrary.Services
                 existingAnimal.LineId = line.Id;
                 existingAnimal.comment = animalDto.comment;
                 existingAnimal.imageUrl = animalDto.imageUrl;
-                existingAnimal.damId = animalDto.damId;
-                existingAnimal.sireId = animalDto.sireId;
+                //existingAnimal.damId = animalDto.damId; TODO
+                //existingAnimal.sireId = animalDto.sireId;
 
                 // Add the new animal to the database
                 _context.Animal.Update(existingAnimal);
@@ -259,11 +345,16 @@ namespace RATAPPLibrary.Services
             var stockId = a.StockId;
 
             var speciesObj = await _context.Species.FirstOrDefaultAsync(s => s.Id == stockId); //FIXME this is a placeholder until I fix/implement species logic
+            string species = speciesObj.CommonName;
 
             int breederId = 5; //FIXME this is a placeholder until I fix/implement breeder logic 
 
+            var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
+
+            //TODO can do above logic for all traits and then just loop through them to get
+
             //string dam = GetAnimalByIdAsync(a.damId).Result.name; 
-           //string sire = GetAnimalByIdAsync(a.sireId).Result.name; FIXME this needs to come from a litter, this is ridiculous 
+            //string sire = GetAnimalByIdAsync(a.sireId).Result.name; FIXME this needs to come from a litter, this is ridiculous 
 
             // Map the animals to include string values for the related entities
             var result = new AnimalDto
@@ -279,6 +370,10 @@ namespace RATAPPLibrary.Services
                 breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name, TODO this should be grabbing the breeders name from the breeder db (actually the user db)
                 species = speciesObj.CommonName, // Assuming Species has a Name property
                 imageUrl = a.imageUrl,
+                color = animalTraits["Color"].LastOrDefault(), //TODO this might break the world since its assuming multiple colors FIXME this is just going to print all colors as a list of strings which will work for 1, but not once i start stacking them
+                markings = animalTraits["Markings"].LastOrDefault(), //TODO this might break the world since its assuming multiple markings FIXME this is just going to print all markings as a list of strings which will work for 1, but not once i start stacking them
+                earType = animalTraits["Ear Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple ear types FIXME this is just going to print all ear types as a list of strings which will work for 1, but not once i start stacking them
+                variety = animalTraits["Coat Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple coat types FIXME this is just going to print all coat types as a list of strings which will work for 1, but not once i start stacking them
                 //dam = dam,
                 //sire = sire, 
                 //damId = a.damId,
@@ -287,6 +382,54 @@ namespace RATAPPLibrary.Services
             };
 
             return result;
+        }
+
+        //get animal's traits 
+        public async Task<Dictionary<string,List<string>>> GetAnimalTraits(int id)
+        {
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with ID {id} not found.");
+            }
+            
+            Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
+            try
+            {
+                traitMap = await _traitService.GetTraitMapForSingleAnimal(id);
+            }
+            catch(Exception e) //for now just catch exceptions and set default trait values to avoid breaking the world FIXME 
+            {
+                //throw new KeyNotFoundException($"Traits for animal with ID {id} not found.");
+                //animal doesn't have to have traits, at least not right now TODO 
+                Console.WriteLine($"Traits for animal with ID {id} not found.");
+                traitMap["Color"] = new List<string> { "No color found" };
+                traitMap["Markings"] = new List<string> { "No markings found" };
+                traitMap["Ear Type"] = new List<string> { "No ear type found" };
+                traitMap["Coat Type"] = new List<string> { "No coat type found" };
+            }
+
+            if (traitMap.Count < 4) //FIXME this is assuming we have 4 traits just to auto set traits for now for now just make sure we have the 4 traits we're looking for
+            {
+                if(traitMap.ContainsKey("Color") == false)
+                {
+                    traitMap["Color"] = new List<string> { "No color found" };
+                }
+                if (traitMap.ContainsKey("Markings") == false)
+                {
+                    traitMap["Markings"] = new List<string> { "No markings found" };
+                }
+                if (traitMap.ContainsKey("Ear Type") == false)
+                {
+                    traitMap["Ear Type"] = new List<string> { "No ear type found" };
+                }
+                if (traitMap.ContainsKey("Coat Type") == false)
+                {
+                    traitMap["Coat Type"] = new List<string> { "No coat type found" };
+                }
+            }
+
+            return traitMap;
         }
 
         //Map array of animals to array of AnimalDto
