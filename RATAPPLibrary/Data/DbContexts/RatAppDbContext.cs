@@ -38,6 +38,7 @@ namespace RATAPPLibrary.Data.DbContexts
         //Ancestry
         //public DbSet<AncestryRecord> Ancestries { get; set; }
         //public DbSet<AncestryRecordLink> AncestorLink { get; set; }
+        public virtual DbSet<Lineage> Lineages { get; set; }
 
         //Animal Management
         public virtual DbSet<Animal> Animal { get; set; }
@@ -99,6 +100,7 @@ namespace RATAPPLibrary.Data.DbContexts
             // Configure the Ancestry entities
             //ConfigureAncestryRecord(modelBuilder);
             //ConfigureAncestryRecordLink(modelBuilder);
+            ConfigureLineage(modelBuilder);
 
             ConfigureAnimalTrait(modelBuilder); 
 
@@ -138,6 +140,22 @@ namespace RATAPPLibrary.Data.DbContexts
                 .HasOne(u => u.Credentials)
                 .WithOne() // Each User has one Credentials
                 .HasForeignKey<User>(u => u.CredentialsId);
+        }
+
+        //lineage
+        private void ConfigureLineage(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Lineage>()
+                .HasOne(l => l.Animal)
+                .WithMany() // Or appropriate navigation property in Animal
+                .HasForeignKey(l => l.AnimalId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Lineage>()
+                .HasOne(l => l.Ancestor)
+                .WithMany() // Or appropriate navigation property in Animal
+                .HasForeignKey(l => l.AncestorId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         // Configure the Credentials entity
