@@ -453,7 +453,7 @@ namespace RATAPPLibrary.Services
                 name = a.Name,
                 DateOfBirth = a.DateOfBirth,
                 sex = a.Sex,
-                breeder = a.Line.Stock.Breeder.User.Individual.Name,
+                breeder = a.Line.Stock.Breeder.User.Individual.FirstName,
                 species = a.Line.Stock.Species.CommonName, // Assuming Species has a Name property
                 Line = a.Line?.Name, // Assuming Line has a Name property
                 comment = a.comment,

@@ -21,7 +21,7 @@ namespace RATAPPLibrary.Services
         }
 
         // Method to create a new user account
-        public async Task<bool> CreateAccountAsync(string username, string password, string email, string name, string phone, string location, string accountTypeName)
+        public async Task<bool> CreateAccountAsync(string username, string password, string email, string firstName, string lastName, string phone, string city, string state, string accountTypeName)
         {
             // Check if username already exists
             var existingUser = await _context.Users
@@ -45,10 +45,12 @@ namespace RATAPPLibrary.Services
             // Create new individual user data
             var individual = new Individual
             {
-                Name = name,
+                FirstName = firstName,
+                LastName = lastName,
                 Phone = phone,
                 Email = email,
-                Location = location
+                City = city,
+                State = state
             };
 
             // Create new account type (if not exists, you might want to have logic for creating account types as well)

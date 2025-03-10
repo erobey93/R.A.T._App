@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Ancestry;
 
 namespace RATAPPLibrary.Services
 {
@@ -73,5 +74,39 @@ namespace RATAPPLibrary.Services
             var sire = await GetSireByAnimalId(animalId);
             return (dam?.DisplayName ?? "Unknown", sire?.DisplayName ?? "Unknown");
         }
+
+        //add a new lineage connection
+        //Add a new lineage connection between an animal and its ancestor
+        //Lineage connection addition must be followed by adding in any new connections with the updated data 
+        public async Task<bool> AddLineageConnection(int animalId, int ancestorId, int generation, int sequence, string relationshipType)
+        {
+            try
+            {
+                var newLineage = new Lineage
+                {
+                    AnimalId = animalId,
+                    AncestorId = ancestorId,
+                    Generation = generation,
+                    Sequence = sequence,
+                    RelationshipType = relationshipType,
+                    RecordedAt = DateTime.UtcNow
+                };
+                _context.Lineages.Add(newLineage);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions (logging, etc.)
+                Console.WriteLine($"Error in AddLineageConnection: {ex.Message}");
+                return false; // Return false in case of error
+            }
+        }
     }
+
+    // update connections
+    // when a new lineage connection is added
+    // the connections must be updated to reflect the new data
+    // this means searching for any connections 
+
 }

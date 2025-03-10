@@ -3,9 +3,12 @@
     public class Individual
     {
         public int Id { get; set; }  // Primary key
-        public string Name { get; set; }
+        public required string FirstName { get; set; }
+        public required string LastName { get; set; }
         public string Phone { get; set; }
-        public string Email { get; set; }
-        public string Location { get; set; }
+        public required string Email { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+
     }
 }
