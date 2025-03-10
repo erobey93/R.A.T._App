@@ -52,7 +52,7 @@ namespace RATAPP.Panels
             // Title Label
             titleLabel = new Label
             {
-                Text = "Ancestry Tree",
+                Text = "Ancestry",
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 Location = new Point(20, 20),
                 Size = new Size(200, 30),
@@ -438,8 +438,7 @@ namespace RATAPP.Panels
         #endregion
     }
 
-    // These classes would typically be defined elsewhere in your application
-    // They are included here for completeness
+    //mock data below this will come from the library 
 
     public enum Gender
     {
@@ -478,4 +477,432 @@ namespace RATAPP.Panels
         }
     }
 }
+
+
+
+//namespace RATAPP.Panels
+//{
+//    public partial class AnimalPanel : Panel, INavigable
+   // {
+        // Keep existing field declarations
+
+        // Add new fields for weight and cage number
+        //private Label weightLabel;
+        //private Label cageNumberLabel;
+        //private TextBox weightTextBox;
+        //private TextBox cageNumberTextBox;
+        //private ComboBox cageNumberComboBox;
+
+        // Constructor remains the same
+
+        //private void InitializeComponent(AnimalDto animal)
+        //{
+        //    _animal = animal;
+
+        //    // Set panel properties with a more modern look
+        //    this.Size = new Size(1200, 800);
+        //    this.BackColor = Color.FromArgb(245, 245, 245); // Slightly off-white for less eye strain
+        //    this.Padding = new Padding(20);
+        //    this.AutoScroll = true; // Enable scrolling for smaller screens
+
+        //    // Initialize the main container layout
+        //    InitializeMainLayout();
+
+        //    // Initialize buttons first as they're referenced by other methods
+        //    InitializeButtons();
+        //    InitializeBottomButtons();
+
+        //    if (animal != null && !_isEditMode)
+        //    {
+        //        LoadAnimalDataAsync(animal.Id);
+        //    }
+        //    else
+        //    {
+        //        InitializeComboBoxes();
+        //    }
+        //}
+
+//        private void InitializeMainLayout()
+//        {
+//            // Create main container TableLayoutPanel for better organization
+//            TableLayoutPanel mainContainer = new TableLayoutPanel
+//            {
+//                Dock = DockStyle.Fill,
+//                ColumnCount = 2,
+//                RowCount = 1,
+//                Padding = new Padding(10),
+//                BackColor = Color.Transparent
+//            };
+
+//            // Set column widths - 70% for data, 30% for image
+//            mainContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 70F));
+//            mainContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 30F));
+
+//            // Create left panel for data entry
+//            Panel dataEntryPanel = CreateDataEntryPanel();
+
+//            // Create right panel for images
+//            Panel imagePanel = CreateImagePanel();
+
+//            // Add panels to main container
+//            mainContainer.Controls.Add(dataEntryPanel, 0, 0);
+//            mainContainer.Controls.Add(imagePanel, 1, 0);
+
+//            // Add main container to the panel
+//            this.Controls.Add(mainContainer);
+//        }
+
+//        private Panel CreateDataEntryPanel()
+//        {
+//            Panel dataPanel = new Panel
+//            {
+//                Dock = DockStyle.Fill,
+//                AutoScroll = true,
+//                Padding = new Padding(10)
+//            };
+
+//            // Create grouped sections using GroupBox for better visual organization
+//            GroupBox identificationGroup = CreateGroupBox("Identification", 0);
+//            GroupBox physicalGroup = CreateGroupBox("Physical Characteristics", 220);
+//            GroupBox housingGroup = CreateGroupBox("Housing & Management", 440);
+//            GroupBox parentageGroup = CreateGroupBox("Parentage", 660);
+
+//            // Add identification fields (ID, Name, Registration)
+//            AddFieldToGroup(identificationGroup, "Registration #/ID", regNumTextBox, 20);
+//            AddFieldToGroup(identificationGroup, "Animal Name", animalNameTextBox, 60);
+//            AddFieldToGroup(identificationGroup, "Species", speciesComboBox, 100);
+//            AddFieldToGroup(identificationGroup, "Sex", sexComboBox, 140);
+
+//            // Add physical characteristics fields
+//            AddFieldToGroup(physicalGroup, "Variety", varietyComboBox, 20);
+//            AddFieldToGroup(physicalGroup, "Color", colorComboBox, 60);
+//            AddFieldToGroup(physicalGroup, "Markings", markingComboBox, 100);
+//            AddFieldToGroup(physicalGroup, "Ear Type", earTypeComboBox, 140);
+//            AddFieldToGroup(physicalGroup, "Weight", weightTextBox, 180); // New field
+
+//            // Add housing & management fields
+//            AddFieldToGroup(housingGroup, "Cage #", cageNumberComboBox, 20); // New field
+//            AddFieldToGroup(housingGroup, "Breeder", breederInfoComboBox, 60);
+//            AddFieldToGroup(housingGroup, "Genetics", genotypeComboBox, 100);
+//            AddFieldToGroup(housingGroup, "% Inbred", inbredTextBox, 140);
+
+//            // Add parentage fields
+//            AddFieldToGroup(parentageGroup, "Dam", damComboBox, 20);
+//            AddFieldToGroup(parentageGroup, "Sire", sireComboBox, 60);
+
+//            // Add comments section at the bottom
+//            GroupBox commentsGroup = CreateGroupBox("Comments", 880);
+//            commentsGroup.Height = 150;
+
+//            commentsTextBox = new TextBox
+//            {
+//                Multiline = true,
+//                ScrollBars = ScrollBars.Vertical,
+//                Dock = DockStyle.Fill,
+//                Font = new Font("Segoe UI", 10F),
+//                BackColor = Color.White
+//            };
+
+//            commentsGroup.Controls.Add(commentsTextBox);
+
+//            // Add all groups to the data panel
+//            dataPanel.Controls.Add(identificationGroup);
+//            dataPanel.Controls.Add(physicalGroup);
+//            dataPanel.Controls.Add(housingGroup);
+//            dataPanel.Controls.Add(parentageGroup);
+//            dataPanel.Controls.Add(commentsGroup);
+
+//            return dataPanel;
+//        }
+
+//        private GroupBox CreateGroupBox(string title, int yPosition)
+//        {
+//            return new GroupBox
+//            {
+//                Text = title,
+//                Location = new Point(10, yPosition),
+//                Size = new Size(700, 200),
+//                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+//                ForeColor = Color.FromArgb(60, 60, 60)
+//            };
+//        }
+
+//        private void AddFieldToGroup(GroupBox group, string labelText, Control control, int yPosition)
+//        {
+//            Label label = new Label
+//            {
+//                Text = labelText,
+//                Location = new Point(20, yPosition + 5),
+//                AutoSize = true,
+//                Font = new Font("Segoe UI", 9.5F)
+//            };
+
+//            control.Location = new Point(200, yPosition);
+//            control.Width = 450;
+//            control.Font = new Font("Segoe UI", 9.5F);
+
+//            if (control is TextBox textBox)
+//            {
+//                textBox.BorderStyle = BorderStyle.FixedSingle;
+//                textBox.BackColor = Color.White;
+//            }
+//            else if (control is ComboBox comboBox)
+//            {
+//                comboBox.FlatStyle = FlatStyle.Flat;
+//                comboBox.BackColor = Color.White;
+//                comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+//            }
+
+//            group.Controls.Add(label);
+//            group.Controls.Add(control);
+//        }
+
+//        private Panel CreateImagePanel()
+//        {
+//            Panel imagePanel = new Panel
+//            {
+//                Dock = DockStyle.Fill,
+//                Padding = new Padding(10)
+//            };
+
+//            // Create a GroupBox for the image section
+//            GroupBox imageGroup = new GroupBox
+//            {
+//                Text = "Animal Images",
+//                Dock = DockStyle.Top,
+//                Height = 350,
+//                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+//                ForeColor = Color.FromArgb(60, 60, 60)
+//            };
+
+//            // Initialize the animal photo box with better styling
+//            animalPhotoBox = new PictureBox
+//            {
+//                Size = new Size(250, 250),
+//                Location = new Point(25, 30),
+//                BorderStyle = BorderStyle.FixedSingle,
+//                SizeMode = PictureBoxSizeMode.Zoom,
+//                BackColor = Color.White
+//            };
+
+//            // Add a label with instructions
+//            Label photoInstructionLabel = new Label
+//            {
+//                Text = "Click to change image",
+//                Location = new Point(25, 290),
+//                AutoSize = true,
+//                Font = new Font("Segoe UI", 8F, FontStyle.Italic),
+//                ForeColor = Color.Gray
+//            };
+
+//            imageGroup.Controls.Add(animalPhotoBox);
+//            imageGroup.Controls.Add(photoInstructionLabel);
+
+//            // Create a GroupBox for the thumbnails
+//            GroupBox thumbnailGroup = new GroupBox
+//            {
+//                Text = "Additional Images",
+//                Dock = DockStyle.Fill,
+//                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
+//                ForeColor = Color.FromArgb(60, 60, 60)
+//            };
+
+//            // Initialize the thumbnail panel with better styling
+//            thumbnailPanel = new FlowLayoutPanel
+//            {
+//                Dock = DockStyle.Fill,
+//                Padding = new Padding(10),
+//                AutoScroll = true,
+//                FlowDirection = FlowDirection.LeftToRight,
+//                WrapContents = true,
+//                BackColor = Color.White
+//            };
+
+//            thumbnailGroup.Controls.Add(thumbnailPanel);
+
+//            imagePanel.Controls.Add(imageGroup);
+//            imagePanel.Controls.Add(thumbnailGroup);
+
+//            return imagePanel;
+//        }
+
+//        // Method to initialize the action buttons with better styling
+//        private void InitializeButtons()
+//        {
+//            // Create a panel for the action buttons
+//            Panel actionButtonPanel = new Panel
+//            {
+//                Dock = DockStyle.Bottom,
+//                Height = 60,
+//                Padding = new Padding(10)
+//            };
+
+//            // Create buttons with modern styling
+//            saveButton = CreateStyledButton("Save Changes", Color.FromArgb(0, 120, 212), Color.White);
+//            updateButton = CreateStyledButton("Update Data", Color.FromArgb(0, 120, 212), Color.White);
+//            cancelButton = CreateStyledButton("Cancel", Color.FromArgb(200, 200, 200), Color.Black);
+
+//            // Position buttons
+//            saveButton.Location = new Point(10, 10);
+//            updateButton.Location = new Point(10, 10);
+//            cancelButton.Location = new Point(170, 10);
+
+//            // Set up event handlers
+//            saveButton.Click += async (sender, e) => await SaveButtonClick(sender, e);
+//            updateButton.Click += UpdateButtonClick;
+//            cancelButton.Click += async (sender, e) => await CancelButtonClick(sender, e);
+
+//            // Add buttons to panel
+//            actionButtonPanel.Controls.Add(saveButton);
+//            actionButtonPanel.Controls.Add(updateButton);
+//            actionButtonPanel.Controls.Add(cancelButton);
+
+//            // Add navigation buttons
+//            prevButton = CreateStyledButton("< Previous", Color.FromArgb(240, 240, 240), Color.Black);
+//            nextButton = CreateStyledButton("Next >", Color.FromArgb(240, 240, 240), Color.Black);
+
+//            prevButton.Location = new Point(actionButtonPanel.Width - 240, 10);
+//            nextButton.Location = new Point(actionButtonPanel.Width - 120, 10);
+
+//            prevButton.Click += PreviousButtonClick;
+//            nextButton.Click += NextButtonClick;
+
+//            actionButtonPanel.Controls.Add(prevButton);
+//            actionButtonPanel.Controls.Add(nextButton);
+
+//            // Add the button panel to the main panel
+//            this.Controls.Add(actionButtonPanel);
+
+//            // Set initial button visibility
+//            if (_animal != null && !_isEditMode)
+//            {
+//                saveButton.Visible = false;
+//                cancelButton.Visible = false;
+//                updateButton.Visible = true;
+//            }
+//            else
+//            {
+//                saveButton.Visible = true;
+//                cancelButton.Visible = true;
+//                updateButton.Visible = false;
+//            }
+//        }
+
+//        private Button CreateStyledButton(string text, Color backColor, Color foreColor)
+//        {
+//            return new Button
+//            {
+//                Text = text,
+//                Width = 150,
+//                Height = 40,
+//                Font = new Font("Segoe UI", 10F),
+//                BackColor = backColor,
+//                ForeColor = foreColor,
+//                FlatStyle = FlatStyle.Flat,
+//                FlatAppearance = { BorderSize = 0 },
+//                Cursor = Cursors.Hand
+//            };
+//        }
+
+//        // Method to initialize the bottom navigation buttons with better styling
+//        private void InitializeBottomButtons()
+//        {
+//            // Create a panel for the feature navigation buttons
+//            Panel featureButtonPanel = new Panel
+//            {
+//                Dock = DockStyle.Bottom,
+//                Height = 60,
+//                Padding = new Padding(10),
+//                BackColor = Color.FromArgb(230, 230, 230)
+//            };
+
+//            // Create a FlowLayoutPanel to hold the buttons
+//            FlowLayoutPanel buttonFlow = new FlowLayoutPanel
+//            {
+//                Dock = DockStyle.Fill,
+//                FlowDirection = FlowDirection.LeftToRight,
+//                WrapContents = false,
+//                AutoScroll = true
+//            };
+
+//            // Create feature buttons with consistent styling
+//            indAncestryButton = CreateFeatureButton("Ancestry", "View and edit ancestry information");
+//            Button geneticsButton = CreateFeatureButton("Genetics", "Manage genetic information");
+//            Button breedingHistoryButton = CreateFeatureButton("Breeding History", "View breeding records");
+//            documentsButton = CreateFeatureButton("Documents", "Manage related documents");
+//            healthButton = CreateFeatureButton("Health Records", "View health history");
+
+//            // Set up event handlers
+//            indAncestryButton.Click += (sender, e) => {
+//                var ancestryForm = new IndividualAnimalAncestryForm(_parentForm, _context, _animal);
+//                ancestryForm.Show();
+//            };
+
+//            documentsButton.Click += (sender, e) => {
+//                var documentForm = new DocumentsForm(_parentForm, _context);
+//                documentForm.Show();
+//            };
+
+//            healthButton.Click += (sender, e) => {
+//                var healthForm = new HealthRecordForm(_parentForm, _context, _animal);
+//                healthForm.Show();
+//            };
+
+//            // Add buttons to flow panel
+//            buttonFlow.Controls.Add(indAncestryButton);
+//            buttonFlow.Controls.Add(geneticsButton);
+//            buttonFlow.Controls.Add(breedingHistoryButton);
+//            buttonFlow.Controls.Add(documentsButton);
+//            buttonFlow.Controls.Add(healthButton);
+
+//            // Add flow panel to feature panel
+//            featureButtonPanel.Controls.Add(buttonFlow);
+
+//            // Add feature panel to main panel
+//            this.Controls.Add(featureButtonPanel);
+//        }
+
+//        private Button CreateFeatureButton(string text, string tooltip)
+//        {
+//            Button button = new Button
+//            {
+//                Text = text,
+//                Width = 140,
+//                Height = 40,
+//                Margin = new Padding(5, 0, 5, 0),
+//                Font = new Font("Segoe UI", 9.5F),
+//                BackColor = Color.FromArgb(250, 250, 250),
+//                FlatStyle = FlatStyle.Flat,
+//                FlatAppearance = { BorderColor = Color.FromArgb(200, 200, 200) },
+//                Cursor = Cursors.Hand
+//            };
+
+//            // Add tooltip
+//            ToolTip tip = new ToolTip();
+//            tip.SetToolTip(button, tooltip);
+
+//            return button;
+//        }
+
+//        // Update ParseAnimalData to include new fields
+//        private AnimalDto ParseAnimalData()
+//        {
+//            // Existing code...
+
+//            AnimalDto animal = new AnimalDto
+//            {
+//                // Existing properties...
+
+//                // Add new properties
+//                Weight = string.IsNullOrEmpty(weightTextBox.Text) ? null : weightTextBox.Text,
+//                CageNumber = cageNumberComboBox.Text
+//            };
+
+//            return animal;
+//        }
+
+//        // Other methods remain largely the same, with UI improvements applied
+//        // ...
+//    }
+//}
 

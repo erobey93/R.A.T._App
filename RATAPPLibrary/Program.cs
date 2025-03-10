@@ -23,8 +23,10 @@ namespace RATAPPLibrary
 
             if (_env.IsDevelopment())  // For development or tests, use InMemory
             {
+                //builder.Services.AddDbContext<RatAppDbContext>(options =>
+                //    options.UseInMemoryDatabase("TestDatabase"));
                 builder.Services.AddDbContext<RatAppDbContext>(options =>
-                    options.UseInMemoryDatabase("TestDatabase"));
+                   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             }
             else  // For production, use SQL Server
             {
