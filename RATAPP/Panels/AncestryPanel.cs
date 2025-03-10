@@ -52,7 +52,7 @@ namespace RATAPP.Panels
             // Title Label
             titleLabel = new Label
             {
-                Text = "Ancestry Tree",
+                Text = "Ancestry",
                 Font = new Font("Segoe UI", 16, FontStyle.Bold),
                 Location = new Point(20, 20),
                 Size = new Size(200, 30),
@@ -438,8 +438,7 @@ namespace RATAPP.Panels
         #endregion
     }
 
-    // These classes would typically be defined elsewhere in your application
-    // They are included here for completeness
+    //mock data below this will come from the library 
 
     public enum Gender
     {
