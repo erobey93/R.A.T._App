@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250310000504_addLineageTablePlusContext")]
+    partial class addLineageTablePlusContext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -91,7 +94,8 @@ namespace RATAPPLibrary.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("RelationshipType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("Sequence")
                         .HasColumnType("int");
