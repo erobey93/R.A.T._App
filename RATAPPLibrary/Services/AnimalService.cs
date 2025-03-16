@@ -65,9 +65,32 @@ namespace RATAPPLibrary.Services
                     }
 
                 }
-              
-                // Map the AnimalDto to the Animal database model
-                var newAnimal = new Animal
+
+                //if there is an entry for dam and sire, make new lineage entry
+                //gen 1, seq 1, animal id, need to figure out ancestor id, how do I find them? should have the parent object and store that I guess? Is that the most efficient way? TODO 
+                if (animalDto.damId != null)
+                {
+                    try
+                    {
+                        //add a new dam entry into lineage table 
+                        await _lineageService.AddLineageConnection(animalDto.Id, (int)animalDto.damId, 1, 1, "Maternal");
+                    }
+                    catch (Exception e) { } //for now, just catch, do nothing 
+
+                }
+                if (animalDto.sireId != null)
+                {
+                    //add a new sire entry into lineage table 
+                    try
+                    {
+                        //add a new dam entry into lineage table 
+                        await _lineageService.AddLineageConnection(animalDto.Id, (int)animalDto.sireId, 1, 1, "Paternal");
+                    }
+                    catch (Exception e) { } //for now, just catch, do nothing 
+                }
+
+                    // Map the AnimalDto to the Animal database model
+                    var newAnimal = new Animal
                 {
                     registrationNumber = animalDto.regNum,
                     StockId = 1, //FIXME this should be set automatically based on the species of the animal
@@ -78,14 +101,6 @@ namespace RATAPPLibrary.Services
                     LineId = line.Id,
                     comment = animalDto.comment,
                     imageUrl = animalDto.imageUrl,
-                    //StockId = line.StockId, // FIXME: Leaving this here as noted even though stock id should not be in the animal object (EF won't let me update this)
-                    //S = species.Id, // Assuming a SpeciesId FK exists in the Animal table
-                    //Dam = animalDto.Dam,
-                    //Sire = animalDto.Sire,
-                    //Variety = animalDto.Variety, line is being set based on variety so this is not needed
-                    //TODO missing color and markings I guess? Gonna get the db working first then I'll update this, maybe I was planning on storing this in a phenotype object but idk
-                    //Breeder = animalDto.Breeder, //TODO not yet implemented 
-                    //Genotype = animalDto.Genotype //TODO not yet implemented
                 };
 
                 // Add the new animal to the database
@@ -266,6 +281,43 @@ namespace RATAPPLibrary.Services
 
                 }
 
+                int? damId = animalDto.damId;
+                int? sireId = animalDto.sireId;
+                int animalId = animalDto.Id;
+
+                //if ancestry connection doesn't exist, make it 
+                if(damId != 0)
+                {
+                    var doesExist = await _lineageService.DoesAncestryConnectionExist(animalId, (int)damId);
+                    bool connectionExists = doesExist; 
+
+                    //check if it exists
+                    if (!connectionExists){
+                        //add the connection
+                        await _lineageService.AddLineageConnection(animalId, (int)damId, 1, 1, "Maternal"); //TODO this is hardcoded for a dam 
+                    }
+                    else
+                    {
+                        //connection is there so no need to do anything 
+                    }
+                }
+                if (sireId != 0)
+                {
+                    var doesExist = await _lineageService.DoesAncestryConnectionExist(animalId, (int)sireId);
+                    bool connectionExists = doesExist;
+
+                    //check if it exists
+                    if (!connectionExists)
+                    {
+                        //add the connection
+                        await _lineageService.AddLineageConnection(animalId, (int)sireId, 1, 1, "Paternal"); //TODO this is hardcoded for a dam 
+                    }
+                    else
+                    {
+                        //connection is there so no need to do anything 
+                    }
+                }
+
 
                 // Update the existing animal's properties
                 existingAnimal.Name = animalDto.name;
@@ -351,23 +403,21 @@ namespace RATAPPLibrary.Services
 
             //TODO can do above logic for all traits and then just loop through them to get
 
-            //string dam = _lineageService.GetDamByAnimalId(a.Id).Result.Name; //FIXME this is a placeholder until I fix/implement lineage logic
-            //if (dam == null)
-            //{
-            //    dam = "unknown";
-            //}
-            //string sire = _lineageService.GetSireByAnimalId(a.Id).Result.Name; //FIXME this is a placeholder until I fix/implement lineage logic
-            //if (sire == null)
-            //{
-            //    sire = "unknown";
-            //}
+            //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
+            //int sireId = getSire.sire.;
+            var getDam = await _lineageService.GetDamByAnimalId(a.Id);
+            int damId = 0; 
+            if (getDam != null)
+            {
+                damId = getDam.Id;
+            }
 
-            //other way is to use the method I made in the lineage service, I'm not sure what best practice is here though 
-            var getDam = await _lineageService.GetDamAndSireByAnimalId(a.Id); //FIXME this is a placeholder until I fix/implement lineage logic
-            string dam = getDam.dam;
-
-            var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
-            string sire = getSire.sire;
+            var getSire = await _lineageService.GetSireByAnimalId(a.Id);
+            int sireId = 0;
+            if (getSire != null)
+            {
+                sireId = getSire.Id;
+            }
 
             // Map the animals to include string values for the related entities
             var result = new AnimalDto
@@ -387,8 +437,8 @@ namespace RATAPPLibrary.Services
                 markings = animalTraits["Markings"].LastOrDefault(), //TODO this might break the world since its assuming multiple markings FIXME this is just going to print all markings as a list of strings which will work for 1, but not once i start stacking them
                 earType = animalTraits["Ear Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple ear types FIXME this is just going to print all ear types as a list of strings which will work for 1, but not once i start stacking them
                 variety = animalTraits["Coat Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple coat types FIXME this is just going to print all coat types as a list of strings which will work for 1, but not once i start stacking them
-                dam = dam,
-                sire = sire, 
+                damId = damId != 0 ? damId : (int?)null,
+                sireId = sireId != 0 ? sireId : (int?)null, 
             };
 
             return result;

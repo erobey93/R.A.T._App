@@ -50,7 +50,7 @@ namespace RATAPPLibrary.Services
             {
                 var sireAncestryRecord = await _context.Lineages
                     .Include(l => l.Ancestor)
-                    .FirstOrDefaultAsync(l => l.AnimalId == animalId && l.Generation == 1 && l.Sequence == 1 && l.RelationshipType == "Maternal"); // Assuming you have a maternal identifier.
+                    .FirstOrDefaultAsync(l => l.AnimalId == animalId && l.Generation == 1 && l.Sequence == 2 && l.RelationshipType == "Paternal"); // Assuming you have a maternal identifier.
 
                 if (sireAncestryRecord != null && sireAncestryRecord.Ancestor != null)
                 {
@@ -102,11 +102,21 @@ namespace RATAPPLibrary.Services
                 return false; // Return false in case of error
             }
         }
+
+        //check for matching animalId and ancestorId 
+        public async Task<bool> DoesAncestryConnectionExist(int animalId, int ancestorId)
+        {
+            var existingConnection = await _context.Lineages.FirstOrDefaultAsync(l =>
+                l.AnimalId == animalId && l.AncestorId == ancestorId);
+
+            return existingConnection != null;
+        }
+
+
+        // update connections
+        // when a new lineage connection is added
+        // the connections must be updated to reflect the new data
+        // this means searching for any connections 
+
     }
-
-    // update connections
-    // when a new lineage connection is added
-    // the connections must be updated to reflect the new data
-    // this means searching for any connections 
-
 }

@@ -17,6 +17,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 //NOTES
 // * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
+// Ask about best practices for the following 
+// service organization, seems like bad practice to be passing so many services around 
+//
 namespace RATAPP.Panels
 {
     public partial class AnimalPanel : Panel, INavigable
@@ -88,10 +91,16 @@ namespace RATAPP.Panels
         //db context & services 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Services.LineageService _lineageService; //TODO I think what I want to do is make an "animal service" that does anything related to the animals and then make domain classes for everything else to avoid having to call so many services for basic animal data/functionality 
         private RATAPPLibrary.Services.TraitService _traitService;
         private RATAPPLibrary.Services.SpeciesService _speciesService;
 
         private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
+        //current idea is to store the dam and sire objects so that I have the id for the db, there is likely a more efficient way to do this TODO
+        private AnimalDto _dam;
+        private AnimalDto _sire;
+        private AnimalDto[] _parents;
+
         private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
         private RATAppBaseForm _parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
 
@@ -99,22 +108,7 @@ namespace RATAPP.Panels
 
         //TODO
         //think through data caching of animals, right now I am passing the entire list of animals and having to navigate through an array
-        //this is not efficient and I am making data base calls for the current animal instead of using the data that I already have so this is a big FIXME 
-        // it may actually make sense to have a state for the panel - future work
-        // edit vs non edit mode and then just check this state
-        //like if a user is on an existing animal and they click update animal details
-
-        // and then requery the database to get the updated values
-        // and then disable the text boxes and enable the update button again
-        // and disable the save button
-        // and then if they click cancel it will just requery the database
-        // but if they have made changes it will prompt them to save changes
-        // and then if they click yes it will save the changes
-        // and then requery the database
-        // for new animals it will just save the animal to the database
-        // and then requery the database
-        // and then disable the text boxes and enable the update button again
-        // and disable the save button
+        //this is not efficient and I am making data base calls for the current animal instead of using the data that I already have so this is a big FIXME
 
         // Test image paths TODO should be getting from an AnimalImage table in the database - future feature 
         private List<string> imagePaths = new List<string>
@@ -132,6 +126,8 @@ namespace RATAPP.Panels
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
             _traitService = new RATAPPLibrary.Services.TraitService(context);
             _speciesService = new RATAPPLibrary.Services.SpeciesService(context);
+            _lineageService = new RATAPPLibrary.Services.LineageService(context);
+
             parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _parentForm = parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
@@ -181,11 +177,18 @@ namespace RATAPP.Panels
         {
             var animal = await _animalService.GetAnimalByIdAsync(animalID); //get the animal data from the database FIXME should just set global variable and use that instead of passing around 
             _animal = animal; //FIXME 
+                              //get animal dam and sire 
+            var defaultAnimal = await GetOrCreateDefaultAnimal(0);
+            //TODO resetting dam and sire here but this won't always need to happen, so re-think this logic to be more efficient 
+            _dam = defaultAnimal;
+            _sire = defaultAnimal;
+
+            await GetAnimalDamAndSire();
             InitializeTextBoxes(_animal);//probably don't need to pass anything here, but for clarity I guess 
         }
 
         // initialize combo boxes
-        private void InitializeComboBoxes()
+        private async void InitializeComboBoxes()
         {
             string regNum = "";
             string name = "";
@@ -207,18 +210,26 @@ namespace RATAPP.Panels
             //if it does, then we need to get the data from the database and populate the text boxes with the values
             if (_animal != null)
             {
+                //TODO resetting dam and sire here but this won't always need to happen, so re-think this logic to be more efficient 
+                var defaultAnimal = await GetOrCreateDefaultAnimal(0);
+                _dam = defaultAnimal;
+                _sire = defaultAnimal;
+
+                //get most recent dam and sire 
+                await GetAnimalDamAndSire(); 
+
                 regNum = _animal.regNum.ToString();
                 name = _animal.name;
                 species = _animal.species;
                 sex = _animal.sex;
                 variety = _animal.variety;
                 color = _animal.color;
-                genotype = "TODO";
+                genotype = "xxyyzz";
                 marking = _animal.markings;
                 breeder = _animal.breeder;
                 earType = _animal.earType;//_animal.earType; //TODO make ear type species specific 
-                dam = _animal.dam;
-                sire = _animal.sire;
+                dam = _dam.name;
+                sire = _sire.name;
                 imageUrl = _animal.imageUrl;
                 inbred = "TODO";
 
@@ -360,8 +371,9 @@ namespace RATAPP.Panels
                     if (animalSpecies != "Unknown")
                     {
                         // Handle dam-related options (fetch data from database or service as needed)
-                        AnimalDto[] dams = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
-                        foreach (var dam in dams)
+                        //store to global parents variable so that the object's data can be snagged if it's chosen (in selected index changed) 
+                        _parents = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var dam in _parents)
                         {
                             options.Add(dam.name);
                         }
@@ -370,8 +382,8 @@ namespace RATAPP.Panels
                     {
                         // if no species, show all for appropriate sex 
                         // TODO handle mismatch in selected species and dam/sire type 
-                        AnimalDto[] dams = await _animalService.GetAnimalsBySex(animalSex);
-                        foreach (var dam in dams)
+                        _parents = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var dam in _parents)
                         {
                             options.Add(dam.name);
                         }
@@ -388,9 +400,9 @@ namespace RATAPP.Panels
                     //Unknown means nothing filled out, so we need to get all Female options other option is to have a pop up box that says "Please fill out the species field first"
                     if (animalSpecies != "Unknown")
                     {
-                        // Handle dam-related options (fetch data from database or service as needed)
-                        AnimalDto[] sires = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
-                        foreach (var sire in sires)
+                        // Handle sire-related options (fetch data from database or service as needed)
+                        _parents = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var sire in _parents)
                         {
                             options.Add(sire.name);
                         }
@@ -399,8 +411,8 @@ namespace RATAPP.Panels
                     {
                         // if no species, show all for appropriate sex 
                         // TODO handle mismatch in selected species and dam/sire type 
-                        AnimalDto[] sires = await _animalService.GetAnimalsBySex(animalSex);
-                        foreach (var sire in sires)
+                        _parents = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var sire in _parents)
                         {
                             options.Add(sire.name);
                         }  
@@ -472,31 +484,62 @@ namespace RATAPP.Panels
         // Event handler for "Create New" functionality
         private async void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (sender is ComboBox comboBox && comboBox.SelectedItem?.ToString() == "Create New")
+            //create new option
+            if (sender is ComboBox comboBox)
             {
-                // Open a dialog to get the new item from the user
-                string newItem = PromptForNewItem();
-
-                if (!string.IsNullOrWhiteSpace(newItem))
+                //if create new
+                if (comboBox.SelectedItem?.ToString() == "Create New")
                 {
-                    // Add the new item to the database
-                    AddNewItemToDatabase(newItem);
+                    // Open a dialog to get the new item from the user
+                    string newItem = PromptForNewItem();
 
-                    //get the updated data from the database 
-                    List<string> items = await GetComboBoxItemsFromDatabase(comboBox);
+                    if (!string.IsNullOrWhiteSpace(newItem))
+                    {
+                        // Add the new item to the database
+                        AddNewItemToDatabase(newItem);
 
-                    // Refresh the combo box items
-                    comboBox.Items.Clear();
-                    comboBox.Items.AddRange(items.ToArray());
-                    comboBox.Items.Add("Create New"); //TODO
+                        //get the updated data from the database 
+                        List<string> items = await GetComboBoxItemsFromDatabase(comboBox);
 
-                    // Optionally, select the newly added item
-                    comboBox.SelectedItem = newItem;
+                        // Refresh the combo box items
+                        comboBox.Items.Clear();
+                        comboBox.Items.AddRange(items.ToArray());
+                        comboBox.Items.Add("Create New"); //TODO
+
+                        // Optionally, select the newly added item
+                        comboBox.SelectedItem = newItem;
+                    }
+                    else
+                    {
+                        // Revert to a default selection if no new item is added
+                        comboBox.SelectedIndex = -1;
+                    }
                 }
-                else
+                //if dam get the selected dam object and store to global dam variable 
+                else if(comboBox.Name == "damComboBox")
                 {
-                    // Revert to a default selection if no new item is added
-                    comboBox.SelectedIndex = -1;
+                    //get the animal object from the list of animal objects stored earlier 
+                    foreach (var animal in _parents)
+                    {
+                        //compare the name? I guess this is the easiest approach for now but is problematic if there are duplicate names  
+                        if(comboBox.SelectedItem?.ToString() == animal.name)
+                        {
+                            _dam = animal; 
+                        }
+                    }
+                }
+                //if sire, get the selected sire object and store to global sire variable 
+                else if (comboBox.Name == "sireComboBox")
+                {
+                    //get the animal object from the list of animal objects stored earlier 
+                    foreach (var animal in _parents)
+                    {
+                        //compare the name? I guess this is the easiest approach for now but is problematic if there are duplicate names  
+                        if (comboBox.SelectedItem?.ToString() == animal.name)
+                        {
+                            _sire = animal;
+                        }
+                    }
                 }
             }
         }
@@ -648,15 +691,17 @@ namespace RATAPP.Panels
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
         //TODO ID should be a string, but leaving it for now as db edits are annoying 
-        private void InitializeTextBoxes(AnimalDto animal)
+        private async void InitializeTextBoxes(AnimalDto animal)
         {
+            //await GetAnimalDamAndSire();
+
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, _animal.regNum);
             animalNameTextBox = CreateTextBox(150, 60, _animal.name);
             speciesTextBox = CreateTextBox(150, 100, _animal.species);
             sexTextBox = CreateTextBox(150, 140, _animal.sex);
             varietyTextBox = CreateTextBox(150, 180, _animal.variety);
-            damTextBox = CreateTextBox(150, 220, _animal.dam);
+            damTextBox = CreateTextBox(150, 220, _dam.name); 
 
             // Second column (right side)
             colorTextBox = CreateTextBox(490, 20, _animal.color);
@@ -664,7 +709,7 @@ namespace RATAPP.Panels
             markingsTextBox = CreateTextBox(490, 100, _animal.markings);
             breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
             earTypeTextBox = CreateTextBox(490, 180, _animal.earType);
-            sireTextBox = CreateTextBox(490, 220, _animal.sire);
+            sireTextBox = CreateTextBox(490, 220, _dam.name);
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -702,6 +747,85 @@ namespace RATAPP.Panels
 
             //Update the state of the panel
             AnimalExists();
+        }
+
+        //get animal dam and sire
+        //FIXME I've got semi-repeated logic I think, need to look at all of the ways that I am interacting with dam and sire and pulling from db 
+        //TODO f
+        private async Task GetAnimalDamAndSire()
+        {
+            // Initialize _dam and _sire if they are null
+            _dam ??= await GetOrCreateDefaultAnimal(_dam?.Id);
+            _sire ??= await GetOrCreateDefaultAnimal(_sire?.Id);
+
+            //this isn't correct because we need to go to the lineage table to get this data 
+            if(_animal != null)
+            {
+                //search for animal id, gen 1, seq 1 and return that value
+                var dam = await _lineageService.GetDamByAnimalId(_animal.Id);
+                if (dam != null)
+                {
+                    //parse into AnimalDto object
+                    var getDam = await _animalService.MapSingleAnimaltoDto(dam);
+                    _dam = getDam; 
+                }
+
+                var sire = await _lineageService.GetSireByAnimalId(_animal.Id);
+                if (sire != null)
+                {
+                    //parse into AnimalDto object
+                    var getSire = await _animalService.MapSingleAnimaltoDto(sire);
+                    _sire = getSire;
+                }
+            }
+
+            // Update _dam if it exists in the database
+            //if (_dam.Id != 0) // Check if it's not the default animal
+            //{
+            //    var fetchedDam = await _animalService.GetAnimalByIdAsync(_dam.Id);
+            //    _dam = fetchedDam ?? await GetOrCreateDefaultAnimal(_dam.Id); // Use fetched or default if not found
+            //}
+
+            //// Update _sire if it exists in the database
+            //if (_sire.Id != 0) // Check if it's not the default animal
+            //{
+            //    var fetchedSire = await _animalService.GetAnimalByIdAsync(_sire.Id);
+            //    _sire = fetchedSire ?? await GetOrCreateDefaultAnimal(_sire.Id); // Use fetched or default if not found
+            //}
+        }
+
+        //search for animal, if it doesn't exist, create an empty animal object 
+        //TODO this should probably be in the library 
+        private async Task<AnimalDto> GetOrCreateDefaultAnimal(int? id)
+        {
+            if (id.HasValue && id.Value != 0)
+            {
+                var existingAnimal = await _animalService.GetAnimalByIdAsync(id.Value);
+                if (existingAnimal != null)
+                {
+                    return existingAnimal;
+                }
+            }
+
+            return new AnimalDto
+            {
+                Id = 0,
+                regNum = "0",
+                name = "Unknown",
+                sex = "Unknown",
+                DateOfBirth = DateTime.Now,
+                DateOfDeath = DateTime.Now,
+                species = "Unknown",
+                comment = "Unknown",
+                imageUrl = "",
+                Line = "1",
+                damId = null,
+                sireId = null,
+                variety = "Unknown",
+                color = "Unknown",
+                breeder = "TLDR",
+                genotype = "XYZ"
+            };
         }
 
         // Add image to textbox
@@ -889,7 +1013,7 @@ namespace RATAPP.Panels
                 {
                     //go to the previous animal 
                     //first clear out old controls
-                    this.Controls.Clear();
+                    this.Controls.Clear(); 
                     InitializeComponent(_allAnimals[i - 1]);
                     break;
                 }
@@ -1203,11 +1327,11 @@ namespace RATAPP.Panels
                 comment = commentsTextBox.Text,
                 imageUrl = _animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
                 Line = line, // Assuming there's a TextBox for line
-                dam = "aDam",//damComboBox.Text, // Assuming there's a TextBox for dam
-                sire = "aSIRE",//sireComboBox.Text, // Assuming there's a TextBox for sire
+                damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
+                sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
                 variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
                 color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
-                breeder = "1",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
+                breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
                 genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
             };
 
@@ -1354,7 +1478,6 @@ namespace RATAPP.Panels
         }
 
         //save and update animal logic below 
-
         private async Task SaveButtonClick(object sender, EventArgs e)
         {
             AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes

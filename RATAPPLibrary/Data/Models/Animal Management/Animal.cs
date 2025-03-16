@@ -87,10 +87,10 @@ namespace RATAPPLibrary.Data.Models
         public string? markings { get; set; }
         public string? variety { get; set; } = string.Empty;
         public string? color { get; set; }
-        public string dam { get; set; } = string.Empty;
-        public string sire { get; set; } = string.Empty;
+        public int? damId { get; set; }
+        public int? sireId { get; set; }
         public required string breeder { get; set; }
-        public string genotype { get; set; } = string.Empty;
+        public string? genotype { get; set; } = string.Empty;
         public string? comment { get; set; } = string.Empty;
     }
 }
