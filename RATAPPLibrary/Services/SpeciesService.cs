@@ -46,6 +46,7 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"Species with scientific name '{scientificName}' already exists.");
             }
+
             // Create the new species
             var newSpecies = new Species
             {
@@ -54,6 +55,7 @@ namespace RATAPPLibrary.Services
             };
             _context.Species.Add(newSpecies);
             await _context.SaveChangesAsync();
+
             return newSpecies;
         }
 
@@ -66,10 +68,12 @@ namespace RATAPPLibrary.Services
             {
                 throw new KeyNotFoundException($"Species with ID '{id}' not found.");
             }
+
             // Update the species
             species.CommonName = commonName;
             species.ScientificName = scientificName;
             await _context.SaveChangesAsync();
+
             return species;
         }
 
@@ -80,7 +84,6 @@ namespace RATAPPLibrary.Services
             var species = await _context.Species.FirstOrDefaultAsync(s => s.Id == id);
             if (species == null)
             {
-                // Throw an exception if the species is not found
                 throw new KeyNotFoundException($"Species with ID '{id}' not found.");
             }
             return species;
@@ -93,7 +96,6 @@ namespace RATAPPLibrary.Services
             var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == commonName);
             if (species == null)
             {
-                // Throw an exception if the species is not found
                 throw new KeyNotFoundException($"Species with common name '{commonName}' not found.");
             }
             return species;
@@ -108,7 +110,6 @@ namespace RATAPPLibrary.Services
             var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == commonName);
             if (species == null)
             {
-                // Throw an exception if the species is not found
                 throw new KeyNotFoundException($"Species with common name '{commonName}' not found.");
             }
             return species.Id;

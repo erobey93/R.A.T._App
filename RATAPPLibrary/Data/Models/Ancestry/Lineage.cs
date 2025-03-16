@@ -7,7 +7,7 @@ namespace RATAPPLibrary.Data.Models.Ancestry
     //this is also using a different way of setting up database schema i.e. not in the context but by using headers in the model
     public class Lineage
     {
-        public required int Id { get; set; }
+        public int Id { get; set; }
         public required int AnimalId { get; set; }
         public required int AncestorId { get; set; }
         public required int Generation { get; set; }
