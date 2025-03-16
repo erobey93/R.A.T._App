@@ -17,9 +17,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 //NOTES
 // * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
-// Ask about best practices for the following 
+// Ask about best practices for the following /TODO
 // service organization, seems like bad practice to be passing so many services around 
-//
+// Need to make sure that I don't have any business logic in here 
 namespace RATAPP.Panels
 {
     public partial class AnimalPanel : Panel, INavigable
@@ -131,7 +131,6 @@ namespace RATAPP.Panels
             parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _parentForm = parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
             _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
-            _animal = currAnimal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
 
             InitializeComponent(currAnimal); //TODO need to re-structure to account for await nope, just use async lambda! 
             LoadSpinner();
@@ -139,13 +138,11 @@ namespace RATAPP.Panels
 
         private void InitializeComponent(AnimalDto animal)
         {
-            //TODO should this just be _animal? Why or why not? follow this variable through and make sure I can make that switch first 
-            _animal = animal;
-
             // Set panel properties
-            this.Size = new Size(1200, 800); // Increased panel size for better spacing
+            this.Size = new Size(1200, 800); 
             this.BackColor = Color.White;
-            this.Padding = new Padding(20); // Add padding around the panel for better spacing
+            this.Padding = new Padding(20);
+            _animal = animal; //FIXME I need to handle this passing around of _animal better as this is confusing and ugly 
 
             //Initialize the controls for the Animal Panel, buttons first as others are dependent on them (this is probably a bad idea, but works for now) 
             IntializeButtons();
@@ -176,15 +173,22 @@ namespace RATAPP.Panels
         private async void LoadAnimalDataAsync(int animalID)
         {
             var animal = await _animalService.GetAnimalByIdAsync(animalID); //get the animal data from the database FIXME should just set global variable and use that instead of passing around 
-            _animal = animal; //FIXME 
-                              //get animal dam and sire 
+            _animal = animal; //FIXME this is repetitive 
+
+            //get animal dam and sire 
+            SetDefaultDamAndSire(); 
+           
+            await GetAnimalDamAndSire();
+            InitializeTextBoxes(_animal);//probably don't need to pass anything here, but for clarity I guess 
+        }
+
+        private async void SetDefaultDamAndSire()
+        {
             var defaultAnimal = await GetOrCreateDefaultAnimal(0);
-            //TODO resetting dam and sire here but this won't always need to happen, so re-think this logic to be more efficient 
+            //reset dam and sire to default values each time
             _dam = defaultAnimal;
             _sire = defaultAnimal;
 
-            await GetAnimalDamAndSire();
-            InitializeTextBoxes(_animal);//probably don't need to pass anything here, but for clarity I guess 
         }
 
         // initialize combo boxes
@@ -709,7 +713,7 @@ namespace RATAPP.Panels
             markingsTextBox = CreateTextBox(490, 100, _animal.markings);
             breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
             earTypeTextBox = CreateTextBox(490, 180, _animal.earType);
-            sireTextBox = CreateTextBox(490, 220, _dam.name);
+            sireTextBox = CreateTextBox(490, 220, _sire.name);
 
             inbredTextBox = CreateTextBox(150, 450, "TODO");
             // Move commentsTextBox below everything else and make it larger
@@ -755,8 +759,8 @@ namespace RATAPP.Panels
         private async Task GetAnimalDamAndSire()
         {
             // Initialize _dam and _sire if they are null
-            _dam ??= await GetOrCreateDefaultAnimal(_dam?.Id);
-            _sire ??= await GetOrCreateDefaultAnimal(_sire?.Id);
+            //_dam ??= await GetOrCreateDefaultAnimal(_dam?.Id); FIXME repetitive need a method to call once in the beginning to handle this logic 
+            //_sire ??= await GetOrCreateDefaultAnimal(_sire?.Id);
 
             //this isn't correct because we need to go to the lineage table to get this data 
             if(_animal != null)
@@ -778,20 +782,6 @@ namespace RATAPP.Panels
                     _sire = getSire;
                 }
             }
-
-            // Update _dam if it exists in the database
-            //if (_dam.Id != 0) // Check if it's not the default animal
-            //{
-            //    var fetchedDam = await _animalService.GetAnimalByIdAsync(_dam.Id);
-            //    _dam = fetchedDam ?? await GetOrCreateDefaultAnimal(_dam.Id); // Use fetched or default if not found
-            //}
-
-            //// Update _sire if it exists in the database
-            //if (_sire.Id != 0) // Check if it's not the default animal
-            //{
-            //    var fetchedSire = await _animalService.GetAnimalByIdAsync(_sire.Id);
-            //    _sire = fetchedSire ?? await GetOrCreateDefaultAnimal(_sire.Id); // Use fetched or default if not found
-            //}
         }
 
         //search for animal, if it doesn't exist, create an empty animal object 
