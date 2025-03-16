@@ -184,7 +184,12 @@ namespace RATAPPLibrary.Data.DbContexts
         private void ConfigureIndividual(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Individual>()
-                .Property(i => i.Name)
+                .Property(i => i.FirstName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Individual>()
+                .Property(i => i.LastName)
                 .IsRequired()
                 .HasMaxLength(100);
 
@@ -198,7 +203,12 @@ namespace RATAPPLibrary.Data.DbContexts
                 .HasMaxLength(255);
 
             modelBuilder.Entity<Individual>()
-                .Property(i => i.Location)
+                .Property(i => i.City)
+                .IsRequired()
+                .HasMaxLength(255);
+
+            modelBuilder.Entity<Individual>()
+                .Property(i => i.State)
                 .IsRequired()
                 .HasMaxLength(255);
         }

@@ -22,8 +22,7 @@ namespace RATAPPLibrary.Data.Models
         public int StockId { get; set; } // FIXME this should not be here but EF if fing up need to research shadow properties more and better understand EF
         public string? imageUrl { get; set; } 
         public string? comment { get; set; } 
-        public int damId { get; set; } 
-        public int sireId { get; set; }
+        public int? weight { get; set; } //FIXME not convinced weight should be in here, but for now its fine 
 
         // Navigation Properties for EF
         public virtual Line? Line { get; set; } // Navigation property to Line table
@@ -88,10 +87,10 @@ namespace RATAPPLibrary.Data.Models
         public string? markings { get; set; }
         public string? variety { get; set; } = string.Empty;
         public string? color { get; set; }
-        public string dam { get; set; } = string.Empty;
-        public string sire { get; set; } = string.Empty;
+        public int? damId { get; set; }
+        public int? sireId { get; set; }
         public required string breeder { get; set; }
-        public string genotype { get; set; } = string.Empty;
+        public string? genotype { get; set; } = string.Empty;
         public string? comment { get; set; } = string.Empty;
     }
 }

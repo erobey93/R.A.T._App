@@ -12,7 +12,6 @@ namespace RATAPPLibrary.Services
         private readonly Data.DbContexts.RatAppDbContext _context;
         private SpeciesService _speciesService;
 
-        // Constructor to initialize the context
         public TraitService(Data.DbContexts.RatAppDbContext context)
         {
             _context = context;
@@ -27,7 +26,7 @@ namespace RATAPPLibrary.Services
                 throw new ArgumentException("Trait type name cannot be null or empty.", nameof(name));
             }
 
-            // Query the TraitType by Name
+            // search traitType by name
             var traitType = await _context.TraitType
                 .FirstOrDefaultAsync(tt => tt.Name.ToLower() == name.ToLower());
 
@@ -47,7 +46,7 @@ namespace RATAPPLibrary.Services
                 throw new ArgumentException("Trait name cannot be null or empty.", nameof(name));
             }
 
-            // Query the Trait by Name
+            // search trait table by name 
             var trait = await _context.Trait
                 .FirstOrDefaultAsync(t => t.CommonName.ToLower() == name.ToLower());
 
@@ -56,14 +55,15 @@ namespace RATAPPLibrary.Services
                 throw new InvalidOperationException($"Trait with name '{name}' does not exist.");
             }
 
-            return trait; // Return the Trait if found
+            return trait;
         }
 
         // Get a list of trait objects based on the traitType and species names converted into ID for searching the database
         public async Task<List<Trait>> GetTraitObjectsByTypeAndSpeciesAsync(string type, string species)
         {
             List<string> traitList = new List<string>();
-            // Query the TraitType by Name without using StringComparison
+            
+            // search traitType by name 
             var traitType = await _context.TraitType
                 .FirstOrDefaultAsync(tt => tt.Name.ToLower() == type.ToLower());
             if (traitType == null)
@@ -71,7 +71,7 @@ namespace RATAPPLibrary.Services
                 throw new InvalidOperationException($"Trait type '{type}' does not exist.");
             }
 
-            // Query the Traits by TraitTypeId and SpeciesID
+            // search traits by traitTypeId and speciesID
             var speciesId = _context.Species
                 .Where(s => s.CommonName.ToLower() == species.ToLower())
                 .Select(s => s.Id)
@@ -88,7 +88,7 @@ namespace RATAPPLibrary.Services
         public async Task<List<string>> GetTraitsByTypeAndSpeciesAsync(string type, string species)
         {
             List<string> traitList = new List<string>();
-            // Query the TraitType by Name without using StringComparison
+            // search the traitType by name
             var traitType = await _context.TraitType
                 .FirstOrDefaultAsync(tt => tt.Name.ToLower() == type.ToLower());
             if (traitType == null)
@@ -96,7 +96,7 @@ namespace RATAPPLibrary.Services
                 throw new InvalidOperationException($"Trait type '{type}' does not exist.");
             }
 
-            // Query the Traits by TraitTypeId and SpeciesID
+            // search Traits by TraitTypeId and SpeciesID
             var speciesId = _context.Species
                 .Where(s => s.CommonName.ToLower() == species.ToLower())
                 .Select(s => s.Id)
@@ -119,7 +119,7 @@ namespace RATAPPLibrary.Services
         {
             List<Trait> traitList = new List<Trait>();
 
-            // Query the Species by CommonName and return the Id
+            // search Species by CommonName and return the Id
             try
             {
                 var speciesID = await _speciesService.GetSpeciesIdByCommonNameAsync(species); // Get the SpeciesID
@@ -131,8 +131,8 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"Species '{species}' does not exist.");
             }
-            // Query the Traits by SpeciesID
-            return traitList; // Return the list of traits for the specified species
+           
+            return traitList;
         }
 
         //create a new trait type i.e. each trait has a type (e.g. color, pattern, etc.) so this is not species specific 
@@ -151,6 +151,7 @@ namespace RATAPPLibrary.Services
                 Name = name,
                 Description = description
             };
+
             _context.TraitType.Add(newTraitType);
             await _context.SaveChangesAsync();
             return newTraitType;
@@ -221,14 +222,20 @@ namespace RATAPPLibrary.Services
         // Get all trait types available in the database
         public async Task<IEnumerable<TraitType>> GetAllTraitTypesAsync()
         {
-            return await _context.TraitType.ToListAsync();  // Get all trait types from the database
+            return await _context.TraitType.ToListAsync(); 
         }
 
         // Get specific trait by Id
         public async Task<Trait> GetTraitByIdAsync(int id)
         {
-            return await _context.Trait
-                .FirstOrDefaultAsync(t => t.Id == id);  // Get a trait by its Id
+            // Check if the trait exists
+            var trait = await _context.Trait.FindAsync(id);
+            if (trait == null)
+            {
+                throw new InvalidOperationException($"Trait with id '{id}' does not exist.");
+            }
+
+            return trait; // Return the trait if found
         }
 
         // get all traits for a specific animal by animal id
@@ -302,7 +309,7 @@ namespace RATAPPLibrary.Services
         //get colors for animal
         public async Task<IEnumerable<Trait>> GetColorTraitsForSingleAnimal(int animalId, string traitType, string species)
         {
-            // Query the AnimalTrait by animal id, get all traits
+            // Search the AnimalTrait by animal id, get all traits
             List<int> traitIds = new List<int>();
             // return the list of color traits (TODO for right now, this will just be 1 trait) 
             try
@@ -315,7 +322,7 @@ namespace RATAPPLibrary.Services
                     traitIds.Add(trait.Id);
                 }
 
-                // Query the AnimalTrait by animal id and trait id
+                //Search the AnimalTrait by animal id and trait id
                 //this should return all the traitType traits for the animal
                 var animalTraits = await _context.AnimalTrait
                     .Where(at => at.AnimalId == animalId && traitIds.Contains(at.TraitId))
@@ -369,7 +376,7 @@ namespace RATAPPLibrary.Services
                     Console.WriteLine($"Inner Exception: {dbEx.InnerException.Message}");
                 }
 
-                // Optional: You can also log the SQL error if available
+                // FIXME : remove once testing is complete 
                 if (dbEx.InnerException is SqlException sqlEx)
                 {
                     Console.WriteLine($"SQL Error: {sqlEx.Message}");
@@ -386,10 +393,18 @@ namespace RATAPPLibrary.Services
         // and to "stack" traits together to make new traits, for example angora + rex = texel
         public async Task<Trait> GetTraitByAnimalIdAndTraitIdAsync(int animalId, int traitId)
         {
-            return await _context.AnimalTrait
+            //check that the trait exists 
+            var trait = await _context.AnimalTrait
                 .Where(at => at.AnimalId == animalId && at.TraitId == traitId)
                 .Select(at => at.Trait)
                 .FirstOrDefaultAsync();
+
+            //if the trait doesn't exist throw an exception
+            if (trait == null) { 
+                throw new InvalidOperationException($"Trait with id '{traitId}' does not exist."); 
+            }
+
+            return trait; 
         }
 
         //get trait type name by id 
