@@ -90,6 +90,7 @@ namespace RATAPPLibrary.Services
                 }
 
                     // Map the AnimalDto to the Animal database model
+                    //todo make mapping method 
                     var newAnimal = new Animal
                 {
                     registrationNumber = animalDto.regNum,
