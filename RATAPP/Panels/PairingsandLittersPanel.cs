@@ -1,9 +1,11 @@
-﻿
-
-using RATAPP.Forms;
+﻿using RATAPP.Forms;
+using RATAPPLibrary.Data.Models;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using RATAPPLibrary;
+using RATAPPLibrary.Data.Models.Breeding;
+using System.Transactions;
 
 namespace RATAPP.Panels
 {
@@ -20,10 +22,15 @@ namespace RATAPP.Panels
         private Button addButton;
         private Button updateButton;
         private Button deleteButton;
+        private DataGridView dataDisplayArea;
+
+        private Pairing[] _pairings;
+        private Litter[] _litters;
 
         public PairingsAndLittersPanel()
         {
             InitializeComponents();
+            
         }
 
         private void InitializeComponents()
@@ -37,6 +44,10 @@ namespace RATAPP.Panels
                 Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", 12F, FontStyle.Regular)
             };
+
+
+            //get all pairings and litters from db 
+            GetPairingsAndLitters();
 
             // Initialize Pairings Tab
             pairingsTab = new TabPage("Pairings");
@@ -55,6 +66,17 @@ namespace RATAPP.Panels
             InitializeCommonControls();
         }
 
+        private void GetPairingsAndLitters()
+        {
+            //get pairings
+            //if no pairings initialize pairings array with empty object
+            _pairings = new Pairing[0]; 
+            //get all litters
+            //if no litters, initialize litters array with empty object 
+            //TODO for now just initialize with empty object 
+            _litters = new Litter[0];
+        }
+
         private void InitializeTabPage(TabPage tabPage, out DataGridView gridView)
         {
             gridView = new DataGridView
@@ -67,6 +89,15 @@ namespace RATAPP.Panels
                 AllowUserToAddRows = false,
                 Font = new Font("Segoe UI", 10F, FontStyle.Regular)
             };
+
+            if (tabPage.Text == "Pairings")
+            {
+                InitializePairingDataGridView(gridView);
+            }
+            else //TODO will have other tabs, so change to switch statement in future 
+            {
+                InitializeLitterDataGridView(gridView);
+            }
 
             tabPage.Controls.Add(gridView);
         }
@@ -102,6 +133,7 @@ namespace RATAPP.Panels
             {
                 Text = "Search",
                 Font = new Font("Segoe UI", 10F),
+                Height = 30,
                 Location = new Point(380, 13),
                 BackColor = Color.FromArgb(0, 120, 212),
                 ForeColor = Color.White,
@@ -142,6 +174,7 @@ namespace RATAPP.Panels
                 Font = new Font("Segoe UI", 10F),
                 Location = new Point(x, 13),
                 Width = 100,
+                Height = 30,
                 BackColor = Color.FromArgb(0, 120, 212),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
@@ -164,16 +197,97 @@ namespace RATAPP.Panels
             string currentTab = tabControl.SelectedTab.Text;
 
             MessageBox.Show($"{action} {currentTab}");
-            // Implement add, update, or delete functionality based on the action and current tab
+            // Implement add, update, or delete functionality based on the action and current tab TODO 
         }
 
         public Task RefreshDataAsync()
         {
-            // Implement data refresh logic
+            // Implement data refresh logic TODO
             return Task.CompletedTask;
         }
 
-        // Additional methods for data operations (Add, Update, Delete, Search, Filter) to be implemented
+        private void InitializePairingDataGridView(DataGridView pairingsDataGrid)
+        {
+            int topPanelHeight = 180;
+
+            dataDisplayArea = new DataGridView
+            {
+                Location = new Point(0, topPanelHeight),
+                Width = 1000,
+                Height = 400,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+            };
+
+            dataDisplayArea.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn { Name = "PairingId", HeaderText = "Pairing ID" },
+                new DataGridViewTextBoxColumn { Name = "Doe", HeaderText = "Doe" },
+                new DataGridViewTextBoxColumn { Name = "Buck", HeaderText = "Buck" },
+                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
+                new DataGridViewTextBoxColumn { Name = "Pairing Date", HeaderText = "Pairing Date" },
+                new DataGridViewTextBoxColumn { Name = "Pairing End Date", HeaderText = "Pairing End Date" },
+                new DataGridViewButtonColumn { Name = "Edit", HeaderText = "Edit Pairing", Text = "Edit", UseColumnTextForButtonValue = true }
+            });
+
+            //dataDisplayArea.CellContentClick += DataGridView_CellContentClick;
+            PopulatePairingDataDisplayArea();
+            
+
+            this.Controls.Add(dataDisplayArea);
+        }
+
+        private void PopulatePairingDataDisplayArea()
+        {
+            dataDisplayArea.Rows.Clear();
+            foreach (var pairing in _pairings)
+            {
+                dataDisplayArea.Rows.Add(pairing.pairingId, pairing.Dam, pairing.Sire, pairing.Project, pairing.PairingStartDate, pairing.PairingEndDate, "TODO - edit pairing button?");
+            }
+        }
+
+        private void InitializeLitterDataGridView(DataGridView littersDataGrid)
+        {
+            int topPanelHeight = 180;
+
+            dataDisplayArea = new DataGridView
+            {
+                Location = new Point(0, topPanelHeight),
+                Width = 1000,
+                Height = 400,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+            };
+
+            dataDisplayArea.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn { Name = "LitterId", HeaderText = "Litter ID" },
+                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
+                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
+                new DataGridViewTextBoxColumn { Name = "TODO", HeaderText = "TODO" },
+                new DataGridViewTextBoxColumn { Name = "TODO", HeaderText = "TODO" },
+                new DataGridViewTextBoxColumn { Name = "TODO", HeaderText = "TODO" },
+                new DataGridViewButtonColumn { Name = "EditLitter", HeaderText = "Edit Litter", Text = "Edit", UseColumnTextForButtonValue = true }
+            });
+
+            //dataDisplayArea.CellContentClick += DataGridView_CellContentClick;
+            PopulateLittersDataDisplayArea();
+
+            this.Controls.Add(dataDisplayArea);
+        }
+
+        private void PopulateLittersDataDisplayArea()
+        {
+            dataDisplayArea.Rows.Clear();
+            foreach (var litter in _litters)
+            {
+                dataDisplayArea.Rows.Add(litter.LitterId, litter.Name, litter.DateOfBirth, litter.NumPups, "TODO - edit litter button?");
+            }
+        }
     }
 }
 //using RATAPP.Forms;

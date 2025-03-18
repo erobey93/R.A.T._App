@@ -279,28 +279,35 @@ namespace RATAPPLibrary.Services
 
         }
 
-        //map trait type and name
+        ////map trait type and name
         private async Task<Dictionary<string, List<string>>> MapTraitTypeAndNameAsync(IEnumerable<Trait> traits)
         {
             Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
             foreach (var trait in traits)
             {
-                //get the trait type name
                 var traitType = await _context.TraitType.FindAsync(trait.TraitTypeId);
-                //if the trait type name is already in the map
-                if (traitMap.ContainsKey(traitType.Name))
+
+                // Check if traitType is null
+                if (traitType != null)
                 {
-                    //add the trait name to the list of traits for that trait type
-                    traitMap[traitType.Name].Add(trait.CommonName);
+                    if (traitMap.ContainsKey(traitType.Name))
+                    {
+                        traitMap[traitType.Name].Add(trait.CommonName);
+                    }
+                    else
+                    {
+                        List<string> traitList = new List<string>();
+                        traitList.Add(trait.CommonName);
+                        traitMap.Add(traitType.Name, traitList);
+                    }
                 }
                 else
                 {
-                    //create a new list of traits for the trait type
-                    List<string> traitList = new List<string>();
-                    //add the trait name to the list
-                    traitList.Add(trait.CommonName);
-                    //add the trait type and list of traits to the map
-                    traitMap.Add(traitType.Name, traitList);
+                    // Handle the case where the TraitType is not found.
+                    // You might want to log an error, throw an exception, or skip the trait.
+                    // Example:
+                    Console.WriteLine($"TraitType with ID {trait.TraitTypeId} not found for trait {trait.CommonName}.");
+                    continue; //TODO 
                 }
             }
             return traitMap;

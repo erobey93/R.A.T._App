@@ -97,15 +97,6 @@ namespace RATAPP.Forms
                 Location = new Point(60, 15)
             };
 
-            //userNameLabel = new Label FIXME I don't think that I want this 
-            //{
-            //    Text = UserName ?? "User Name",
-            //    ForeColor = Color.White,
-            //    Font = new Font("Segoe UI", 12),
-            //    AutoSize = true,
-            //    Location = new Point(topNavPanel.Width - 150, 20)
-            //};
-
             var refreshButton = CreateTopNavButton("Refresh", 0, RefreshButton_Click);
             var utilitiesButton = CreateTopNavButton("Utilities", 1, UtilitiesButton_Click);
             var logoutButton = CreateTopNavButton("Log Out", 2, LogoutButton_Click);
@@ -175,7 +166,6 @@ namespace RATAPP.Forms
         public void SetUserName(string username)
         {
             UserName = username;
-            //userNameLabel.Text = UserName;
         }
 
         public void ShowPanel(Panel panelToShow)
@@ -194,8 +184,45 @@ namespace RATAPP.Forms
 
         private void UtilitiesButton_Click(object sender, EventArgs e)
         {
-            // Handle Utilities button click
-            MessageBox.Show("Utilities button clicked");
+            Button utilitiesButton = (Button)sender; // cast sender as button 
+
+            ContextMenuStrip utilitiesContextMenu = new ContextMenuStrip();
+
+            ToolStripMenuItem settingsItem = new ToolStripMenuItem("Settings");
+            settingsItem.Click += SettingsItem_Click;
+            utilitiesContextMenu.Items.Add(settingsItem);
+
+            ToolStripMenuItem styleItem = new ToolStripMenuItem("Style");
+            styleItem.Click += StyleItem_Click;
+            utilitiesContextMenu.Items.Add(styleItem);
+
+            ToolStripMenuItem errorLogsItem = new ToolStripMenuItem("Error Logs");
+            errorLogsItem.Click += ErrorLogsItem_Click;
+            utilitiesContextMenu.Items.Add(errorLogsItem);
+
+            // Show the context menu below the Utilities button
+            utilitiesContextMenu.Show(utilitiesButton, new Point(0, utilitiesButton.Height));
+        }
+
+        private void SettingsItem_Click(object sender, EventArgs e)
+        {
+            // Handle Settings menu item click
+            MessageBox.Show("Settings clicked");
+            // Add your settings logic here
+        }
+
+        private void StyleItem_Click(object sender, EventArgs e)
+        {
+            // Handle Style menu item click
+            MessageBox.Show("Style clicked");
+            // Add your style logic here
+        }
+
+        private void ErrorLogsItem_Click(object sender, EventArgs e)
+        {
+            // Handle Error Logs menu item click
+            MessageBox.Show("Error Logs clicked");
+            // Add your error logs logic here
         }
 
         private void AncestryButton_Click(object sender, EventArgs e)
@@ -265,7 +292,9 @@ namespace RATAPP.Forms
         private void FinancialButton_Click(object sender, EventArgs e)
         {
             // Financial button click
-            MessageBox.Show("Financial button clicked");
+            var financialPanel = new FinancialPanel(this, _context);
+            _activePanel = financialPanel;
+            ShowPanel(financialPanel);
         }
 
         private void GeneticsButton_Click(object sender, EventArgs e)

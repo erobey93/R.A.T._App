@@ -49,49 +49,9 @@ namespace RATAPPLibrary.Services
                     throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
                 }
 
-                // set animal's color 
-                //get the color from the string and find the id in the database
-                //then store the animal id + color id in the animal_color table
-                // Get the trait by name
-                if(animalDto.color != null)
-                {
-                    try
-                    {
-                        await CreateAnimalTraitAsync(animalDto.Id, animalDto.color);
-                    }
-                    catch(Exception e)
-                    {
-                        //color isn't required so if it doesn't exist, just continue? FIXME 
-                    }
-
-                }
-
-                //if there is an entry for dam and sire, make new lineage entry
-                //gen 1, seq 1, animal id, need to figure out ancestor id, how do I find them? should have the parent object and store that I guess? Is that the most efficient way? TODO 
-                if (animalDto.damId != null)
-                {
-                    try
-                    {
-                        //add a new dam entry into lineage table 
-                        await _lineageService.AddLineageConnection(animalDto.Id, (int)animalDto.damId, 1, 1, "Maternal");
-                    }
-                    catch (Exception e) { } //for now, just catch, do nothing 
-
-                }
-                if (animalDto.sireId != null)
-                {
-                    //add a new sire entry into lineage table 
-                    try
-                    {
-                        //add a new dam entry into lineage table 
-                        await _lineageService.AddLineageConnection(animalDto.Id, (int)animalDto.sireId, 1, 1, "Paternal");
-                    }
-                    catch (Exception e) { } //for now, just catch, do nothing 
-                }
-
-                    // Map the AnimalDto to the Animal database model
-                    //todo make mapping method 
-                    var newAnimal = new Animal
+                // Map the AnimalDto to the Animal database model
+                //todo make mapping method 
+                var newAnimal = new Animal
                 {
                     registrationNumber = animalDto.regNum,
                     StockId = 1, //FIXME this should be set automatically based on the species of the animal
@@ -106,7 +66,18 @@ namespace RATAPPLibrary.Services
 
                 // Add the new animal to the database
                 _context.Animal.Add(newAnimal);
+
                 await _context.SaveChangesAsync();
+
+                //get the animal back from the db so that we have the id
+                //FIXME this is SO UGLY, need to plan out this logic better 
+                animalDto = await GetAnimalByRegAsync(animalDto.regNum);
+
+                //set dam and sire
+                await SetAnimalDamAndSire(animalDto);
+
+                //set available animal traits 
+                await SetAnimalTraits(animalDto);
 
                 return newAnimal;
             }
@@ -116,7 +87,92 @@ namespace RATAPPLibrary.Services
             }
         }
 
+        //set animals traits
+        public async Task SetAnimalTraits(AnimalDto animalDto)
+        {
+            // set animal's color 
+            //get the color from the string and find the id in the database
+            //then store the animal id + color id in the animal_color table
+            // Get the trait by name
+            if (animalDto.color != null)
+            {
+                try
+                {
+                    await CreateAnimalTraitAsync(animalDto.Id, animalDto.color);
+                }
+                catch (Exception e)
+                {
+                    //color isn't required so if it doesn't exist, just continue? FIXME 
+                }
+
+            }
+            if (animalDto.variety != null)
+            {
+                try
+                {
+                    await CreateAnimalTraitAsync(animalDto.Id, animalDto.variety);
+                }
+                catch (Exception e)
+                {
+                    //variety isn't required so if it doesn't exist, just continue? FIXME 
+                }
+
+            }
+            if (animalDto.earType != null)
+            {
+                try
+                {
+                    await CreateAnimalTraitAsync(animalDto.Id, animalDto.earType);
+                }
+                catch (Exception e)
+                {
+                    //ear type isn't required so if it doesn't exist, just continue? FIXME 
+                }
+
+            }
+            if (animalDto.markings != null)
+            {
+                try
+                {
+                    await CreateAnimalTraitAsync(animalDto.Id, animalDto.markings);
+                }
+                catch (Exception e)
+                {
+                    //marking isn't required so if it doesn't exist, just continue? FIXME 
+                }
+
+            }
+        }
+
+        //set animal's dam and sire 
+        public async Task SetAnimalDamAndSire(AnimalDto animalDto)
+        {
+            //if there is an entry for dam and sire, make new lineage entry
+            //gen 1, seq 1, animal id, need to figure out ancestor id, how do I find them? should have the parent object and store that I guess? Is that the most efficient way? TODO 
+            if (animalDto.damId != null)
+            {
+                try
+                {
+                    //add a new dam entry into lineage table 
+                    await _lineageService.AddLineageConnection(animalDto.Id, (int)animalDto.damId, 1, 1, "Maternal");
+                }
+                catch (Exception e) { } //for now, just catch, do nothing 
+
+            }
+            if (animalDto.sireId != null)
+            {
+                //add a new sire entry into lineage table 
+                try
+                {
+                    //add a new dam entry into lineage table 
+                    await _lineageService.AddLineageConnection(animalDto.Id, (int)animalDto.sireId, 1, 2, "Paternal");
+                }
+                catch (Exception e) { } //for now, just catch, do nothing 
+            }
+        }
+
         //create new animal trait
+        //this method assumes that any trait added is already in the db 
         public async Task CreateAnimalTraitAsync(int animalId, string traitName)
         {
             try
@@ -265,22 +321,7 @@ namespace RATAPPLibrary.Services
                 }
 
                 // add updated traits if they don't already exist 
-                // set animal's color 
-                //get the color from the string and find the id in the database
-                //then store the animal id + color id in the animal_color table
-                // Get the trait by name
-                if (animalDto.color != null)
-                {
-                    try
-                    {
-                        await CreateAnimalTraitAsync(animalDto.Id, animalDto.color);
-                    }
-                    catch (Exception e)
-                    {
-                        //color isn't required so if it doesn't exist, just continue? FIXME 
-                    }
-
-                }
+                await SetAnimalTraits(animalDto);
 
                 int? damId = animalDto.damId;
                 int? sireId = animalDto.sireId;
@@ -311,7 +352,7 @@ namespace RATAPPLibrary.Services
                     if (!connectionExists)
                     {
                         //add the connection
-                        await _lineageService.AddLineageConnection(animalId, (int)sireId, 1, 1, "Paternal"); //TODO this is hardcoded for a dam 
+                        await _lineageService.AddLineageConnection(animalId, (int)sireId, 1, 2, "Paternal"); //TODO this is hardcoded for a dam 
                     }
                     else
                     {
@@ -430,16 +471,15 @@ namespace RATAPPLibrary.Services
                 sex = a.Sex,
                 Line = lineId.ToString(),
                 comment = a.comment,
-
-                breeder = breederId.ToString(),//lineObj.Stock.Breeder.User.Individual.Name, TODO this should be grabbing the breeders name from the breeder db (actually the user db)
-                species = speciesObj.CommonName, // Assuming Species has a Name property
+                breeder = "TLDR", // TODO: Implement breeder lookup
+                species = speciesObj.CommonName,
                 imageUrl = a.imageUrl,
-                color = animalTraits["Color"].LastOrDefault(), //TODO this might break the world since its assuming multiple colors FIXME this is just going to print all colors as a list of strings which will work for 1, but not once i start stacking them
-                markings = animalTraits["Markings"].LastOrDefault(), //TODO this might break the world since its assuming multiple markings FIXME this is just going to print all markings as a list of strings which will work for 1, but not once i start stacking them
-                earType = animalTraits["Ear Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple ear types FIXME this is just going to print all ear types as a list of strings which will work for 1, but not once i start stacking them
-                variety = animalTraits["Coat Type"].LastOrDefault(), //TODO this might break the world since its assuming multiple coat types FIXME this is just going to print all coat types as a list of strings which will work for 1, but not once i start stacking them
+                color = animalTraits.ContainsKey("Color") ? animalTraits["Color"].LastOrDefault() : null,
+                markings = animalTraits.ContainsKey("Marking") ? animalTraits["Marking"].LastOrDefault() : null,
+                earType = animalTraits.ContainsKey("Ear Type") ? animalTraits["Ear Type"].LastOrDefault() : null,
+                variety = animalTraits.ContainsKey("Coat Type") ? animalTraits["Coat Type"].LastOrDefault() : null,
                 damId = damId != 0 ? damId : (int?)null,
-                sireId = sireId != 0 ? sireId : (int?)null, 
+                sireId = sireId != 0 ? sireId : (int?)null,
             };
 
             return result;
@@ -465,7 +505,7 @@ namespace RATAPPLibrary.Services
                 //animal doesn't have to have traits, at least not right now TODO 
                 Console.WriteLine($"Traits for animal with ID {id} not found.");
                 traitMap["Color"] = new List<string> { "No color found" };
-                traitMap["Markings"] = new List<string> { "No markings found" };
+                traitMap["Marking"] = new List<string> { "No markings found" };
                 traitMap["Ear Type"] = new List<string> { "No ear type found" };
                 traitMap["Coat Type"] = new List<string> { "No coat type found" };
             }
@@ -476,9 +516,9 @@ namespace RATAPPLibrary.Services
                 {
                     traitMap["Color"] = new List<string> { "No color found" };
                 }
-                if (traitMap.ContainsKey("Markings") == false)
+                if (traitMap.ContainsKey("Marking") == false)
                 {
-                    traitMap["Markings"] = new List<string> { "No markings found" };
+                    traitMap["Marking"] = new List<string> { "No markings found" };
                 }
                 if (traitMap.ContainsKey("Ear Type") == false)
                 {
@@ -529,7 +569,18 @@ namespace RATAPPLibrary.Services
             await _context.SaveChangesAsync();
         }
 
-        //get animal 
+        //get animal by registration number
+        //FIXME reg has to be unique then and now I have an id and a registration number....
+        public async Task<AnimalDto> GetAnimalByRegAsync(string registrationNum)
+        {
+            var animal = await _context.Animal.FirstOrDefaultAsync(a => a.registrationNumber == registrationNum);
+            if (animal == null)
+            {
+                throw new KeyNotFoundException($"Animal with Registration Number {registrationNum} not found.");
+            }
+
+            return await MapSingleAnimaltoDto(animal);
+        }
 
     }
 }
