@@ -31,7 +31,34 @@ namespace RATAPPLibrary.Services
         }
 
         //pairings 
+        //get all pairings by species 
+        //public async Task<List<Pairing>> GetAllPairingsBySpeciesAsync()
+        //{
+        //    var pairingsBySpecies 
+        //}
+
         //get all pairings
+        public async Task<List<Pairing>> GetAllPairingsAsync()
+        {
+            var pairings = await _context.Pairing.ToListAsync();
+            if (pairings.Count == 0)
+            {
+                return new List<Pairing>();
+            }
+            return pairings; 
+        }
+
+        //map list of pairings to human readable object with sire name, dam name, project name?
+        // TODO check if this sort of logic should be in here, or if it should be handled elsewhere 
+        //public async Task<List>
+
+        //get all current pairings (no pairing end date)
+        //get all upcoming pairings (no pairing start, or end date)
+        //get all past pairings (pairing start and end date) 
+
+        //get all pairings for line
+        //get all pairings for group
+        //get all pairings for animal id
 
         //add new pairing 
         public async Task CreatePairingAsync(string pairingId, int damId, int sireId, int projectId, DateTime? startDate, DateTime? endDate)
@@ -90,13 +117,26 @@ namespace RATAPPLibrary.Services
         //delete pairing 
         //update pairing 
         //find pairing 
-        //get all pairings (by species for now, but I will be breaking the db into species specific dbs to reduce complexity) 
+
 
         //litters 
         //add new litter 
         //when a litter is added there should be pups associated with it which implies that new animals will be created 
         //delete litter
         //update litter 
+        //get all litters 
+        public async Task<List<Litter>> GetAllLittersAsync()
+        {
+            var litters = await _context.Litter.ToListAsync();
+            if (litters.Count == 0)
+            {
+                return new List<Litter>();
+            }
+            return litters;
+        }
+        //get all litters by date?
 
+
+        //get pairings and 
     }
 }
