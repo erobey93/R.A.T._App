@@ -1,9 +1,11 @@
-﻿
-
-using RATAPP.Forms;
+﻿using RATAPP.Forms;
+using RATAPPLibrary.Data.Models;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using RATAPPLibrary;
+using RATAPPLibrary.Data.Models.Breeding;
+using System.Transactions;
 
 namespace RATAPP.Panels
 {
@@ -20,10 +22,27 @@ namespace RATAPP.Panels
         private Button addButton;
         private Button updateButton;
         private Button deleteButton;
+        //private DataGridView dataDisplayArea;
 
-        public PairingsAndLittersPanel()
+        private Pairing[] _pairings;
+        private Litter[] _litters;
+        private bool _littersGridView; 
+
+        private RATAppBaseForm _parentForm;
+        private RATAPPLibrary.Services.BreedingService _breedingService;
+        private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+
+        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
+            _parentForm = parentForm;
+            _context = context;
+            _animalService = new RATAPPLibrary.Services.AnimalService(_context);
+            _breedingService = new RATAPPLibrary.Services.BreedingService(_context);
+            _littersGridView = false; //start with showing pairings page, when switched will show litters page 
+
             InitializeComponents();
+            
         }
 
         private void InitializeComponents()
@@ -38,16 +57,24 @@ namespace RATAPP.Panels
                 Font = new Font("Segoe UI", 12F, FontStyle.Regular)
             };
 
+
+           
+
+            pairingsGridView = new DataGridView();
+            littersGridView = new DataGridView(); //TODO need to better organize everything, i.e. come up with a common schema for how I initialize and pass around all controls 
+
             // Initialize Pairings Tab
             pairingsTab = new TabPage("Pairings");
-            InitializeTabPage(pairingsTab, out pairingsGridView);
+            InitializePairingDataGridView();
 
             // Initialize Litters Tab
             littersTab = new TabPage("Litters");
-            InitializeTabPage(littersTab, out littersGridView);
+            InitializeLitterDataGridView();
 
             tabControl.TabPages.Add(pairingsTab);
             tabControl.TabPages.Add(littersTab);
+
+            tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged; 
 
             this.Controls.Add(tabControl);
 
@@ -55,20 +82,31 @@ namespace RATAPP.Panels
             InitializeCommonControls();
         }
 
-        private void InitializeTabPage(TabPage tabPage, out DataGridView gridView)
+        private async Task GetPairingsAndLitters()
         {
-            gridView = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                BackgroundColor = Color.White,
-                BorderStyle = BorderStyle.None,
-                RowHeadersVisible = false,
-                AllowUserToAddRows = false,
-                Font = new Font("Segoe UI", 10F, FontStyle.Regular)
-            };
+                //get all litters
+                //if no litters, initialize litters array with empty object 
+                var getLitters = await _breedingService.GetAllLittersAsync();
+                _litters = getLitters.ToArray();
+     
+              //get pairings
+                var getPairings = await _breedingService.GetAllPairingsAsync();
+                _pairings = getPairings.ToArray();
+        }
 
-            tabPage.Controls.Add(gridView);
+        private async void TabControl_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl.SelectedIndex == 0) // Assuming pairings tab is index 0
+            {
+                pairingsGridView.Visible = true;
+                littersGridView.Visible = false;
+            }
+            else if (tabControl.SelectedIndex == 1) // Assuming litters tab is index 1
+            {
+                pairingsGridView.Visible = false;
+                littersGridView.Visible = true;
+
+            }
         }
 
         private void InitializeCommonControls()
@@ -102,6 +140,7 @@ namespace RATAPP.Panels
             {
                 Text = "Search",
                 Font = new Font("Segoe UI", 10F),
+                Height = 30,
                 Location = new Point(380, 13),
                 BackColor = Color.FromArgb(0, 120, 212),
                 ForeColor = Color.White,
@@ -142,6 +181,7 @@ namespace RATAPP.Panels
                 Font = new Font("Segoe UI", 10F),
                 Location = new Point(x, 13),
                 Width = 100,
+                Height = 30,
                 BackColor = Color.FromArgb(0, 120, 212),
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
@@ -157,6 +197,7 @@ namespace RATAPP.Panels
             MessageBox.Show($"Searching for: {searchBox.Text}\nFilter: {filterComboBox.SelectedItem}");
         }
 
+        //TODO 
         private void ActionButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = (Button)sender;
@@ -164,293 +205,123 @@ namespace RATAPP.Panels
             string currentTab = tabControl.SelectedTab.Text;
 
             MessageBox.Show($"{action} {currentTab}");
-            // Implement add, update, or delete functionality based on the action and current tab
+            // Implement add, update, or delete functionality based on the action and current tab TODO 
         }
 
         public Task RefreshDataAsync()
         {
-            // Implement data refresh logic
+            // Implement data refresh logic TODO
             return Task.CompletedTask;
         }
 
-        // Additional methods for data operations (Add, Update, Delete, Search, Filter) to be implemented
+        private async void InitializePairingDataGridView()
+        {
+            int topPanelHeight = 90;
+            //get all pairings and litters from db 
+            await GetPairingsAndLitters();
+
+
+            pairingsGridView.Location = new Point(0, topPanelHeight);
+            pairingsGridView.Width = 1000;
+            pairingsGridView.Height = 400;
+            pairingsGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            pairingsGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            pairingsGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            pairingsGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+
+            pairingsGridView.Columns.AddRange(new DataGridViewColumn[]
+            {
+        new DataGridViewTextBoxColumn { Name = "PairingId", HeaderText = "Pairing ID" },
+        new DataGridViewTextBoxColumn { Name = "Doe", HeaderText = "Doe" },
+        new DataGridViewTextBoxColumn { Name = "Buck", HeaderText = "Buck" },
+        new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
+        new DataGridViewTextBoxColumn { Name = "Pairing Date", HeaderText = "Pairing Date" },
+        new DataGridViewTextBoxColumn { Name = "Pairing End Date", HeaderText = "Pairing End Date" },
+        new DataGridViewButtonColumn { Name = "Edit", HeaderText = "Edit Pairing", Text = "Edit", UseColumnTextForButtonValue = true }
+            });
+
+            PopulatePairingDataDisplayArea();
+
+            this.Controls.Add(pairingsGridView);
+        }
+
+        private void PopulatePairingDataDisplayArea()
+        {
+            string dam = "Unknown";
+            string sire = "Unknown";
+            string projName = "Unknown"; //TODO there should always be a project, dam and sire name....
+
+            pairingsGridView.Rows.Clear();
+            if (_pairings != null)
+            {
+                foreach (var pairing in _pairings)
+                {
+                    if(pairing.Dam.Name != null)
+                    {
+                        dam = pairing.Dam.Name;
+                    }
+                    if(pairing.Sire != null)
+                    {
+                        sire = pairing.Sire.Name;
+                    }
+                    if(pairing.Project != null)
+                    {
+                        projName = pairing.Project.Name;
+                    }
+                    pairingsGridView.Rows.Add(pairing.pairingId, dam, sire, projName, pairing.PairingStartDate, pairing.PairingEndDate, "TODO - edit pairing button?");
+                }
+            }
+            else
+            {
+                MessageBox.Show("There are no pairings in your database.");
+            }
+        }
+
+        private async void InitializeLitterDataGridView()
+        {
+            int topPanelHeight = 90;
+
+            littersGridView.Location = new Point(0,topPanelHeight );
+            littersGridView.Width = 1000;
+            littersGridView.Height = 400;
+            littersGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            littersGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            littersGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            littersGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+
+            littersGridView.Columns.AddRange(new DataGridViewColumn[]
+            {
+        new DataGridViewTextBoxColumn { Name = "LitterId", HeaderText = "Litter ID" },
+        new DataGridViewTextBoxColumn { Name = "LitterName", HeaderText = "Name/Theme" },
+        //new DataGridViewTextBoxColumn { Name = "Species", HeaderText = "Species" },
+        new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" }, //TODO or line if there is no project? 
+        new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
+        new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
+        new DataGridViewTextBoxColumn { Name = "DOB", HeaderText = "DOB" },
+        new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "Num Pups" },
+        new DataGridViewButtonColumn { Name = "EditLitter", HeaderText = "Edit Litter", Text = "Edit", UseColumnTextForButtonValue = true }
+            });
+
+            PopulateLittersDataDisplayArea();
+
+            this.Controls.Add(littersGridView);
+        }
+
+        private void PopulateLittersDataDisplayArea()
+        {
+            littersGridView.Rows.Clear();
+            if (_litters != null)
+            {
+                foreach (var litter in _litters)
+                {
+                    littersGridView.Rows.Add(litter.LitterId, litter.Name, litter.Pair.Project.Name, litter.Pair.Dam, litter.Pair.Sire, litter.DateOfBirth, litter.NumPups, "TODO - edit litter button?");
+                }
+            }
+            else
+            {
+                MessageBox.Show("There are no litters in your database.");
+            }
+        }
     }
 }
-//using RATAPP.Forms;
-//using System;
-//using System.Collections.Generic;
-//using System.ComponentModel;
-//using System.Data;
-//using System.Drawing;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
-//using System.Windows.Forms;
-
-//namespace RATAPP.Panels
-//{
-//    public partial class PairingsAndLittersPanel : Panel, INavigable
-//    {
-//        private Button addPairingButton;
-//        private Button updatePairingButton;
-//        private Button deletePairingButton;
-//        private Button addLitterButton;
-//        private Button updateLitterButton;
-//        private Button deleteLitterButton;
-//        private DataGridView pairingsGridView;
-//        private DataGridView littersGridView;
-//        private Panel pairingsButtonsPanel;
-//        private Panel littersButtonsPanel;
-//        private Panel pairingsGridPanel;
-//        private Panel littersGridPanel;
-
-//        public PairingsAndLittersPanel()
-//        {
-//            InitializeComponents();
-//        }
-
-//        private void InitializeComponents()
-//        {
-//            // Set the Dock style for the custom panel
-//            this.Dock = DockStyle.Fill;
-//            BackColor = Color.LightBlue;
-
-//            // Initialize Pairings and Litters panels
-//            InitializePairingsPanel();
-//            InitializeLittersPanel();
-//        }
-
-//        private void InitializePairingsPanel()
-//        {
-//            // Create the panel for Pairings section
-//            var pairingsPanel = new Panel
-//            {
-//                Dock = DockStyle.Top,
-//                Height = 200
-//            };
-
-//            // Initialize Pairing Buttons Panel
-//            pairingsButtonsPanel = new Panel
-//            {
-//                Dock = DockStyle.Top,
-//                Height = 80
-//            };
-//            InitializePairingButtons();
-//            pairingsPanel.Controls.Add(pairingsButtonsPanel);
-
-//            // Initialize Pairings Grid Panel
-//            pairingsGridPanel = new Panel
-//            {
-//                Dock = DockStyle.Fill
-//            };
-//            InitializePairingsGrid();
-//            pairingsPanel.Controls.Add(pairingsGridPanel);
-
-//            // Add pairings panel to the custom panel
-//            this.Controls.Add(pairingsPanel);
-//        }
-
-//        private void InitializeLittersPanel()
-//        {
-//            // Create the panel for Litters section
-//            var littersPanel = new Panel
-//            {
-//                Dock = DockStyle.Top,
-//                Height = 200
-//            };
-
-//            // Initialize Litter Buttons Panel
-//            littersButtonsPanel = new Panel
-//            {
-//                Dock = DockStyle.Top,
-//                Height = 80
-//            };
-//            InitializeLitterButtons();
-//            littersPanel.Controls.Add(littersButtonsPanel);
-
-//            // Initialize Litters Grid Panel
-//            littersGridPanel = new Panel
-//            {
-//                Dock = DockStyle.Fill
-//            };
-//            InitializeLittersGrid();
-//            littersPanel.Controls.Add(littersGridPanel);
-
-//            // Add litters panel to the custom panel
-//            this.Controls.Add(littersPanel);
-//        }
-
-//        private void InitializePairingButtons()
-//        {
-//            // Add Pairing Button
-//            addPairingButton = new Button
-//            {
-//                Text = "Add Pairing",
-//                Font = new Font("Arial", 12F),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(20, 20)
-//            };
-//            addPairingButton.Click += AddPairingButton_Click;
-
-//            // Update Pairing Button
-//            updatePairingButton = new Button
-//            {
-//                Text = "Update Pairing",
-//                Font = new Font("Arial", 12F),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(240, 20)
-//            };
-//            updatePairingButton.Click += UpdatePairingButton_Click;
-
-//            // Delete Pairing Button
-//            deletePairingButton = new Button
-//            {
-//                Text = "Delete Pairing",
-//                Font = new Font("Arial", 12F),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(460, 20)
-//            };
-//            deletePairingButton.Click += DeletePairingButton_Click;
-
-//            // Add buttons to the pairingsButtonsPanel
-//            pairingsButtonsPanel.Controls.Add(addPairingButton);
-//            pairingsButtonsPanel.Controls.Add(updatePairingButton);
-//            pairingsButtonsPanel.Controls.Add(deletePairingButton);
-//        }
-
-//        private void InitializeLitterButtons()
-//        {
-//            // Add Litter Button
-//            addLitterButton = new Button
-//            {
-//                Text = "Add Litter",
-//                Font = new Font("Arial", 12F),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(20, 20)
-//            };
-//            addLitterButton.Click += AddLitterButton_Click;
-
-//            // Update Litter Button
-//            updateLitterButton = new Button
-//            {
-//                Text = "Update Litter",
-//                Font = new Font("Arial", 12F),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(240, 20)
-//            };
-//            updateLitterButton.Click += UpdateLitterButton_Click;
-
-//            // Delete Litter Button
-//            deleteLitterButton = new Button
-//            {
-//                Text = "Delete Litter",
-//                Font = new Font("Arial", 12F),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(460, 20)
-//            };
-//            deleteLitterButton.Click += DeleteLitterButton_Click;
-
-//            // Add buttons to the littersButtonsPanel
-//            littersButtonsPanel.Controls.Add(addLitterButton);
-//            littersButtonsPanel.Controls.Add(updateLitterButton);
-//            littersButtonsPanel.Controls.Add(deleteLitterButton);
-//        }
-
-//        private void InitializePairingsGrid()
-//        {
-//            // Pairings DataGridView
-//            pairingsGridView = new DataGridView
-//            {
-//                Location = new Point(20, 20),
-//                Size = new Size(pairingsGridPanel.Width - 40, 200),
-//                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-//                Columns =
-//                {
-//                    new DataGridViewTextBoxColumn { HeaderText = "Pairing ID", Name = "PairingID" },
-//                    new DataGridViewTextBoxColumn { HeaderText = "Male Animal", Name = "MaleAnimal" },
-//                    new DataGridViewTextBoxColumn { HeaderText = "Female Animal", Name = "FemaleAnimal" },
-//                    new DataGridViewTextBoxColumn { HeaderText = "Breeding Date", Name = "BreedingDate" }
-//                }
-//            };
-
-//            // Add the DataGrid to the pairingsGridPanel
-//            pairingsGridPanel.Controls.Add(pairingsGridView);
-//        }
-
-//        private void InitializeLittersGrid()
-//        {
-//            // Litters DataGridView
-//            littersGridView = new DataGridView
-//            {
-//                Location = new Point(20, 20),
-//                Size = new Size(littersGridPanel.Width - 40, 200),
-//                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-//                Columns =
-//                {
-//                    new DataGridViewTextBoxColumn { HeaderText = "Litter ID", Name = "LitterID" },
-//                    new DataGridViewTextBoxColumn { HeaderText = "Dam", Name = "Dam" },
-//                    new DataGridViewTextBoxColumn { HeaderText = "Sire", Name = "Sire" },
-//                    new DataGridViewTextBoxColumn { HeaderText = "Litter Date", Name = "LitterDate" }
-//                }
-//            };
-
-//            // Add the DataGrid to the littersGridPanel
-//            littersGridPanel.Controls.Add(littersGridView);
-//        }
-
-//        // Button Click Event Handlers (Just placeholders for now)
-//        private void AddPairingButton_Click(object sender, EventArgs e)
-//        {
-//            MessageBox.Show("Add Pairing functionality will be implemented.");
-//        }
-
-//        private void UpdatePairingButton_Click(object sender, EventArgs e)
-//        {
-//            MessageBox.Show("Update Pairing functionality will be implemented.");
-//        }
-
-//        private void DeletePairingButton_Click(object sender, EventArgs e)
-//        {
-//            MessageBox.Show("Delete Pairing functionality will be implemented.");
-//        }
-
-//        private void AddLitterButton_Click(object sender, EventArgs e)
-//        {
-//            MessageBox.Show("Add Litter functionality will be implemented.");
-//        }
-
-//        private void UpdateLitterButton_Click(object sender, EventArgs e)
-//        {
-//            MessageBox.Show("Update Litter functionality will be implemented.");
-//        }
-
-//        private void DeleteLitterButton_Click(object sender, EventArgs e)
-//        {
-//            MessageBox.Show("Delete Litter functionality will be implemented.");
-//        }
-
-//        public Task RefreshDataAsync()
-//        {
-//            throw new NotImplementedException();
-//        }
-//    }
-//}
 

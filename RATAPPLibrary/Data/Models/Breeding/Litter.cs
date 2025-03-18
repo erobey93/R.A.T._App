@@ -2,7 +2,8 @@
 {
     public class Litter
     {
-        public required int Id { get; set; } // Unique identifier for the litter
+        public int? Id { get; set; } // Unique identifier for the litter
+        public required string LitterId { get; set; }   //id that user sets 
         public required int PairId { get; set; } // The unique identifier for the parental pairing
         public required string Name { get; set; } // The name of the litter
         public int? NumPups { get; set; } // The number of pups in the litter

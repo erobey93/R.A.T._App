@@ -4,18 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPP.Forms;
+using static System.Windows.Forms.AxHost;
 
 namespace RATAPP.Panels
 {
     public partial class HomePanel : Panel, INavigable
     {
         private string _username;
-        private string _role;
         private ComboBox speciesComboBox;
         private ComboBox sexComboBox;
         private TextBox searchBar;
         private Button searchButton;
         private Button addButton;
+        private Button bulkAddButton; //TODO 
+        private Panel remindersPanel;
         private DataGridView dataDisplayArea;
         private RATAppBaseForm _parentForm;
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
@@ -27,7 +29,6 @@ namespace RATAPP.Panels
         {
             _parentForm = parentForm;
             _username = username;
-            _role = role;
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(_context);
         }
@@ -50,7 +51,7 @@ namespace RATAPP.Panels
             _animals = await _animalService.GetAllAnimalsAsync();
         }
 
-        private void InitializeComponents()
+       private void InitializeComponents()
         {
             this.Dock = DockStyle.Fill;
             this.BackColor = Color.White;
@@ -58,8 +59,8 @@ namespace RATAPP.Panels
             var headerPanel = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 100,
-                Padding = new Padding(20, 20, 20, 0)
+                Height = 60,
+                Padding = new Padding(20, 10, 20, 0)
             };
 
             var welcomeLabel = new Label
@@ -68,24 +69,15 @@ namespace RATAPP.Panels
                 Font = new Font("Segoe UI", 25, FontStyle.Bold),
                 ForeColor = Color.FromArgb(0, 120, 212),
                 AutoSize = true,
-                Location = new Point(0, 0)
+                Location = new Point(0, 5)
             };
             headerPanel.Controls.Add(welcomeLabel);
-
-            var roleLabel = new Label
-            {
-                Text = $"Role: {_role}",
-                Font = new Font("Segoe UI", 12),
-                ForeColor = Color.Gray,
-                AutoSize = true,
-                Location = new Point(0, welcomeLabel.Bottom + 5)
-            };
-            //headerPanel.Controls.Add(roleLabel); FIXME I don't think that I want this
 
             this.Controls.Add(headerPanel);
 
             InitializeFilterControls();
             InitializeDataDisplayArea();
+            InitializeRemindersPanel();
             InitializeLoadingSpinner();
         }
 
@@ -95,22 +87,18 @@ namespace RATAPP.Panels
             {
                 Dock = DockStyle.Top,
                 Height = 60,
-                Padding = new Padding(20, 10, 20, 10)
+                Padding = new Padding(20, 10, 20, 10),
+                //Location = new Point(0, startY) // Set the Location based on startY
             };
 
-            //var dbSpecies = getDbSpecies();
-            //string[] speciesArray = dbSpecies.Result.ToArray();
-
-            //speciesComboBox = CreateComboBox(speciesArray, 0); //TODO get from db 
-
             speciesComboBox = CreateComboBox(new string[] { "All Species", "Rat", "Mouse" }, 0); //TODO get from db 
-            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female", "Unknown" }, 190);
+            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female", "Unknown" }, 190); //TODO get from db 
 
             searchBar = new TextBox
             {
                 Font = new Font("Segoe UI", 10),
                 Width = 300,
-                Location = new Point(380, 5),
+                Location = new Point(380, 15),
                 PlaceholderText = "Search by Animal Name, ID..."
             };
 
@@ -142,6 +130,7 @@ namespace RATAPP.Panels
                 Text = text,
                 Font = new Font("Segoe UI", 10),
                 Width = 100,
+                Height = 30,
                 Location = new Point(x, 13),
                 BackColor = Color.FromArgb(0, 120, 212),
                 ForeColor = Color.White,
@@ -169,39 +158,7 @@ namespace RATAPP.Panels
                 RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
                 RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
             };
-            //var dataPanel = new Panel
-            //{
-            //    Dock = DockStyle.Fill,
-            //    Padding = new Padding(20, 10, 20, 20)
-            //};
-            //int roleLabelHeight = 150;
-
-            //dataDisplayArea = new DataGridView
-            //{
-            //    //Dock = DockStyle.Fill,
-            //    AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            //    BackgroundColor = Color.White,
-            //    BorderStyle = BorderStyle.None,
-            //    RowHeadersVisible = false,
-            //    AllowUserToAddRows = false,
-            //    Font = new Font("Segoe UI", 10),
-            //    ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
-            //    RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
-            //    RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders,
-            //    AllowUserToResizeColumns = false,
-            //    AllowUserToResizeRows = false,
-            //    ReadOnly = true,
-
-
-            //    Location = new Point(roleLabelHeight, 0 ),
-            //                Width = 1000,
-            //                Height = 400,
-            //                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-            //                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
-            //                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
-            //                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-       // };
-
+           
             dataDisplayArea.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn { Name = "Species", HeaderText = "Species" },
@@ -226,6 +183,133 @@ namespace RATAPP.Panels
             {
                 dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
             }
+        }
+
+        //set up reminder panel to the right of the main data grid view panel on the home page 
+        private void InitializeRemindersPanel()
+        {
+            int topPanelHeight = 180;
+
+            remindersPanel = new Panel
+            {
+                Location = new Point(1020, topPanelHeight),
+                Width = 240,
+                Height = 400,
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.FromArgb(245, 245, 245)
+            };
+
+            // Reminders header
+            var remindersHeader = new Label
+            {
+                Text = "Reminders",
+                Font = new Font("Segoe UI", 14, FontStyle.Bold),
+                ForeColor = Color.FromArgb(0, 120, 212),
+                Location = new Point(10, 10),
+                Size = new Size(220, 30),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            remindersPanel.Controls.Add(remindersHeader);
+
+            // Today's reminders section
+            var todayLabel = new Label
+            {
+                Text = "Today",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Location = new Point(10, 50),
+                Size = new Size(220, 20)
+            };
+            remindersPanel.Controls.Add(todayLabel);
+
+            // Sample reminders for today
+            CreateReminderItem("Pup Pickup 6-7pm", 80, Color.FromArgb(255, 100, 100));
+            CreateReminderItem("Respond to Adoption Applications", 110, Color.FromArgb(255, 100, 100));
+
+            // Next week reminders section
+            var nextWeekLabel = new Label
+            {
+                Text = "Next Week",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                Location = new Point(10, 150),
+                Size = new Size(220, 20)
+            };
+            remindersPanel.Controls.Add(nextWeekLabel);
+
+            // Sample reminders for next week
+            //TODO - I want some kind of calendar functionality this is just a mock up of the actual functionality 
+            CreateReminderItem("Antibiotics Finished for Groups 1-3 (Monday)", 180, Color.FromArgb(100, 150, 255));
+            CreateReminderItem("Vet appointment (Wednesday)", 210, Color.FromArgb(100, 150, 255));
+            CreateReminderItem("Pickup Wilco Supplies (Friday)", 240, Color.FromArgb(100, 150, 255));
+
+            // Refresh button
+            var refreshButton = new Button
+            {
+                Text = "Refresh Reminders",
+                Font = new Font("Segoe UI", 9),
+                Location = new Point(10, 350),
+                Size = new Size(220, 30),
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            refreshButton.FlatAppearance.BorderSize = 0;
+            refreshButton.Click += RefreshReminders_Click;
+            remindersPanel.Controls.Add(refreshButton);
+
+            // Refresh button
+            var openCalendarButton = new Button
+            {
+                Text = "Open Calendar",
+                Font = new Font("Segoe UI", 9),
+                Location = new Point(10, 310),
+                Size = new Size(220, 30),
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            openCalendarButton.FlatAppearance.BorderSize = 0;
+            openCalendarButton.Click += OpenCalendar_Click;
+            remindersPanel.Controls.Add(openCalendarButton);
+
+            this.Controls.Add(remindersPanel);
+        }
+
+        private void CreateReminderItem(string text, int y, Color color)
+        {
+            var panel = new Panel
+            {
+                Location = new Point(15, y),
+                Size = new Size(210, 25),
+                BackColor = color
+            };
+
+            var label = new Label
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 9),
+                ForeColor = Color.White,
+                Location = new Point(5, 5),
+                Size = new Size(200, 15),
+                AutoEllipsis = true
+            };
+
+            panel.Controls.Add(label);
+            remindersPanel.Controls.Add(panel);
+        }
+
+        private void RefreshReminders_Click(object sender, EventArgs e)
+        {
+            // TODO: Implement backend logic to fetch actual reminders
+            MessageBox.Show("Refreshing reminders...\n\nThis would fetch the latest reminders from the database.",
+                "Reminders", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void OpenCalendar_Click(object sender, EventArgs e)
+        {
+            //TODO: do actual implementation of calendar, but this is a workable example for now 
+            var calendarForm = new CalendarForm(_context);
+            calendarForm.ShowDialog();
+
         }
 
         private void InitializeLoadingSpinner()
@@ -318,389 +402,3 @@ namespace RATAPP.Panels
         }
     }
 }
-
-//using Microsoft.Azure.Amqp.Framing;
-//using RATAPP.Forms;
-//using RATAPP.Properties;
-//using System;
-//using System.Collections.Generic;
-//using System.ComponentModel;
-//using System.Data;
-//using System.Drawing;
-//using System.Linq;
-//using System.Runtime.CompilerServices;
-//using System.Text;
-//using System.Threading.Tasks;
-//using System.Windows.Forms;
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-
-//namespace RATAPP.Panels
-//{
-//    public partial class HomePanel : Panel, INavigable
-//    {
-//        private string _username;
-//        private string _role;
-
-//        private ComboBox speciesComboBox;
-//        private ComboBox sexComboBox;
-//        private TextBox searchBar;
-//        private Button searchButton;
-//        private Button addButton;
-//        private DataGridView dataDisplayArea;
-
-//        private RATAppBaseForm _parentForm;  // Reference to parent form (RATAppBaseForm) this tightly couples things, but it is the easiest way to use panels
-//        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
-
-//        private RATAPPLibrary.Services.AnimalService _animalService;
-//        private RATAPPLibrary.Data.Models.AnimalDto[] _animals; //list or array, does it matter? if so, why? TODO
-
-//        private PictureBox loadingSpinner; //TODO put in some kind of utility class for re-use, just testing right now 
-
-
-//        private HomePanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
-//        {
-//            _parentForm = parentForm;
-//            _username = username;
-//            _role = role;
-//            _context = context;
-//            _animalService = new RATAPPLibrary.Services.AnimalService(_context);
-//        }
-
-//        public static async Task<HomePanel> CreateAsync(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
-//        {
-//            var panel = new HomePanel(parentForm, context, username, role);
-//            await panel.InitializePanelAsync();
-//            return panel;
-//        }
-
-//        public async Task InitializePanelAsync()
-//        {
-//            // Fetch animals asynchronously
-//            await GetAnimalsAsync();
-
-//            // Set the panel size to match the container (RATAppBaseForm)
-//            Dock = DockStyle.Fill;
-//            BackColor = Color.LightBlue;
-
-//            // Set the title of the panel
-//            var usernameLabel = new Label
-//            {
-//                Text = $"Welcome, {_username}!",
-//                Font = new Font("Arial", 14, FontStyle.Bold),
-//                AutoSize = true,
-//                Location = new Point(20, 20)
-//            };
-//            Controls.Add(usernameLabel);
-
-//            // Add a label to display role
-//            var roleLabel = new Label
-//            {
-//                Text = $"Your role: {_role}",
-//                Font = new Font("Arial", 12, FontStyle.Regular),
-//                AutoSize = true,
-//                Location = new Point(20, 60)
-//            };
-//            Controls.Add(roleLabel);
-
-//            // Initialize other components in the panel
-//            InitializeSpeciesToggleButton();
-//            InitializeSexToggleButton();
-//            InitializeSearchBar();
-//            InitializeSearchButton();
-//            InitializeAddButton();
-//            InitializeDataDisplayArea();
-//            LoadSpinner(); 
-//        }
-
-//        private async Task GetAnimalsAsync()
-//        {
-//            // Fetch animals asynchronously
-//            _animals = await _animalService.GetAllAnimalsAsync();
-//        }
-
-//        private void InitializeSpeciesToggleButton()
-//        {
-//            speciesComboBox = new ComboBox
-//            {
-//                Font = new Font("Arial", 12F, FontStyle.Bold),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                DropDownStyle = ComboBoxStyle.DropDownList,
-//                Width = 200,
-//                Height = 40,
-//                Location = new Point(20, 100)
-//            };
-
-//            speciesComboBox.Items.Add("All Species");
-//            speciesComboBox.Items.Add("Rats");
-//            speciesComboBox.Items.Add("Mice");
-//            speciesComboBox.SelectedIndex = 0;
-
-//            Controls.Add(speciesComboBox);
-//        }
-
-//        private void InitializeSexToggleButton()
-//        {
-//            sexComboBox = new ComboBox
-//            {
-//                Font = new Font("Arial", 12F, FontStyle.Bold),
-//                ForeColor = Color.White,
-//                BackColor = Color.Navy,
-//                DropDownStyle = ComboBoxStyle.DropDownList,
-//                Width = 150,
-//                Height = 40,
-//                Location = new Point(240, 100)
-//            };
-
-//            sexComboBox.Items.Add("All Sexes");
-//            sexComboBox.Items.Add("Male");
-//            sexComboBox.Items.Add("Female");
-//            sexComboBox.SelectedIndex = 0;
-
-//            Controls.Add(sexComboBox);
-//        }
-
-//        private void InitializeSearchBar()
-//        {
-//            searchBar = new TextBox
-//            {
-//                Font = new Font("Arial", 12F),
-//                Width = 400,
-//                Height = 30,
-//                Location = new Point(420, 100),
-//                PlaceholderText = "Search by Animal Name, ID, etc..."
-//            };
-
-//            Controls.Add(searchBar);
-//        }
-
-//        private void InitializeSearchButton()
-//        {
-//            searchButton = new Button
-//            {
-//                Text = "Search",
-//                Font = new Font("Arial", 12F),
-//                Width = 100,
-//                Height = 30,
-//                Location = new Point(830, 100)
-//            };
-
-//            searchButton.Click += SearchButton_Click;
-
-//            Controls.Add(searchButton);
-//        }
-
-//        private void InitializeAddButton()
-//        {
-//            addButton = new Button
-//            {
-//                Text = "Add New Animal",
-//                Font = new Font("Arial", 12F),
-//                Width = 100,
-//                Height = 30,
-//                Location = new Point(1030, 100)
-//            };
-
-//            addButton.Click += addButton_Click;
-
-//            Controls.Add(addButton);
-//        }
-
-//        private void InitializeDataDisplayArea()
-//        {
-//            int topPanelHeight = 150;
-
-//            dataDisplayArea = new DataGridView
-//            {
-//                Location = new Point(0, topPanelHeight),
-//                Width = 1000,
-//                Height = 400,
-//                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-//                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
-//                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
-//                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-//            };
-
-//            // Add columns
-//            dataDisplayArea.Columns.Add("Species", "Species");
-//            dataDisplayArea.Columns.Add("AnimalID", "Animal ID");
-//            dataDisplayArea.Columns.Add("AnimalName", "Animal Name");
-//            dataDisplayArea.Columns.Add("Sex", "Sex");
-//            dataDisplayArea.Columns.Add("DOB", "DOB");
-//            dataDisplayArea.Columns.Add("Variety", "Variety");
-
-//            // Add rows for all animals in database 
-//            //get data from db 
-//            foreach (var animal in _animals)
-//            {
-//                dataDisplayArea.Rows.Add(animal.Species, animal.Id, animal.Name, animal.Sex, animal.DateOfBirth, animal.Variety);
-//            }
-
-//            Controls.Add(dataDisplayArea);
-
-//            // Add a button column for individual animal pages
-//            DataGridViewButtonColumn buttonColumn = new DataGridViewButtonColumn
-//            {
-//                Name = "Individual Animal Page",  // Give it a name for easy reference
-//                HeaderText = "Individual Animal Page",
-//                Text = "Go to Page",
-//                UseColumnTextForButtonValue = true
-//            };
-//            dataDisplayArea.Columns.Add(buttonColumn);
-//            // Add an event handler for button clicks in the DataGridView
-//            dataDisplayArea.CellContentClick += DataGridView_CellContentClick;
-//        }
-
-//        private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
-//        {
-//            if (e.ColumnIndex == dataDisplayArea.Columns["Individual Animal Page"].Index && e.RowIndex >= 0 && dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value != null)
-//            {
-//                string animalName = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalName"].Value.ToString();
-//                string animalID = dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value.ToString(); //TODO fix this logic with string vs int 
-//                string species = dataDisplayArea.Rows[e.RowIndex].Cells["Species"].Value.ToString();
-//                string sex = dataDisplayArea.Rows[e.RowIndex].Cells["Sex"].Value.ToString();
-//                string dob = dataDisplayArea.Rows[e.RowIndex].Cells["DOB"].Value.ToString();
-//                //string genotype = dataDisplayArea.Rows[e.RowIndex].Cells["Genotype"].Value.ToString();
-
-//                // Create the AnimalDetailsPanel and show it using the parent form's ShowPanel method
-//                //interesting problem/question here: where should the getting be done for the single animal? Here? or in the Animal panel?
-//                int animalId = int.Parse(animalID);
-//                //get the animal from the list of animals
-//                var animal = _animals.FirstOrDefault(a => a.Id == animalId);
-//                var animalDetailsPanel = new AnimalPanel(_parentForm, _context, _animals, animal);//new AnimalPanel(animalName, animalID, species, sex, dob, genotype); TODO need to actually pass in the details for the associated animal 
-//                _parentForm.ShowPanel(animalDetailsPanel);   // Use the ShowPanel method from the parent form
-//            }
-//        }
-
-//        private void addButton_Click(object sender, EventArgs e)
-//        {
-//            //go to animal panel, but pass in an empty animal id
-//            var animalPanel = new AnimalPanel(_parentForm, _context, _animals, null); // Pass in an empty animal ID for a new animal
-//            _parentForm.ShowPanel(animalPanel);
-//        }
-//        private void SearchButton_Click(object sender, EventArgs e)
-//        {
-//            // Get selected filter values
-//            string speciesFilter = speciesComboBox.SelectedItem.ToString();
-//            string sexFilter = sexComboBox.SelectedItem.ToString();
-//            string searchTerm = searchBar.Text.ToLower();
-
-//            // Filter rows first by Species
-//            var speciesFilteredRows = new List<DataGridViewRow>();
-//            foreach (DataGridViewRow row in dataDisplayArea.Rows)
-//            {
-//                bool isVisible = true;
-
-//                // Filter by species
-//                if (speciesFilter != "All Species" && row.Cells["Species"].Value.ToString() != speciesFilter)
-//                {
-//                    isVisible = false;
-//                }
-
-//                // Only add to the filtered list if it matches the species filter
-//                if (isVisible)
-//                {
-//                    speciesFilteredRows.Add(row);
-//                }
-//            }
-
-//            // Now apply further filtering and sorting by Sex or Group
-//            var sexFilteredRows = new List<DataGridViewRow>();
-//            foreach (var row in speciesFilteredRows)
-//            {
-//                bool isSexVisible = true;
-
-//                // Filter by sex/group
-//                if (sexFilter != "All Sexes" && row.Cells["Sex"].Value.ToString() != sexFilter)
-//                {
-//                    isSexVisible = false;
-//                }
-
-//                // Apply the search filter
-//                if (!row.Cells["AnimalName"].Value.ToString().ToLower().Contains(searchTerm) &&
-//                    !row.Cells["AnimalID"].Value.ToString().ToLower().Contains(searchTerm))
-//                {
-//                    isSexVisible = false;
-//                }
-
-//                // If the row passes all filters, add it to the visible list
-//                if (isSexVisible)
-//                {
-//                    sexFilteredRows.Add(row);
-//                }
-//            }
-
-//            // Finally, update DataGridView rows based on filtering
-//            dataDisplayArea.Rows.Clear();  // Clear existing rows
-//            foreach (var row in sexFilteredRows)
-//            {
-//                dataDisplayArea.Rows.Add(row);
-//            }
-//        }
-
-//        //TODO just testing, move to utils file
-//        private void LoadSpinner()
-//        {
-//            // Create and configure the spinner
-//            loadingSpinner = new PictureBox
-//            {
-//                Size = new Size(50, 50), // Adjust size as needed "C:\Users\earob\source\repos\RATAPP\RATAPPLibrary\RATAPP\Resources\Loading_2.gif"
-//                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\Loading_2.gif"), // Add a GIF to your project resources
-//                SizeMode = PictureBoxSizeMode.StretchImage,
-//                Visible = false // Initially hidden
-//            };
-
-//            // Position the spinner in the center of the form
-//            loadingSpinner.Location = new Point(
-//                (ClientSize.Width - loadingSpinner.Width) / 2,
-//                (ClientSize.Height - loadingSpinner.Height) / 2
-//            );
-
-//            // Add the spinner to the form
-//            Controls.Add(loadingSpinner);
-
-//            // Handle form resize to reposition the spinner
-//            Resize += (s, e) =>
-//            {
-//                loadingSpinner.Location = new Point(
-//                    (ClientSize.Width - loadingSpinner.Width) / 2,
-//                    (ClientSize.Height - loadingSpinner.Height) / 2
-//                );
-//            };
-//        }
-//        //FIXME repeated code but getting interface working for now 
-//        public async Task RefreshDataAsync()
-//        {
-//            try
-//            {
-//                // Show spinner
-//                loadingSpinner.Visible = true;
-//                Refresh(); // Force UI to repaint to show spinner
-
-//                // Fetch animals asynchronously
-//                _animals = await _animalService.GetAllAnimalsAsync();
-
-//                //for testing
-//                // Wait asynchronously for 3 seconds
-//                await Task.Delay(3000); // 3000 milliseconds = 3 seconds
-
-//                // Hide spinner
-//                loadingSpinner.Visible = false;
-//                Refresh(); // Force UI to repaint to not show spinner
-
-//                MessageBox.Show("Data refresh complete", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-//            }
-//            catch (Exception ex)
-//            {
-//                MessageBox.Show($"An error occurred: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-//            }
-//            finally
-//            {
-//                //this is an emergency catch really TODO fix this logic, maybe no finally? 
-//                // Hide spinner
-//                loadingSpinner.Visible = false;
-//                Refresh(); // Force UI to repaint to not show spinner
-//            }
-//        }
-//    }
-//}

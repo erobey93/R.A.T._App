@@ -8,6 +8,7 @@ using System.Data;
 using System.DirectoryServices.ActiveDirectory;
 using System.Drawing;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -99,7 +100,8 @@ namespace RATAPP.Panels
         //current idea is to store the dam and sire objects so that I have the id for the db, there is likely a more efficient way to do this TODO
         private AnimalDto _dam;
         private AnimalDto _sire;
-        private AnimalDto[] _parents;
+        private AnimalDto[] _dams;
+        private AnimalDto[] _sires;
 
         private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
         private RATAppBaseForm _parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
@@ -138,11 +140,15 @@ namespace RATAPP.Panels
 
         private void InitializeComponent(AnimalDto animal)
         {
+            _animal = animal; //FIXME I need to handle this passing around of _animal better as this is confusing and ugly 
+            if (_animal == null) { 
+                _isEditMode = true;
+            }
+
             // Set panel properties
             this.Size = new Size(1200, 800); 
             this.BackColor = Color.White;
             this.Padding = new Padding(20);
-            _animal = animal; //FIXME I need to handle this passing around of _animal better as this is confusing and ugly 
 
             //Initialize the controls for the Animal Panel, buttons first as others are dependent on them (this is probably a bad idea, but works for now) 
             IntializeButtons();
@@ -245,6 +251,7 @@ namespace RATAPP.Panels
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, regNum);
             animalNameTextBox = CreateTextBox(150, 60, name);
+            animalNameTextBox.Name = "nameTextBox"; 
             speciesComboBox = CreateComboBox(150, 100, species);
             speciesComboBox.Name = "speciesComboBox"; //TODO this is how you set the names 
             sexComboBox = CreateComboBox(150, 140, sex);
@@ -351,14 +358,16 @@ namespace RATAPP.Panels
 
                 case "varietyComboBox":
                     // Handle variety-related options (update as needed)
-                    options.AddRange(new[] { "Variety1", "Variety2", "Variety3" }); // FIXME: for testing
+                    List<string> animalCoats = await GetSpeciesTraitsByType(animalSpecies, "Coat Type");
+                    options.AddRange(animalCoats.ToArray()); // FIXME: for testing
                     break;
+
 
                 case "colorComboBox":
                     // Handle color-related options (update as needed)
                     //get colors by species from the db 
-                    List<string> animalTraits = await GetSpeciesTraitsByType(animalSpecies, "Color");
-                    options.AddRange(animalTraits.ToArray()); // FIXME: for testing
+                    List<string> animalColors = await GetSpeciesTraitsByType(animalSpecies, "Color");
+                    options.AddRange(animalColors.ToArray()); // FIXME: for testing
                     break;
 
                 case "genotypeComboBox":
@@ -376,8 +385,8 @@ namespace RATAPP.Panels
                     {
                         // Handle dam-related options (fetch data from database or service as needed)
                         //store to global parents variable so that the object's data can be snagged if it's chosen (in selected index changed) 
-                        _parents = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
-                        foreach (var dam in _parents)
+                        _dams = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var dam in _dams)
                         {
                             options.Add(dam.name);
                         }
@@ -386,8 +395,8 @@ namespace RATAPP.Panels
                     {
                         // if no species, show all for appropriate sex 
                         // TODO handle mismatch in selected species and dam/sire type 
-                        _parents = await _animalService.GetAnimalsBySex(animalSex);
-                        foreach (var dam in _parents)
+                        _dams = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var dam in _dams)
                         {
                             options.Add(dam.name);
                         }
@@ -405,8 +414,8 @@ namespace RATAPP.Panels
                     if (animalSpecies != "Unknown")
                     {
                         // Handle sire-related options (fetch data from database or service as needed)
-                        _parents = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
-                        foreach (var sire in _parents)
+                        _sires = await _animalService.GetAnimalInfoBySexAndSpecies(animalSex, animalSpecies);
+                        foreach (var sire in _sires)
                         {
                             options.Add(sire.name);
                         }
@@ -415,8 +424,8 @@ namespace RATAPP.Panels
                     {
                         // if no species, show all for appropriate sex 
                         // TODO handle mismatch in selected species and dam/sire type 
-                        _parents = await _animalService.GetAnimalsBySex(animalSex);
-                        foreach (var sire in _parents)
+                        _sires = await _animalService.GetAnimalsBySex(animalSex);
+                        foreach (var sire in _sires)
                         {
                             options.Add(sire.name);
                         }  
@@ -426,12 +435,15 @@ namespace RATAPP.Panels
 
                 case "earTypeComboBox":
                     // Handle ear type-related options (update as needed)
-                    options.AddRange(new[] { "EarType1", "EarType2", "EarType3" }); // FIXME: for testing
+                    List<string> animalEars = await GetSpeciesTraitsByType(animalSpecies, "Ear Type");
+                    options.AddRange(animalEars.ToArray()); // FIXME: for testing
                     break;
+
 
                 case "markingComboBox":
                     // Handle marking-related options (update as needed)
-                    options.AddRange(new[] { "Marking1", "Marking2", "Marking3" }); // FIXME: for testing
+                    List<string> animalMarkings = await GetSpeciesTraitsByType(animalSpecies, "Marking");
+                    options.AddRange(animalMarkings.ToArray()); // FIXME: for testing
                     break;
 
                 case "breederInfoComboBox":
@@ -448,6 +460,7 @@ namespace RATAPP.Panels
             return options;
         }
 
+        //return a string list of phenotypes for each trait type 
         private async Task <List<string>> GetSpeciesTraitsByType(string species, string type)
         {
             try
@@ -523,7 +536,7 @@ namespace RATAPP.Panels
                 else if(comboBox.Name == "damComboBox")
                 {
                     //get the animal object from the list of animal objects stored earlier 
-                    foreach (var animal in _parents)
+                    foreach (var animal in _dams)
                     {
                         //compare the name? I guess this is the easiest approach for now but is problematic if there are duplicate names  
                         if(comboBox.SelectedItem?.ToString() == animal.name)
@@ -536,7 +549,7 @@ namespace RATAPP.Panels
                 else if (comboBox.Name == "sireComboBox")
                 {
                     //get the animal object from the list of animal objects stored earlier 
-                    foreach (var animal in _parents)
+                    foreach (var animal in _sires)
                     {
                         //compare the name? I guess this is the easiest approach for now but is problematic if there are duplicate names  
                         if (comboBox.SelectedItem?.ToString() == animal.name)
@@ -697,8 +710,6 @@ namespace RATAPP.Panels
         //TODO ID should be a string, but leaving it for now as db edits are annoying 
         private async void InitializeTextBoxes(AnimalDto animal)
         {
-            //await GetAnimalDamAndSire();
-
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, _animal.regNum);
             animalNameTextBox = CreateTextBox(150, 60, _animal.name);
@@ -709,7 +720,7 @@ namespace RATAPP.Panels
 
             // Second column (right side)
             colorTextBox = CreateTextBox(490, 20, _animal.color);
-            genotypeTextBox = CreateTextBox(490, 60, "TODO");
+            genotypeTextBox = CreateTextBox(490, 60, "xxyyzz"); //TODO
             markingsTextBox = CreateTextBox(490, 100, _animal.markings);
             breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
             earTypeTextBox = CreateTextBox(490, 180, _animal.earType);
@@ -755,14 +766,9 @@ namespace RATAPP.Panels
 
         //get animal dam and sire
         //FIXME I've got semi-repeated logic I think, need to look at all of the ways that I am interacting with dam and sire and pulling from db 
-        //TODO f
+        //TODO
         private async Task GetAnimalDamAndSire()
         {
-            // Initialize _dam and _sire if they are null
-            //_dam ??= await GetOrCreateDefaultAnimal(_dam?.Id); FIXME repetitive need a method to call once in the beginning to handle this logic 
-            //_sire ??= await GetOrCreateDefaultAnimal(_sire?.Id);
-
-            //this isn't correct because we need to go to the lineage table to get this data 
             if(_animal != null)
             {
                 //search for animal id, gen 1, seq 1 and return that value
@@ -821,10 +827,20 @@ namespace RATAPP.Panels
         // Add image to textbox
         private void AddImageToAnimalTextbox(AnimalDto animal)
         {
+            //check that the image url exists 
             if (animal.imageUrl != null)
             {
-                string imageUrl = CleanFilePath(animal.imageUrl);
-                animalPhotoBox.Image = Image.FromFile(imageUrl);
+                try
+                {
+                    //get the correctly formatted image url and set the image 
+                    string imageUrl = CleanFilePath(animal.imageUrl);
+                    animalPhotoBox.Image = Image.FromFile(imageUrl);
+                }
+                catch(Exception e)
+                {
+                    MessageBox.Show(e.Message);  //FIXME - for now, show the error but continue with the rest of the logic 
+                }
+               
                 if(_isEditMode)
                 {
                     animalPhotoBox.Click += AnimalImageClicked;
@@ -855,10 +871,11 @@ namespace RATAPP.Panels
                 }
             }
 
-            //hide save button
-            //show update button
+            //hide save & cancel buttons
             saveButton.Hide();
             cancelButton.Hide();
+
+            //show update button
             updateButton.Show();
         }
 
@@ -1057,43 +1074,37 @@ namespace RATAPP.Panels
                 else if (result == DialogResult.Cancel)
                 {
                     return; // Do nothing, keep the user in edit mode
-                } 
+                }
             }
             else
             {
-                // adding a new animal so check if there is data in the text boxes TODO
-                //if //data in the text boxes 
-                   // {
-                    // if there is, prompt the user to save the data
-                    // Show message box with prompt to save changes.
-                    DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?",
-                                                          "Confirm Cancel",
-                                                          MessageBoxButtons.YesNoCancel,
-                                                          MessageBoxIcon.Question);
+                // Show message box with prompt to save changes.
+                DialogResult result = MessageBox.Show("You have unsaved changes. Do you want to save them?",
+                                                      "Confirm Cancel",
+                                                      MessageBoxButtons.YesNoCancel,
+                                                      MessageBoxIcon.Question);
 
-                    // If the user clicks 'Yes', save changes
-                    if (result == DialogResult.Yes)
-                    {
-                        // Save changes (implement the actual saving logic here)
-                        await SaveButtonClick(sender, e);
-                    }
-                    // If the user clicks 'No', don't save changes
-                    else if (result == DialogResult.No)
-                    {
-                        // Set edit mode to false after deciding what to do with the changes
-                        _isEditMode = false;
+                // If the user clicks 'Yes', save changes
+                if (result == DialogResult.Yes)
+                {
+                    // Save changes (implement the actual saving logic here)
+                    await SaveButtonClick(sender, e);
+                }
+                // If the user clicks 'No', don't save changes
+                else if (result == DialogResult.No)
+                {
+                    // Set edit mode to false after deciding what to do with the changes
+                    _isEditMode = false;
 
                     //return to home page
                     _parentForm.HomeButton_Click(sender, e);
                 }
                 // If the user clicks 'Cancel', do nothing and return to edit mode
                 else if (result == DialogResult.Cancel)
-                    {
-                        return; // Do nothing, keep the user in edit mode
-                    }
+                {
+                    return; // Do nothing, keep the user in edit mode
                 }
-               
-           // }
+            }
         }
 
         //next button click 
@@ -1204,7 +1215,7 @@ namespace RATAPP.Panels
         //documents button
         //TODO just testing out 
         //I would like this to have ALL documents for the animal
-        //I may end up deleting this andz
+        //I may end up deleting this and
         private void DocumentsButton()
         {
             //create documents button
@@ -1303,29 +1314,61 @@ namespace RATAPP.Panels
                 line = "1";
             }
 
-            AnimalDto animal = new AnimalDto
+            if(_animal != null)
             {
-                Id = _animal.Id,
-                regNum = regNumTextBox.Text,
-                name = animalNameTextBox.Text,
-                sex = sexComboBox.Text, // Assuming there's a TextBox for sex
-                DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
-                DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
-                                           //? null
-                                           //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
-                species = speciesComboBox.Text,
-                comment = commentsTextBox.Text,
-                imageUrl = _animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
-                Line = line, // Assuming there's a TextBox for line
-                damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
-                sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
-                variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
-                color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
-                breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
-            };
-
-            return animal;
+                AnimalDto animal = new AnimalDto
+                {
+                    Id = _animal.Id,
+                    regNum = regNumTextBox.Text,
+                    name = animalNameTextBox.Text,
+                    sex = sexComboBox.Text, // Assuming there's a TextBox for sex
+                    DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
+                    DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
+                                               //? null
+                                               //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
+                    species = speciesComboBox.Text,
+                    comment = commentsTextBox.Text,
+                    imageUrl = _animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
+                    Line = line, // Assuming there's a TextBox for line
+                    damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
+                    sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
+                    variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
+                    color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
+                    markings = markingComboBox.Text,
+                    earType = earTypeComboBox.Text,
+                    breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
+                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
+                };
+                return animal;
+            }
+            else
+            {
+                AnimalDto animal = new AnimalDto
+                {
+                    //id will have to be created for a new animal 
+                    regNum = regNumTextBox.Text,
+                    name = animalNameTextBox.Text,
+                    sex = sexComboBox.Text, // Assuming there's a TextBox for sex
+                    DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
+                    DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
+                                               //? null
+                                               //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
+                    species = speciesComboBox.Text,
+                    comment = commentsTextBox.Text,
+                    imageUrl = null, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
+                    Line = line, // Assuming there's a TextBox for line
+                    damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
+                    sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
+                    variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
+                    color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
+                    markings = markingComboBox.Text,
+                    earType = earTypeComboBox.Text,
+                    breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
+                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
+                };
+                return animal;
+            }
+            
         }
 
         private void UpdateButton()
@@ -1470,7 +1513,7 @@ namespace RATAPP.Panels
         //save and update animal logic below 
         private async Task SaveButtonClick(object sender, EventArgs e)
         {
-            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes
+            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
 
             if (animalDto == null) //if the data is invalid, show an error message and return
             {
