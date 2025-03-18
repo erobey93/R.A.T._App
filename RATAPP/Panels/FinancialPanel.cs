@@ -444,6 +444,8 @@ namespace RATAPP.Panels
             {
                 Dock = DockStyle.Fill,
                 Orientation = Orientation.Vertical,
+                Width = 600,
+                Height = 600,
                 SplitterDistance = 500,
                 Panel1MinSize = 400,
                 Panel2MinSize = 200

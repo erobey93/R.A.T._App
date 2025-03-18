@@ -284,7 +284,7 @@ namespace RATAPP.Forms
 
         private void BreedingButton_Click(object sender, EventArgs e)
         {
-            var pairingsAndLittersPanel = new PairingsAndLittersPanel();
+            var pairingsAndLittersPanel = new PairingsAndLittersPanel(this, _context);
             _activePanel = pairingsAndLittersPanel;
             ShowPanel(pairingsAndLittersPanel);
         }
