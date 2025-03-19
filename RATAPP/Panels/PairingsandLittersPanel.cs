@@ -4,7 +4,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPPLibrary;
-using RATAPPLibrary.Data.Models.Breeding;
+using RATAPPLibrary.Data.Models.Breeding; 
 using System.Transactions;
 
 namespace RATAPP.Panels
@@ -56,9 +56,6 @@ namespace RATAPP.Panels
                 Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", 12F, FontStyle.Regular)
             };
-
-
-           
 
             pairingsGridView = new DataGridView();
             littersGridView = new DataGridView(); //TODO need to better organize everything, i.e. come up with a common schema for how I initialize and pass around all controls 
@@ -198,13 +195,25 @@ namespace RATAPP.Panels
         }
 
         //TODO 
+        //different functionality for adding pairings vs. litters so check that first 
         private void ActionButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = (Button)sender;
             string action = clickedButton.Text;
             string currentTab = tabControl.SelectedTab.Text;
 
-            MessageBox.Show($"{action} {currentTab}");
+            if(currentTab == "Pairings")
+            {
+                //open the add pairings form 
+                AddPairingForm addPairing = new AddPairingForm(_context);
+                addPairing.ShowDialog();
+                //this form would likely work for updating pairings too, but need to add in a way to populate it with the existing pairing 
+            }
+            else
+            {
+                MessageBox.Show($"{action} {currentTab}");
+            }
+            
             // Implement add, update, or delete functionality based on the action and current tab TODO 
         }
 

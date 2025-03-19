@@ -41,6 +41,10 @@ namespace RATAPP.Panels
         private Label inbredLabel;
         private Label earTypeLabel;
         private Label markingsLabel;
+        private Label weightLabel;
+        private Label cageNumberLabel;
+        private Label dobLabel;
+        private Label dodLabel;
 
         private TextBox animalNameTextBox;
         private TextBox regNumTextBox;
@@ -59,6 +63,8 @@ namespace RATAPP.Panels
         private TextBox markingsTextBox; //TODO
         private TextBox dobTextBox; //TODO Date of Birth this needs to be in a specific format so I need to figure that out some checks needed for that, for now just a text box
         private TextBox dodTextBox; // Date of Death
+        private TextBox weightTextBox;
+        private TextBox cageNumberTextBox;
 
         private ComboBox speciesComboBox;
         private ComboBox sexComboBox;
@@ -71,7 +77,7 @@ namespace RATAPP.Panels
         private ComboBox earTypeComboBox;
         private ComboBox markingComboBox;
         private ComboBox breederInfoComboBox;
-
+        private ComboBox cageNumberComboBox;
 
         private PictureBox animalPhotoBox;
         private Button inbredButton;
@@ -79,12 +85,19 @@ namespace RATAPP.Panels
         private Button updateButton;
         private Button cancelButton;
         private Button documentsButton;
-        private Button healthButton; 
+        private Button healthButton;
         private Button indAncestryButton; // Individual Ancestry Button vs Ancestry Page
         private Button prevButton;
         private Button nextButton;
+        private Button geneticsButton;
+        private Button breedingHistoryButton;
 
         private FlowLayoutPanel thumbnailPanel; // Panel to hold the thumbnails
+        private TableLayoutPanel mainContainer;
+        private Panel dataEntryPanel;
+        private Panel imagePanel;
+        private Panel actionButtonPanel;
+        private Panel featureButtonPanel;
 
         //state of the panel
         private bool _isEditMode = false;
@@ -141,12 +154,13 @@ namespace RATAPP.Panels
         private void InitializeComponent(AnimalDto animal)
         {
             _animal = animal; //FIXME I need to handle this passing around of _animal better as this is confusing and ugly 
-            if (_animal == null) { 
+            if (_animal == null)
+            {
                 _isEditMode = true;
             }
 
             // Set panel properties
-            this.Size = new Size(1200, 800); 
+            this.Size = new Size(1200, 800);
             this.BackColor = Color.White;
             this.Padding = new Padding(20);
 
@@ -182,8 +196,8 @@ namespace RATAPP.Panels
             _animal = animal; //FIXME this is repetitive 
 
             //get animal dam and sire 
-            SetDefaultDamAndSire(); 
-           
+            SetDefaultDamAndSire();
+
             await GetAnimalDamAndSire();
             InitializeTextBoxes(_animal);//probably don't need to pass anything here, but for clarity I guess 
         }
@@ -226,7 +240,7 @@ namespace RATAPP.Panels
                 _sire = defaultAnimal;
 
                 //get most recent dam and sire 
-                await GetAnimalDamAndSire(); 
+                await GetAnimalDamAndSire();
 
                 regNum = _animal.regNum.ToString();
                 name = _animal.name;
@@ -251,7 +265,7 @@ namespace RATAPP.Panels
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, regNum);
             animalNameTextBox = CreateTextBox(150, 60, name);
-            animalNameTextBox.Name = "nameTextBox"; 
+            animalNameTextBox.Name = "nameTextBox";
             speciesComboBox = CreateComboBox(150, 100, species);
             speciesComboBox.Name = "speciesComboBox"; //TODO this is how you set the names 
             sexComboBox = CreateComboBox(150, 140, sex);
@@ -288,7 +302,8 @@ namespace RATAPP.Panels
                 ScrollBars = ScrollBars.Vertical,
                 Font = new Font("Segoe UI", 10F), // Make it consistent with labels
                 Text = "TODO - should come from db",
-                BackColor = Color.LightGray
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle
             };
 
             // Add comboboxes to panel
@@ -321,7 +336,7 @@ namespace RATAPP.Panels
                 {
                     //get the list of values from the db 
                     List<string> items = await GetComboBoxItemsFromDatabase(control); // Add database items
-                    
+
                     // Add "Create New" as an option TODO need to set Create New as a button 
                     comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
                     comboBox.Items.AddRange(items.ToArray()); // Add database items
@@ -402,7 +417,7 @@ namespace RATAPP.Panels
                         }
                     }
 
-                        break;
+                    break;
 
                 case "sireComboBox":
                     animalSpecies = GetAnimalSpecies();
@@ -428,7 +443,7 @@ namespace RATAPP.Panels
                         foreach (var sire in _sires)
                         {
                             options.Add(sire.name);
-                        }  
+                        }
                     }
 
                     break;
@@ -461,7 +476,7 @@ namespace RATAPP.Panels
         }
 
         //return a string list of phenotypes for each trait type 
-        private async Task <List<string>> GetSpeciesTraitsByType(string species, string type)
+        private async Task<List<string>> GetSpeciesTraitsByType(string species, string type)
         {
             try
             {
@@ -474,7 +489,7 @@ namespace RATAPP.Panels
                 // Log the error and notify the user
                 LogError(ex);
                 ShowMessage("Failed to get traits for the species. Please try again.");
-                return null; 
+                return null;
             }
         }
 
@@ -533,15 +548,15 @@ namespace RATAPP.Panels
                     }
                 }
                 //if dam get the selected dam object and store to global dam variable 
-                else if(comboBox.Name == "damComboBox")
+                else if (comboBox.Name == "damComboBox")
                 {
                     //get the animal object from the list of animal objects stored earlier 
                     foreach (var animal in _dams)
                     {
                         //compare the name? I guess this is the easiest approach for now but is problematic if there are duplicate names  
-                        if(comboBox.SelectedItem?.ToString() == animal.name)
+                        if (comboBox.SelectedItem?.ToString() == animal.name)
                         {
-                            _dam = animal; 
+                            _dam = animal;
                         }
                     }
                 }
@@ -716,7 +731,7 @@ namespace RATAPP.Panels
             speciesTextBox = CreateTextBox(150, 100, _animal.species);
             sexTextBox = CreateTextBox(150, 140, _animal.sex);
             varietyTextBox = CreateTextBox(150, 180, _animal.variety);
-            damTextBox = CreateTextBox(150, 220, _dam.name); 
+            damTextBox = CreateTextBox(150, 220, _dam.name);
 
             // Second column (right side)
             colorTextBox = CreateTextBox(490, 20, _animal.color);
@@ -738,7 +753,8 @@ namespace RATAPP.Panels
                 ScrollBars = ScrollBars.Vertical,
                 Font = new Font("Segoe UI", 10F), // Make it consistent with labels
                 Text = _animal.comment,
-                BackColor = Color.LightGray
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle
             };
 
             // Add textboxes to panel
@@ -769,7 +785,7 @@ namespace RATAPP.Panels
         //TODO
         private async Task GetAnimalDamAndSire()
         {
-            if(_animal != null)
+            if (_animal != null)
             {
                 //search for animal id, gen 1, seq 1 and return that value
                 var dam = await _lineageService.GetDamByAnimalId(_animal.Id);
@@ -777,7 +793,7 @@ namespace RATAPP.Panels
                 {
                     //parse into AnimalDto object
                     var getDam = await _animalService.MapSingleAnimaltoDto(dam);
-                    _dam = getDam; 
+                    _dam = getDam;
                 }
 
                 var sire = await _lineageService.GetSireByAnimalId(_animal.Id);
@@ -836,12 +852,12 @@ namespace RATAPP.Panels
                     string imageUrl = CleanFilePath(animal.imageUrl);
                     animalPhotoBox.Image = Image.FromFile(imageUrl);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     MessageBox.Show(e.Message);  //FIXME - for now, show the error but continue with the rest of the logic 
                 }
-               
-                if(_isEditMode)
+
+                if (_isEditMode)
                 {
                     animalPhotoBox.Click += AnimalImageClicked;
                 }
@@ -908,7 +924,8 @@ namespace RATAPP.Panels
                 Width = 200,
                 Font = new Font("Segoe UI", 10F),
                 Text = text,
-                BackColor = Color.LightGray
+                BackColor = Color.White,
+                BorderStyle = BorderStyle.FixedSingle
             };
         }
 
@@ -921,7 +938,8 @@ namespace RATAPP.Panels
                 Width = 200,
                 Font = new Font("Segoe UI", 10F),
                 Text = text,
-                BackColor = Color.LightGray
+                BackColor = Color.White,
+                FlatStyle = FlatStyle.Flat
             };
         }
 
@@ -993,10 +1011,10 @@ namespace RATAPP.Panels
             }
 
             // Create and re-add buttons
-            prevButton = CreateButton("Previous", 200, 700);
+            prevButton = CreateButton("Previous", 200, 750);
             prevButton.Click += PreviousButtonClick;
 
-            nextButton = CreateButton("Next", 600, 700);
+            nextButton = CreateButton("Next", 600, 750);
             nextButton.Click += NextButtonClick;
 
             this.Controls.Add(prevButton);
@@ -1020,7 +1038,7 @@ namespace RATAPP.Panels
                 {
                     //go to the previous animal 
                     //first clear out old controls
-                    this.Controls.Clear(); 
+                    this.Controls.Clear();
                     InitializeComponent(_allAnimals[i - 1]);
                     break;
                 }
@@ -1043,7 +1061,7 @@ namespace RATAPP.Panels
 
         private async Task CancelButtonClick(object sender, EventArgs e)
         {
-            // Make sure that we're in edit mode. If we aren't, we shouldn't be here anyways, but just in case, check.
+            // Make sure that we're in edit mode. If we aren't, we shouldn't be here anyways, just in case, check.
             if (_isEditMode)
             {
                 // Show message box with prompt to save changes.
@@ -1162,8 +1180,11 @@ namespace RATAPP.Panels
                 Width = 100,
                 Height = 40,
                 Font = new Font("Segoe UI", 10F),
-                BackColor = Color.LightGray,
-                FlatStyle = FlatStyle.Flat
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
         }
 
@@ -1172,80 +1193,92 @@ namespace RATAPP.Panels
         // Initialize the row of buttons at the bottom
         private void InitializeBottomButtons()
         {
+            // Create a panel for the feature buttons
+            Panel featureButtonPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 60,
+                Padding = new Padding(10),
+                BackColor = Color.FromArgb(230, 230, 230)
+            };
+
             // Button 2: Ancestry
-            //Button ancestryButton = CreateButton("Ancestry", 220, 630);
-            AncestryButton();
+            indAncestryButton = CreateFeatureButton("Ancestry");
+            indAncestryButton.Click += (sender, e) =>
+            {
+                var ancestryForm = new IndividualAnimalAncestryForm(_parentForm, _context, _animal);
+                ancestryForm.Show();
+            };
 
             // Button 3: Genetics
-            Button geneticsButton = CreateButton("Genetics", 360, 630);
+            geneticsButton = CreateFeatureButton("Genetics");
 
             // Button 4: Breeding History
-            Button breedingHistoryButton = CreateButton("Breeding History", 500, 630);
+            breedingHistoryButton = CreateFeatureButton("Breeding History");
 
             // Button 5: Documents
-            //Button documentsButton = CreateButton("Documents", 650, 630);
-            DocumentsButton(); //create button and set click event 
-
-            // Button 6: Health
-            HealthButton();
-
-            this.Controls.Add(indAncestryButton);
-            this.Controls.Add(geneticsButton);
-            this.Controls.Add(breedingHistoryButton);
-            this.Controls.Add(documentsButton);
-            this.Controls.Add(healthButton);
-        }
-
-        //health button 
-        private void HealthButton()
-        {
-            //create health button
-            healthButton = CreateButton("Health", 790, 630);
-            healthButton.Click += (sender, e) =>
-            {
-                // Logic to show health
-                //TODO get the health from the database
-                // and display it in a new window
-                // Open the CreateAccountForm
-                var healthForm = new HealthRecordForm(_parentForm, _context, _animal);
-                healthForm.Show();
-            };
-        }
-
-        //documents button
-        //TODO just testing out 
-        //I would like this to have ALL documents for the animal
-        //I may end up deleting this and
-        private void DocumentsButton()
-        {
-            //create documents button
-            documentsButton = CreateButton("Documents", 650, 630);
+            documentsButton = CreateFeatureButton("Documents");
             documentsButton.Click += (sender, e) =>
             {
-                // Logic to show documents
-                //TODO get the documents from the database
-                // and display them in a new window
-                // Open the CreateAccountForm
                 var documentForm = new DocumentsForm(_parentForm, _context);
                 documentForm.Show();
             };
+
+            // Button 6: Health
+            healthButton = CreateFeatureButton("Health");
+            healthButton.Click += (sender, e) =>
+            {
+                var healthForm = new HealthRecordForm(_parentForm, _context, _animal);
+                healthForm.Show();
+            };
+
+            //navigation buttons
+            // Remove any existing buttons with the same name
+            //var buttonsToRemove = this.Controls.OfType<Button>()
+            //    .Where(b => b.Name == "Previous" || b.Name == "Next").ToList();
+            //foreach (var button in buttonsToRemove)
+            //{
+            //    this.Controls.Remove(button);
+            //}
+
+            // Create and re-add buttons
+            prevButton = CreateFeatureButton("Previous");
+            prevButton.BackColor = Color.FromArgb(0, 120, 212);
+            prevButton.ForeColor = Color.White;
+            prevButton.Click += PreviousButtonClick;
+
+            nextButton = CreateFeatureButton("Next");
+            nextButton.BackColor = Color.FromArgb(0, 120, 212);
+            nextButton.ForeColor = Color.White;
+            nextButton.Click += NextButtonClick;
+
+            //this.Controls.Add(prevButton);
+            //this.Controls.Add(nextButton);
+
+            // Add buttons to the panel with proper spacing
+            int buttonX = 10;
+            foreach (Button btn in new[] { indAncestryButton, geneticsButton, breedingHistoryButton, documentsButton, healthButton, prevButton, nextButton })
+            {
+                btn.Location = new Point(buttonX, 10);
+                featureButtonPanel.Controls.Add(btn);
+                buttonX += btn.Width + 10;
+            }
+            this.Controls.Add(featureButtonPanel);
         }
 
-        //ancestry button 
-        //TODO just the start 
-        //I would like this to have a way to update ancestry, print 
-        private void AncestryButton()
+        private Button CreateFeatureButton(string text)
         {
-            //create ancestry button
-            indAncestryButton = CreateButton("Ancestry", 220, 630);
-            indAncestryButton.Click += (sender, e) =>
+            return new Button
             {
-                // Logic to show ancestry
-                //TODO get the ancestry from the database
-                // and display it in a new window
-                // Open the CreateAccountForm
-                var ancestryForm = new IndividualAnimalAncestryForm(_parentForm, _context, _animal); //TODO change name to form if I decide to keep it that way, maybe do a form and a panel option for different buttons and ask folks which they like best 
-                ancestryForm.Show();
+                Text = text,
+                Width = 140,
+                Height = 40,
+                Font = new Font("Segoe UI", 9.5F),
+                BackColor = Color.FromArgb(250, 250, 250),
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderColor = Color.FromArgb(200, 200, 200) },
+                Cursor = Cursors.Hand
             };
         }
 
@@ -1264,8 +1297,11 @@ namespace RATAPP.Panels
                 Height = 30,
                 Text = "Calculate % Inbred",
                 Font = new Font("Segoe UI", 10F),
-                BackColor = Color.LightGray,
-                FlatStyle = FlatStyle.Flat
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             //this should be a call to the library to calculate the % inbred
             inbredButton.Click += (sender, e) =>
@@ -1287,8 +1323,11 @@ namespace RATAPP.Panels
                 Height = 40,
                 Text = "Save Changes",
                 Font = new Font("Segoe UI", 10F),
-                BackColor = Color.Green,
-                FlatStyle = FlatStyle.Popup
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             saveButton.Click += async (sender, e) => //NOTE: putting this inside of an async lambda is what allows us to use await without setting the entire method to async! 
             {
@@ -1309,12 +1348,12 @@ namespace RATAPP.Panels
 
             //FIXME this is just for testing right now need a way to manage lines i.e. "add new" or "select from list" 
             string line = "2";
-            if (speciesComboBox.Text == "Mouse")
+            if (speciesComboBox.Text == "Mouse" || speciesComboBox.Text == "mouse")
             {
                 line = "1";
             }
 
-            if(_animal != null)
+            if (_animal != null)
             {
                 AnimalDto animal = new AnimalDto
                 {
@@ -1368,7 +1407,7 @@ namespace RATAPP.Panels
                 };
                 return animal;
             }
-            
+
         }
 
         private void UpdateButton()
@@ -1381,8 +1420,11 @@ namespace RATAPP.Panels
                 Height = 40,
                 Text = "Update Data",
                 Font = new Font("Segoe UI", 10F),
-                BackColor = Color.Green,
-                FlatStyle = FlatStyle.Popup
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 0 },
+                Cursor = Cursors.Hand
             };
             //this should be a call to the library to calculate the % inbred
             updateButton.Click += (sender, e) =>
@@ -1402,18 +1444,21 @@ namespace RATAPP.Panels
             //create calc % inbred button 
             cancelButton = new Button
             {
-                Location = new Point(10, 680),
+                Location = new Point(170, 630),
                 Width = 150,
                 Height = 40,
                 Text = "Cancel",
                 Font = new Font("Segoe UI", 10F),
-                BackColor = Color.Red,
-                FlatStyle = FlatStyle.Popup
+                BackColor = Color.FromArgb(240, 240, 240),
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat,
+                FlatAppearance = { BorderSize = 1 },
+                Cursor = Cursors.Hand
             };
             //this should be a call to the library to calculate the % inbred
             cancelButton.Click += async (sender, e) =>
             {
-                await CancelButtonClick(sender, e); 
+                await CancelButtonClick(sender, e);
             };
         }
 
@@ -1423,15 +1468,15 @@ namespace RATAPP.Panels
             UpdateButton();
             SaveButton();
             CancelButton();
-            InitializeNavigationButtons(); //initialize the navigation buttons
+            //InitializeNavigationButtons(); //initialize the navigation buttons FIXME working on formatting 
 
             // Add the button to the panel
             this.Controls.Add(inbredButton);
             this.Controls.Add(updateButton);
             this.Controls.Add(saveButton);
             this.Controls.Add(cancelButton);
-            this.Controls.Add(nextButton);
-            this.Controls.Add(prevButton);
+            //this.Controls.Add(nextButton);
+            //this.Controls.Add(prevButton);
         }
 
         //TODO just testing, move to utils file
@@ -1629,3 +1674,5 @@ namespace RATAPP.Panels
         }
     }
 }
+
+
