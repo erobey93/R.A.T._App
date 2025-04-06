@@ -41,8 +41,8 @@ namespace RATAPP
                 Location = new Point((this.ClientSize.Width - 220) / 2, 20)
             };
 
-            var lblUsername = CreateLabel(Text = "Username", 300);
-            var lblPassword = CreateLabel(Text = "Password", 370);
+            var lblUsername = CreateLabel("Username", 300);
+            var lblPassword = CreateLabel("Password", 370);
 
             var txtUsername = CreateTextBox("txtUsername", "Username", 260);
             var txtPassword = CreateTextBox("txtPassword", "Password", 330);

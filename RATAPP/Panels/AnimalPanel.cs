@@ -33,7 +33,6 @@ namespace RATAPP.Panels
         private Label varietyLabel;
         private Label colorLabel;
         private Label genotypeLabel;
-        private Label ancestryLabel;
         private Label breederInfoLabel;
         private Label commentsLabel;
         private Label damLabel;
@@ -41,10 +40,10 @@ namespace RATAPP.Panels
         private Label inbredLabel;
         private Label earTypeLabel;
         private Label markingsLabel;
-        private Label weightLabel;
-        private Label cageNumberLabel;
-        private Label dobLabel;
-        private Label dodLabel;
+        private Label weightLabel; //TODO
+        private Label cageNumberLabel; //TODO
+        private Label dobLabel; //TODO
+        private Label dodLabel; //TODO
 
         private TextBox animalNameTextBox;
         private TextBox regNumTextBox;
@@ -53,7 +52,6 @@ namespace RATAPP.Panels
         private TextBox varietyTextBox;
         private TextBox colorTextBox;
         private TextBox genotypeTextBox;
-        private TextBox ancestryTextBox;
         private TextBox breederInfoTextBox;
         private TextBox commentsTextBox;
         private TextBox damTextBox;
@@ -259,6 +257,8 @@ namespace RATAPP.Panels
 
                 InitializePhotoBox();
                 AddImageToAnimalTextbox(_animal);
+                this.Refresh(); 
+             
                 //animalPhotoBox.Image = Image.FromFile(imageUrl); //TODO clean up this logic 
 
             }
@@ -322,6 +322,7 @@ namespace RATAPP.Panels
             this.Controls.Add(earTypeComboBox);
             this.Controls.Add(inbredTextBox);
             this.Controls.Add(markingComboBox);
+
 
             NewAnimal(); //new animal settings
             SetComboBoxes();
@@ -913,6 +914,8 @@ namespace RATAPP.Panels
             saveButton.Show();
             //TODO set up cancel here but it should return to home page 
             cancelButton.Show();
+            nextButton.Hide();
+            prevButton.Hide();  
         }
 
         // Method to create textboxes
@@ -957,6 +960,7 @@ namespace RATAPP.Panels
 
             // Add picture box to the form or panel
             this.Controls.Add(animalPhotoBox);
+            Refresh(); 
         }
 
         // Initialize the scrollable thumbnail panel
@@ -997,28 +1001,6 @@ namespace RATAPP.Panels
         {
             // Change the main image box to the selected thumbnail's image
             animalPhotoBox.Image = Image.FromFile(imagePath);
-        }
-
-        // Method to initialize the navigation buttons (Next and Previous)
-        private void InitializeNavigationButtons()
-        {
-            // Remove any existing buttons with the same name
-            var buttonsToRemove = this.Controls.OfType<Button>()
-                .Where(b => b.Name == "Previous" || b.Name == "Next").ToList();
-            foreach (var button in buttonsToRemove)
-            {
-                this.Controls.Remove(button);
-            }
-
-            // Create and re-add buttons
-            prevButton = CreateButton("Previous", 200, 750);
-            prevButton.Click += PreviousButtonClick;
-
-            nextButton = CreateButton("Next", 600, 750);
-            nextButton.Click += NextButtonClick;
-
-            this.Controls.Add(prevButton);
-            this.Controls.Add(nextButton);
         }
 
         //would really be helpful to just know the index 
@@ -1234,12 +1216,12 @@ namespace RATAPP.Panels
 
             //navigation buttons
             // Remove any existing buttons with the same name
-            //var buttonsToRemove = this.Controls.OfType<Button>()
-            //    .Where(b => b.Name == "Previous" || b.Name == "Next").ToList();
-            //foreach (var button in buttonsToRemove)
-            //{
-            //    this.Controls.Remove(button);
-            //}
+            var buttonsToRemove = this.Controls.OfType<Button>()
+                .Where(b => b.Name == "Previous" || b.Name == "Next").ToList();
+            foreach (var button in buttonsToRemove)
+            {
+                this.Controls.Remove(button);
+            }
 
             // Create and re-add buttons
             prevButton = CreateFeatureButton("Previous");
@@ -1347,10 +1329,10 @@ namespace RATAPP.Panels
             string breeder = "0"; //this is the user's breeder id there is currently a bug that isn't storing the user as a breeder that needs to be fixed before this will actually work
 
             //FIXME this is just for testing right now need a way to manage lines i.e. "add new" or "select from list" 
-            string line = "2";
+            string line = "3";
             if (speciesComboBox.Text == "Mouse" || speciesComboBox.Text == "mouse")
             {
-                line = "1";
+                line = "2";
             }
 
             if (_animal != null)
