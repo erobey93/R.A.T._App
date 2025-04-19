@@ -44,6 +44,7 @@ namespace RATAPP.Panels
         private Label cageNumberLabel; //TODO
         private Label dobLabel; //TODO
         private Label dodLabel; //TODO
+        private Label numGensLabel; //TODO
 
         private TextBox animalNameTextBox;
         private TextBox regNumTextBox;
@@ -61,8 +62,9 @@ namespace RATAPP.Panels
         private TextBox markingsTextBox; //TODO
         private TextBox dobTextBox; //TODO Date of Birth this needs to be in a specific format so I need to figure that out some checks needed for that, for now just a text box
         private TextBox dodTextBox; // Date of Death
-        private TextBox weightTextBox;
-        private TextBox cageNumberTextBox;
+        private TextBox weightTextBox; //TODO
+        private TextBox cageNumberTextBox; //TODO
+        private TextBox numGensTextBox; //TODO
 
         private ComboBox speciesComboBox;
         private ComboBox sexComboBox;
