@@ -41,7 +41,19 @@ namespace RATAPPLibrary.Services
             return pairings; 
         }
 
-        //get all current pairings (no pairing end date)
+        //get all current pairings (no pairing end date, so "active")
+        //get all pairings
+        public async Task<List<Pairing>> GetAllActivePairingsAsync()
+        {
+            // Retrieve active pairings where PairingEndDate is null
+            var activePairings = await _context.Pairing
+                                               .Where(p => p.PairingEndDate == null)
+                                               .ToListAsync();
+
+            // Return the list, which may be empty if no active pairings exist
+            return activePairings;
+        }
+
         //get all upcoming pairings (no pairing start, or end date)
         //get all past pairings (pairing start and end date) 
 
@@ -50,6 +62,7 @@ namespace RATAPPLibrary.Services
         //get all pairings for animal id
 
         //add new pairing 
+        //individual variables TODO may remove this and switch to just using objects 
         public async Task CreatePairingAsync(string pairingId, int damId, int sireId, int projectId, DateTime? startDate, DateTime? endDate)
         {
             try
@@ -84,6 +97,42 @@ namespace RATAPPLibrary.Services
             }
         }
 
+        //add new pairing 
+        //when passed pairing object 
+        public async Task CreatePairingAsync(Pairing pair)
+        {
+            try
+            {
+                //check if the pairing already exists based on pairingId
+                //if it exists return exception
+                //if it does not exist, add it 
+                //if the add fails, return an exception 
+                var existingPairing = await _context.Pairing.FirstOrDefaultAsync(p => p.pairingId == pair.pairingId);
+                if (existingPairing != null)
+                {
+                    throw new InvalidOperationException($"Pairing with ID {pair.pairingId} already exists.");
+                }
+
+                DateTime createdOn = DateTime.Now;
+                DateTime lastUpdated = DateTime.Now;
+
+                //map to a pairing object No need to map if we pass in an object 
+                //Pairing pairing = mapToPairingObject(pairingId, damId, sireId, projectId, createdOn, lastUpdated, startDate, endDate);
+
+                //make a new entry in the animal pairing table for the specified dam and sire 
+                _context.Pairing.Add(pair);
+            }
+            catch (Exception ex)
+            {
+                // Log the error details to the console or a logging service
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // throw the exception again to propagate further
+                throw;
+            }
+        }
+
         //map to pairing object 
         public Pairing mapToPairingObject(string pairingId, int damId, int sireId, int projectId, DateTime createdOn, DateTime lastUpdated, DateTime? startDate, DateTime? endDate)
         {
@@ -103,13 +152,15 @@ namespace RATAPPLibrary.Services
             return pairing; 
 
         }
+
+
         //delete pairing 
         //update pairing 
         //find pairing 
 
 
         //litters 
-        //add new litter 
+        
         //when a litter is added there should be pups associated with it which implies that new animals will be created 
         //delete litter
         //update litter 
@@ -122,6 +173,39 @@ namespace RATAPPLibrary.Services
                 return new List<Litter>();
             }
             return litters;
+        }
+
+        //add new litter 
+        public async Task CreateLitterAsync(Litter litter)
+        {
+            try
+            {
+                //check if the pairing already exists based on pairingId
+                //if it exists return exception
+                //if it does not exist, add it 
+                //if the add fails, return an exception 
+                var existingLitter = await _context.Pairing.FirstOrDefaultAsync(p => p.Id == litter.Id);
+                if (existingLitter != null)
+                {
+                    throw new InvalidOperationException($"Litter with ID {litter.Id} already exists.");
+                }
+
+                DateTime createdOn = DateTime.Now;
+                DateTime lastUpdated = DateTime.Now;
+                
+
+                //make a new entry in the animal pairing table for the specified dam and sire 
+                _context.Litter.Add(litter);
+            }
+            catch (Exception ex)
+            {
+                // Log the error details to the console or a logging service
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+                // throw the exception again to propagate further
+                throw;
+            }
         }
         //get all litters by date?
 
