@@ -49,12 +49,15 @@ namespace RATAPPLibrary.Services
                     throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
                 }
 
+                //Find the stock id based on the line 
+                int stockId = line.StockId;
+
                 // Map the AnimalDto to the Animal database model
                 //todo make mapping method 
                 var newAnimal = new Animal
                 {
                     registrationNumber = animalDto.regNum,
-                    StockId = 1, //FIXME this should be set automatically based on the species of the animal
+                    StockId = stockId,
                     Name = animalDto.name,
                     DateOfBirth = animalDto.DateOfBirth,
                     DateOfDeath = animalDto.DateOfDeath,

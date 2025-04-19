@@ -54,5 +54,50 @@ namespace RATAPPLibrary.Services
 
             return line;
         }
+
+
+        // Get all lines
+        public async Task<List<Line>> GetAllLinesAsync()
+        {
+            return await _context.Line.ToListAsync();
+        }
+
+        // Create a new line
+        public async Task<Line> CreateLineAsync(Line line)
+        {
+            _context.Line.Add(line);
+            await _context.SaveChangesAsync();
+            return line;
+        }
+
+        // Update an existing line
+        public async Task<Line> UpdateLineAsync(Line line)
+        {
+            var existingLine = await _context.Line.FindAsync(line.Id);
+
+            if (existingLine == null)
+            {
+                throw new Exception("Line not found");
+            }
+
+            _context.Entry(existingLine).CurrentValues.SetValues(line);
+            await _context.SaveChangesAsync();
+
+            return line;
+        }
+
+        // Delete a line by ID
+        public async Task DeleteLineAsync(int id)
+        {
+            var line = await _context.Line.FindAsync(id);
+
+            if (line == null)
+            {
+                throw new Exception("Line not found");
+            }
+
+            _context.Line.Remove(line);
+            await _context.SaveChangesAsync();
+        }
     }
 }
