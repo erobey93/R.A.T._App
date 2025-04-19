@@ -67,7 +67,6 @@
 //        private ComboBox earTypeComboBox;
 //        private ComboBox markingComboBox;
 //        private ComboBox breederInfoComboBox;
-//        private ComboBox cageNumberComboBox; // TODO have to implement a new "cage" and "animalCage" model in db and then implement this in the UI
 
 
 //        private PictureBox animalPhotoBox;
@@ -83,22 +82,23 @@
 
 //        private FlowLayoutPanel thumbnailPanel; // Panel to hold the thumbnails
 
-//        // Add new fields for weight and cage number
-//        private Label weightLabel;
-//        private Label cageNumberLabel;
-//        private TextBox weightTextBox;
-//        private TextBox cageNumberTextBox;
-
 //        //state of the panel
 //        private bool _isEditMode = false;
 
 //        //db context & services 
 //        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
 //        private RATAPPLibrary.Services.AnimalService _animalService;
+//        private RATAPPLibrary.Services.LineageService _lineageService; //TODO I think what I want to do is make an "animal service" that does anything related to the animals and then make domain classes for everything else to avoid having to call so many services for basic animal data/functionality 
 //        private RATAPPLibrary.Services.TraitService _traitService;
 //        private RATAPPLibrary.Services.SpeciesService _speciesService;
 
 //        private AnimalDto _animal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
+//                                   //current idea is to store the dam and sire objects so that I have the id for the db, there is likely a more efficient way to do this TODO
+//        private AnimalDto _dam;
+//        private AnimalDto _sire;
+//        private AnimalDto[] _dams;
+//        private AnimalDto[] _sires;
+
 //        private AnimalDto[] _allAnimals; //FIXME this should be cached data instead of passing around a potentially huge array of animals but still WIP
 //        private RATAppBaseForm _parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
 
@@ -106,22 +106,7 @@
 
 //        //TODO
 //        //think through data caching of animals, right now I am passing the entire list of animals and having to navigate through an array
-//        //this is not efficient and I am making data base calls for the current animal instead of using the data that I already have so this is a big FIXME 
-//        // it may actually make sense to have a state for the panel - future work
-//        // edit vs non edit mode and then just check this state
-//        //like if a user is on an existing animal and they click update animal details
-
-//        // and then requery the database to get the updated values
-//        // and then disable the text boxes and enable the update button again
-//        // and disable the save button
-//        // and then if they click cancel it will just requery the database
-//        // but if they have made changes it will prompt them to save changes
-//        // and then if they click yes it will save the changes
-//        // and then requery the database
-//        // for new animals it will just save the animal to the database
-//        // and then requery the database
-//        // and then disable the text boxes and enable the update button again
-//        // and disable the save button
+//        //this is not efficient and I am making data base calls for the current animal instead of using the data that I already have so this is a big FIXME
 
 //        // Test image paths TODO should be getting from an AnimalImage table in the database - future feature 
 //        private List<string> imagePaths = new List<string>
@@ -132,6 +117,7 @@
 //            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
 //        };
 
+
 //        // Constructor for initializing the panel
 //        public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, AnimalDto[] allAnimals, AnimalDto currAnimal)
 //        {
@@ -139,10 +125,11 @@
 //            _animalService = new RATAPPLibrary.Services.AnimalService(context);
 //            _traitService = new RATAPPLibrary.Services.TraitService(context);
 //            _speciesService = new RATAPPLibrary.Services.SpeciesService(context);
+//            _lineageService = new RATAPPLibrary.Services.LineageService(context);
+
 //            parentForm.SetActivePanel(this); //FIXME this is going to get annoying fix all of these relationships and how active panel works
 //            _parentForm = parentForm; //FIXME this is going to get annoying fix all of these relationships and how active panel works
 //            _allAnimals = allAnimals; //FIXME this is not correct, but I'm just getting refresh sort of functioning
-//            _animal = currAnimal; //FIXME this is not correct, but I'm just getting refresh sort of functioning
 
 //            InitializeComponent(currAnimal); //TODO need to re-structure to account for await nope, just use async lambda! 
 //            LoadSpinner();
@@ -150,41 +137,22 @@
 
 //        private void InitializeComponent(AnimalDto animal)
 //        {
-//            //TODO should this just be _animal? Why or why not? follow this variable through and make sure I can make that switch first 
-//            _animal = animal;
+//            / _animal = animal; //FIXME I need to handle this passing around of _animal better as this is confusing and ugly 
+//            if (_animal == null)
+//            {
+//                _isEditMode = true;
+//            }
 
 //            // Set panel properties
 //            this.Size = new Size(1200, 800); // Increased panel size for better spacing
 //            this.BackColor = Color.White;
 //            this.Padding = new Padding(20); // Add padding around the panel for better spacing
 
-//            //Initialize the controls for the Animal Panel, buttons first as others are dependent on them (this is probably a bad idea, but works for now) 
-//            //IntializeButtons();
 //            InitializeBottomButtons();
 
 //            //initialize the main layout 
 //            InitializeMainLayout();
 
-//            //if ID is present than it is an existing animal
-//            //show existing animal versions = no editing, Update Data button, animal's associated data
-//            //first get the animal data by id 
-//            //TODO need to set to 0 and make a rule to never allow 0 as an ID 
-//            //TODO work on the logic on the state, I think I need to think through "state" as a whole for the application but this is okay for now
-//            //if (animal != null && !_isEditMode)
-//            //{
-//            //    LoadAnimalDataAsync(animal.Id);
-//            //}
-//            //else
-//            //{
-//            //    //else if ID is not present than the user is creating a new animal or updating an existing animal 
-//            //    // show new animal version = editing, save button, blank boxes
-//            //    InitializeComboBoxes();
-//            //}
-
-//            // Initialize the labels, photo, nav for the Animal Panel
-//            //InitializeLabels();
-//            //InitializePhotoBox();
-//            // InitializeThumbnailPanel(); //TODO this is for the thumbnails of the animals, not yet fully implemented
 
 //        }
 
@@ -525,17 +493,20 @@
 //            healthButton = CreateFeatureButton("Health Records", "View health history");
 
 //            // Set up event handlers
-//            indAncestryButton.Click += (sender, e) => {
+//            indAncestryButton.Click += (sender, e) =>
+//            {
 //                var ancestryForm = new IndividualAnimalAncestryForm(_parentForm, _context, _animal);
 //                ancestryForm.Show();
 //            };
 
-//            documentsButton.Click += (sender, e) => {
+//            documentsButton.Click += (sender, e) =>
+//            {
 //                var documentForm = new DocumentsForm(_parentForm, _context);
 //                documentForm.Show();
 //            };
 
-//            healthButton.Click += (sender, e) => {
+//            healthButton.Click += (sender, e) =>
+//            {
 //                var healthForm = new HealthRecordForm(_parentForm, _context, _animal);
 //                healthForm.Show();
 //            };

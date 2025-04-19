@@ -30,13 +30,6 @@ namespace RATAPPLibrary.Services
 
         }
 
-        //pairings 
-        //get all pairings by species 
-        //public async Task<List<Pairing>> GetAllPairingsBySpeciesAsync()
-        //{
-        //    var pairingsBySpecies 
-        //}
-
         //get all pairings
         public async Task<List<Pairing>> GetAllPairingsAsync()
         {
@@ -47,10 +40,6 @@ namespace RATAPPLibrary.Services
             }
             return pairings; 
         }
-
-        //map list of pairings to human readable object with sire name, dam name, project name?
-        // TODO check if this sort of logic should be in here, or if it should be handled elsewhere 
-        //public async Task<List>
 
         //get all current pairings (no pairing end date)
         //get all upcoming pairings (no pairing start, or end date)

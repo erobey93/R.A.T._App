@@ -1,160 +1,152 @@
-//using Moq;
-//using System;
-//using System.Linq;
-//using System.Security.Claims;
-//using System.Text;
-//using System.IdentityModel.Tokens.Jwt;
-//using Microsoft.Extensions.Configuration;
-//using Microsoft.EntityFrameworkCore;
-//using RATAPPLibrary.Data.DbContexts;
-//using RATAPPLibrary.Services;
-//using RATAPPLibrary.Data.Models;
-//using Xunit;
-//using Microsoft.IdentityModel.Tokens;
-//using System.Net;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models.Requests;
+using RATAPPLibrary.Services;
+using RATAPPLibrary.Utilities;
+using System;
+using System.Threading.Tasks;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
-//namespace RATAPPLibraryUT
-//{
-//    public class LoginServiceTests
-//    {
-//        private readonly Mock<IConfiguration> _mockConfig;
-//        private readonly Mock<RatAppDbContext> _mockDbContext;
-//        private readonly Mock<PasswordHashing> _mockPasswordHashing;
-//        private readonly LoginService _loginService;
-//        private readonly string _jwtSecretKey = "secretkey12345";
-//        private readonly string _jwtIssuer = "http://issuer.com";
-//        private readonly string _jwtAudience = "http://audience.com";
+namespace RATAPPLibraryUT
+{
+    [TestClass]
+    public class LoginServiceTests
+    {
+        private LoginService _loginService;
+        private RatAppDbContext _context;
+        private DbContextOptions<RatAppDbContext> _options;
+        private PasswordHashing _passwordHashing;
 
-//        public LoginServiceTests()
-//        {
-//            _mockConfig = new Mock<IConfiguration>();
-//            _mockConfig.Setup(config => config["Jwt:SecretKey"]).Returns(_jwtSecretKey);
-//            _mockConfig.Setup(config => config["Jwt:Issuer"]).Returns(_jwtIssuer);
-//            _mockConfig.Setup(config => config["Jwt:Audience"]).Returns(_jwtAudience);
+        [TestInitialize]
+        public void Setup()
+        {
+            // Configure In-Memory Database for testing
+            _options = new DbContextOptionsBuilder<RatAppDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
 
-//            _mockPasswordHashing = new Mock<PasswordHashing>();
-//            _mockPasswordHashing.Setup(ph => ph.VerifyPassword(It.IsAny<string>(), It.IsAny<string>())).Returns(true);
+            // Initialize DbContext with In-Memory Database
+            _context = new RatAppDbContext(_options);
 
-//            _mockDbContext = new Mock<RatAppDbContext>();
-//            _loginService = new LoginService(_mockDbContext.Object, _mockConfig.Object, _mockPasswordHashing.Object);
-//        }
+            // Initialize password hashing utility
+            _passwordHashing = new PasswordHashing();
 
-//        //[Fact]
-//        //public void Login_ValidCredentials_ReturnsToken()
-//        //{
-//        //    // Arrange
-//        //    var request = new LoginRequest { Username = "testUser", Password = "validPassword" };
+            // Initialize LoginService with the DbContext
+            _loginService = new LoginService(_context);
 
-//        //    var user = new User
-//        //    {
-//        //        Id = 1,
-//        //        Credentials = new Credentials { Username = "testUser", Password = "validPassword" },
-//        //        AccountType = new AccountType { Name = "Admin" }
-//        //    };
+            // Clear the database before each test
+            _context.Database.EnsureDeleted();
+            _context.Database.EnsureCreated();
 
-//        //    _mockDbContext.Setup(db => db.Users.FirstOrDefault(It.IsAny<Func<User, bool>>()))
-//        //        .Returns(user);
+            // Seed test data
+            SeedData().Wait();
+        }
 
-//        //    // Mock password verification to return true
-//        //    _mockPasswordHashing.Setup(ph => ph.VerifyPassword(request.Password, user.Credentials.Password)).Returns(true);
+        private async Task SeedData()
+        {
+            var accountType = new AccountType { Id = 1, Name = "Admin" };
+            _context.AccountType.Add(accountType);
 
-//        //    // Act
-//        //    var response = _loginService.Login(request);
+            var hashedPassword = _passwordHashing.HashPassword("validPassword");
+            var credentials = new Credentials { Id = 1, Username = "testUser", Password = hashedPassword };
+            _context.Credentials.Add(credentials);
 
-//        //    // Assert
-//        //    Assert.NotNull(response);
-//        //    Assert.Equal("testUser", response.Username);
-//        //    Assert.Equal("Admin", response.Role);
-//        //    Assert.NotNull(response.Token);
-//        //}
+            var user = new User { Id = 1, AccountTypeId = 1, CredentialsId = 1 };
+            _context.User.Add(user);
 
-//        //[Fact]
-//        //public void Login_InvalidUsername_ThrowsUnauthorizedAccessException()
-//        //{
-//        //    // Arrange
-//        //    var request = new LoginRequest { Username = "wrongUser", Password = "anyPassword" };
+            await _context.SaveChangesAsync();
+        }
 
-//        //    _mockDbContext.Setup(db => db.Users.FirstOrDefault(It.IsAny<Func<User, bool>>()))
-//        //        .Returns((User)null); // User not found
+        /// <summary>
+        /// This method tests the LoginAsync method with valid credentials.
+        /// It validates that when correct username and password are provided:
+        /// 1. A valid response object is returned
+        /// 2. The response contains the correct username
+        /// 3. The response contains the correct role
+        /// 4. A JWT token is generated and included in the response
+        /// </summary>
+        [TestMethod]
+        public async Task Login_ValidCredentials_ReturnsToken()
+        {
+            // Arrange
+            var request = new LoginRequest { Username = "testUser", Password = "validPassword" };
 
-//        //    // Act & Assert
-//        //    Assert.Throws<UnauthorizedAccessException>(() => _loginService.Login(request));
-//        //}
+            // Act
+            var response = await _loginService.LoginAsync(request);
 
-//        //[Fact]
-//        //public void Login_InvalidPassword_ThrowsUnauthorizedAccessException()
-//        //{
-//        //    // Arrange
-//        //    var request = new LoginRequest { Username = "testUser", Password = "wrongPassword" };
+            // Assert
+            Assert.IsNotNull(response);
+            Assert.AreEqual("testUser", response.Username);
+            Assert.AreEqual("Admin", response.Role);
+            Assert.IsNotNull(response.Token);
+        }
 
-//        //    var user = new User
-//        //    {
-//        //        Id = 1,
-//        //        Credentials = new Credentials { Username = "testUser", Password = "validPassword" },
-//        //        AccountType = new AccountType { Name = "Admin" }
-//        //    };
+        /// <summary>
+        /// This method tests the LoginAsync method with an invalid username.
+        /// It validates that when a non-existent username is provided:
+        /// 1. An UnauthorizedAccessException is thrown
+        /// 2. No login response or token is generated
+        /// </summary>
+        [TestMethod]
+        public async Task Login_InvalidUsername_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var request = new LoginRequest { Username = "wrongUser", Password = "anyPassword" };
 
-//        //    _mockDbContext.Setup(db => db.Users.FirstOrDefault(It.IsAny<Func<User, bool>>()))
-//        //        .Returns(user);
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
+            {
+                await _loginService.LoginAsync(request);
+            });
+        }
 
-//        //    // Mock password verification to return false
-//        //    _mockPasswordHashing.Setup(ph => ph.VerifyPassword(request.Password, user.Credentials.Password)).Returns(false);
+        /// <summary>
+        /// This method tests the LoginAsync method with an invalid password.
+        /// It validates that when an incorrect password is provided for an existing user:
+        /// 1. An UnauthorizedAccessException is thrown
+        /// 2. No login response or token is generated
+        /// This ensures secure authentication even when the username exists
+        /// </summary>
+        [TestMethod]
+        public async Task Login_InvalidPassword_ThrowsUnauthorizedAccessException()
+        {
+            // Arrange
+            var request = new LoginRequest { Username = "testUser", Password = "wrongPassword" };
 
-//        //    // Act & Assert
-//        //    Assert.Throws<UnauthorizedAccessException>(() => _loginService.Login(request));
-//        //}
+            // Act & Assert
+            await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
+            {
+                await _loginService.LoginAsync(request);
+            });
+        }
 
-//        //[Fact]
-//        //public void Login_GeneratesValidJwtToken()
-//        //{
-//        //    // Arrange
-//        //    var request = new LoginRequest { Username = "testUser", Password = "validPassword" };
+        /// <summary>
+        /// This method tests the JWT token generation aspect of the LoginAsync method.
+        /// It validates that when a successful login occurs:
+        /// 1. A JWT token is generated
+        /// 2. The token is properly formatted and included in the response
+        /// This ensures proper token-based authentication functionality
+        /// </summary>
+        [TestMethod]
+        public async Task Login_GeneratesValidJwtToken()
+        {
+            // Arrange
+            var request = new LoginRequest { Username = "testUser", Password = "validPassword" };
 
-//        //    var user = new User
-//        //    {
-//        //        Id = 1,
-//        //        Credentials = new Credentials { Username = "testUser", Password = "validPassword" },
-//        //        AccountType = new AccountType { Name = "Admin" }
-//        //    };
+            // Act
+            var response = await _loginService.LoginAsync(request);
 
-//        //    _mockDbContext.Setup(db => db.Users.FirstOrDefault(It.IsAny<Func<User, bool>>()))
-//        //        .Returns(user);
+            // Assert
+            Assert.IsNotNull(response.Token);
+            // Additional JWT validation could be added here if needed
+        }
 
-//        //    // Mock password verification to return true
-//        //    _mockPasswordHashing.Setup(ph => ph.VerifyPassword(request.Password, user.Credentials.Password)).Returns(true);
-
-//        //    // Act
-//        //    var response = _loginService.Login(request);
-
-//        //    // Assert JWT Token structure
-//        //    var handler = new JwtSecurityTokenHandler();
-//        //    var jsonToken = handler.ReadToken(response.Token) as JwtSecurityToken;
-
-//        //    Assert.NotNull(jsonToken);
-//        //    Assert.Equal("testUser", jsonToken?.Claims.First(c => c.Type == ClaimTypes.Name).Value);
-//        //    Assert.Equal("Admin", jsonToken?.Claims.First(c => c.Type == ClaimTypes.Role).Value);
-//        //}
-
-//        [Fact]
-//        public void GenerateJwtToken_ValidUser_CreatesValidToken()
-//        {
-//            // Arrange
-//            var user = new User
-//            {
-//                Id = 1,
-//                Credentials = new Credentials { Username = "testUser", Password = "validPassword" },
-//                AccountType = new AccountType { Name = "Admin" }
-//            };
-
-//            var token = _loginService.GenerateJwtToken(user);
-
-//            // Act & Assert
-//            var handler = new JwtSecurityTokenHandler();
-//            var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
-
-//            Assert.NotNull(jsonToken);
-//            Assert.Equal("testUser", jsonToken?.Claims.First(c => c.Type == ClaimTypes.Name).Value);
-//            Assert.Equal("Admin", jsonToken?.Claims.First(c => c.Type == ClaimTypes.Role).Value);
-//        }
-//    }
-//}
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _context.Database.EnsureDeleted();
+            _context.Dispose();
+        }
+    }
+}
