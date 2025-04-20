@@ -20,7 +20,6 @@ namespace RATAPP.Forms
         private Panel sideNavPanel;
         public Panel contentPanel;
         private Label appNameLabel;
-        private Label userNameLabel;
         private PictureBox logoPictureBox;
         private INavigable _activePanel;
         private RatAppDbContext _context;
@@ -200,6 +199,10 @@ namespace RATAPP.Forms
             errorLogsItem.Click += ErrorLogsItem_Click;
             utilitiesContextMenu.Items.Add(errorLogsItem);
 
+            ToolStripMenuItem bulkImportItem = new ToolStripMenuItem("Bulk Import Animals");
+            bulkImportItem.Click += BulkImportItem_Click;
+            utilitiesContextMenu.Items.Add(bulkImportItem);
+
             // Show the context menu below the Utilities button
             utilitiesContextMenu.Show(utilitiesButton, new Point(0, utilitiesButton.Height));
         }
@@ -222,6 +225,13 @@ namespace RATAPP.Forms
         {
             // Handle Error Logs menu item click
             MessageBox.Show("Error Logs clicked");
+            // Add your error logs logic here
+        }
+
+        private void BulkImportItem_Click(object sender, EventArgs e)
+        {
+            // Handle Error Logs menu item click
+            MessageBox.Show("Bulk Import clicked");
             // Add your error logs logic here
         }
 

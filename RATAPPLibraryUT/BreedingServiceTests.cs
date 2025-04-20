@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using RATAPPLibrary.Data.Models;
+using Microsoft.VisualBasic;
 
 namespace RATAPPLibraryUT
 {
@@ -46,6 +47,15 @@ namespace RATAPPLibraryUT
             var species = new Species { Id = 1, CommonName = "Rat", ScientificName = "Rattus norvegicus" };
             _context.Species.Add(species);
 
+            var newStock = new Stock
+            {
+                Id = 1,
+                BreederId = 1, // Assuming a Breeder with Id 1 exists
+                SpeciesId = 1, // Assuming a Species with Id 2 exists
+                Description = "Test Stock"
+            };
+            _context.Stock.Add(newStock);
+
             var line = new Line { Id = 1, Name = "Test", StockId = 1 };
             _context.Line.Add(line);
 
@@ -81,7 +91,6 @@ namespace RATAPPLibraryUT
                 PairingStartDate = DateTime.Now.AddDays(-30),
                 PairingEndDate = DateTime.Now.AddDays(10),
                 ProjectId = 1,
-                Project = project
             };
 
             var pairing2 = new Pairing
@@ -92,7 +101,6 @@ namespace RATAPPLibraryUT
                 DamId = 2,
                 PairingStartDate = DateTime.Now.AddDays(-30),
                 ProjectId = 1,
-                Project = project
             };
 
             var pairing3 = new Pairing
@@ -102,7 +110,6 @@ namespace RATAPPLibraryUT
                 SireId = 1,
                 DamId = 2,
                 ProjectId = 1,
-                Project = project
             };
 
             _context.Pairing.AddRange(pairing, pairing2, pairing3);
@@ -180,6 +187,27 @@ namespace RATAPPLibraryUT
             Assert.AreEqual(2, pairing[0].DamId);
             Assert.AreEqual("1", pairing[0].pairingId);
             Assert.AreEqual(1, pairing[0].Id);
+        }
+
+        /// <summary>
+        /// This method tests the GetPairingBySpeciesAsync method.
+        /// It validates that:
+        /// 1. An existing pairing can be retrieved by its common Species name (not ID)
+        /// 2. The retrieved pairing has correct properties and relationships
+        /// </summary>
+        [TestMethod]
+        public async Task GetPairingBySpeciesId_ShouldReturnCorrectPairing()
+        {
+            // Act
+            var pairings = await _breedingService.GetAllPairingsBySpeciesAsync("Rat");
+
+            // Assert
+            Assert.IsNotNull(pairings);
+            Assert.AreEqual(3, pairings.Count); 
+            Assert.AreEqual(1, pairings[0].SireId);
+            Assert.AreEqual(2, pairings[0].DamId);
+            Assert.AreEqual("1", pairings[0].pairingId);
+            Assert.AreEqual(1, pairings[0].Id);
         }
 
         /// <summary>

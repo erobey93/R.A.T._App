@@ -110,7 +110,6 @@ namespace RATAPPLibrary.Services
         public async Task<List<Pairing>> GetAllPairingsBySpeciesAsync(string species)
         {
             //probably should get pairing, check for project then get line, stock, species first to check if its populated but TODO this works for now 
-
             // Retrieve active pairings where PairingEndDate is null
             var pastPairings = await _context.Pairing
                                                .Where(p => p.Project.Line.Stock.Species.CommonName == species)

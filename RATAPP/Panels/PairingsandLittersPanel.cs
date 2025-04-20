@@ -241,6 +241,18 @@ namespace RATAPP.Panels
                 addPairing.ShowDialog();
                 //this form would likely work for updating pairings too, but need to add in a way to populate it with the existing pairing 
             }
+            else if (currentTab == "Litters")
+            {
+                //open the add pairings form 
+                AddLitterForm addLitter = new AddLitterForm(_context);
+                addLitter.ShowDialog();
+            }
+            else if(currentTab == "Line Management")
+            {
+                //open the add pairings form 
+                AddLineForm addLine = new AddLineForm(_context);
+                addLine.ShowDialog();
+            }
             else
             {
                 MessageBox.Show($"{action} {currentTab}");
