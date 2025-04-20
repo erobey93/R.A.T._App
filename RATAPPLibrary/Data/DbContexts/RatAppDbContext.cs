@@ -27,7 +27,7 @@ namespace RATAPPLibrary.Data.DbContexts
                     .EnableSensitiveDataLogging()    // Show parameter values in logs (optional)
                     .LogTo(Console.WriteLine, LogLevel.Debug); // Set log level to Debug
             }
-            }
+        }
 
         //Account management
         public virtual DbSet<User> Users { get; set; }
@@ -102,7 +102,7 @@ namespace RATAPPLibrary.Data.DbContexts
             //ConfigureAncestryRecordLink(modelBuilder);
             ConfigureLineage(modelBuilder);
 
-            ConfigureAnimalTrait(modelBuilder); 
+            ConfigureAnimalTrait(modelBuilder);
 
         }
 

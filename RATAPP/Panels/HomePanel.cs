@@ -51,7 +51,7 @@ namespace RATAPP.Panels
             _animals = await _animalService.GetAllAnimalsAsync();
         }
 
-       private void InitializeComponents()
+        private void InitializeComponents()
         {
             this.Dock = DockStyle.Fill;
             this.BackColor = Color.White;
@@ -158,7 +158,7 @@ namespace RATAPP.Panels
                 RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
                 RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
             };
-           
+
             dataDisplayArea.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn { Name = "Species", HeaderText = "Species" },

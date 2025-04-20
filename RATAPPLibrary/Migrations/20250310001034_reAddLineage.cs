@@ -53,7 +53,7 @@ namespace RATAPPLibrary.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-           
+
         }
     }
 }

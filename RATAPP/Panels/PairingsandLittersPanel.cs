@@ -4,7 +4,7 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPPLibrary;
-using RATAPPLibrary.Data.Models.Breeding; 
+using RATAPPLibrary.Data.Models.Breeding;
 using System.Transactions;
 using RATAPPLibrary.Services;
 
@@ -29,7 +29,7 @@ namespace RATAPP.Panels
 
         private Pairing[] _pairings;
         private Litter[] _litters;
-        private Line[] _lines; 
+        private Line[] _lines;
         private bool _littersGridView;
         private bool _linesGridView;
 
@@ -51,7 +51,7 @@ namespace RATAPP.Panels
             _stockService = new StockService(_context);
 
             _littersGridView = false; //start with showing pairings page, when switched will show litters page, or line page
-            _linesGridView = false; 
+            _linesGridView = false;
 
             InitializeComponents();
 
@@ -110,8 +110,8 @@ namespace RATAPP.Panels
 
             //get lines TODO...maybe? 
             var getLines = await _lineService.GetAllLinesAsync();
-            _lines = getLines.ToArray(); 
-            
+            _lines = getLines.ToArray();
+
             //get projects TODO
         }
 

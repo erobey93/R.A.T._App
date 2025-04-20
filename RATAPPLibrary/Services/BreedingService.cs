@@ -18,7 +18,7 @@ namespace RATAPPLibrary.Services
         private readonly LineService _lineService;
         private readonly TraitService _traitService;
         private readonly LineageService _lineageService;
-        private readonly AnimalService _animalService; 
+        private readonly AnimalService _animalService;
 
         public BreedingService(RatAppDbContext context)
         {
@@ -26,7 +26,7 @@ namespace RATAPPLibrary.Services
             _lineService = new LineService(context);
             _traitService = new TraitService(context);
             _lineageService = new LineageService(context);
-            _animalService = new AnimalService(context); 
+            _animalService = new AnimalService(context);
 
         }
 
@@ -38,7 +38,7 @@ namespace RATAPPLibrary.Services
             {
                 return new List<Pairing>();
             }
-            return pairings; 
+            return pairings;
         }
 
         //get all current pairings (no pairing end date, so "active")
@@ -136,7 +136,7 @@ namespace RATAPPLibrary.Services
         //map to pairing object 
         public Pairing mapToPairingObject(string pairingId, int damId, int sireId, int projectId, DateTime createdOn, DateTime lastUpdated, DateTime? startDate, DateTime? endDate)
         {
-            
+
             Pairing pairing = new Pairing
             {
                 pairingId = pairingId,
@@ -149,7 +149,7 @@ namespace RATAPPLibrary.Services
                 LastUpdated = lastUpdated,
             };
 
-            return pairing; 
+            return pairing;
 
         }
 
@@ -160,10 +160,9 @@ namespace RATAPPLibrary.Services
 
 
         //litters 
-        
+
         //when a litter is added there should be pups associated with it which implies that new animals will be created 
-        //delete litter
-        //update litter 
+       
         //get all litters 
         public async Task<List<Litter>> GetAllLittersAsync()
         {
@@ -192,24 +191,45 @@ namespace RATAPPLibrary.Services
 
                 DateTime createdOn = DateTime.Now;
                 DateTime lastUpdated = DateTime.Now;
-                
 
-                //make a new entry in the animal pairing table for the specified dam and sire 
                 _context.Litter.Add(litter);
             }
             catch (Exception ex)
             {
-                // Log the error details to the console or a logging service
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
 
-                // throw the exception again to propagate further
                 throw;
             }
         }
-        //get all litters by date?
 
+        //update litter, individual variable not object 
+        public async Task<Litter> UpdateLitterAsync(int litterId, string name, DateTime dob, int numPups)
+        {
+            var litter = await _context.Litter.FindAsync(litterId);
 
-        //get pairings and 
+            if (litter == null) throw new KeyNotFoundException($"Litter {litterId} not found");
+
+            litter.Name = name;
+            litter.DateOfBirth = dob;
+            litter.NumPups = numPups;
+            litter.LastUpdated = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return litter;
+        }
+
+        //delete litter
+        public async Task DeleteLitterAsync(int litterId)
+        {
+            var litter = await _context.Litter.FindAsync(litterId);
+
+            if (litter == null) throw new KeyNotFoundException($"Litter {litterId} not found");
+            _context.Litter.Remove(litter);
+
+            await _context.SaveChangesAsync();
+        }
+
+        //TODO when a litter is added, new animals should be created for said pups ?
     }
 }

@@ -31,6 +31,6 @@ public class PasswordHashing
 
     public bool VerifyPasswordTempFix(string storedHash, string inputPassword)
     {
-            return inputPassword == storedHash; // Compare the hashes directly
+        return inputPassword == storedHash; // Compare the hashes directly
     }
 }

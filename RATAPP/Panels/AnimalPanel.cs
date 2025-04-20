@@ -259,8 +259,8 @@ namespace RATAPP.Panels
 
                 InitializePhotoBox();
                 AddImageToAnimalTextbox(_animal);
-                this.Refresh(); 
-             
+                this.Refresh();
+
                 //animalPhotoBox.Image = Image.FromFile(imageUrl); //TODO clean up this logic 
 
             }
@@ -917,7 +917,7 @@ namespace RATAPP.Panels
             //TODO set up cancel here but it should return to home page 
             cancelButton.Show();
             nextButton.Hide();
-            prevButton.Hide();  
+            prevButton.Hide();
         }
 
         // Method to create textboxes
@@ -962,7 +962,7 @@ namespace RATAPP.Panels
 
             // Add picture box to the form or panel
             this.Controls.Add(animalPhotoBox);
-            Refresh(); 
+            Refresh();
         }
 
         // Initialize the scrollable thumbnail panel

@@ -4,7 +4,7 @@
     {
         public int Id { get; set; } // Unique identifier for the project
         public required string Name { get; set; } // The name of the project
-        
+
         // Foreign Keys
         public required int LineId { get; set; } // Foreign key for the associated line
 

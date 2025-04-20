@@ -41,7 +41,7 @@ namespace RATAPP.Panels
             return panel;
         }
 
-        public AdopterManagementPanel(RATAppBaseForm baseForm,RatAppDbContext context)
+        public AdopterManagementPanel(RATAppBaseForm baseForm, RatAppDbContext context)
         {
             _baseForm = baseForm;
             _context = context;
@@ -199,7 +199,8 @@ namespace RATAPP.Panels
                 Font = new Font("Segoe UI", 9)
             };
 
-            grid.CellDoubleClick += (s, e) => {
+            grid.CellDoubleClick += (s, e) =>
+            {
                 if (e.RowIndex >= 0)
                 {
                     ViewAdopterDetails(grid.Rows[e.RowIndex]);
@@ -353,7 +354,8 @@ namespace RATAPP.Panels
         {
             if (grid.DataSource is IEnumerable<dynamic> source)
             {
-                var filteredList = source.Where(item => {
+                var filteredList = source.Where(item =>
+                {
                     if (filterType == "All")
                     {
                         // Search in all string properties

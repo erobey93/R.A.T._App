@@ -46,18 +46,18 @@ namespace RATAPPLibraryUT
             var species = new Species { Id = 1, CommonName = "Rat", ScientificName = "Rattus norvegicus" };
             _context.Species.Add(species);
 
-            var male = new Animal 
-            { 
-                Id = 1, 
+            var male = new Animal
+            {
+                Id = 1,
                 Name = "Male1",
                 Sex = "Male",
                 DateOfBirth = DateTime.Now.AddMonths(-6),
                 StockId = 1
             };
 
-            var female = new Animal 
-            { 
-                Id = 2, 
+            var female = new Animal
+            {
+                Id = 2,
                 Name = "Female1",
                 Sex = "Female",
                 DateOfBirth = DateTime.Now.AddMonths(-5),
@@ -168,7 +168,7 @@ namespace RATAPPLibraryUT
             {
                 LitterId = "1",
                 PairId = 1,
-                Name =  "testLitter",
+                Name = "testLitter",
                 DateOfBirth = DateTime.Now,
                 NumPups = 8,
                 Notes = "Healthy litter"

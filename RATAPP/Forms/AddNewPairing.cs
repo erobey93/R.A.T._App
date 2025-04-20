@@ -437,7 +437,8 @@ namespace RATAPP.Forms
                 Cursor = Cursors.Hand
             };
             addToGridButton.FlatAppearance.BorderSize = 0;
-            addToGridButton.Click += (s, e) => {
+            addToGridButton.Click += (s, e) =>
+            {
                 // Show loading spinner
                 loadingSpinner.Visible = true;
                 this.Refresh();
@@ -530,7 +531,8 @@ namespace RATAPP.Forms
                 new DataGridViewButtonColumn { Name = "Remove", HeaderText = "Remove", Text = "Remove", UseColumnTextForButtonValue = true }
             });
 
-            multiplePairingsGrid.CellContentClick += (s, e) => {
+            multiplePairingsGrid.CellContentClick += (s, e) =>
+            {
                 if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
                 {
                     // Show loading spinner

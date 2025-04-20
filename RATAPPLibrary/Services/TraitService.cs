@@ -62,7 +62,7 @@ namespace RATAPPLibrary.Services
         public async Task<List<Trait>> GetTraitObjectsByTypeAndSpeciesAsync(string type, string species)
         {
             List<string> traitList = new List<string>();
-            
+
             // search traitType by name 
             var traitType = await _context.TraitType
                 .FirstOrDefaultAsync(tt => tt.Name.ToLower() == type.ToLower());
@@ -111,7 +111,7 @@ namespace RATAPPLibrary.Services
                 traitList.Add(trait.CommonName);
             }
 
-            return traitList; 
+            return traitList;
         }
 
         //get all traits by species - return a trait object for each trait associated with a specific species 
@@ -131,7 +131,7 @@ namespace RATAPPLibrary.Services
             {
                 throw new InvalidOperationException($"Species '{species}' does not exist.");
             }
-           
+
             return traitList;
         }
 
@@ -222,7 +222,7 @@ namespace RATAPPLibrary.Services
         // Get all trait types available in the database
         public async Task<IEnumerable<TraitType>> GetAllTraitTypesAsync()
         {
-            return await _context.TraitType.ToListAsync(); 
+            return await _context.TraitType.ToListAsync();
         }
 
         // Get specific trait by Id
@@ -346,7 +346,7 @@ namespace RATAPPLibrary.Services
         }
 
         //create new entry in the animal trait table
-        public async Task<AnimalTrait> CreateAnimalTraitAsync( int traitId, int animalId)
+        public async Task<AnimalTrait> CreateAnimalTraitAsync(int traitId, int animalId)
         {
             try
             {
@@ -407,11 +407,12 @@ namespace RATAPPLibrary.Services
                 .FirstOrDefaultAsync();
 
             //if the trait doesn't exist throw an exception
-            if (trait == null) { 
-                throw new InvalidOperationException($"Trait with id '{traitId}' does not exist."); 
+            if (trait == null)
+            {
+                throw new InvalidOperationException($"Trait with id '{traitId}' does not exist.");
             }
 
-            return trait; 
+            return trait;
         }
 
         //get trait type name by id 

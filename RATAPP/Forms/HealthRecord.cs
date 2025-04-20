@@ -120,7 +120,8 @@ namespace RATAPP.Forms
                 BorderStyle = BorderStyle.FixedSingle,
                 ReadOnly = true
             };
-            recordsListBox.SelectedIndexChanged += (s, e) => {
+            recordsListBox.SelectedIndexChanged += (s, e) =>
+            {
                 //TODO: load record details to the recordDetailsTextBox, using the recordsListBox.SelectedItem.
                 recordDetailsTextBox.Text = "Placeholder record details";
             };
@@ -193,7 +194,7 @@ namespace RATAPP.Forms
             this.Controls.Add(animalIdLabel);
             this.Controls.Add(animalNameLabel);
             this.Controls.Add(healthTabControl);
-        
+
         }
 
         private Button CreateButton(string text, int x, int y, int width, Color color)

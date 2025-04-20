@@ -100,7 +100,7 @@ namespace RATAPP.Forms
             var refreshButton = CreateTopNavButton("Refresh", 0, RefreshButton_Click);
             var utilitiesButton = CreateTopNavButton("Utilities", 1, UtilitiesButton_Click);
             var logoutButton = CreateTopNavButton("Log Out", 2, LogoutButton_Click);
-            var settingsButton = CreateTopNavButton("Settings",3, SettingsButton_Click);
+            var settingsButton = CreateTopNavButton("Settings", 3, SettingsButton_Click);
 
             topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, refreshButton, utilitiesButton, logoutButton });
         }
@@ -238,7 +238,7 @@ namespace RATAPP.Forms
             // Handle Settings button click
             MessageBox.Show("Settings button clicked");
         }
-        
+
         private void AdopterButton_Click(object sender, EventArgs e)
         {
             // Handle Adopter Management button click
