@@ -48,7 +48,7 @@ namespace RATAPPLibrary.Services
         {
             // Retrieve active pairings where PairingEndDate is null
             var activePairings = await _context.Pairing
-                                               .Where(p => p.PairingEndDate == null)
+                                               .Where(p => p.PairingEndDate == null && p.PairingStartDate != null)
                                                .ToListAsync();
 
             // Return the list, which may be empty if no active pairings exist

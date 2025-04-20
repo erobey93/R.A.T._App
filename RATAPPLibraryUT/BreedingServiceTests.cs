@@ -46,6 +46,12 @@ namespace RATAPPLibraryUT
             var species = new Species { Id = 1, CommonName = "Rat", ScientificName = "Rattus norvegicus" };
             _context.Species.Add(species);
 
+            var line = new Line { Id = 1, Name = "Test", StockId = 1 };
+            _context.Line.Add(line);
+
+            var project = new Project { Id = 1, LineId = 1, Name = "testProject" }; 
+            _context.Project.Add(project);
+
             var male = new Animal
             {
                 Id = 1,
@@ -69,13 +75,37 @@ namespace RATAPPLibraryUT
             var pairing = new Pairing
             {
                 Id = 1,
+                pairingId = "1", 
                 SireId = 1,
                 DamId = 2,
                 PairingStartDate = DateTime.Now.AddDays(-30),
                 PairingEndDate = DateTime.Now.AddDays(10),
+                ProjectId = 1,
+                Project = project
             };
 
-            _context.Pairing.Add(pairing);
+            var pairing2 = new Pairing
+            {
+                Id = 2,
+                pairingId = "12",
+                SireId = 1,
+                DamId = 2,
+                PairingStartDate = DateTime.Now.AddDays(-30),
+                ProjectId = 1,
+                Project = project
+            };
+
+            var pairing3 = new Pairing
+            {
+                Id = 3,
+                pairingId = "123",
+                SireId = 1,
+                DamId = 2,
+                ProjectId = 1,
+                Project = project
+            };
+
+            _context.Pairing.AddRange(pairing, pairing2, pairing3);
             await _context.SaveChangesAsync();
         }
 
@@ -113,13 +143,13 @@ namespace RATAPPLibraryUT
         }
 
         /// <summary>
-        /// This method tests the GetPairingByIdAsync method.
+        /// This method tests the GetAllPairingsByAnimalIdAsync method.
         /// It validates that:
-        /// 1. An existing pairing can be retrieved by its ID
+        /// 1. An existing pairing can be retrieved by its related animal ID
         /// 2. The retrieved pairing has correct properties and relationships
         /// </summary>
         [TestMethod]
-        public async Task GetPairingById_ShouldReturnCorrectPairing()
+        public async Task GetPairingByAnimalId_ShouldReturnCorrectPairing()
         {
             // Act
             var pairing = await _breedingService.GetAllPairingsByAnimalIdAsync(1);
@@ -128,6 +158,27 @@ namespace RATAPPLibraryUT
             Assert.IsNotNull(pairing);
             Assert.AreEqual(1, pairing[0].SireId);
             Assert.AreEqual(2, pairing[0].DamId);
+            Assert.AreEqual("1", pairing[0].pairingId);
+            Assert.AreEqual(1, pairing[0].Id);
+        }
+
+        /// <summary>
+        /// This method tests the GetPairingByLineIdAsync method.
+        /// It validates that:
+        /// 1. An existing pairing can be retrieved by its Line ID
+        /// 2. The retrieved pairing has correct properties and relationships
+        /// </summary>
+        [TestMethod]
+        public async Task GetPairingByLineId_ShouldReturnCorrectPairing()
+        {
+            // Act
+            var pairing = await _breedingService.GetAllPairingsByLineIdAsync(1);
+
+            // Assert
+            Assert.IsNotNull(pairing);
+            Assert.AreEqual(1, pairing[0].SireId);
+            Assert.AreEqual(2, pairing[0].DamId);
+            Assert.AreEqual("1", pairing[0].pairingId);
             Assert.AreEqual(1, pairing[0].Id);
         }
 
