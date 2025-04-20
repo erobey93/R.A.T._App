@@ -120,11 +120,9 @@ namespace RATAPPLibrary.Services
             return pastPairings;
         }
 
-        //get all pairings for group TODO
-
         //add new pairing 
         //individual variables TODO may remove this and switch to just using objects 
-        public async Task CreatePairingAsync(string pairingId, int damId, int sireId, int projectId, DateTime? startDate, DateTime? endDate)
+        public async Task<bool> CreatePairingAsync(string pairingId, int damId, int sireId, int projectId, DateTime? startDate, DateTime? endDate)
         {
             try
             {
@@ -146,6 +144,8 @@ namespace RATAPPLibrary.Services
 
                 //make a new entry in the animal pairing table for the specified dam and sire 
                 _context.Pairing.Add(pairing);
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -153,14 +153,14 @@ namespace RATAPPLibrary.Services
                 Console.WriteLine($"An error occurred: {ex.Message}");
                 Console.WriteLine($"Stack Trace: {ex.StackTrace}");
 
-                // throw the exception again to propagate further
+                // throw the exception again to propagate further TODO need to think through error handling more thoroughly 
                 throw;
             }
         }
 
         //add new pairing 
         //when passed pairing object 
-        public async Task CreatePairingAsync(Pairing pair)
+        public async Task<bool> CreatePairingAsync(Pairing pair)
         {
             try
             {
@@ -179,6 +179,8 @@ namespace RATAPPLibrary.Services
 
                 //make a new entry in the animal pairing table for the specified dam and sire 
                 _context.Pairing.Add(pair);
+
+                return true;    
             }
             catch (Exception ex)
             {
@@ -244,7 +246,7 @@ namespace RATAPPLibrary.Services
         }
 
         //add new litter 
-        public async Task CreateLitterAsync(Litter litter)
+        public async Task<bool> CreateLitterAsync(Litter litter)
         {
             try
             {
@@ -262,6 +264,8 @@ namespace RATAPPLibrary.Services
                 DateTime lastUpdated = DateTime.Now;
 
                 _context.Litter.Add(litter);
+
+                return true;
             }
             catch (Exception ex)
             {

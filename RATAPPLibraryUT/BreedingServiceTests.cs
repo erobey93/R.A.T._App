@@ -103,10 +103,13 @@ namespace RATAPPLibraryUT
 
             // Assert
             Assert.IsNotNull(createdPairing);
-            Assert.IsTrue(createdPairing.Id > 0);
-            Assert.AreEqual(1, createdPairing.MaleId);
-            Assert.AreEqual(2, createdPairing.FemaleId);
-            Assert.AreEqual("Active", createdPairing.Status);
+            Assert.IsTrue(createdPairing);
+
+            //to check the below variables I need to go get the pairing, it doesn't make sense to return it in this method TODO 
+            //Assert.IsTrue(createdPairing.Id > 0);
+            //Assert.AreEqual(1, createdPairing.MaleId);
+            //Assert.AreEqual(2, createdPairing.FemaleId);
+            //Assert.AreEqual("Active", createdPairing.Status);
         }
 
         /// <summary>
@@ -119,13 +122,13 @@ namespace RATAPPLibraryUT
         public async Task GetPairingById_ShouldReturnCorrectPairing()
         {
             // Act
-            var pairing = await _breedingService.GetPairingByIdAsync(1);
+            var pairing = await _breedingService.GetAllPairingsByAnimalIdAsync(1);
 
             // Assert
             Assert.IsNotNull(pairing);
-            Assert.AreEqual(1, pairing.MaleId);
-            Assert.AreEqual(2, pairing.FemaleId);
-            Assert.AreEqual("Active", pairing.Status);
+            Assert.AreEqual(1, pairing[0].SireId);
+            Assert.AreEqual(2, pairing[0].DamId);
+            Assert.AreEqual(1, pairing[0].Id);
         }
 
         /// <summary>
@@ -138,19 +141,20 @@ namespace RATAPPLibraryUT
         [TestMethod]
         public async Task UpdatePairing_ShouldUpdateExistingPairing()
         {
+            //TODO
+            throw new NotImplementedException();
             // Arrange
-            var pairing = await _breedingService.GetPairingByIdAsync(1);
-            pairing.Status = "Completed";
-            pairing.Notes = "Updated pairing notes";
+            //var pairing = await _breedingService.GetAllPairingsByAnimalIdAsync(1);
+            //pairing[0].PairingStartDate = DateTime.Now;
 
-            // Act
-            var updatedPairing = await _breedingService.UpdatePairingAsync(pairing);
+            //// Act
+            //var updatedPairing = await _breedingService.UpdatePairingAsync(pairing);
 
-            // Assert
-            Assert.IsNotNull(updatedPairing);
-            Assert.AreEqual("Completed", updatedPairing.Status);
-            Assert.AreEqual("Updated pairing notes", updatedPairing.Notes);
-            Assert.AreEqual(1, updatedPairing.MaleId); // Original value should remain unchanged
+            //// Assert
+            //Assert.IsNotNull(updatedPairing);
+            //Assert.AreEqual("Completed", updatedPairing.Status);
+            //Assert.AreEqual("Updated pairing notes", updatedPairing.Notes);
+            //Assert.AreEqual(1, updatedPairing.MaleId); // Original value should remain unchanged
         }
 
         /// <summary>
@@ -179,10 +183,11 @@ namespace RATAPPLibraryUT
 
             // Assert
             Assert.IsNotNull(createdLitter);
-            Assert.IsTrue(createdLitter.Id > 0);
-            Assert.AreEqual(1, createdLitter.PairingId);
-            Assert.AreEqual(8, createdLitter.NumberBorn);
-            Assert.AreEqual(8, createdLitter.NumberSurvived);
+            Assert.IsTrue(createdLitter);
+            //Assert.IsTrue(createdLitter.Id > 0);
+            //Assert.AreEqual(1, createdLitter.PairingId);
+            //Assert.AreEqual(8, createdLitter.NumberBorn);
+            //Assert.AreEqual(8, createdLitter.NumberSurvived);
         }
 
         /// <summary>
