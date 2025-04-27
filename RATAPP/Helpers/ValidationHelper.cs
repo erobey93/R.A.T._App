@@ -91,7 +91,7 @@ namespace RATAPP.Helpers
             }
 
             // Validate dam and sire are of the same species
-            if (dam.SpeciesId != sire.SpeciesId)
+            if (dam.species != sire.species)
             {
                 errorMessage = "Dam and Sire must be of the same species";
                 return false;
