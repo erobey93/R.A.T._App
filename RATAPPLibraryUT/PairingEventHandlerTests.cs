@@ -173,7 +173,11 @@ namespace RATAPPLibraryUT
             _pairingsGrid.Rows.Add("TEST002", "Test Project", "DAM002 - Test Dam", "SIRE002 - Test Sire", DateTime.Today.ToShortDateString());
 
             // Act
-            await _eventHandler.HandleSaveAllPairingsAsync(_pairingsGrid);
+            await _eventHandler.HandleSaveAllPairingsAsync(
+                _pairingsGrid,
+                _damComboBox,
+                _sireComboBox,
+                _projectComboBox);
 
             // Assert
             Assert.AreEqual(0, _pairingsGrid.Rows.Count, "Grid should be cleared after saving");

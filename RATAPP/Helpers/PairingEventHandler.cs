@@ -129,7 +129,11 @@ namespace RATAPP.Helpers
         /// <summary>
         /// Handles saving all pairings from the grid
         /// </summary>
-        public async Task HandleSaveAllPairingsAsync(DataGridView pairingsGrid)
+        public async Task HandleSaveAllPairingsAsync(
+            DataGridView pairingsGrid,
+            ComboBox damComboBox,
+            ComboBox sireComboBox,
+            ComboBox projectComboBox)
         {
             await _spinner.ExecuteWithSpinner(async () =>
             {
@@ -146,9 +150,9 @@ namespace RATAPP.Helpers
                     pairings.Add(new PairingDataManager.PairingData
                     {
                         PairingId = row.Cells["PairingID"].Value?.ToString(),
-                        Dam = GetAnimalFromDisplay(row.Cells["Dam"].Value?.ToString()),
-                        Sire = GetAnimalFromDisplay(row.Cells["Sire"].Value?.ToString()),
-                        Project = GetProjectFromDisplay(row.Cells["Project"].Value?.ToString()),
+                        Dam = GetAnimalFromDisplay(row.Cells["Dam"].Value?.ToString(), damComboBox, sireComboBox),
+                        Sire = GetAnimalFromDisplay(row.Cells["Sire"].Value?.ToString(), damComboBox, sireComboBox),
+                        Project = GetProjectFromDisplay(row.Cells["Project"].Value?.ToString(), projectComboBox),
                         PairingDate = DateTime.Parse(row.Cells["PairingDate"].Value?.ToString())
                     });
                 }
@@ -246,24 +250,31 @@ namespace RATAPP.Helpers
             pairingDatePicker.Value = DateTime.Today;
         }
 
-        private AnimalDto GetAnimalFromDisplay(string display)
+        private AnimalDto GetAnimalFromDisplay(string display, ComboBox damComboBox, ComboBox sireComboBox)
         {
             if (string.IsNullOrEmpty(display))
                 return null;
 
-            var parts = display.Split('-');
-            if (parts.Length < 2)
-                return null;
+            // Find the matching item in the dam/sire combo boxes
+            var damItem = damComboBox.Items.Cast<DropdownHelper.ListItem<AnimalDto>>()
+                .FirstOrDefault(i => i.Display == display);
+            if (damItem != null)
+                return damItem.Value;
 
-            return new AnimalDto { Id = parts[0].Trim() };
+            var sireItem = sireComboBox.Items.Cast<DropdownHelper.ListItem<AnimalDto>>()
+                .FirstOrDefault(i => i.Display == display);
+            return sireItem?.Value;
         }
 
-        private Project GetProjectFromDisplay(string display)
+        private Project GetProjectFromDisplay(string display, ComboBox projectComboBox)
         {
             if (string.IsNullOrEmpty(display))
                 return null;
 
-            return new Project { Name = display.Trim() };
+            // Find the matching item in the project combo box
+            var projectItem = projectComboBox.Items.Cast<DropdownHelper.ListItem<Project>>()
+                .FirstOrDefault(i => i.Display == display);
+            return projectItem?.Value;
         }
 
         #endregion
