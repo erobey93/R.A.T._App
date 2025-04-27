@@ -243,7 +243,11 @@ namespace RATAPP.Forms
             addToGridButton.Click += (s, e) => _eventHandler.HandleAddToGridClick(
                 pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
 
-            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(multiplePairingsGrid);
+            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
+                multiplePairingsGrid,
+                damComboBox,
+                sireComboBox,
+                projectComboBox);
 
             importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
 
