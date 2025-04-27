@@ -9,6 +9,11 @@ namespace RATAPP.Forms
     public partial class AddPairingForm : Form
     {
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        private RATAPPLibrary.Services.BreedingService _breedingService;
+        private RATAPPLibrary.Data.Models.Breeding.Pairing pairObj;
+        private RATAPPLibrary.Data.Models.AnimalDto damDto;
+        private RATAPPLibrary.Data.Models.AnimalDto sireDto; 
+
         private TabControl tabControl;
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
@@ -20,11 +25,14 @@ namespace RATAPP.Forms
         private DataGridView multiplePairingsGrid;
         private Button addToGridButton;
         private Button saveAllButton;
+        private Button importButton;
         private PictureBox loadingSpinner;
 
         public AddPairingForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
             _context = context;
+            _breedingService = new RATAPPLibrary.Services.BreedingService(context);
+
             InitializeComponents();
             LoadAnimals();
             LoadProjects();
@@ -122,46 +130,6 @@ namespace RATAPP.Forms
                 }
             };
 
-            // Dam (Female)
-            var damLabel = new Label
-            {
-                Text = "Dam (Female):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(damLabel, 0, 0);
-
-            damComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(damComboBox, 1, 0);
-
-            // Sire (Male)
-            var sireLabel = new Label
-            {
-                Text = "Sire (Male):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(sireLabel, 0, 1);
-
-            sireComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(sireComboBox, 1, 1);
-
             // Pairing ID
             var pairingIdLabel = new Label
             {
@@ -169,7 +137,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(pairingIdLabel, 0, 2);
+            formPanel.Controls.Add(pairingIdLabel, 0, 0);
 
             pairingIdTextBox = new TextBox
             {
@@ -179,7 +147,7 @@ namespace RATAPP.Forms
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(pairingIdTextBox, 1, 2);
+            formPanel.Controls.Add(pairingIdTextBox, 1, 0);
 
             // Project
             var projectLabel = new Label
@@ -188,7 +156,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(projectLabel, 0, 3);
+            formPanel.Controls.Add(projectLabel, 0, 1);
 
             projectComboBox = new ComboBox
             {
@@ -199,7 +167,47 @@ namespace RATAPP.Forms
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(projectComboBox, 1, 3);
+            formPanel.Controls.Add(projectComboBox, 1, 1);
+
+            // Dam (Female)
+            var damLabel = new Label
+            {
+                Text = "Dam (Female):",
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right
+            };
+            formPanel.Controls.Add(damLabel, 0, 2);
+
+            damComboBox = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                Width = 300,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            formPanel.Controls.Add(damComboBox, 1, 2);
+
+            // Sire (Male)
+            var sireLabel = new Label
+            {
+                Text = "Sire (Male):",
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right
+            };
+            formPanel.Controls.Add(sireLabel, 0, 3);
+
+            sireComboBox = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                Width = 300,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            formPanel.Controls.Add(sireComboBox, 1, 3);
 
             // Pairing Date
             var pairingDateLabel = new Label
@@ -303,7 +311,7 @@ namespace RATAPP.Forms
             {
                 Text = "New Pairing",
                 Dock = DockStyle.Top,
-                Height = 250,
+                Height = 275,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 ForeColor = Color.FromArgb(60, 60, 60),
                 Padding = new Padding(15)
@@ -321,46 +329,6 @@ namespace RATAPP.Forms
                 }
             };
 
-            // Dam (Female)
-            var damLabel = new Label
-            {
-                Text = "Dam (Female):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(damLabel, 0, 0);
-
-            var multiDamComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(multiDamComboBox, 1, 0);
-
-            // Sire (Male)
-            var sireLabel = new Label
-            {
-                Text = "Sire (Male):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(sireLabel, 0, 1);
-
-            var multiSireComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(multiSireComboBox, 1, 1);
-
             // Pairing ID
             var pairingIdLabel = new Label
             {
@@ -368,7 +336,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(pairingIdLabel, 0, 2);
+            formPanel.Controls.Add(pairingIdLabel, 0, 0);
 
             var multiPairingIdTextBox = new TextBox
             {
@@ -378,7 +346,7 @@ namespace RATAPP.Forms
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(multiPairingIdTextBox, 1, 2);
+            formPanel.Controls.Add(multiPairingIdTextBox, 1, 0);
 
             // Project
             var projectLabel = new Label
@@ -387,7 +355,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(projectLabel, 0, 3);
+            formPanel.Controls.Add(projectLabel, 0, 1);
 
             var multiProjectComboBox = new ComboBox
             {
@@ -398,7 +366,47 @@ namespace RATAPP.Forms
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(multiProjectComboBox, 1, 3);
+            formPanel.Controls.Add(multiProjectComboBox, 1, 1);
+
+            // Dam (Female)
+            var damLabel = new Label
+            {
+                Text = "Dam (Female):",
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right
+            };
+            formPanel.Controls.Add(damLabel, 0, 2);
+
+            var multiDamComboBox = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                Width = 300,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            formPanel.Controls.Add(multiDamComboBox, 1, 2);
+
+            // Sire (Male)
+            var sireLabel = new Label
+            {
+                Text = "Sire (Male):",
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right
+            };
+            formPanel.Controls.Add(sireLabel, 0, 3);
+
+            var multiSireComboBox = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                Width = 300,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            formPanel.Controls.Add(multiSireComboBox, 1, 3);
 
             // Pairing Date
             var pairingDateLabel = new Label
@@ -523,10 +531,10 @@ namespace RATAPP.Forms
 
             multiplePairingsGrid.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
-                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
                 new DataGridViewTextBoxColumn { Name = "PairingID", HeaderText = "Pairing ID" },
                 new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
+                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
+                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
                 new DataGridViewTextBoxColumn { Name = "PairingDate", HeaderText = "Pairing Date" },
                 new DataGridViewButtonColumn { Name = "Remove", HeaderText = "Remove", Text = "Remove", UseColumnTextForButtonValue = true }
             });
@@ -581,6 +589,22 @@ namespace RATAPP.Forms
             saveAllButton.FlatAppearance.BorderSize = 0;
             saveAllButton.Click += SaveAllButton_Click;
             bottomPanel.Controls.Add(saveAllButton);
+
+            importButton = new Button
+            {
+                Text = "Import Data",
+                Font = new Font("Segoe UI", 10),
+                Width = 150,
+                Height = 40,
+                Location = new Point(140, 10),
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
+            importButton.FlatAppearance.BorderSize = 0;
+            importButton.Click += ImportButton_Click;
+            bottomPanel.Controls.Add(importButton);
 
             var cancelMultiButton = new Button
             {
@@ -766,11 +790,11 @@ namespace RATAPP.Forms
                     return;
                 }
 
-                // TODO: Save pairing to database
+                // Save pairing to database
+                _breedingService.CreatePairingAsync(pairingIdTextBox.Text, ); 
 
-                // Simulate processing delay
-                System.Threading.Thread.Sleep(1000);
 
+                //if there are no errors 
                 MessageBox.Show($"Pairing added successfully!\n\nDam: {damComboBox.SelectedItem}\nSire: {sireComboBox.SelectedItem}\nPairing ID: {pairingIdTextBox.Text}\nProject: {projectComboBox.SelectedItem}\nPairing Date: {pairingDatePicker.Value.ToShortDateString()}",
                     "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -789,6 +813,11 @@ namespace RATAPP.Forms
             }
         }
 
+        private void ImportButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show($"TODO - bulk import from excel logic goes here"); 
+        }
+
         private void SaveAllButton_Click(object sender, EventArgs e)
         {
             // Show loading spinner
@@ -803,11 +832,11 @@ namespace RATAPP.Forms
                     return;
                 }
 
-                // TODO: Save all pairings to database
+                //Save all pairings to database
+                //requires populating the pairings data object
+                //which requires first storing the dam and sire data objects when selected 
 
-                // Simulate processing delay
-                System.Threading.Thread.Sleep(1500);
-
+                //if there are no errors 
                 MessageBox.Show($"Successfully added {multiplePairingsGrid.Rows.Count} pairings!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 // Clear grid for next batch
