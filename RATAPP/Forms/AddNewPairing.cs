@@ -2,21 +2,39 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using iTextSharp.text;
 using RATAPP.Forms;
+using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Breeding;
+using RATAPPLibrary.Services;
+using Font = System.Drawing.Font;
+using Image = System.Drawing.Image;
 
 namespace RATAPP.Forms
 {
     public partial class AddPairingForm : Form
     {
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
-        private RATAPPLibrary.Services.BreedingService _breedingService;
-        private RATAPPLibrary.Data.Models.Breeding.Pairing pairObj;
-        private RATAPPLibrary.Data.Models.AnimalDto damDto;
-        private RATAPPLibrary.Data.Models.AnimalDto sireDto; 
+        private BreedingService _breedingService;
+        private SpeciesService _speciesService;
+        private ProjectService _projectService; 
+        private AnimalService _animalService; 
+        private Pairing pairObj;
+
+        private AnimalDto _damDto;
+        private AnimalDto _sireDto;
+        private List<AnimalDto> _dams;
+        private List <AnimalDto> _sires;
+        private Project selectedProject;
+        private string speciesCommonNames; //FIXME remove 
+
+        private List<Species> allSpecies; 
+        private Species pairingSpecies;
 
         private TabControl tabControl;
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
+        private ComboBox speciesComboBox;
         private TextBox pairingIdTextBox;
         private ComboBox projectComboBox;
         private DateTimePicker pairingDatePicker;
@@ -28,13 +46,18 @@ namespace RATAPP.Forms
         private Button importButton;
         private PictureBox loadingSpinner;
 
+        
+
         public AddPairingForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
             _context = context;
-            _breedingService = new RATAPPLibrary.Services.BreedingService(context);
+            _breedingService = new BreedingService(context);
+            _speciesService = new SpeciesService(context);
+            _animalService = new AnimalService(context);
+            _projectService = new ProjectService(context);
 
             InitializeComponents();
-            LoadAnimals();
+            LoadAnimalsAsync();
             LoadProjects();
         }
 
@@ -129,6 +152,27 @@ namespace RATAPP.Forms
                     new ColumnStyle(SizeType.Percent, 70F)
                 }
             };
+            // Species
+            var speciesLabel = new Label
+            {
+                Text = "Species:",
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right
+            };
+            formPanel.Controls.Add(speciesLabel, 0, 0);
+
+            speciesComboBox = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 10),
+                Anchor = AnchorStyles.Left | AnchorStyles.Right,
+                Width = 300,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.White
+            };
+            formPanel.Controls.Add(speciesComboBox, 1, 0);
+            speciesComboBox.Items.Add("Rat");
+            speciesComboBox.SelectedIndex = 0;
 
             // Pairing ID
             var pairingIdLabel = new Label
@@ -137,7 +181,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(pairingIdLabel, 0, 0);
+            formPanel.Controls.Add(pairingIdLabel, 0, 1);
 
             pairingIdTextBox = new TextBox
             {
@@ -147,7 +191,7 @@ namespace RATAPP.Forms
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(pairingIdTextBox, 1, 0);
+            formPanel.Controls.Add(pairingIdTextBox, 1, 1); 
 
             // Project
             var projectLabel = new Label
@@ -156,7 +200,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(projectLabel, 0, 1);
+            formPanel.Controls.Add(projectLabel, 0, 2); 
 
             projectComboBox = new ComboBox
             {
@@ -167,7 +211,7 @@ namespace RATAPP.Forms
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(projectComboBox, 1, 1);
+            formPanel.Controls.Add(projectComboBox, 1, 2); 
 
             // Dam (Female)
             var damLabel = new Label
@@ -176,7 +220,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(damLabel, 0, 2);
+            formPanel.Controls.Add(damLabel, 0, 3); 
 
             damComboBox = new ComboBox
             {
@@ -187,7 +231,7 @@ namespace RATAPP.Forms
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(damComboBox, 1, 2);
+            formPanel.Controls.Add(damComboBox, 1, 3); 
 
             // Sire (Male)
             var sireLabel = new Label
@@ -196,7 +240,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(sireLabel, 0, 3);
+            formPanel.Controls.Add(sireLabel, 0, 4);
 
             sireComboBox = new ComboBox
             {
@@ -207,7 +251,7 @@ namespace RATAPP.Forms
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.White
             };
-            formPanel.Controls.Add(sireComboBox, 1, 3);
+            formPanel.Controls.Add(sireComboBox, 1, 4); 
 
             // Pairing Date
             var pairingDateLabel = new Label
@@ -216,7 +260,7 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 Anchor = AnchorStyles.Left | AnchorStyles.Right
             };
-            formPanel.Controls.Add(pairingDateLabel, 0, 4);
+            formPanel.Controls.Add(pairingDateLabel, 0, 5); 
 
             pairingDatePicker = new DateTimePicker
             {
@@ -225,7 +269,7 @@ namespace RATAPP.Forms
                 Anchor = AnchorStyles.Left | AnchorStyles.Right,
                 Width = 300
             };
-            formPanel.Controls.Add(pairingDatePicker, 1, 4);
+            formPanel.Controls.Add(pairingDatePicker, 1, 5); 
 
             // Buttons
             var buttonPanel = new Panel
@@ -298,6 +342,7 @@ namespace RATAPP.Forms
             tab.Controls.Add(mainPanel);
         }
 
+        //TODO add species 
         private void InitializeMultiplePairingsTab(TabPage tab)
         {
             var mainPanel = new Panel
@@ -634,6 +679,45 @@ namespace RATAPP.Forms
 
             // We'll populate these in the LoadAnimals and LoadProjects methods
         }
+        //find species name 
+        private string GetSpeciesCommonName()
+        {
+            Species selectedSpecies = GetAnimalSpeciesFromComboBoxSelection();
+            string speciesCommonName = selectedSpecies.CommonName;
+
+            return speciesCommonName;
+        }
+
+        //find species object
+        private Species GetAnimalSpeciesFromComboBoxSelection()
+        {
+            string speciesCommonName = null;
+
+            //first, check if the combo box has a selected item
+            if (speciesComboBox.SelectedItem != null)
+            {
+                speciesCommonName = speciesComboBox.SelectedItem.ToString();
+                //match the common name from our species list
+                foreach (var specie in allSpecies) 
+                {
+                    if (speciesCommonName == specie.CommonName)
+                    {
+                        //set our pair species to the matched species
+                        return specie;
+                    }
+                }
+                // If the loop completes without a match, it means the selected item
+                // there is something wrong, throw an exception
+                throw new Exception("species common name not found in species list"); //this shouldn't be possible, but just in case 
+            }
+           
+            else
+            {
+                //return unknown, use to tell the user that they need to fill out the species field first
+                MessageBox.Show("Please fill out the species field first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return null; //FIXME shouldn't be returning null, but okay for now 
+            }
+        }
 
         private void InitializeLoadingSpinner()
         {
@@ -656,36 +740,41 @@ namespace RATAPP.Forms
             );
         }
 
-        private void LoadAnimals()
+        //selected index changed for species combo box
+        //find the species in our species list by matching common name
+        //return the 
+        private async Task LoadAnimalsAsync()
         {
+            //FIXME this is not correct but just for testing 
+            var species = await _speciesService.GetAllSpeciesAsync();
+            allSpecies = species.ToList(); 
+
             // Show loading spinner
             loadingSpinner.Visible = true;
             this.Refresh();
 
             try
             {
-                // TODO: Load actual animals from database
-                // For now, add sample data
-
                 // Add female rats to dam combo box
-                damComboBox.Items.Clear();
-                damComboBox.Items.AddRange(new string[] {
-                    "F001 - Daisy (Female)",
-                    "F002 - Luna (Female)",
-                    "F003 - Bella (Female)",
-                    "F004 - Molly (Female)",
-                    "F005 - Coco (Female)"
-                });
-
-                // Add male rats to sire combo box
-                sireComboBox.Items.Clear();
-                sireComboBox.Items.AddRange(new string[] {
-                    "M001 - Max (Male)",
-                    "M002 - Charlie (Male)",
-                    "M003 - Buddy (Male)",
-                    "M004 - Rocky (Male)",
-                    "M005 - Duke (Male)"
-                });
+                // Populate dam and get the list
+                List<AnimalDto> dams = await DropdownHelper.PopulateAnimalDropdownAsync(
+                damComboBox,
+                GetSpeciesCommonName,//get species from the user's selection 
+                    _animalService.GetAnimalInfoBySexAndSpecies,
+                    _animalService.GetAnimalsBySex,
+                    "Female"
+                );
+                _dams = dams ?? new List<AnimalDto>(); // Store the returned list in your form-level _dams variable FIXME trying to avoid form level variables like this 
+                
+                // Populate sire and get the list
+                List<AnimalDto> sires = await DropdownHelper.PopulateAnimalDropdownAsync(
+                damComboBox,
+                GetSpeciesCommonName,//get species from the user's selection 
+                    _animalService.GetAnimalInfoBySexAndSpecies,
+                    _animalService.GetAnimalsBySex,
+                    "Male"
+                );
+                _sires = sires ?? new List<AnimalDto>(); // Store the returned list in your form-level _sires variable  FIXME trying to avoid form level variables like this 
 
                 // Also populate the multiple pairings tab combo boxes
                 if (tabControl.TabPages.Count > 1)
@@ -697,11 +786,7 @@ namespace RATAPP.Forms
                     {
                         multiDamComboBox.Items.Clear();
                         multiDamComboBox.Items.AddRange(new string[] {
-                            "F001 - Daisy (Female)",
-                            "F002 - Luna (Female)",
-                            "F003 - Bella (Female)",
-                            "F004 - Molly (Female)",
-                            "F005 - Coco (Female)"
+                          
                         });
 
                         multiSireComboBox.Items.Clear();
@@ -726,7 +811,8 @@ namespace RATAPP.Forms
             }
         }
 
-        private void LoadProjects()
+
+        private async void LoadProjects()
         {
             // Show loading spinner
             loadingSpinner.Visible = true;
@@ -734,16 +820,9 @@ namespace RATAPP.Forms
 
             try
             {
-                // TODO: Load actual projects from database
-                // For now, add sample data
-                projectComboBox.Items.Clear();
-                projectComboBox.Items.AddRange(new string[] {
-                    "Breeding Program A",
-                    "Research Project B",
-                    "Color Study C",
-                    "Behavior Study D",
-                    "General Breeding"
-                });
+                List<Project> projects = await DropdownHelper.PopulateProjectsDropdownAsync(
+                    projectComboBox, _projectService.GetAllProjectsAsync //FIXME should be getting projects by species 
+                    );
 
                 // Also populate the multiple pairings tab project combo box
                 if (tabControl.TabPages.Count > 1)
@@ -774,6 +853,46 @@ namespace RATAPP.Forms
             }
         }
 
+        //wrapper to get species 
+        private async Task<List<Species>> GetSpecies()
+        {
+            List<Species> species = (List<Species>)await _speciesService.GetAllSpeciesAsync();
+
+            return species; 
+        }
+
+        private async Task<List<Species>> LoadSpecies()
+        {
+            // Show loading spinner
+            loadingSpinner.Visible = true;
+            this.Refresh();
+
+            try
+            {
+               
+                //store the returned species
+                allSpecies = await DropdownHelper.PopulateSpeciesDropdownAsync(speciesComboBox, GetSpecies);
+
+                if (tabControl.TabPages.Count > 1)
+                {
+                    var multiSpeciesComboBox = tabControl.TabPages[1].Controls[0].Controls[0].Controls[0].Controls[7] as ComboBox;
+
+                    if (speciesComboBox != null)
+                    {
+                        await DropdownHelper.PopulateSpeciesDropdownAsync(speciesComboBox, GetSpecies); //FIXME probably shouldn't be calling this twice right after the other row 
+                    }
+                }
+            }
+            finally
+            {
+                // Hide loading spinner
+                loadingSpinner.Visible = false;
+                this.Refresh();
+            }
+
+            return allSpecies;
+        }
+
         private void AddButton_Click(object sender, EventArgs e)
         {
             // Show loading spinner
@@ -791,7 +910,7 @@ namespace RATAPP.Forms
                 }
 
                 // Save pairing to database
-                _breedingService.CreatePairingAsync(pairingIdTextBox.Text, ); 
+                _breedingService.CreatePairingAsync(pairingIdTextBox.Text, _damDto.Id,_sireDto.Id, selectedProject.Id, pairObj.PairingStartDate, pairObj.PairingEndDate);  //FIXME not fully implemented and have to handle issue with EndData
 
 
                 //if there are no errors 
