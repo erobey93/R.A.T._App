@@ -139,6 +139,21 @@ namespace RATAPP.Helpers
         }
 
         /// <summary>
+        /// Creates a form section with standard styling
+        /// </summary>
+        /// <param name="title">The section title</param>
+        /// <param name="dock">The docking style for the section</param>
+        /// <param name="height">The height of the section</param>
+        /// <returns>A configured GroupBox for the section</returns>
+        public static GroupBox CreateFormSection(string title, DockStyle dock, int height)
+        {
+            var section = new GroupBox();
+            FormStyleHelper.ApplyGroupBoxStyle(section, title, height);
+            section.Dock = dock;
+            return section;
+        }
+
+        /// <summary>
         /// Creates an information panel with standard styling
         /// </summary>
         /// <param name="title">The panel title</param>
