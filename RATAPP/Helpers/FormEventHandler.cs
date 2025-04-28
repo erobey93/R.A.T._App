@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Linq;
 using RATAPPLibrary.Data.Models.Breeding;
 
 namespace RATAPP.Helpers
@@ -27,11 +28,11 @@ namespace RATAPP.Helpers
                 
                 // Load species
                 var species = await _dataManager.GetSpeciesAsync();
-                speciesBox.Items.AddRange(species);
+                speciesBox.Items.AddRange(species.ToArray());
 
                 // Load projects
                 var projects = await _dataManager.GetProjectsAsync();
-                projectBox.Items.AddRange(projects);
+                projectBox.Items.AddRange(projects.Select(p => p.Name).ToArray());
             }
             finally
             {
@@ -87,13 +88,18 @@ namespace RATAPP.Helpers
                     return;
                 }
 
+                var project = (await _dataManager.GetProjectsAsync())
+                    .First(p => p.Name == projectBox.SelectedItem.ToString());
+
                 var pairing = new Pairing
                 {
-                    PairingId = pairingId,
-                    DamName = damBox.SelectedItem.ToString(),
-                    SireName = sireBox.SelectedItem.ToString(),
-                    ProjectName = projectBox.SelectedItem.ToString(),
-                    PairingDate = datePicker.Value
+                    pairingId = pairingId,
+                    DamId = int.Parse(damBox.SelectedItem.ToString().Split('-')[0].Trim()),
+                    SireId = int.Parse(sireBox.SelectedItem.ToString().Split('-')[0].Trim()),
+                    ProjectId = project.Id,
+                    PairingStartDate = datePicker.Value,
+                    CreatedOn = DateTime.Now,
+                    LastUpdated = DateTime.Now
                 };
 
                 await _dataManager.SavePairingAsync(pairing);
@@ -127,7 +133,11 @@ namespace RATAPP.Helpers
                     LitterId = litterId,
                     Name = litterName,
                     PairId = pairId,
-                    DateOfBirth = datePicker.Value
+                    DamId = int.Parse(damBox.SelectedItem.ToString().Split('-')[0].Trim()),
+                    SireId = int.Parse(sireBox.SelectedItem.ToString().Split('-')[0].Trim()),
+                    DateOfBirth = datePicker.Value,
+                    CreatedOn = DateTime.Now,
+                    LastUpdated = DateTime.Now
                 };
 
                 await _dataManager.SaveLitterAsync(litter);
@@ -186,13 +196,18 @@ namespace RATAPP.Helpers
 
                 foreach (DataGridViewRow row in grid.Rows)
                 {
+                    var project = (await _dataManager.GetProjectsAsync())
+                        .First(p => p.Name == row.Cells["Project"].Value.ToString());
+
                     var pairing = new Pairing
                     {
-                        DamName = row.Cells["Dam"].Value.ToString(),
-                        SireName = row.Cells["Sire"].Value.ToString(),
-                        PairingId = row.Cells["PairingID"].Value.ToString(),
-                        ProjectName = row.Cells["Project"].Value.ToString(),
-                        PairingDate = DateTime.Parse(row.Cells["PairingDate"].Value.ToString())
+                        pairingId = row.Cells["PairingID"].Value.ToString(),
+                        DamId = int.Parse(row.Cells["Dam"].Value.ToString().Split('-')[0].Trim()),
+                        SireId = int.Parse(row.Cells["Sire"].Value.ToString().Split('-')[0].Trim()),
+                        ProjectId = project.Id,
+                        PairingStartDate = DateTime.Parse(row.Cells["PairingDate"].Value.ToString()),
+                        CreatedOn = DateTime.Now,
+                        LastUpdated = DateTime.Now
                     };
 
                     await _dataManager.SavePairingAsync(pairing);
