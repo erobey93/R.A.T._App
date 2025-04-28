@@ -82,6 +82,7 @@ namespace RATAPPLibrary.Data.Models
         public DateTime? DateOfDeath { get; set; }
         public required string species { get; set; }
         public string? imageUrl { get; set; }
+        public List<string>? AdditionalImages { get; set; }
         public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
         public string? earType { get; set; }
         public string? markings { get; set; }

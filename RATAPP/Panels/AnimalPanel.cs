@@ -974,35 +974,192 @@ namespace RATAPP.Panels
                 Size = new Size(200, 100), // Adjust size as needed for thumbnails
                 Location = new Point(750, 240), // Adjust location to be below the main image
                 AutoScroll = true, // Enable scrolling if thumbnails overflow
-                FlowDirection = FlowDirection.LeftToRight // Arrange thumbnails horizontally
+                FlowDirection = FlowDirection.LeftToRight, // Arrange thumbnails horizontally
+                BorderStyle = BorderStyle.FixedSingle // Add border for visual clarity
             };
+
+            // Add "Add Image" button at the start of thumbnail panel
+            Button addImageButton = new Button
+            {
+                Size = new Size(50, 50),
+                Text = "+",
+                Font = new Font("Segoe UI", 20),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Margin = new Padding(5),
+                Cursor = Cursors.Hand,
+                FlatStyle = FlatStyle.Flat
+            };
+            addImageButton.Click += AddThumbnailImage;
+            thumbnailPanel.Controls.Add(addImageButton);
+
             this.Controls.Add(thumbnailPanel);
 
-            // Add thumbnails to the panel
-            foreach (var imagePath in imagePaths)
+            // Add existing thumbnails to the panel
+            if (_animal != null && _animal.AdditionalImages != null)
             {
-                PictureBox thumbnail = new PictureBox
+                foreach (var imagePath in _animal.AdditionalImages)
                 {
-                    Image = Image.FromFile(imagePath), // Load the thumbnail image
-                    Size = new Size(50, 50), // Set the thumbnail size
-                    SizeMode = PictureBoxSizeMode.Zoom, // Scale the image to fit
-                    Margin = new Padding(5), // Add spacing between thumbnails
-                    Cursor = Cursors.Hand // Change cursor to hand on hover
-                };
+                    AddThumbnailToPanel(imagePath);
+                }
+            }
+        }
 
-                // Event handler to update the main image when the thumbnail is clicked
-                thumbnail.Click += (sender, e) => OnThumbnailClick(imagePath);
+        // Handle adding a new thumbnail image
+        private void AddThumbnailImage(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog
+            {
+                Filter = "Image Files (*.jpg, *.jpeg, *.png, *.gif, *.bmp)|*.jpg;*.jpeg;*.png;*.gif;*.bmp",
+                Title = "Select an Image"
+            };
 
-                // Add the thumbnail to the panel
-                thumbnailPanel.Controls.Add(thumbnail);
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string selectedFilePath = dialog.FileName;
+                    if (ValidateAndProcessImage(selectedFilePath))
+                    {
+                        string normalizedPath = CleanFilePath(selectedFilePath);
+                        AddThumbnailToPanel(normalizedPath);
+                        
+                        // Update animal's additional images in database
+                        if (_animal != null)
+                        {
+                            if (_animal.AdditionalImages == null)
+                                _animal.AdditionalImages = new List<string>();
+                            
+                            _animal.AdditionalImages.Add(normalizedPath);
+                            // TODO: Update database with new image list
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("Error adding thumbnail image: " + ex.Message);
+                }
+            }
+        }
+
+        // Add a single thumbnail to the panel
+        private void AddThumbnailToPanel(string imagePath)
+        {
+            try
+            {
+                if (File.Exists(imagePath))
+                {
+                    PictureBox thumbnail = new PictureBox
+                    {
+                        Image = Image.FromFile(imagePath),
+                        Size = new Size(50, 50),
+                        SizeMode = PictureBoxSizeMode.Zoom,
+                        Margin = new Padding(5),
+                        Cursor = Cursors.Hand
+                    };
+
+                    // Create context menu for thumbnail
+                    ContextMenuStrip menu = new ContextMenuStrip();
+                    menu.Items.Add("View", null, (s, e) => OnThumbnailClick(imagePath));
+                    menu.Items.Add("Delete", null, (s, e) => DeleteThumbnail(thumbnail, imagePath));
+                    thumbnail.ContextMenuStrip = menu;
+
+                    // Add click handler
+                    thumbnail.Click += (s, e) => OnThumbnailClick(imagePath);
+
+                    // Add to panel after the add button
+                    thumbnailPanel.Controls.Add(thumbnail);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error loading thumbnail: " + ex.Message);
             }
         }
 
         // Handle the click event on a thumbnail
         private void OnThumbnailClick(string imagePath)
         {
-            // Change the main image box to the selected thumbnail's image
-            animalPhotoBox.Image = Image.FromFile(imagePath);
+            try
+            {
+                if (File.Exists(imagePath))
+                {
+                    // Change the main image box to the selected thumbnail's image
+                    if (animalPhotoBox.Image != null)
+                    {
+                        animalPhotoBox.Image.Dispose();
+                    }
+                    animalPhotoBox.Image = Image.FromFile(imagePath);
+                }
+                else
+                {
+                    ShowMessage("Image file not found: " + imagePath);
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error displaying image: " + ex.Message);
+            }
+        }
+
+        // Delete a thumbnail
+        private void DeleteThumbnail(PictureBox thumbnail, string imagePath)
+        {
+            if (MessageBox.Show("Are you sure you want to remove this image?", "Confirm Delete", 
+                MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                try
+                {
+                    // Remove from UI
+                    if (thumbnail.Image != null)
+                    {
+                        thumbnail.Image.Dispose();
+                    }
+                    thumbnailPanel.Controls.Remove(thumbnail);
+                    thumbnail.Dispose();
+
+                    // Remove from animal's additional images
+                    if (_animal != null && _animal.AdditionalImages != null)
+                    {
+                        _animal.AdditionalImages.Remove(imagePath);
+                        // TODO: Update database with new image list
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("Error removing thumbnail: " + ex.Message);
+                }
+            }
+        }
+
+        // Validate and process an image file
+        private bool ValidateAndProcessImage(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                ShowMessage("Error: The selected file does not exist.");
+                return false;
+            }
+
+            string[] validImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp" };
+            string fileExtension = Path.GetExtension(filePath).ToLower();
+
+            if (!validImageExtensions.Contains(fileExtension))
+            {
+                ShowMessage("Error: The selected file is not a valid image. Please choose a valid image file.");
+                return false;
+            }
+
+            try
+            {
+                // Verify the file is a valid image by attempting to load it
+                using (Image img = Image.FromFile(filePath)) { }
+                return true;
+            }
+            catch (Exception)
+            {
+                ShowMessage("Error: The selected file is not a valid image.");
+                return false;
+            }
         }
 
         //would really be helpful to just know the index 
@@ -1658,5 +1815,3 @@ namespace RATAPP.Panels
         }
     }
 }
-
-
