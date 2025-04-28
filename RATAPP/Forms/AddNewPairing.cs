@@ -74,6 +74,13 @@ namespace RATAPP.Forms
                 AutoSize = true,
                 Location = new Point(22, 40)
             };
+
+            // Calculate the X position to place descriptionLabel to the right of headerLabel
+            int descriptionLabelX = headerLabel.Location.X + headerLabel.Width + 10;
+            // Calculate the Y position to vertically align descriptionLabel with headerLabel
+            int descriptionLabelY = headerLabel.Location.Y;
+
+            descriptionLabel.Location = new Point(descriptionLabelX, descriptionLabelY);
             headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
 
@@ -126,8 +133,8 @@ namespace RATAPP.Forms
             };
 
             // Create groups for related fields
-            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 280);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 280);
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250);
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
@@ -204,7 +211,7 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create input group with improved layout
-            var inputGroup = FormComponentFactory.CreateFormSection("Add New Pairing", DockStyle.Top, 280);
+            var inputGroup = FormComponentFactory.CreateFormSection("Add New Pairing", DockStyle.Top, 250);
             inputGroup.Margin = new Padding(0, 0, 0, 20);
 
             // Create form fields with validation indicators
