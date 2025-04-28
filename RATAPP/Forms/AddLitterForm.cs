@@ -246,11 +246,14 @@ namespace RATAPP.Forms
             // Add columns to grid
             multipleLittersGrid.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
-                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
                 new DataGridViewTextBoxColumn { Name = "LitterID", HeaderText = "Litter ID" },
-                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
+                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Name" },
+                new DataGridViewTextBoxColumn { Name = "PairID", HeaderText = "Pair ID" },
                 new DataGridViewTextBoxColumn { Name = "BirthDate", HeaderText = "Birth Date" },
+                new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "# Pups" },
+                new DataGridViewTextBoxColumn { Name = "NumMales", HeaderText = "# Males" },
+                new DataGridViewTextBoxColumn { Name = "NumFemales", HeaderText = "# Females" },
+                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes" },
                 new DataGridViewButtonColumn { Name = "Remove", HeaderText = "Remove", Text = "Remove", UseColumnTextForButtonValue = true }
             });
 
@@ -275,24 +278,26 @@ namespace RATAPP.Forms
             addButton.Click += async (s, e) => await _eventHandler.HandleAddLitterClickAsync(
                 litterIdTextBox.Text,
                 litterNameTextBox.Text,
-                damComboBox,
-                sireComboBox,
                 pairComboBox.SelectedIndex + 1,
-                litterDatePicker);
-
-            addToGridButton.Click += (s, e) => _eventHandler.HandleAddToGridClick(
-                litterIdTextBox.Text,
-                damComboBox,
-                sireComboBox,
-                projectComboBox,
                 litterDatePicker,
+                numPups,
+                numMales,
+                numFemales,
+                litterNotes);
+
+            addToGridButton.Click += (s, e) => _eventHandler.HandleAddLitterToGridClick(
+                litterIdTextBox.Text,
+                litterNameTextBox.Text,
+                pairComboBox.SelectedIndex + 1,
+                litterDatePicker,
+                numPups,
+                numMales,
+                numFemales,
+                litterNotes,
                 multipleLittersGrid);
 
-            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
-                multipleLittersGrid,
-                damComboBox,
-                sireComboBox,
-                projectComboBox);
+            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllLittersAsync(
+                multipleLittersGrid);
 
             cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
 

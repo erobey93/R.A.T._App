@@ -113,15 +113,15 @@ namespace RATAPP.Helpers
             }
         }
 
-        public async Task HandleAddLitterClickAsync(string litterId, string litterName, ComboBox damBox, ComboBox sireBox, int pairId, DateTimePicker datePicker)
+        public async Task HandleAddLitterClickAsync(string litterId, string litterName, int pairId, 
+            DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes)
         {
             try
             {
                 _spinner.Show();
 
                 // Validate inputs
-                if (string.IsNullOrWhiteSpace(litterId) || damBox.SelectedIndex == -1 || 
-                    sireBox.SelectedIndex == -1)
+                if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
                 {
                     MessageBox.Show("Please fill in all required fields", "Validation Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -133,9 +133,11 @@ namespace RATAPP.Helpers
                     LitterId = litterId,
                     Name = litterName,
                     PairId = pairId,
-                    DamId = int.Parse(damBox.SelectedItem.ToString().Split('-')[0].Trim()),
-                    SireId = int.Parse(sireBox.SelectedItem.ToString().Split('-')[0].Trim()),
                     DateOfBirth = datePicker.Value,
+                    NumPups = !string.IsNullOrWhiteSpace(numPups.Text) ? int.Parse(numPups.Text) : null,
+                    NumMale = !string.IsNullOrWhiteSpace(numMales.Text) ? int.Parse(numMales.Text) : null,
+                    NumFemale = !string.IsNullOrWhiteSpace(numFemales.Text) ? int.Parse(numFemales.Text) : null,
+                    Notes = notes.Text,
                     CreatedOn = DateTime.Now,
                     LastUpdated = DateTime.Now
                 };
@@ -151,16 +153,16 @@ namespace RATAPP.Helpers
             }
         }
 
-        public void HandleAddToGridClick(string id, ComboBox damBox, ComboBox sireBox, ComboBox projectBox, 
-            DateTimePicker datePicker, DataGridView grid)
+        public void HandleAddLitterToGridClick(string litterId, string litterName, int pairId,
+            DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes,
+            DataGridView grid)
         {
             try
             {
                 _spinner.Show();
 
                 // Validate inputs
-                if (string.IsNullOrWhiteSpace(id) || damBox.SelectedIndex == -1 || 
-                    sireBox.SelectedIndex == -1 || projectBox.SelectedIndex == -1)
+                if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
                 {
                     MessageBox.Show("Please fill in all required fields", "Validation Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -168,11 +170,14 @@ namespace RATAPP.Helpers
                 }
 
                 grid.Rows.Add(
-                    damBox.SelectedItem.ToString(),
-                    sireBox.SelectedItem.ToString(),
-                    id,
-                    projectBox.SelectedItem.ToString(),
-                    datePicker.Value.ToShortDateString()
+                    litterId,
+                    litterName,
+                    pairId.ToString(),
+                    datePicker.Value.ToShortDateString(),
+                    numPups.Text,
+                    numMales.Text,
+                    numFemales.Text,
+                    notes.Text
                 );
             }
             finally
@@ -181,7 +186,7 @@ namespace RATAPP.Helpers
             }
         }
 
-        public async Task HandleSaveAllPairingsAsync(DataGridView grid, ComboBox damBox, ComboBox sireBox, ComboBox projectBox)
+        public async Task HandleSaveAllLittersAsync(DataGridView grid)
         {
             try
             {
@@ -189,31 +194,34 @@ namespace RATAPP.Helpers
 
                 if (grid.Rows.Count == 0)
                 {
-                    MessageBox.Show("Please add at least one item to the list", "Validation Error", 
+                    MessageBox.Show("Please add at least one litter to the list", "Validation Error", 
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
                 foreach (DataGridViewRow row in grid.Rows)
                 {
-                    var project = (await _dataManager.GetProjectsAsync())
-                        .First(p => p.Name == row.Cells["Project"].Value.ToString());
-
-                    var pairing = new Pairing
+                    var litter = new Litter
                     {
-                        pairingId = row.Cells["PairingID"].Value.ToString(),
-                        DamId = int.Parse(row.Cells["Dam"].Value.ToString().Split('-')[0].Trim()),
-                        SireId = int.Parse(row.Cells["Sire"].Value.ToString().Split('-')[0].Trim()),
-                        ProjectId = project.Id,
-                        PairingStartDate = DateTime.Parse(row.Cells["PairingDate"].Value.ToString()),
+                        LitterId = row.Cells["LitterID"].Value.ToString(),
+                        Name = row.Cells["Name"].Value.ToString(),
+                        PairId = int.Parse(row.Cells["PairID"].Value.ToString()),
+                        DateOfBirth = DateTime.Parse(row.Cells["BirthDate"].Value.ToString()),
+                        NumPups = !string.IsNullOrWhiteSpace(row.Cells["NumPups"].Value?.ToString()) 
+                            ? int.Parse(row.Cells["NumPups"].Value.ToString()) : null,
+                        NumMale = !string.IsNullOrWhiteSpace(row.Cells["NumMales"].Value?.ToString()) 
+                            ? int.Parse(row.Cells["NumMales"].Value.ToString()) : null,
+                        NumFemale = !string.IsNullOrWhiteSpace(row.Cells["NumFemales"].Value?.ToString()) 
+                            ? int.Parse(row.Cells["NumFemales"].Value.ToString()) : null,
+                        Notes = row.Cells["Notes"].Value?.ToString(),
                         CreatedOn = DateTime.Now,
                         LastUpdated = DateTime.Now
                     };
 
-                    await _dataManager.SavePairingAsync(pairing);
+                    await _dataManager.SaveLitterAsync(litter);
                 }
 
-                MessageBox.Show($"Successfully added {grid.Rows.Count} pairings!", "Success", 
+                MessageBox.Show($"Successfully added {grid.Rows.Count} litters!", "Success", 
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 grid.Rows.Clear();
