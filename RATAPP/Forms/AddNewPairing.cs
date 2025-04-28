@@ -49,7 +49,7 @@ namespace RATAPP.Forms
                 projectService,
                 animalService);
 
-            _spinner = new LoadingSpinnerHelper(this, "RATAPP/Resources/Loading_2.gif");
+            _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
             _eventHandler = new PairingEventHandler(_dataManager, _spinner);
 
             InitializeComponents();
@@ -142,7 +142,9 @@ namespace RATAPP.Forms
                 damField, sireField, dateField, buttonPanel
             });
 
+           
             pairingGroup.Controls.Add(formPanel);
+            pairingGroup.Controls.Add(buttonPanel);
             mainPanel.Controls.Add(pairingGroup);
 
             // Add information panel

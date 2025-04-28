@@ -89,6 +89,7 @@ namespace RATAPP.Helpers
         /// <param name="primaryButton">The primary action button</param>
         /// <param name="secondaryButton">The secondary action button</param>
         /// <returns>A panel containing the buttons</returns>
+        /// //TODO this may not have a secondary button 
         public static Panel CreateButtonPanel(Button primaryButton, Button secondaryButton)
         {
             var panel = new Panel
@@ -100,12 +101,15 @@ namespace RATAPP.Helpers
 
             // Style and position buttons
             FormStyleHelper.ApplyButtonStyle(primaryButton, true);
-            FormStyleHelper.ApplyButtonStyle(secondaryButton, false);
-
             primaryButton.Location = new Point(panel.Width / 2 - 160, 10);
-            secondaryButton.Location = new Point(panel.Width / 2 + 10, 10);
 
-            panel.Controls.AddRange(new Control[] { primaryButton, secondaryButton });
+            if (secondaryButton != null) {
+                FormStyleHelper.ApplyButtonStyle(secondaryButton, false);
+                secondaryButton.Location = new Point(panel.Width / 2 + 10, 10);
+                panel.Controls.AddRange(new Control[] { primaryButton, secondaryButton });
+            }
+            
+            panel.Controls.AddRange(new Control[] { primaryButton});
             return panel;
         }
 

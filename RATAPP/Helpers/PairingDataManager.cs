@@ -51,7 +51,7 @@ namespace RATAPP.Helpers
         {
             try
             {
-                var species = await _speciesService.GetAllSpeciesAsync();
+                var species = await _speciesService.GetAllSpeciesObjectsAsync();
                 return species?.ToList() ?? new List<Species>();
             }
             catch (Exception ex)
