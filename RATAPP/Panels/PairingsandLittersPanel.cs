@@ -249,7 +249,7 @@ namespace RATAPP.Panels
             else if (currentTab == "Litters")
             {
                 //open the add pairings form 
-                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_context, "Rat");//new AddLitterForm(_context, "Rat"); //TODO hardcoded need to think through how to get this 
+                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_context);//new AddLitterForm(_context, "Rat"); //TODO hardcoded need to think through how to get this 
                 addLitter.ShowDialog();
             }
             else if(currentTab == "Line Management")
