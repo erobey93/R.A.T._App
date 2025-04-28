@@ -3,6 +3,7 @@ using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Data.Models.Ancestry;
+using RATAPPLibrary.Data.Models.Research;
 
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity.Data;
@@ -64,6 +65,13 @@ namespace RATAPPLibrary.Data.DbContexts
         //Health
         //public DbSet<HealthRecord> HealthRecord { get; set; }
 
+        //Research
+        public virtual DbSet<Study> Studies { get; set; }
+        public virtual DbSet<StudyGroup> StudyGroups { get; set; }
+        public virtual DbSet<StudyAnimal> StudyAnimals { get; set; }
+        public virtual DbSet<DataPoint> DataPoints { get; set; }
+        public virtual DbSet<ObservationData> ObservationData { get; set; }
+
         //Requests TODO
         //public DbSet<Models.Requests.LoginRequest> LoginRequest { get; set; }
         //public DbSet<UpdateCredentialsRequest> UpdateCredentialsRequest { get; set; }
@@ -103,7 +111,107 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureLineage(modelBuilder);
 
             ConfigureAnimalTrait(modelBuilder);
+            
+            // Configure Research entities
+            ConfigureStudy(modelBuilder);
+            ConfigureStudyGroup(modelBuilder);
+            ConfigureStudyAnimal(modelBuilder);
+            ConfigureDataPoint(modelBuilder);
+            ConfigureObservationData(modelBuilder);
+        }
 
+        private void ConfigureStudy(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Study>()
+                .Property(s => s.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<Study>()
+                .Property(s => s.Description)
+                .HasMaxLength(500);
+
+            modelBuilder.Entity<Study>()
+                .HasOne(s => s.Researcher)
+                .WithMany()
+                .HasForeignKey(s => s.ResearcherId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void ConfigureStudyGroup(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StudyGroup>()
+                .Property(sg => sg.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<StudyGroup>()
+                .HasOne(sg => sg.Study)
+                .WithMany(s => s.StudyGroups)
+                .HasForeignKey(sg => sg.StudyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        private void ConfigureStudyAnimal(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<StudyAnimal>()
+                .HasOne(sa => sa.StudyGroup)
+                .WithMany(sg => sg.StudyAnimals)
+                .HasForeignKey(sa => sa.StudyGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudyAnimal>()
+                .HasOne(sa => sa.Animal)
+                .WithMany()
+                .HasForeignKey(sa => sa.AnimalId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void ConfigureDataPoint(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<DataPoint>()
+                .Property(dp => dp.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            modelBuilder.Entity<DataPoint>()
+                .Property(dp => dp.Description)
+                .HasMaxLength(500);
+
+            modelBuilder.Entity<DataPoint>()
+                .HasOne(dp => dp.Study)
+                .WithMany(s => s.DataPoints)
+                .HasForeignKey(dp => dp.StudyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+        private void ConfigureObservationData(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ObservationData>()
+                .Property(od => od.Value)
+                .IsRequired();
+
+            modelBuilder.Entity<ObservationData>()
+                .Property(od => od.Notes)
+                .HasMaxLength(500);
+
+            modelBuilder.Entity<ObservationData>()
+                .HasOne(od => od.DataPoint)
+                .WithMany(dp => dp.Observations)
+                .HasForeignKey(od => od.DataPointId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ObservationData>()
+                .HasOne(od => od.StudyAnimal)
+                .WithMany(sa => sa.Observations)
+                .HasForeignKey(od => od.StudyAnimalId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ObservationData>()
+                .HasOne(od => od.Observer)
+                .WithMany()
+                .HasForeignKey(od => od.ObserverId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
 
