@@ -38,7 +38,7 @@ namespace RATAPP.Forms
         private Button addToGridButton;
         private Button saveAllButton;
 
-        public AddLitterForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        private AddLitterForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
             // Initialize services
             var breedingService = new BreedingService(context);
@@ -58,6 +58,18 @@ namespace RATAPP.Forms
 
             InitializeComponents();
             InitializeEventHandlers();
+        }
+
+        /// <summary>
+        /// Static factory method that initializes the form and ensures the data is loaded.
+        /// Use like: var form = await AddLitterForm.CreateAsync(context);
+        /// </summary>
+        public static async Task<AddLitterForm> CreateAsync(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        {
+            var form = new AddLitterForm(context);
+            await form._eventHandler.HandleFormLoadAsync(
+                form.speciesComboBox, form.damComboBox, form.sireComboBox, form.projectComboBox);
+            return form;
         }
 
         private void InitializeComponents()
