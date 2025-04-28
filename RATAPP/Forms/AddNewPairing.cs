@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPP.Helpers;
-using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
 
@@ -15,8 +14,8 @@ namespace RATAPP.Forms
     public partial class AddPairingForm : Form
     {
         // Helper classes
-        private readonly PairingDataManager _dataManager;
-        private readonly PairingEventHandler _eventHandler;
+        private readonly FormDataManager _dataManager;
+        private readonly FormEventHandler _eventHandler;
         private readonly LoadingSpinnerHelper _spinner;
 
         // UI Controls
@@ -43,14 +42,14 @@ namespace RATAPP.Forms
             var projectService = new ProjectService(context);
 
             // Initialize helper classes
-            _dataManager = new PairingDataManager(
+            _dataManager = new FormDataManager(
                 breedingService,
                 speciesService,
                 projectService,
                 animalService);
 
             _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
-            _eventHandler = new PairingEventHandler(_dataManager, _spinner);
+            _eventHandler = new FormEventHandler(_dataManager, _spinner);
 
             InitializeComponents();
             InitializeEventHandlers();
@@ -65,8 +64,7 @@ namespace RATAPP.Forms
             this.BackColor = Color.White;
 
             // Create header
-            var headerPanel = new Panel();
-            FormStyleHelper.ApplyHeaderStyle(headerPanel, "Add Pairing");
+            var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Pairing");
             this.Controls.Add(headerPanel);
 
             // Create container panel for tabControl
@@ -87,11 +85,11 @@ namespace RATAPP.Forms
             };
 
             // Initialize tabs
-            var singlePairingTab = PairingFormComponentFactory.CreatePairingTabPage("Single Pairing");
+            var singlePairingTab = FormComponentFactory.CreateTabPage("Single Pairing");
             InitializeSinglePairingTab(singlePairingTab);
             tabControl.TabPages.Add(singlePairingTab);
 
-            var multiplePairingsTab = PairingFormComponentFactory.CreatePairingTabPage("Multiple Pairings");
+            var multiplePairingsTab = FormComponentFactory.CreateTabPage("Multiple Pairings");
             InitializeMultiplePairingsTab(multiplePairingsTab);
             tabControl.TabPages.Add(multiplePairingsTab);
 
@@ -104,36 +102,40 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create pairing information group
+<<<<<<< HEAD
             var pairingGroup = PairingFormComponentFactory.CreateFormSection("Pairing Information", DockStyle.Top, 350);
+=======
+            var pairingGroup = FormComponentFactory.CreateFormSection("Pairing Information", DockStyle.Top, 300);
+>>>>>>> 9c13a3029662b8a4ba5aa00fa6c7e809b08e0929
 
             // Create form fields
             speciesComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(speciesComboBox);
-            var speciesField = PairingFormComponentFactory.CreateFormField("Species:", speciesComboBox);
+            var speciesField = FormComponentFactory.CreateFormField("Species:", speciesComboBox);
 
             pairingIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(pairingIdTextBox);
-            var pairingIdField = PairingFormComponentFactory.CreateFormField("Pairing ID:", pairingIdTextBox);
+            var pairingIdField = FormComponentFactory.CreateFormField("Pairing ID:", pairingIdTextBox);
 
             projectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(projectComboBox);
-            var projectField = PairingFormComponentFactory.CreateFormField("Project:", projectComboBox);
+            var projectField = FormComponentFactory.CreateFormField("Project:", projectComboBox);
 
             damComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(damComboBox);
-            var damField = PairingFormComponentFactory.CreateFormField("Dam (Female):", damComboBox);
+            var damField = FormComponentFactory.CreateFormField("Dam (Female):", damComboBox);
 
             sireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(sireComboBox);
-            var sireField = PairingFormComponentFactory.CreateFormField("Sire (Male):", sireComboBox);
+            var sireField = FormComponentFactory.CreateFormField("Sire (Male):", sireComboBox);
 
             pairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = PairingFormComponentFactory.CreateFormField("Pairing Date:", pairingDatePicker);
+            var dateField = FormComponentFactory.CreateFormField("Pairing Date:", pairingDatePicker);
 
             // Create buttons
             addButton = new Button { Text = "Add Pairing" };
             cancelButton = new Button { Text = "Cancel" };
-            var buttonPanel = PairingFormComponentFactory.CreateButtonPanel(addButton, cancelButton);
+            var buttonPanel = FormComponentFactory.CreateButtonPanel(addButton, cancelButton);
 
             // Add all controls to the group
             var formPanel = new Panel { Dock = DockStyle.Fill };
@@ -142,13 +144,15 @@ namespace RATAPP.Forms
                 damField, sireField, dateField, buttonPanel
             });
 
-           
             pairingGroup.Controls.Add(formPanel);
+<<<<<<< HEAD
             mainPanel.Controls.Add(buttonPanel);
+=======
+>>>>>>> 9c13a3029662b8a4ba5aa00fa6c7e809b08e0929
             mainPanel.Controls.Add(pairingGroup);
 
             // Add information panel
-            var infoPanel = PairingFormComponentFactory.CreateInfoPanel("Information",
+            var infoPanel = FormComponentFactory.CreateInfoPanel("Information",
                 "• Pairing ID should be unique for each pairing\n" +
                 "• Ensure the dam and sire are of appropriate age for breeding\n" +
                 "• The pairing date will be used to calculate expected litter dates\n" +
@@ -163,31 +167,31 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create input group
-            var inputGroup = PairingFormComponentFactory.CreateFormSection("New Pairing", DockStyle.Top, 275);
+            var inputGroup = FormComponentFactory.CreateFormSection("New Pairing", DockStyle.Top, 275);
 
             // Create form fields (similar to single pairing tab)
             var multiPairingIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(multiPairingIdTextBox);
-            var pairingIdField = PairingFormComponentFactory.CreateFormField("Pairing ID:", multiPairingIdTextBox);
+            var pairingIdField = FormComponentFactory.CreateFormField("Pairing ID:", multiPairingIdTextBox);
 
             var multiProjectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiProjectComboBox);
-            var projectField = PairingFormComponentFactory.CreateFormField("Project:", multiProjectComboBox);
+            var projectField = FormComponentFactory.CreateFormField("Project:", multiProjectComboBox);
 
             var multiDamComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiDamComboBox);
-            var damField = PairingFormComponentFactory.CreateFormField("Dam (Female):", multiDamComboBox);
+            var damField = FormComponentFactory.CreateFormField("Dam (Female):", multiDamComboBox);
 
             var multiSireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiSireComboBox);
-            var sireField = PairingFormComponentFactory.CreateFormField("Sire (Male):", multiSireComboBox);
+            var sireField = FormComponentFactory.CreateFormField("Sire (Male):", multiSireComboBox);
 
             var multiPairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = PairingFormComponentFactory.CreateFormField("Pairing Date:", multiPairingDatePicker);
+            var dateField = FormComponentFactory.CreateFormField("Pairing Date:", multiPairingDatePicker);
 
             // Create Add to Grid button
             addToGridButton = new Button { Text = "Add to List" };
-            var addToGridPanel = PairingFormComponentFactory.CreateButtonPanel(addToGridButton, null);
+            var addToGridPanel = FormComponentFactory.CreateButtonPanel(addToGridButton, null);
 
             // Add all controls to the group
             var formPanel = new Panel { Dock = DockStyle.Fill };
@@ -200,31 +204,29 @@ namespace RATAPP.Forms
             mainPanel.Controls.Add(inputGroup);
 
             // Create grid
-            multiplePairingsGrid = PairingFormComponentFactory.CreatePairingsGrid();
-            var gridGroup = PairingFormComponentFactory.CreateFormSection("Pairings to Add", DockStyle.Fill, 0);
+            multiplePairingsGrid = FormComponentFactory.CreateDataGrid();
+            var gridGroup = FormComponentFactory.CreateFormSection("Pairings to Add", DockStyle.Fill, 0);
             gridGroup.Controls.Add(multiplePairingsGrid);
+
+            // Add columns to grid
+            multiplePairingsGrid.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
+                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
+                new DataGridViewTextBoxColumn { Name = "PairingID", HeaderText = "Pairing ID" },
+                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
+                new DataGridViewTextBoxColumn { Name = "PairingDate", HeaderText = "Pairing Date" },
+                new DataGridViewButtonColumn { Name = "Remove", HeaderText = "Remove", Text = "Remove", UseColumnTextForButtonValue = true }
+            });
 
             // Create bottom buttons
             saveAllButton = new Button { Text = "Save All Pairings" };
             importButton = new Button { Text = "Import Data" };
             var cancelMultiButton = new Button { Text = "Cancel" };
-
-            var bottomPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 60,
-                Padding = new Padding(0, 10, 0, 0)
-            };
-
-            FormStyleHelper.ApplyButtonStyle(saveAllButton, true);
+            var bottomPanel = FormComponentFactory.CreateButtonPanel(saveAllButton, cancelMultiButton);
+            bottomPanel.Controls.Add(importButton);
             FormStyleHelper.ApplyButtonStyle(importButton, true);
-            FormStyleHelper.ApplyButtonStyle(cancelMultiButton, false);
-
-            saveAllButton.Location = new Point(300, 10);
             importButton.Location = new Point(140, 10);
-            cancelMultiButton.Location = new Point(460, 10);
-
-            bottomPanel.Controls.AddRange(new Control[] { saveAllButton, importButton, cancelMultiButton });
 
             mainPanel.Controls.Add(bottomPanel);
             mainPanel.Controls.Add(gridGroup);
@@ -246,10 +248,7 @@ namespace RATAPP.Forms
                 pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
 
             saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
-                multiplePairingsGrid,
-                damComboBox,
-                sireComboBox,
-                projectComboBox);
+                multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
 
             importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
 
