@@ -83,13 +83,19 @@ namespace RATAPP.Forms
 
             // Create header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Litter");
+            headerPanel.Height = 70;
+            var headerLabel = headerPanel.Controls[0] as Label;
+            if (headerLabel != null)
+            {
+                headerLabel.Location = new Point(25, 10);
+            }
             var descriptionLabel = new Label
             {
                 Text = "Create new litters and manage breeding records",
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(22, 40)
+                Location = new Point(25, 42)
             };
             headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
@@ -232,7 +238,7 @@ namespace RATAPP.Forms
             leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup });
             rightColumn.Controls.AddRange(new Control[] { litterDetailsGroup });
 
-            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn, buttonPanel });
+            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn });
 
             // Add enhanced information panel
             var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
@@ -244,6 +250,7 @@ namespace RATAPP.Forms
                 "• You can view all litters in the Breeding History section");
 
             mainPanel.Controls.Add(infoPanel);
+            mainPanel.Controls.Add(buttonPanel);
 
             // Set tab order
             SetTabOrder();
