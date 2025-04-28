@@ -1,6 +1,7 @@
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Data.Models.Breeding;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace RATAPP.Helpers
 {
@@ -36,19 +37,19 @@ namespace RATAPP.Helpers
             return await _animalService.GetAnimalInfoBySexAndSpecies("Male", species);
         }
 
-        public async Task<string[]> GetSpeciesAsync()
+        public async Task<IEnumerable<string>> GetSpeciesAsync()
         {
-            return await _speciesService.GetSpeciesAsync();
+            return await _speciesService.GetAllSpeciesAsync();
         }
 
-        public async Task<string[]> GetProjectsAsync()
+        public async Task<List<Project>> GetProjectsAsync()
         {
-            return await _projectService.GetProjectsAsync();
+            return await _projectService.GetAllProjectsAsync();
         }
 
-        public async Task SavePairingAsync(Pairing pairing)
+        public async Task<List<Pairing>> GetPairingsAsync()
         {
-            await _breedingService.CreatePairingAsync(pairing);
+            return await _breedingService.GetAllPairingsAsync();
         }
 
         public async Task SaveLitterAsync(Litter litter)
@@ -56,9 +57,9 @@ namespace RATAPP.Helpers
             await _breedingService.CreateLitterAsync(litter);
         }
 
-        public async Task<Pairing[]> GetPairingsAsync()
+        public async Task SavePairingAsync(Pairing pairing)
         {
-            return await _breedingService.GetPairingsAsync();
+            await _breedingService.CreatePairingAsync(pairing);
         }
     }
 }
