@@ -153,6 +153,79 @@ namespace RATAPP.Helpers
             }
         }
 
+        public void HandleAddPairingToGridClick(string id, ComboBox damBox, ComboBox sireBox, ComboBox projectBox, 
+            DateTimePicker datePicker, DataGridView grid)
+        {
+            try
+            {
+                _spinner.Show();
+
+                // Validate inputs
+                if (string.IsNullOrWhiteSpace(id) || damBox.SelectedIndex == -1 || 
+                    sireBox.SelectedIndex == -1 || projectBox.SelectedIndex == -1)
+                {
+                    MessageBox.Show("Please fill in all required fields", "Validation Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                grid.Rows.Add(
+                    damBox.SelectedItem.ToString(),
+                    sireBox.SelectedItem.ToString(),
+                    id,
+                    projectBox.SelectedItem.ToString(),
+                    datePicker.Value.ToShortDateString()
+                );
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+
+        public async Task HandleSaveAllPairingsAsync(DataGridView grid, ComboBox damBox, ComboBox sireBox, ComboBox projectBox)
+        {
+            try
+            {
+                _spinner.Show();
+
+                if (grid.Rows.Count == 0)
+                {
+                    MessageBox.Show("Please add at least one item to the list", "Validation Error", 
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                foreach (DataGridViewRow row in grid.Rows)
+                {
+                    var project = (await _dataManager.GetProjectsAsync())
+                        .First(p => p.Name == row.Cells["Project"].Value.ToString());
+
+                    var pairing = new Pairing
+                    {
+                        pairingId = row.Cells["PairingID"].Value.ToString(),
+                        DamId = int.Parse(row.Cells["Dam"].Value.ToString().Split('-')[0].Trim()),
+                        SireId = int.Parse(row.Cells["Sire"].Value.ToString().Split('-')[0].Trim()),
+                        ProjectId = project.Id,
+                        PairingStartDate = DateTime.Parse(row.Cells["PairingDate"].Value.ToString()),
+                        CreatedOn = DateTime.Now,
+                        LastUpdated = DateTime.Now
+                    };
+
+                    await _dataManager.SavePairingAsync(pairing);
+                }
+
+                MessageBox.Show($"Successfully added {grid.Rows.Count} pairings!", "Success", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                grid.Rows.Clear();
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+
         public void HandleAddLitterToGridClick(string litterId, string litterName, int pairId,
             DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes,
             DataGridView grid)

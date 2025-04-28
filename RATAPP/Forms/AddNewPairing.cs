@@ -239,7 +239,7 @@ namespace RATAPP.Forms
             addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
                 pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
 
-            addToGridButton.Click += (s, e) => _eventHandler.HandleAddToGridClick(
+            addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
                 pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
 
             saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
