@@ -259,10 +259,11 @@ namespace RATAPP.Forms
 
         private void ResearchButton_Click(object sender, EventArgs e)
         {
-            var researchService = new ResearchService(_context);
-            var researchPanel = new ResearchPanel(this, researchService);
-            _activePanel = researchPanel;
-            ShowPanel(researchPanel);
+            throw new NotImplementedException();
+            //var researchService = new ResearchService(_context);
+            //var researchPanel = new ResearchPanel(this, researchService);
+            //_activePanel = researchPanel;
+            //ShowPanel(researchPanel);
         }
 
         private void ReportsButton_Click(object sender, EventArgs e)

@@ -58,8 +58,5 @@
     <Compile Update="Panels\ReportsPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="Panels\ResearchPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
   </ItemGroup>
 </Project>

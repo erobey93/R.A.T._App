@@ -83,7 +83,7 @@ namespace RATAPP.Forms
 
             // Create header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Litter");
-            headerPanel.Height = 70;
+            headerPanel.Height = 60;
             var headerLabel = headerPanel.Controls[0] as Label;
             if (headerLabel != null)
             {
@@ -95,9 +95,17 @@ namespace RATAPP.Forms
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(25, 42)
             };
-            headerPanel.Controls.Add(descriptionLabel);
+
+            // Calculate the X position to place descriptionLabel to the right of headerLabel
+            int descriptionLabelX = headerLabel.Location.X + headerLabel.Width + 10; // Add some spacing (10)
+                                                                                     // Calculate the Y position to vertically align descriptionLabel with headerLabel
+            int descriptionLabelY = headerLabel.Location.Y;
+
+            descriptionLabel.Location = new Point(descriptionLabelX, descriptionLabelY);
+
+            headerPanel.Controls.Add(descriptionLabel); // Add the descriptionLabel to the headerPanel
+
             this.Controls.Add(headerPanel);
 
             // Create container panel for tabControl
@@ -149,8 +157,8 @@ namespace RATAPP.Forms
             };
 
             // Create groups for related fields
-            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 280);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 280);
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250);
             var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 350);
 
             // Create and configure form fields with validation indicators
@@ -207,20 +215,20 @@ namespace RATAPP.Forms
             // Organize fields into groups
             var basicInfoPanel = new Panel { Dock = DockStyle.Fill };
             basicInfoPanel.Controls.AddRange(new Control[] {
-                speciesField, litterIdField, litterNameField, projectField
-            });
+        speciesField, litterIdField, litterNameField, projectField
+    });
             basicInfoGroup.Controls.Add(basicInfoPanel);
 
             var breedingInfoPanel = new Panel { Dock = DockStyle.Fill };
             breedingInfoPanel.Controls.AddRange(new Control[] {
-                damField, sireField, pairField, dateField
-            });
+        damField, sireField, pairField, dateField
+    });
             breedingInfoGroup.Controls.Add(breedingInfoPanel);
 
             var litterDetailsPanel = new Panel { Dock = DockStyle.Fill };
             litterDetailsPanel.Controls.AddRange(new Control[] {
-                numPupsField, numMalesField, numFemalesField, notesField
-            });
+        numPupsField, numMalesField, numFemalesField, notesField
+    });
             litterDetailsGroup.Controls.Add(litterDetailsPanel);
 
             // Create buttons with improved styling
@@ -233,6 +241,7 @@ namespace RATAPP.Forms
             cancelButton.Margin = new Padding(10, 20, 0, 0);
 
             var buttonPanel = FormComponentFactory.CreateButtonPanel(addButton, cancelButton);
+            buttonPanel.Dock = DockStyle.Bottom; // Dock the button panel to the bottom
 
             // Organize panels
             leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup });
@@ -250,7 +259,7 @@ namespace RATAPP.Forms
                 "• You can view all litters in the Breeding History section");
 
             mainPanel.Controls.Add(infoPanel);
-            mainPanel.Controls.Add(buttonPanel);
+            mainPanel.Controls.Add(buttonPanel); // Add buttonPanel *after* infoPanel
 
             // Set tab order
             SetTabOrder();
