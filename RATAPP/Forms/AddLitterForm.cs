@@ -76,12 +76,22 @@ namespace RATAPP.Forms
         {
             // Set form properties
             this.Text = "Add Litter";
-            this.Size = new Size(900, 650);
+            this.Size = new Size(1000, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
+            this.AutoScroll = true;
 
-            // Create header
+            // Create header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Litter");
+            var descriptionLabel = new Label
+            {
+                Text = "Create new litters and manage breeding records",
+                Font = new Font("Segoe UI", 10),
+                ForeColor = Color.White,
+                AutoSize = true,
+                Location = new Point(22, 40)
+            };
+            headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
 
             // Create container panel for tabControl
@@ -118,82 +128,125 @@ namespace RATAPP.Forms
         {
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
-            // Create litter information group
-            var litterGroup = FormComponentFactory.CreateFormSection("Litter Information", DockStyle.Top, 400);
+            // Create two columns for better organization
+            var leftColumn = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 450,
+                Padding = new Padding(0, 0, 10, 0)
+            };
 
-            // Create form fields
+            var rightColumn = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10, 0, 0, 0)
+            };
+
+            // Create groups for related fields
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 200);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 200);
+            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 250);
+
+            // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(speciesComboBox);
-            var speciesField = FormComponentFactory.CreateFormField("Species:", speciesComboBox);
+            var speciesField = CreateRequiredFormField("Species:", speciesComboBox);
 
             litterIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(litterIdTextBox);
-            var litterIdField = FormComponentFactory.CreateFormField("Litter ID:", litterIdTextBox);
+            var litterIdField = CreateRequiredFormField("Litter ID:", litterIdTextBox);
 
             litterNameTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(litterNameTextBox);
-            var litterNameField = FormComponentFactory.CreateFormField("Litter Name:", litterNameTextBox);
+            var litterNameField = CreateRequiredFormField("Litter Name:", litterNameTextBox);
 
             projectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(projectComboBox);
-            var projectField = FormComponentFactory.CreateFormField("Project:", projectComboBox);
+            var projectField = CreateRequiredFormField("Project:", projectComboBox);
 
             damComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(damComboBox);
-            var damField = FormComponentFactory.CreateFormField("Dam (Female):", damComboBox);
+            var damField = CreateRequiredFormField("Dam (Female):", damComboBox);
 
             sireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(sireComboBox);
-            var sireField = FormComponentFactory.CreateFormField("Sire (Male):", sireComboBox);
+            var sireField = CreateRequiredFormField("Sire (Male):", sireComboBox);
 
             pairComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(pairComboBox);
-            var pairField = FormComponentFactory.CreateFormField("Pair:", pairComboBox);
+            var pairField = CreateRequiredFormField("Pair:", pairComboBox);
 
             litterDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = FormComponentFactory.CreateFormField("Birth Date:", litterDatePicker);
+            var dateField = CreateRequiredFormField("Birth Date:", litterDatePicker);
 
             numPups = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(numPups);
-            var numPupsField = FormComponentFactory.CreateFormField("Number of Pups:", numPups);
+            numPups.KeyPress += (s, e) => ValidateNumericInput(e);
+            var numPupsField = CreateRequiredFormField("Number of Pups:", numPups);
 
             numMales = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(numMales);
-            var numMalesField = FormComponentFactory.CreateFormField("Number of Males:", numMales);
+            numMales.KeyPress += (s, e) => ValidateNumericInput(e);
+            var numMalesField = CreateRequiredFormField("Number of Males:", numMales);
 
             numFemales = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(numFemales);
-            var numFemalesField = FormComponentFactory.CreateFormField("Number of Females:", numFemales);
+            numFemales.KeyPress += (s, e) => ValidateNumericInput(e);
+            var numFemalesField = CreateRequiredFormField("Number of Females:", numFemales);
 
-            litterNotes = new TextBox { Multiline = true, Height = 60 };
-            FormStyleHelper.ApplyTextBoxStyle(litterNotes);
+            litterNotes = new TextBox { Multiline = true, Height = 80 };
+            FormStyleHelper.ApplyTextBoxStyle(litterNotes, 400);
             var notesField = FormComponentFactory.CreateFormField("Notes:", litterNotes);
 
-            // Create buttons
+            // Organize fields into groups
+            var basicInfoPanel = new Panel { Dock = DockStyle.Fill };
+            basicInfoPanel.Controls.AddRange(new Control[] {
+                speciesField, litterIdField, litterNameField, projectField
+            });
+            basicInfoGroup.Controls.Add(basicInfoPanel);
+
+            var breedingInfoPanel = new Panel { Dock = DockStyle.Fill };
+            breedingInfoPanel.Controls.AddRange(new Control[] {
+                damField, sireField, pairField, dateField
+            });
+            breedingInfoGroup.Controls.Add(breedingInfoPanel);
+
+            var litterDetailsPanel = new Panel { Dock = DockStyle.Fill };
+            litterDetailsPanel.Controls.AddRange(new Control[] {
+                numPupsField, numMalesField, numFemalesField, notesField
+            });
+            litterDetailsGroup.Controls.Add(litterDetailsPanel);
+
+            // Create buttons with improved styling
             addButton = new Button { Text = "Add Litter" };
+            FormStyleHelper.ApplyButtonStyle(addButton, true);
+            addButton.Margin = new Padding(0, 20, 0, 0);
+
             cancelButton = new Button { Text = "Cancel" };
+            FormStyleHelper.ApplyButtonStyle(cancelButton, false);
+            cancelButton.Margin = new Padding(10, 20, 0, 0);
+
             var buttonPanel = FormComponentFactory.CreateButtonPanel(addButton, cancelButton);
 
-            // Add all controls to the group
-            var formPanel = new Panel { Dock = DockStyle.Fill };
-            formPanel.Controls.AddRange(new Control[] {
-                speciesField, litterIdField, litterNameField, projectField,
-                damField, sireField, pairField, dateField,
-                numPupsField, numMalesField, numFemalesField, notesField,
-                buttonPanel
-            });
+            // Organize panels
+            leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup });
+            rightColumn.Controls.AddRange(new Control[] { litterDetailsGroup });
 
-            litterGroup.Controls.Add(formPanel);
-            mainPanel.Controls.Add(litterGroup);
+            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn, buttonPanel });
 
-            // Add information panel
-            var infoPanel = FormComponentFactory.CreateInfoPanel("Information",
-                "• Litter ID should be unique for each litter\n" +
+            // Add enhanced information panel
+            var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
+                "• Litter ID must be unique for each litter (required)\n" +
+                "• All fields marked with * are required\n" +
                 "• Ensure the dam and sire are of appropriate age for breeding\n" +
                 "• The birth date will be used to track litter development\n" +
+                "• Numbers must be positive integers\n" +
                 "• You can view all litters in the Breeding History section");
 
             mainPanel.Controls.Add(infoPanel);
+
+            // Set tab order
+            SetTabOrder();
             tab.Controls.Add(mainPanel);
         }
 
@@ -201,70 +254,147 @@ namespace RATAPP.Forms
         {
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
-            // Create input group
-            var inputGroup = FormComponentFactory.CreateFormSection("New Litter", DockStyle.Top, 275);
+            // Create input group with improved layout
+            var inputGroup = FormComponentFactory.CreateFormSection("Add New Litter", DockStyle.Top, 250);
+            inputGroup.Margin = new Padding(0, 0, 0, 20);
 
-            // Create form fields (similar to single litter tab)
+            // Create form fields with validation indicators
             var multiLitterIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(multiLitterIdTextBox);
-            var litterIdField = FormComponentFactory.CreateFormField("Litter ID:", multiLitterIdTextBox);
+            var litterIdField = CreateRequiredFormField("Litter ID:", multiLitterIdTextBox);
 
             var multiProjectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiProjectComboBox);
-            var projectField = FormComponentFactory.CreateFormField("Project:", multiProjectComboBox);
+            var projectField = CreateRequiredFormField("Project:", multiProjectComboBox);
 
             var multiDamComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiDamComboBox);
-            var damField = FormComponentFactory.CreateFormField("Dam (Female):", multiDamComboBox);
+            var damField = CreateRequiredFormField("Dam (Female):", multiDamComboBox);
 
             var multiSireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiSireComboBox);
-            var sireField = FormComponentFactory.CreateFormField("Sire (Male):", multiSireComboBox);
+            var sireField = CreateRequiredFormField("Sire (Male):", multiSireComboBox);
 
             var multiLitterDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = FormComponentFactory.CreateFormField("Birth Date:", multiLitterDatePicker);
+            var dateField = CreateRequiredFormField("Birth Date:", multiLitterDatePicker);
 
-            // Create Add to Grid button
+            // Create Add to Grid button with improved styling
             addToGridButton = new Button { Text = "Add to List" };
+            FormStyleHelper.ApplyButtonStyle(addToGridButton, true);
+            addToGridButton.Margin = new Padding(0, 10, 0, 0);
             var addToGridPanel = FormComponentFactory.CreateButtonPanel(addToGridButton, null);
 
-            // Add all controls to the group
-            var formPanel = new Panel { Dock = DockStyle.Fill };
-            formPanel.Controls.AddRange(new Control[] {
-                litterIdField, projectField, damField,
+            // Organize fields into two columns
+            var leftColumn = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 400,
+                Padding = new Padding(0, 0, 10, 0)
+            };
+
+            var rightColumn = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(10, 0, 0, 0)
+            };
+
+            leftColumn.Controls.AddRange(new Control[] {
+                litterIdField, projectField, damField
+            });
+
+            rightColumn.Controls.AddRange(new Control[] {
                 sireField, dateField, addToGridPanel
             });
 
+            var formPanel = new Panel { Dock = DockStyle.Fill };
+            formPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn });
             inputGroup.Controls.Add(formPanel);
-            mainPanel.Controls.Add(inputGroup);
 
-            // Create grid
+            // Create grid with improved styling
             multipleLittersGrid = FormComponentFactory.CreateDataGrid();
+            FormStyleHelper.ApplyDataGridViewStyle(multipleLittersGrid);
+            multipleLittersGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            multipleLittersGrid.Margin = new Padding(0, 10, 0, 10);
+
             var gridGroup = FormComponentFactory.CreateFormSection("Litters to Add", DockStyle.Fill, 0);
             gridGroup.Controls.Add(multipleLittersGrid);
 
-            // Add columns to grid
+            // Add columns to grid with improved formatting
             multipleLittersGrid.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "LitterID", HeaderText = "Litter ID" },
-                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Name" },
-                new DataGridViewTextBoxColumn { Name = "PairID", HeaderText = "Pair ID" },
-                new DataGridViewTextBoxColumn { Name = "BirthDate", HeaderText = "Birth Date" },
-                new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "# Pups" },
-                new DataGridViewTextBoxColumn { Name = "NumMales", HeaderText = "# Males" },
-                new DataGridViewTextBoxColumn { Name = "NumFemales", HeaderText = "# Females" },
-                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes" },
-                new DataGridViewButtonColumn { Name = "Remove", HeaderText = "Remove", Text = "Remove", UseColumnTextForButtonValue = true }
+                new DataGridViewTextBoxColumn { Name = "LitterID", HeaderText = "Litter ID", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Name", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "PairID", HeaderText = "Pair ID", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "BirthDate", HeaderText = "Birth Date", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "# Pups", Width = 80 },
+                new DataGridViewTextBoxColumn { Name = "NumMales", HeaderText = "# Males", Width = 80 },
+                new DataGridViewTextBoxColumn { Name = "NumFemales", HeaderText = "# Females", Width = 80 },
+                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes", Width = 200 },
+                new DataGridViewButtonColumn { 
+                    Name = "Remove", 
+                    HeaderText = "", 
+                    Text = "Remove", 
+                    UseColumnTextForButtonValue = true,
+                    Width = 80
+                }
             });
 
-            // Create bottom buttons
+            // Create bottom buttons with improved styling
             saveAllButton = new Button { Text = "Save All Litters" };
+            FormStyleHelper.ApplyButtonStyle(saveAllButton, true);
+            
             var cancelMultiButton = new Button { Text = "Cancel" };
+            FormStyleHelper.ApplyButtonStyle(cancelMultiButton, false);
+            
             var bottomPanel = FormComponentFactory.CreateButtonPanel(saveAllButton, cancelMultiButton);
+            bottomPanel.Margin = new Padding(0, 10, 0, 0);
 
-            mainPanel.Controls.Add(bottomPanel);
-            mainPanel.Controls.Add(gridGroup);
+            // Add help text
+            var helpText = new Label
+            {
+                Text = "Add multiple litters by filling in the details above and clicking 'Add to List'. " +
+                      "Click 'Save All Litters' when you're ready to save all entries.",
+                Font = new Font("Segoe UI", 9),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                AutoSize = true,
+                Margin = new Padding(0, 5, 0, 10)
+            };
+
+            mainPanel.Controls.AddRange(new Control[] {
+                inputGroup,
+                helpText,
+                gridGroup,
+                bottomPanel
+            });
+
             tab.Controls.Add(mainPanel);
+        }
+
+        private Panel CreateRequiredFormField(string label, Control control)
+        {
+            var panel = FormComponentFactory.CreateFormField(label + " *", control);
+            panel.Margin = new Padding(0, 0, 0, 10);
+            return panel;
+        }
+
+        private void ValidateNumericInput(KeyPressEventArgs e)
+        {
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void SetTabOrder()
+        {
+            int tabIndex = 0;
+            foreach (Control control in this.Controls)
+            {
+                if (control is ComboBox || control is TextBox || control is DateTimePicker || control is Button)
+                {
+                    control.TabIndex = tabIndex++;
+                }
+            }
         }
 
         private void InitializeEventHandlers()
