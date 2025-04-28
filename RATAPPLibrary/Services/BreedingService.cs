@@ -143,6 +143,7 @@ namespace RATAPPLibrary.Services
 
                 //make a new entry in the animal pairing table for the specified dam and sire 
                 _context.Pairing.Add(pairing);
+                _context.SaveChanges(); 
 
                 return true;
             }
@@ -178,6 +179,7 @@ namespace RATAPPLibrary.Services
 
                 //make a new entry in the animal pairing table for the specified dam and sire 
                 _context.Pairing.Add(pair);
+                _context.SaveChanges();
 
                 return true;    
             }

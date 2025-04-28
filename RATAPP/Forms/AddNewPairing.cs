@@ -60,7 +60,7 @@ namespace RATAPP.Forms
         {
             // Set form properties
             this.Text = "Add Pairing";
-            this.Size = new Size(900, 650);
+            this.Size = new Size(1000, 750);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
 
@@ -104,7 +104,7 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create pairing information group
-            var pairingGroup = PairingFormComponentFactory.CreateFormSection("Pairing Information", DockStyle.Top, 300);
+            var pairingGroup = PairingFormComponentFactory.CreateFormSection("Pairing Information", DockStyle.Top, 350);
 
             // Create form fields
             speciesComboBox = new ComboBox();
@@ -144,7 +144,7 @@ namespace RATAPP.Forms
 
            
             pairingGroup.Controls.Add(formPanel);
-            pairingGroup.Controls.Add(buttonPanel);
+            mainPanel.Controls.Add(buttonPanel);
             mainPanel.Controls.Add(pairingGroup);
 
             // Add information panel
