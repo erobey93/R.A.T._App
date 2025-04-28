@@ -66,19 +66,13 @@ namespace RATAPP.Forms
 
             // Create header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Pairing");
-            headerPanel.Height = 70;
-            var headerLabel = headerPanel.Controls[0] as Label;
-            if (headerLabel != null)
-            {
-                headerLabel.Location = new Point(25, 10);
-            }
             var descriptionLabel = new Label
             {
                 Text = "Create new breeding pairs and manage pairing records",
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.White,
                 AutoSize = true,
-                Location = new Point(25, 42)
+                Location = new Point(22, 40)
             };
             headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
@@ -138,32 +132,26 @@ namespace RATAPP.Forms
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(speciesComboBox);
-            var speciesField = FormComponentFactory.CreateFormField("Species: *", speciesComboBox);
-            speciesField.Margin = new Padding(0, 0, 0, 15);
+            var speciesField = CreateRequiredFormField("Species:", speciesComboBox);
 
             pairingIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(pairingIdTextBox);
-            var pairingIdField = FormComponentFactory.CreateFormField("Pairing ID: *", pairingIdTextBox);
-            pairingIdField.Margin = new Padding(0, 0, 0, 15);
+            var pairingIdField = CreateRequiredFormField("Pairing ID:", pairingIdTextBox);
 
             projectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(projectComboBox);
-            var projectField = FormComponentFactory.CreateFormField("Project: *", projectComboBox);
-            projectField.Margin = new Padding(0, 0, 0, 15);
+            var projectField = CreateRequiredFormField("Project:", projectComboBox);
 
             damComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(damComboBox);
-            var damField = FormComponentFactory.CreateFormField("Dam (Female): *", damComboBox);
-            damField.Margin = new Padding(0, 0, 0, 15);
+            var damField = CreateRequiredFormField("Dam (Female):", damComboBox);
 
             sireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(sireComboBox);
-            var sireField = FormComponentFactory.CreateFormField("Sire (Male): *", sireComboBox);
-            sireField.Margin = new Padding(0, 0, 0, 15);
+            var sireField = CreateRequiredFormField("Sire (Male):", sireComboBox);
 
             pairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = FormComponentFactory.CreateFormField("Pairing Date: *", pairingDatePicker);
-            dateField.Margin = new Padding(0, 0, 0, 15);
+            var dateField = CreateRequiredFormField("Pairing Date:", pairingDatePicker);
 
             // Organize fields into groups
             var basicInfoPanel = new Panel { Dock = DockStyle.Fill };
@@ -193,7 +181,7 @@ namespace RATAPP.Forms
             leftColumn.Controls.Add(basicInfoGroup);
             rightColumn.Controls.Add(breedingInfoGroup);
 
-            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn });
+            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn, buttonPanel });
 
             // Add enhanced information panel
             var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
@@ -205,7 +193,6 @@ namespace RATAPP.Forms
                 "• You can view all pairings in the Breeding History section");
 
             mainPanel.Controls.Add(infoPanel);
-            mainPanel.Controls.Add(buttonPanel);
 
             // Set tab order
             SetTabOrder();
@@ -223,27 +210,22 @@ namespace RATAPP.Forms
             // Create form fields with validation indicators
             var multiPairingIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(multiPairingIdTextBox);
-            var pairingIdField = FormComponentFactory.CreateFormField("Pairing ID: *", multiPairingIdTextBox);
-            pairingIdField.Margin = new Padding(0, 0, 0, 15);
+            var pairingIdField = CreateRequiredFormField("Pairing ID:", multiPairingIdTextBox);
 
             var multiProjectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiProjectComboBox);
-            var projectField = FormComponentFactory.CreateFormField("Project: *", multiProjectComboBox);
-            projectField.Margin = new Padding(0, 0, 0, 15);
+            var projectField = CreateRequiredFormField("Project:", multiProjectComboBox);
 
             var multiDamComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiDamComboBox);
-            var damField = FormComponentFactory.CreateFormField("Dam (Female): *", multiDamComboBox);
-            damField.Margin = new Padding(0, 0, 0, 15);
+            var damField = CreateRequiredFormField("Dam (Female):", multiDamComboBox);
 
             var multiSireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiSireComboBox);
-            var sireField = FormComponentFactory.CreateFormField("Sire (Male): *", multiSireComboBox);
-            sireField.Margin = new Padding(0, 0, 0, 15);
+            var sireField = CreateRequiredFormField("Sire (Male):", multiSireComboBox);
 
             var multiPairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = FormComponentFactory.CreateFormField("Pairing Date: *", multiPairingDatePicker);
-            dateField.Margin = new Padding(0, 0, 0, 15);
+            var dateField = CreateRequiredFormField("Pairing Date:", multiPairingDatePicker);
 
             // Create Add to Grid button with improved styling
             addToGridButton = new Button { Text = "Add to List" };
