@@ -66,7 +66,7 @@ namespace RATAPP.Forms
 
             // Create header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Pairing");
-            headerPanel.Height = 60;
+            headerPanel.Height = 70;
             var headerLabel = headerPanel.Controls[0] as Label;
             if (headerLabel != null)
             {
@@ -77,15 +77,9 @@ namespace RATAPP.Forms
                 Text = "Create new breeding pairs and manage pairing records",
                 Font = new Font("Segoe UI", 10),
                 ForeColor = Color.White,
-                AutoSize = true
+                AutoSize = true,
+                Location = new Point(25, 42)
             };
-
-            // Calculate the X position to place descriptionLabel to the right of headerLabel
-            int descriptionLabelX = headerLabel.Location.X + headerLabel.Width + 10;
-            // Calculate the Y position to vertically align descriptionLabel with headerLabel
-            int descriptionLabelY = headerLabel.Location.Y;
-
-            descriptionLabel.Location = new Point(descriptionLabelX, descriptionLabelY);
             headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
 
@@ -138,32 +132,38 @@ namespace RATAPP.Forms
             };
 
             // Create groups for related fields
-            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250);
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 280);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 280);
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(speciesComboBox);
-            var speciesField = CreateRequiredFormField("Species", speciesComboBox);
+            var speciesField = FormComponentFactory.CreateFormField("Species: *", speciesComboBox);
+            speciesField.Margin = new Padding(0, 0, 0, 15);
 
             pairingIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(pairingIdTextBox);
-            var pairingIdField = CreateRequiredFormField("Pairing ID", pairingIdTextBox);
+            var pairingIdField = FormComponentFactory.CreateFormField("Pairing ID: *", pairingIdTextBox);
+            pairingIdField.Margin = new Padding(0, 0, 0, 15);
 
             projectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(projectComboBox);
-            var projectField = CreateRequiredFormField("Project", projectComboBox);
+            var projectField = FormComponentFactory.CreateFormField("Project: *", projectComboBox);
+            projectField.Margin = new Padding(0, 0, 0, 15);
 
             damComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(damComboBox);
-            var damField = CreateRequiredFormField("Dam (Female)", damComboBox);
+            var damField = FormComponentFactory.CreateFormField("Dam (Female): *", damComboBox);
+            damField.Margin = new Padding(0, 0, 0, 15);
 
             sireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(sireComboBox);
-            var sireField = CreateRequiredFormField("Sire (Male)", sireComboBox);
+            var sireField = FormComponentFactory.CreateFormField("Sire (Male): *", sireComboBox);
+            sireField.Margin = new Padding(0, 0, 0, 15);
 
             pairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = CreateRequiredFormField("Pairing Date", pairingDatePicker);
+            var dateField = FormComponentFactory.CreateFormField("Pairing Date: *", pairingDatePicker);
+            dateField.Margin = new Padding(0, 0, 0, 15);
 
             // Organize fields into groups
             var basicInfoPanel = new Panel { Dock = DockStyle.Fill };
@@ -217,28 +217,33 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create input group with improved layout
-            var inputGroup = FormComponentFactory.CreateFormSection("Add New Pairing", DockStyle.Top, 250);
+            var inputGroup = FormComponentFactory.CreateFormSection("Add New Pairing", DockStyle.Top, 280);
             inputGroup.Margin = new Padding(0, 0, 0, 20);
 
             // Create form fields with validation indicators
             var multiPairingIdTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(multiPairingIdTextBox);
-            var pairingIdField = CreateRequiredFormField("Pairing ID", multiPairingIdTextBox);
+            var pairingIdField = FormComponentFactory.CreateFormField("Pairing ID: *", multiPairingIdTextBox);
+            pairingIdField.Margin = new Padding(0, 0, 0, 15);
 
             var multiProjectComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiProjectComboBox);
-            var projectField = CreateRequiredFormField("Project", multiProjectComboBox);
+            var projectField = FormComponentFactory.CreateFormField("Project: *", multiProjectComboBox);
+            projectField.Margin = new Padding(0, 0, 0, 15);
 
             var multiDamComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiDamComboBox);
-            var damField = CreateRequiredFormField("Dam (Female)", multiDamComboBox);
+            var damField = FormComponentFactory.CreateFormField("Dam (Female): *", multiDamComboBox);
+            damField.Margin = new Padding(0, 0, 0, 15);
 
             var multiSireComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(multiSireComboBox);
-            var sireField = CreateRequiredFormField("Sire (Male)", multiSireComboBox);
+            var sireField = FormComponentFactory.CreateFormField("Sire (Male): *", multiSireComboBox);
+            sireField.Margin = new Padding(0, 0, 0, 15);
 
             var multiPairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
-            var dateField = CreateRequiredFormField("Pairing Date", multiPairingDatePicker);
+            var dateField = FormComponentFactory.CreateFormField("Pairing Date: *", multiPairingDatePicker);
+            dateField.Margin = new Padding(0, 0, 0, 15);
 
             // Create Add to Grid button with improved styling
             addToGridButton = new Button { Text = "Add to List" };
