@@ -75,7 +75,7 @@ namespace RATAPP.Helpers
         /// </summary>
         /// <param name="comboBox">The ComboBox to style</param>
         /// <param name="width">Optional custom width for the ComboBox</param>
-        public static void ApplyComboBoxStyle(ComboBox comboBox, int width = 300)
+        public static void ApplyComboBoxStyle(ComboBox comboBox, int width = 400)
         {
             comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBox.Font = STANDARD_FONT;
@@ -136,7 +136,7 @@ namespace RATAPP.Helpers
         /// </summary>
         /// <param name="textBox">The TextBox to style</param>
         /// <param name="width">Optional custom width for the TextBox</param>
-        public static void ApplyTextBoxStyle(TextBox textBox, int width = 300)
+        public static void ApplyTextBoxStyle(TextBox textBox, int width = 400)
         {
             textBox.Font = STANDARD_FONT;
             textBox.Width = width;

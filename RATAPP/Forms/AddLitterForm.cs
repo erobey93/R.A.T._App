@@ -76,7 +76,7 @@ namespace RATAPP.Forms
         {
             // Set form properties
             this.Text = "Add Litter";
-            this.Size = new Size(1000, 700);
+            this.Size = new Size(1200, 900);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
             this.AutoScroll = true;
@@ -132,8 +132,8 @@ namespace RATAPP.Forms
             var leftColumn = new Panel
             {
                 Dock = DockStyle.Left,
-                Width = 450,
-                Padding = new Padding(0, 0, 10, 0)
+                Width = 550,
+                Padding = new Padding(0, 0, 20, 0)
             };
 
             var rightColumn = new Panel
@@ -143,9 +143,9 @@ namespace RATAPP.Forms
             };
 
             // Create groups for related fields
-            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 200);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 200);
-            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 250);
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 280);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 280);
+            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 350);
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
