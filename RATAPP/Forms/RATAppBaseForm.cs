@@ -259,8 +259,10 @@ namespace RATAPP.Forms
 
         private void ResearchButton_Click(object sender, EventArgs e)
         {
-            // Handle Research button click
-            MessageBox.Show("Research button clicked");
+            var researchService = new ResearchService(_context);
+            var researchPanel = new ResearchPanel(this, researchService);
+            _activePanel = researchPanel;
+            ShowPanel(researchPanel);
         }
 
         private void ReportsButton_Click(object sender, EventArgs e)
