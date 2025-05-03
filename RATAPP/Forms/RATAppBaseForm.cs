@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPP.Panels;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Services;
+using RATAPPLibrary.Services.Genetics;
 
 namespace RATAPP.Forms
 {

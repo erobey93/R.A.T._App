@@ -11,10 +11,11 @@ using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPP.Forms;
 
 namespace RATAPP.Panels
 {
-    public class GeneticsPanel : Panel
+    public class GeneticsPanel : Panel, INavigable
     {
         private readonly TraitService _traitService;
         private readonly GeneService _geneService;
@@ -46,6 +47,8 @@ namespace RATAPP.Panels
         private ComboBox dam2Combo;
         private Button calculateButton;
         private Panel resultPanel;
+
+        public Action<object, EventArgs> Load { get; private set; }
 
         public GeneticsPanel(TraitService traitService, GeneService geneService, BreedingCalculationService breedingService, RatAppDbContext context)
         {
@@ -342,7 +345,7 @@ namespace RATAPP.Panels
 
         private void AddTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AddTraitForm(_traitService, _geneService))
+            using (var form = new AddTraitForm(_traitService, _geneService, _context))
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
@@ -360,7 +363,7 @@ namespace RATAPP.Panels
             }
 
             var selectedTrait = (Trait)traitRegistryGrid.SelectedRows[0].DataBoundItem;
-            using (var form = new AddTraitForm(_traitService, _geneService))
+            using (var form = new AddTraitForm(_traitService, _geneService, _context))
             {
                 // TODO: Implement edit mode in AddTraitForm
                 if (form.ShowDialog() == DialogResult.OK)
@@ -372,7 +375,7 @@ namespace RATAPP.Panels
 
         private void AssignTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_context)))
+            using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_context), _context))
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
@@ -392,7 +395,8 @@ namespace RATAPP.Panels
                 _traitService,
                 _geneService,
                 _breedingService,
-                new AnimalService(_context)))
+                new AnimalService(_context),
+                _context))
             {
                 form.ShowDialog();
             }
@@ -450,6 +454,11 @@ namespace RATAPP.Panels
             {
                 MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        public Task RefreshDataAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }

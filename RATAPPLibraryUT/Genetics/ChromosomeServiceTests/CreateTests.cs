@@ -3,6 +3,8 @@ using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibraryUT.Genetics.Base;
 using System;
 using System.Threading.Tasks;
+using RATAPPLibrary.Data.Models;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace RATAPPLibraryUT.Genetics.ChromosomeServiceTests
 {
@@ -82,7 +84,7 @@ namespace RATAPPLibraryUT.Genetics.ChromosomeServiceTests
                 speciesId: _testSpecies.Id
             );
 
-            var otherSpecies = new RATAPPLibrary.Data.Models.Animal_Management.Species
+            var otherSpecies = new Species
             {
                 CommonName = "Other Species",
                 ScientificName = "Other test"

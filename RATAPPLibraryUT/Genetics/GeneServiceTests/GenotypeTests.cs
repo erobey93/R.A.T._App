@@ -4,6 +4,7 @@ using RATAPPLibrary.Services.Genetics.Interfaces;
 using RATAPPLibraryUT.Genetics.Base;
 using System;
 using System.Threading.Tasks;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace RATAPPLibraryUT.Genetics.GeneServiceTests
 {

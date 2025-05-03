@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Animal_Management;
+using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Services.Genetics.Interfaces;
@@ -138,7 +139,7 @@ namespace RATAPPLibraryUT.Genetics.Base
             _context.Pairing.Add(pairing);
             await _context.SaveChangesAsync();
 
-            return await _breedingCalculationService.CreateBreedingCalculationAsync(pairing.Id);
+            return await _breedingCalculationService.CreateBreedingCalculationAsync((int)pairing.Id);
         }
     }
 }

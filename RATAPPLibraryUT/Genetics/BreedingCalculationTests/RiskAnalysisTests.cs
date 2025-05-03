@@ -5,6 +5,7 @@ using RATAPPLibraryUT.Genetics.Base;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 
 namespace RATAPPLibraryUT.Genetics.BreedingCalculationTests
 {

@@ -2,11 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models.Requests;
+using RATAPPLibrary.Data.Models; 
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Utilities;
 using System;
 using System.Threading.Tasks;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using Microsoft.Extensions.Configuration;
 
 namespace RATAPPLibraryUT
 {
@@ -17,6 +19,7 @@ namespace RATAPPLibraryUT
         private RatAppDbContext _context;
         private DbContextOptions<RatAppDbContext> _options;
         private PasswordHashing _passwordHashing;
+        private IConfiguration _configuration;
 
         [TestInitialize]
         public void Setup()
@@ -32,8 +35,13 @@ namespace RATAPPLibraryUT
             // Initialize password hashing utility
             _passwordHashing = new PasswordHashing();
 
+            _configuration = new ConfigurationBuilder() //FIXME not sure about this  this is from main
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
             // Initialize LoginService with the DbContext
-            _loginService = new LoginService(_context);
+            _loginService = new LoginService(_context, _configuration,_passwordHashing);
 
             // Clear the database before each test
             _context.Database.EnsureDeleted();
@@ -46,14 +54,14 @@ namespace RATAPPLibraryUT
         private async Task SeedData()
         {
             var accountType = new AccountType { Id = 1, Name = "Admin" };
-            _context.AccountType.Add(accountType);
+            _context.AccountTypes.Add(accountType);
 
             var hashedPassword = _passwordHashing.HashPassword("validPassword");
             var credentials = new Credentials { Id = 1, Username = "testUser", Password = hashedPassword };
             _context.Credentials.Add(credentials);
 
             var user = new User { Id = 1, AccountTypeId = 1, CredentialsId = 1 };
-            _context.User.Add(user);
+            _context.Users.Add(user);
 
             await _context.SaveChangesAsync();
         }
@@ -73,7 +81,7 @@ namespace RATAPPLibraryUT
             var request = new LoginRequest { Username = "testUser", Password = "validPassword" };
 
             // Act
-            var response = await _loginService.LoginAsync(request);
+            var response = await _loginService.Login(request);
 
             // Assert
             Assert.IsNotNull(response);
@@ -97,7 +105,7 @@ namespace RATAPPLibraryUT
             // Act & Assert
             await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
             {
-                await _loginService.LoginAsync(request);
+                await _loginService.Login(request);
             });
         }
 
@@ -117,7 +125,7 @@ namespace RATAPPLibraryUT
             // Act & Assert
             await Assert.ThrowsExceptionAsync<UnauthorizedAccessException>(async () =>
             {
-                await _loginService.LoginAsync(request);
+                await _loginService.Login(request);
             });
         }
 
@@ -135,7 +143,7 @@ namespace RATAPPLibraryUT
             var request = new LoginRequest { Username = "testUser", Password = "validPassword" };
 
             // Act
-            var response = await _loginService.LoginAsync(request);
+            var response = await _loginService.Login(request);
 
             // Assert
             Assert.IsNotNull(response.Token);

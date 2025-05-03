@@ -8,6 +8,7 @@ using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Services.Genetics.Interfaces;
 
 namespace RATAPP.Forms
 {

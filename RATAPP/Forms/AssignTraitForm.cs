@@ -287,7 +287,7 @@ namespace RATAPP.Forms
             try
             {
                 var traitType = traitTypeComboBox.Text;
-                var species = selectedAnimal.Line?.Species?.CommonName;
+                var species = selectedAnimal.Line?.Stock?.Species.CommonName;
                 if (species == null)
                     return;
 
