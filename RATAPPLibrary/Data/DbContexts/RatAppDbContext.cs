@@ -56,9 +56,16 @@ namespace RATAPPLibrary.Data.DbContexts
         public virtual DbSet<Pairing> Pairing { get; set; }
 
         //Genetics
-        public virtual DbSet<Trait> Trait { get; set; }  // This should exist
-        public virtual DbSet<TraitType> TraitType { get; set; }  // This should exist  
+        public virtual DbSet<Trait> Trait { get; set; }
+        public virtual DbSet<TraitType> TraitType { get; set; }
         public virtual DbSet<AnimalTrait> AnimalTrait { get; set; }
+        public virtual DbSet<Chromosome> Chromosomes { get; set; }
+        public virtual DbSet<ChromosomePair> ChromosomePairs { get; set; }
+        public virtual DbSet<Gene> Genes { get; set; }
+        public virtual DbSet<Allele> Alleles { get; set; }
+        public virtual DbSet<Genotype> Genotypes { get; set; }
+        public virtual DbSet<BreedingCalculation> BreedingCalculations { get; set; }
+        public virtual DbSet<PossibleOffspring> PossibleOffspring { get; set; }
         public DbContextOptions<RatAppDbContext> Options { get; internal set; }
 
         //Health
@@ -102,8 +109,105 @@ namespace RATAPPLibrary.Data.DbContexts
             //ConfigureAncestryRecordLink(modelBuilder);
             ConfigureLineage(modelBuilder);
 
-            ConfigureAnimalTrait(modelBuilder); 
+            ConfigureAnimalTrait(modelBuilder);
+            ConfigureChromosome(modelBuilder);
+            ConfigureChromosomePair(modelBuilder);
+            ConfigureGene(modelBuilder);
+            ConfigureAllele(modelBuilder);
+            ConfigureGenotype(modelBuilder);
+            ConfigureBreedingCalculation(modelBuilder);
+            ConfigurePossibleOffspring(modelBuilder);
+        }
 
+        private void ConfigureChromosome(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Chromosome>()
+                .HasOne(c => c.Species)
+                .WithMany()
+                .HasForeignKey(c => c.SpeciesId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Chromosome>()
+                .HasIndex(c => new { c.SpeciesId, c.Number })
+                .IsUnique();
+        }
+
+        private void ConfigureChromosomePair(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ChromosomePair>()
+                .HasOne(cp => cp.MaternalChromosome)
+                .WithMany(c => c.MaternalPairs)
+                .HasForeignKey(cp => cp.MaternalChromosomeId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ChromosomePair>()
+                .HasOne(cp => cp.PaternalChromosome)
+                .WithMany(c => c.PaternalPairs)
+                .HasForeignKey(cp => cp.PaternalChromosomeId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void ConfigureGene(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Gene>()
+                .HasOne(g => g.ChromosomePair)
+                .WithMany(cp => cp.Genes)
+                .HasForeignKey(g => g.ChromosomePairId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Gene>()
+                .HasIndex(g => new { g.ChromosomePairId, g.Position })
+                .IsUnique();
+        }
+
+        private void ConfigureAllele(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Allele>()
+                .HasOne(a => a.Gene)
+                .WithMany(g => g.Alleles)
+                .HasForeignKey(a => a.GeneId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Allele>()
+                .HasIndex(a => new { a.GeneId, a.Symbol })
+                .IsUnique();
+        }
+
+        private void ConfigureGenotype(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Genotype>()
+                .HasOne(g => g.Animal)
+                .WithMany(a => a.Genotypes)
+                .HasForeignKey(g => g.AnimalId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Genotype>()
+                .HasOne(g => g.ChromosomePair)
+                .WithMany(cp => cp.Genotypes)
+                .HasForeignKey(g => g.ChromosomePairId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Genotype>()
+                .HasIndex(g => new { g.AnimalId, g.ChromosomePairId })
+                .IsUnique();
+        }
+
+        private void ConfigureBreedingCalculation(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<BreedingCalculation>()
+                .HasOne(bc => bc.Pairing)
+                .WithMany()
+                .HasForeignKey(bc => bc.PairingId)
+                .OnDelete(DeleteBehavior.NoAction);
+        }
+
+        private void ConfigurePossibleOffspring(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PossibleOffspring>()
+                .HasOne(po => po.BreedingCalculation)
+                .WithMany(bc => bc.PossibleOffspring)
+                .HasForeignKey(po => po.CalculationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
 

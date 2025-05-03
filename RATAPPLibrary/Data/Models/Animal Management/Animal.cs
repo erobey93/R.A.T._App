@@ -29,6 +29,7 @@ namespace RATAPPLibrary.Data.Models
         public virtual ICollection<Litter>? Litters { get; set; } // Navigation property for related litters
                                                           //may make sense to have genetics and ancestry here as well TODO - add these/think through logic 
         public virtual ICollection<AnimalTrait>? Traits { get; set; } // Navigation property for all traits for a specific animal
+        public virtual ICollection<Genotype>? Genotypes { get; set; } // Navigation property for genomic data
         //data rules for animal
 
         //TODO allow user to set age and then calculate approximate DOB based on that 
