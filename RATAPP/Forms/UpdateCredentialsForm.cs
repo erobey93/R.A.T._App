@@ -25,7 +25,7 @@ namespace RATAPP.Forms
         {
             _context = context;
             InitializeComponent();
-            CreateUpdateCredentialsForm(); 
+            CreateUpdateCredentialsForm();
         }
 
         private void CreateUpdateCredentialsForm()
@@ -153,7 +153,7 @@ namespace RATAPP.Forms
                 MessageBox.Show("New Password and Confirm Password do not match.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-          
+
             var accountService = new AccountService(_context, _configuration, _passwordHashing); // _context should be your DbContext instance
 
             UpdateCredentialsRequest request = new UpdateCredentialsRequest(username, currentPassword, newPassword);

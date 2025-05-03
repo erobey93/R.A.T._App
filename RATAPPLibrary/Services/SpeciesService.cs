@@ -37,6 +37,14 @@ namespace RATAPPLibrary.Services
                 .ToListAsync();
         }
 
+        // Get all species in the database 
+        // Returned as a list of Species objects
+        public async Task<IEnumerable<Species>> GetAllSpeciesObjectsAsync()
+        {
+            // Query all Species and return the objects
+            return await _context.Species.ToListAsync();
+        }
+
         //create a new species 
         public async Task<Species> CreateSpeciesAsync(string commonName, string scientificName)
         {

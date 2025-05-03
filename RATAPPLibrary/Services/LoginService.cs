@@ -31,7 +31,7 @@
             _passwordHashing = passwordHashing;
         }
 
-        public async Task<LoginResponse> Login (LoginRequest request)
+        public async Task<LoginResponse> Login(LoginRequest request)
         {
             //Retrieve the user with their credentials
             var user = await _context.Users
@@ -110,4 +110,4 @@
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
-    }
+}

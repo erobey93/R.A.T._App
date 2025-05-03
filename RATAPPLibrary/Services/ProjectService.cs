@@ -15,7 +15,7 @@ namespace RATAPPLibrary.Services
     {
         Task<Project> CreateProjectAsync(string name, int lineId, string? description = null);
         Task<Project> GetProjectByIdAsync(int id);
-        Task<IEnumerable<Project>> GetAllProjectsAsync();
+        Task<List<Project>> GetAllProjectsAsync();
         Task<IEnumerable<Project>> GetProjectsByLineAsync(int lineId);
         Task<Project> UpdateProjectAsync(Project project);
         Task DeleteProjectAsync(int id);
@@ -87,7 +87,7 @@ namespace RATAPPLibrary.Services
         /// <summary>
         /// Retrieves all breeding projects.
         /// </summary>
-        public async Task<IEnumerable<Project>> GetAllProjectsAsync()
+        public async Task<List<Project>> GetAllProjectsAsync()
         {
             return await _context.Project
                 .Include(p => p.Line)

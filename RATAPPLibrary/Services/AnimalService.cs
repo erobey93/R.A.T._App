@@ -303,7 +303,7 @@ namespace RATAPPLibrary.Services
             {
                 // Retrieve the existing animal from the context
                 var existingAnimal = await _context.Animal.FindAsync(animalDto.Id);
-                
+
                 if (existingAnimal == null)
                 {
                     throw new InvalidOperationException($"Animal with ID '{animalDto.Id}' not found.");
@@ -331,13 +331,14 @@ namespace RATAPPLibrary.Services
                 int animalId = animalDto.Id;
 
                 //if ancestry connection doesn't exist, make it 
-                if(damId != 0)
+                if (damId != 0)
                 {
                     var doesExist = await _lineageService.DoesAncestryConnectionExist(animalId, (int)damId);
-                    bool connectionExists = doesExist; 
+                    bool connectionExists = doesExist;
 
                     //check if it exists
-                    if (!connectionExists){
+                    if (!connectionExists)
+                    {
                         //add the connection
                         await _lineageService.AddLineageConnection(animalId, (int)damId, 1, 1, "Maternal"); //TODO this is hardcoded for a dam 
                     }
@@ -415,8 +416,8 @@ namespace RATAPPLibrary.Services
             // Fetch the animals and include related entities for species, line, dam, sire, and variety
             //this is fetching all animals so must be dealt with as a group 
             var animals = await _context.Animal
-                .Include(a => a.Line)  
-                                      //.Include(a => a.Litters).ThenInclude(l => l.Pair) // Assuming Litters is a navigation property and Dam is a navigation property on Litter TODO still need to set up ancestry and genetics so these won't be super functional right now 
+                .Include(a => a.Line)
+                //.Include(a => a.Litters).ThenInclude(l => l.Pair) // Assuming Litters is a navigation property and Dam is a navigation property on Litter TODO still need to set up ancestry and genetics so these won't be super functional right now 
                 .ToListAsync();
 
             List<AnimalDto> animalDto = new List<AnimalDto>();
@@ -427,7 +428,7 @@ namespace RATAPPLibrary.Services
                 animalDto.Add(await MapSingleAnimaltoDto(animal));
             }
 
-           return animalDto.ToArray(); //return the array of animals or a list need to research why one over the other given my use case TODO 
+            return animalDto.ToArray(); //return the array of animals or a list need to research why one over the other given my use case TODO 
         }
 
         //convert from Animal to AnimalDto
@@ -451,7 +452,7 @@ namespace RATAPPLibrary.Services
             //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
             //int sireId = getSire.sire.;
             var getDam = await _lineageService.GetDamByAnimalId(a.Id);
-            int damId = 0; 
+            int damId = 0;
             if (getDam != null)
             {
                 damId = getDam.Id;
@@ -489,20 +490,20 @@ namespace RATAPPLibrary.Services
         }
 
         //get animal's traits 
-        public async Task<Dictionary<string,List<string>>> GetAnimalTraits(int id)
+        public async Task<Dictionary<string, List<string>>> GetAnimalTraits(int id)
         {
             var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
             if (animal == null)
             {
                 throw new KeyNotFoundException($"Animal with ID {id} not found.");
             }
-            
+
             Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
             try
             {
                 traitMap = await _traitService.GetTraitMapForSingleAnimal(id);
             }
-            catch(Exception e) //for now just catch exceptions and set default trait values to avoid breaking the world FIXME 
+            catch (Exception e) //for now just catch exceptions and set default trait values to avoid breaking the world FIXME 
             {
                 //throw new KeyNotFoundException($"Traits for animal with ID {id} not found.");
                 //animal doesn't have to have traits, at least not right now TODO 
@@ -515,7 +516,7 @@ namespace RATAPPLibrary.Services
 
             if (traitMap.Count < 4) //FIXME this is assuming we have 4 traits just to auto set traits for now for now just make sure we have the 4 traits we're looking for
             {
-                if(traitMap.ContainsKey("Color") == false)
+                if (traitMap.ContainsKey("Color") == false)
                 {
                     traitMap["Color"] = new List<string> { "No color found" };
                 }

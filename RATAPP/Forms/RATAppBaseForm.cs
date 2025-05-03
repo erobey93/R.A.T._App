@@ -20,7 +20,6 @@ namespace RATAPP.Forms
         private Panel sideNavPanel;
         public Panel contentPanel;
         private Label appNameLabel;
-        private Label userNameLabel;
         private PictureBox logoPictureBox;
         private INavigable _activePanel;
         private RatAppDbContext _context;
@@ -100,7 +99,7 @@ namespace RATAPP.Forms
             var refreshButton = CreateTopNavButton("Refresh", 0, RefreshButton_Click);
             var utilitiesButton = CreateTopNavButton("Utilities", 1, UtilitiesButton_Click);
             var logoutButton = CreateTopNavButton("Log Out", 2, LogoutButton_Click);
-            var settingsButton = CreateTopNavButton("Settings",3, SettingsButton_Click);
+            var settingsButton = CreateTopNavButton("Settings", 3, SettingsButton_Click);
 
             topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, refreshButton, utilitiesButton, logoutButton });
         }
@@ -200,6 +199,10 @@ namespace RATAPP.Forms
             errorLogsItem.Click += ErrorLogsItem_Click;
             utilitiesContextMenu.Items.Add(errorLogsItem);
 
+            ToolStripMenuItem bulkImportItem = new ToolStripMenuItem("Bulk Import Animals");
+            bulkImportItem.Click += BulkImportItem_Click;
+            utilitiesContextMenu.Items.Add(bulkImportItem);
+
             // Show the context menu below the Utilities button
             utilitiesContextMenu.Show(utilitiesButton, new Point(0, utilitiesButton.Height));
         }
@@ -225,6 +228,13 @@ namespace RATAPP.Forms
             // Add your error logs logic here
         }
 
+        private void BulkImportItem_Click(object sender, EventArgs e)
+        {
+            // Handle Error Logs menu item click
+            MessageBox.Show("Bulk Import clicked");
+            // Add your error logs logic here
+        }
+
         private void AncestryButton_Click(object sender, EventArgs e)
         {
             // Handle Ancestry button click
@@ -238,7 +248,7 @@ namespace RATAPP.Forms
             // Handle Settings button click
             MessageBox.Show("Settings button clicked");
         }
-        
+
         private void AdopterButton_Click(object sender, EventArgs e)
         {
             // Handle Adopter Management button click
@@ -249,8 +259,11 @@ namespace RATAPP.Forms
 
         private void ResearchButton_Click(object sender, EventArgs e)
         {
-            // Handle Research button click
-            MessageBox.Show("Research button clicked");
+            throw new NotImplementedException();
+            //var researchService = new ResearchService(_context);
+            //var researchPanel = new ResearchPanel(this, researchService);
+            //_activePanel = researchPanel;
+            //ShowPanel(researchPanel);
         }
 
         private void ReportsButton_Click(object sender, EventArgs e)

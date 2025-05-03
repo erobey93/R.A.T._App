@@ -8,6 +8,8 @@ using System;
 using System.Threading.Tasks;
 using System.Linq;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
+using RATAPPLibrary.Data.Models;
+using Microsoft.VisualBasic;
 
 namespace RATAPPLibraryUT
 {
@@ -45,22 +47,37 @@ namespace RATAPPLibraryUT
             var species = new Species { Id = 1, CommonName = "Rat", ScientificName = "Rattus norvegicus" };
             _context.Species.Add(species);
 
-            var male = new Animal 
-            { 
-                Id = 1, 
+            var newStock = new Stock
+            {
+                Id = 1,
+                BreederId = 1, // Assuming a Breeder with Id 1 exists
+                SpeciesId = 1, // Assuming a Species with Id 2 exists
+                Description = "Test Stock"
+            };
+            _context.Stock.Add(newStock);
+
+            var line = new Line { Id = 1, Name = "Test", StockId = 1 };
+            _context.Line.Add(line);
+
+            var project = new Project { Id = 1, LineId = 1, Name = "testProject" }; 
+            _context.Project.Add(project);
+
+            var male = new Animal
+            {
+                Id = 1,
                 Name = "Male1",
                 Sex = "Male",
                 DateOfBirth = DateTime.Now.AddMonths(-6),
-                SpeciesId = 1
+                StockId = 1
             };
 
-            var female = new Animal 
-            { 
-                Id = 2, 
+            var female = new Animal
+            {
+                Id = 2,
                 Name = "Female1",
                 Sex = "Female",
                 DateOfBirth = DateTime.Now.AddMonths(-5),
-                SpeciesId = 1
+                StockId = 1
             };
 
             _context.Animal.AddRange(male, female);
@@ -68,14 +85,34 @@ namespace RATAPPLibraryUT
             var pairing = new Pairing
             {
                 Id = 1,
-                MaleId = 1,
-                FemaleId = 2,
-                DatePaired = DateTime.Now.AddDays(-30),
-                ExpectedDueDate = DateTime.Now.AddDays(10),
-                Status = "Active"
+                pairingId = "1", 
+                SireId = 1,
+                DamId = 2,
+                PairingStartDate = DateTime.Now.AddDays(-30),
+                PairingEndDate = DateTime.Now.AddDays(10),
+                ProjectId = 1,
             };
 
-            _context.Pairing.Add(pairing);
+            var pairing2 = new Pairing
+            {
+                Id = 2,
+                pairingId = "12",
+                SireId = 1,
+                DamId = 2,
+                PairingStartDate = DateTime.Now.AddDays(-30),
+                ProjectId = 1,
+            };
+
+            var pairing3 = new Pairing
+            {
+                Id = 3,
+                pairingId = "123",
+                SireId = 1,
+                DamId = 2,
+                ProjectId = 1,
+            };
+
+            _context.Pairing.AddRange(pairing, pairing2, pairing3);
             await _context.SaveChangesAsync();
         }
 
@@ -92,11 +129,10 @@ namespace RATAPPLibraryUT
             // Arrange
             var newPairing = new Pairing
             {
-                MaleId = 1,
-                FemaleId = 2,
-                DatePaired = DateTime.Now,
-                ExpectedDueDate = DateTime.Now.AddDays(21),
-                Status = "Active"
+                SireId = 1,
+                DamId = 2,
+                PairingStartDate = DateTime.Now,
+                PairingEndDate = DateTime.Now.AddDays(21),
             };
 
             // Act
@@ -104,29 +140,74 @@ namespace RATAPPLibraryUT
 
             // Assert
             Assert.IsNotNull(createdPairing);
-            Assert.IsTrue(createdPairing.Id > 0);
-            Assert.AreEqual(1, createdPairing.MaleId);
-            Assert.AreEqual(2, createdPairing.FemaleId);
-            Assert.AreEqual("Active", createdPairing.Status);
+            Assert.IsTrue(createdPairing);
+
+            //to check the below variables I need to go get the pairing, it doesn't make sense to return it in this method TODO 
+            //Assert.IsTrue(createdPairing.Id > 0);
+            //Assert.AreEqual(1, createdPairing.MaleId);
+            //Assert.AreEqual(2, createdPairing.FemaleId);
+            //Assert.AreEqual("Active", createdPairing.Status);
         }
 
         /// <summary>
-        /// This method tests the GetPairingByIdAsync method.
+        /// This method tests the GetAllPairingsByAnimalIdAsync method.
         /// It validates that:
-        /// 1. An existing pairing can be retrieved by its ID
+        /// 1. An existing pairing can be retrieved by its related animal ID
         /// 2. The retrieved pairing has correct properties and relationships
         /// </summary>
         [TestMethod]
-        public async Task GetPairingById_ShouldReturnCorrectPairing()
+        public async Task GetPairingByAnimalId_ShouldReturnCorrectPairing()
         {
             // Act
-            var pairing = await _breedingService.GetPairingByIdAsync(1);
+            var pairing = await _breedingService.GetAllPairingsByAnimalIdAsync(1);
 
             // Assert
             Assert.IsNotNull(pairing);
-            Assert.AreEqual(1, pairing.MaleId);
-            Assert.AreEqual(2, pairing.FemaleId);
-            Assert.AreEqual("Active", pairing.Status);
+            Assert.AreEqual(1, pairing[0].SireId);
+            Assert.AreEqual(2, pairing[0].DamId);
+            Assert.AreEqual("1", pairing[0].pairingId);
+            Assert.AreEqual(1, pairing[0].Id);
+        }
+
+        /// <summary>
+        /// This method tests the GetPairingByLineIdAsync method.
+        /// It validates that:
+        /// 1. An existing pairing can be retrieved by its Line ID
+        /// 2. The retrieved pairing has correct properties and relationships
+        /// </summary>
+        [TestMethod]
+        public async Task GetPairingByLineId_ShouldReturnCorrectPairing()
+        {
+            // Act
+            var pairing = await _breedingService.GetAllPairingsByLineIdAsync(1);
+
+            // Assert
+            Assert.IsNotNull(pairing);
+            Assert.AreEqual(1, pairing[0].SireId);
+            Assert.AreEqual(2, pairing[0].DamId);
+            Assert.AreEqual("1", pairing[0].pairingId);
+            Assert.AreEqual(1, pairing[0].Id);
+        }
+
+        /// <summary>
+        /// This method tests the GetPairingBySpeciesAsync method.
+        /// It validates that:
+        /// 1. An existing pairing can be retrieved by its common Species name (not ID)
+        /// 2. The retrieved pairing has correct properties and relationships
+        /// </summary>
+        [TestMethod]
+        public async Task GetPairingBySpeciesId_ShouldReturnCorrectPairing()
+        {
+            // Act
+            var pairings = await _breedingService.GetAllPairingsBySpeciesAsync("Rat");
+
+            // Assert
+            Assert.IsNotNull(pairings);
+            Assert.AreEqual(3, pairings.Count); 
+            Assert.AreEqual(1, pairings[0].SireId);
+            Assert.AreEqual(2, pairings[0].DamId);
+            Assert.AreEqual("1", pairings[0].pairingId);
+            Assert.AreEqual(1, pairings[0].Id);
         }
 
         /// <summary>
@@ -139,19 +220,20 @@ namespace RATAPPLibraryUT
         [TestMethod]
         public async Task UpdatePairing_ShouldUpdateExistingPairing()
         {
+            //TODO
+            throw new NotImplementedException();
             // Arrange
-            var pairing = await _breedingService.GetPairingByIdAsync(1);
-            pairing.Status = "Completed";
-            pairing.Notes = "Updated pairing notes";
+            //var pairing = await _breedingService.GetAllPairingsByAnimalIdAsync(1);
+            //pairing[0].PairingStartDate = DateTime.Now;
 
-            // Act
-            var updatedPairing = await _breedingService.UpdatePairingAsync(pairing);
+            //// Act
+            //var updatedPairing = await _breedingService.UpdatePairingAsync(pairing);
 
-            // Assert
-            Assert.IsNotNull(updatedPairing);
-            Assert.AreEqual("Completed", updatedPairing.Status);
-            Assert.AreEqual("Updated pairing notes", updatedPairing.Notes);
-            Assert.AreEqual(1, updatedPairing.MaleId); // Original value should remain unchanged
+            //// Assert
+            //Assert.IsNotNull(updatedPairing);
+            //Assert.AreEqual("Completed", updatedPairing.Status);
+            //Assert.AreEqual("Updated pairing notes", updatedPairing.Notes);
+            //Assert.AreEqual(1, updatedPairing.MaleId); // Original value should remain unchanged
         }
 
         /// <summary>
@@ -167,10 +249,11 @@ namespace RATAPPLibraryUT
             // Arrange
             var newLitter = new Litter
             {
-                PairingId = 1,
-                DateBorn = DateTime.Now,
-                NumberBorn = 8,
-                NumberSurvived = 8,
+                LitterId = "1",
+                PairId = 1,
+                Name = "testLitter",
+                DateOfBirth = DateTime.Now,
+                NumPups = 8,
                 Notes = "Healthy litter"
             };
 
@@ -179,29 +262,30 @@ namespace RATAPPLibraryUT
 
             // Assert
             Assert.IsNotNull(createdLitter);
-            Assert.IsTrue(createdLitter.Id > 0);
-            Assert.AreEqual(1, createdLitter.PairingId);
-            Assert.AreEqual(8, createdLitter.NumberBorn);
-            Assert.AreEqual(8, createdLitter.NumberSurvived);
+            Assert.IsTrue(createdLitter);
+            //Assert.IsTrue(createdLitter.Id > 0);
+            //Assert.AreEqual(1, createdLitter.PairingId);
+            //Assert.AreEqual(8, createdLitter.NumberBorn);
+            //Assert.AreEqual(8, createdLitter.NumberSurvived);
         }
 
         /// <summary>
         /// This method tests the GetActivePairingsAsync method.
         /// It validates that:
         /// 1. All active pairings can be retrieved
-        /// 2. Only pairings with "Active" status are returned
+        /// 2. Only pairings that don't have an end date set (so they're active)
         /// 3. The pairings contain valid data
         /// </summary>
         [TestMethod]
         public async Task GetActivePairings_ShouldReturnOnlyActivePairings()
         {
             // Act
-            var activePairings = await _breedingService.GetActivePairingsAsync();
+            var activePairings = await _breedingService.GetAllActivePairingsAsync();
 
             // Assert
             Assert.IsNotNull(activePairings);
             Assert.AreEqual(1, activePairings.Count());
-            Assert.IsTrue(activePairings.All(p => p.Status == "Active"));
+            Assert.IsTrue(activePairings.All(p => p.PairingEndDate == null));
         }
 
         [TestCleanup]

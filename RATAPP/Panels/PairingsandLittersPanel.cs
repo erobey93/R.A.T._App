@@ -4,9 +4,12 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPPLibrary;
-using RATAPPLibrary.Data.Models.Breeding; 
+using RATAPPLibrary.Data.Models.Breeding;
 using System.Transactions;
 using RATAPPLibrary.Services;
+using PdfSharp.Charting;
+using Font = System.Drawing.Font;
+using Point = System.Drawing.Point;
 
 namespace RATAPP.Panels
 {
@@ -29,7 +32,7 @@ namespace RATAPP.Panels
 
         private Pairing[] _pairings;
         private Litter[] _litters;
-        private Line[] _lines; 
+        private Line[] _lines;
         private bool _littersGridView;
         private bool _linesGridView;
 
@@ -51,7 +54,7 @@ namespace RATAPP.Panels
             _stockService = new StockService(_context);
 
             _littersGridView = false; //start with showing pairings page, when switched will show litters page, or line page
-            _linesGridView = false; 
+            _linesGridView = false;
 
             InitializeComponents();
 
@@ -110,8 +113,8 @@ namespace RATAPP.Panels
 
             //get lines TODO...maybe? 
             var getLines = await _lineService.GetAllLinesAsync();
-            _lines = getLines.ToArray(); 
-            
+            _lines = getLines.ToArray();
+
             //get projects TODO
         }
 
@@ -193,6 +196,8 @@ namespace RATAPP.Panels
             addButton = CreateActionButton("Add", 10);
             updateButton = CreateActionButton("Update", 120);
             deleteButton = CreateActionButton("Delete", 230);
+            //TODO bulk import button
+            //TODO export? 
 
             actionButtonsPanel.Controls.Add(addButton);
             actionButtonsPanel.Controls.Add(updateButton);
@@ -228,7 +233,7 @@ namespace RATAPP.Panels
 
         //TODO 
         //different functionality for adding pairings vs. litters so check that first 
-        private void ActionButton_Click(object sender, EventArgs e)
+        private async void ActionButton_Click(object sender, EventArgs e)
         {
             Button clickedButton = (Button)sender;
             string action = clickedButton.Text;
@@ -240,6 +245,18 @@ namespace RATAPP.Panels
                 AddPairingForm addPairing = new AddPairingForm(_context);
                 addPairing.ShowDialog();
                 //this form would likely work for updating pairings too, but need to add in a way to populate it with the existing pairing 
+            }
+            else if (currentTab == "Litters")
+            {
+                //open the add pairings form 
+                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_context);//new AddLitterForm(_context, "Rat"); //TODO hardcoded need to think through how to get this 
+                addLitter.ShowDialog();
+            }
+            else if(currentTab == "Line Management")
+            {
+                //open the add pairings form 
+                AddLineForm addLine = new AddLineForm(_context);
+                addLine.ShowDialog();
             }
             else
             {
@@ -279,7 +296,7 @@ namespace RATAPP.Panels
                 new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
                 new DataGridViewTextBoxColumn { Name = "Pairing Date", HeaderText = "Pairing Date" },
                 new DataGridViewTextBoxColumn { Name = "Pairing End Date", HeaderText = "Pairing End Date" },
-                new DataGridViewButtonColumn { Name = "Edit", HeaderText = "Edit Pairing", Text = "Edit", UseColumnTextForButtonValue = true }
+                new DataGridViewButtonColumn { Name = "PairingPage", HeaderText = "Pairing Page", Text = "Go", UseColumnTextForButtonValue = true }
             });
 
             PopulatePairingDataDisplayArea();
@@ -341,7 +358,7 @@ namespace RATAPP.Panels
                 new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
                 new DataGridViewTextBoxColumn { Name = "DOB", HeaderText = "DOB" },
                 new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "Num Pups" },
-                new DataGridViewButtonColumn { Name = "EditLitter", HeaderText = "Edit Litter", Text = "Edit", UseColumnTextForButtonValue = true }
+                new DataGridViewButtonColumn { Name = "LitterPage", HeaderText = "Litter Page", Text = "Go", UseColumnTextForButtonValue = true }
             });
 
             PopulateLittersDataDisplayArea();
@@ -388,7 +405,7 @@ namespace RATAPP.Panels
                 new DataGridViewTextBoxColumn { Name = "StockName", HeaderText = "Stock Name" }, // Displaying Stock Name
                 new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description" },
                 new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes" },
-                new DataGridViewButtonColumn { Name = "EditLine", HeaderText = "Edit Line", Text = "Edit", UseColumnTextForButtonValue = true }
+                new DataGridViewButtonColumn { Name = "LinePage", HeaderText = "Line Page", Text = "Go", UseColumnTextForButtonValue = true }
             });
 
             PopulateLineDataDisplayArea(); // Assuming this method now populates Line data
