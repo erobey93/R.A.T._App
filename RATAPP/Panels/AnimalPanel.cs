@@ -1,4 +1,5 @@
-﻿using RATAPP.Forms;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using RATAPP.Forms;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using System;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using ContentAlignment = System.Drawing.ContentAlignment;
 
 //NOTES
 // * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
@@ -1010,11 +1012,11 @@ namespace RATAPP.Panels
             };
 
             // Add existing thumbnails to the panel
-            if (_animal != null && _animal.AdditionalImages != null)
+            if (_animal != null && _animal.additionalImageUrls != null)
             {
-                foreach (var imagePath in _animal.AdditionalImages)
+                foreach (var imagePath in _animal.additionalImageUrls)
                 {
-                    AddThumbnailToPanel(imagePath);
+                    AddThumbnailToPanel(imagePath.ToString());
                 }
             }
 
@@ -1060,10 +1062,10 @@ namespace RATAPP.Panels
                         // Update animal's additional images in database
                         if (_animal != null)
                         {
-                            if (_animal.AdditionalImages == null)
-                                _animal.AdditionalImages = new List<string>();
+                            if (_animal.additionalImageUrls == null)
+                                _animal.additionalImageUrls = Array.Empty<string>(); //FIXME do I need to do this? 
                             
-                            _animal.AdditionalImages.Add(normalizedPath);
+                            _animal.additionalImageUrls.Append(normalizedPath);
                             // TODO: Update database with new image list
                         }
                     }
@@ -1170,9 +1172,12 @@ namespace RATAPP.Panels
                     thumbnail.Dispose();
 
                     // Remove from animal's additional images
-                    if (_animal != null && _animal.AdditionalImages != null)
+                    if (_animal != null && _animal.additionalImageUrls != null) //FIXME this should really be a list 
                     {
-                        _animal.AdditionalImages.Remove(imagePath);
+                        // Create a new array excluding the specified value
+                        _animal.additionalImageUrls = _animal.additionalImageUrls
+                            .Where(url => url != imagePath)
+                            .ToArray();
                         // TODO: Update database with new image list
                     }
                 }
