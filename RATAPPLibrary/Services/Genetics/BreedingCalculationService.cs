@@ -276,5 +276,15 @@ namespace RATAPPLibrary.Services.Genetics
             // For recessive traits, both alleles must be the same
             return allele1.Symbol == allele2.Symbol ? allele1.Phenotype : allele1.Phenotype;
         }
+
+        public Task<BreedingCalculation> GetBreedingCalculationAsync(Guid calculationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<PossibleOffspring>> GetPossibleOffspringAsync(Guid calculationId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
