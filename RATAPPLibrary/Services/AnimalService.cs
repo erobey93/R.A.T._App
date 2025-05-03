@@ -477,6 +477,7 @@ namespace RATAPPLibrary.Services
                 breeder = "TLDR", // TODO: Implement breeder lookup
                 species = speciesObj.CommonName,
                 imageUrl = a.imageUrl,
+                additionalImageUrls = a.additionalImageUrls,
                 color = animalTraits.ContainsKey("Color") ? animalTraits["Color"].LastOrDefault() : null,
                 markings = animalTraits.ContainsKey("Marking") ? animalTraits["Marking"].LastOrDefault() : null,
                 earType = animalTraits.ContainsKey("Ear Type") ? animalTraits["Ear Type"].LastOrDefault() : null,

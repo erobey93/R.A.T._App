@@ -21,6 +21,7 @@ namespace RATAPPLibrary.Data.Models
         public required string Name { get; set; } 
         public int StockId { get; set; } // FIXME this should not be here but EF if fing up need to research shadow properties more and better understand EF
         public string? imageUrl { get; set; } 
+        public string?[] additionalImageUrls { get; set; }
         public string? comment { get; set; } 
         public int? weight { get; set; } //FIXME not convinced weight should be in here, but for now its fine 
 
@@ -81,7 +82,8 @@ namespace RATAPPLibrary.Data.Models
         public DateTime DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
         public required string species { get; set; }
-        public string? imageUrl { get; set; }   
+        public string? imageUrl { get; set; } //FIXME this should probably be using AnimalImage
+        public string?[] additionalImageUrls { get; set; } //FIXME this should probably be using AnimalImage
         public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
         public string? earType { get; set; }
         public string? markings { get; set; }
