@@ -7,6 +7,7 @@ using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Forms
 {
@@ -33,7 +34,9 @@ namespace RATAPP.Forms
             TraitService traitService,
             GeneService geneService,
             BreedingCalculationService breedingService,
-            AnimalService animalService)
+            AnimalService animalService,
+            RatAppDbContext context)
+            : base(context)
         {
             _traitService = traitService;
             _geneService = geneService;

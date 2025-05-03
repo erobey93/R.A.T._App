@@ -7,6 +7,7 @@ using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Forms
 {
@@ -30,7 +31,8 @@ namespace RATAPP.Forms
         private Animal selectedAnimal;
         private Dictionary<string, List<string>> currentTraits;
 
-        public AssignTraitForm(TraitService traitService, GeneService geneService, AnimalService animalService)
+        public AssignTraitForm(TraitService traitService, GeneService geneService, AnimalService animalService, RatAppDbContext context)
+            : base(context)
         {
             _traitService = traitService;
             _geneService = geneService;

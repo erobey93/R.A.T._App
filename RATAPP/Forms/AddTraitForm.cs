@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Data.Models.Genetics;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Forms
 {
@@ -21,7 +22,8 @@ namespace RATAPP.Forms
         private Button saveButton;
         private Button cancelButton;
 
-        public AddTraitForm(TraitService traitService, GeneService geneService)
+        public AddTraitForm(TraitService traitService, GeneService geneService, RatAppDbContext context)
+            : base(context)
         {
             _traitService = traitService;
             _geneService = geneService;

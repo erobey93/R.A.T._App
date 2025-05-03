@@ -299,8 +299,13 @@ namespace RATAPP.Forms
 
         private void GeneticsButton_Click(object sender, EventArgs e)
         {
-            // Handle Genetics button click
-            MessageBox.Show("Genetics button clicked");
+            var geneticsPanel = new GeneticsPanel(
+                new TraitService(_context),
+                new GeneService(_context),
+                new BreedingCalculationService(_context),
+                _context);
+            _activePanel = geneticsPanel;
+            ShowPanel(geneticsPanel);
         }
     }
 }
