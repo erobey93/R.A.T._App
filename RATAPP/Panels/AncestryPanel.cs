@@ -483,44 +483,44 @@ namespace RATAPP.Panels
 //namespace RATAPP.Panels
 //{
 //    public partial class AnimalPanel : Panel, INavigable
-   // {
-        // Keep existing field declarations
+// {
+// Keep existing field declarations
 
-        // Add new fields for weight and cage number
-        //private Label weightLabel;
-        //private Label cageNumberLabel;
-        //private TextBox weightTextBox;
-        //private TextBox cageNumberTextBox;
-        //private ComboBox cageNumberComboBox;
+// Add new fields for weight and cage number
+//private Label weightLabel;
+//private Label cageNumberLabel;
+//private TextBox weightTextBox;
+//private TextBox cageNumberTextBox;
+//private ComboBox cageNumberComboBox;
 
-        // Constructor remains the same
+// Constructor remains the same
 
-        //private void InitializeComponent(AnimalDto animal)
-        //{
-        //    _animal = animal;
+//private void InitializeComponent(AnimalDto animal)
+//{
+//    _animal = animal;
 
-        //    // Set panel properties with a more modern look
-        //    this.Size = new Size(1200, 800);
-        //    this.BackColor = Color.FromArgb(245, 245, 245); // Slightly off-white for less eye strain
-        //    this.Padding = new Padding(20);
-        //    this.AutoScroll = true; // Enable scrolling for smaller screens
+//    // Set panel properties with a more modern look
+//    this.Size = new Size(1200, 800);
+//    this.BackColor = Color.FromArgb(245, 245, 245); // Slightly off-white for less eye strain
+//    this.Padding = new Padding(20);
+//    this.AutoScroll = true; // Enable scrolling for smaller screens
 
-        //    // Initialize the main container layout
-        //    InitializeMainLayout();
+//    // Initialize the main container layout
+//    InitializeMainLayout();
 
-        //    // Initialize buttons first as they're referenced by other methods
-        //    InitializeButtons();
-        //    InitializeBottomButtons();
+//    // Initialize buttons first as they're referenced by other methods
+//    InitializeButtons();
+//    InitializeBottomButtons();
 
-        //    if (animal != null && !_isEditMode)
-        //    {
-        //        LoadAnimalDataAsync(animal.Id);
-        //    }
-        //    else
-        //    {
-        //        InitializeComboBoxes();
-        //    }
-        //}
+//    if (animal != null && !_isEditMode)
+//    {
+//        LoadAnimalDataAsync(animal.Id);
+//    }
+//    else
+//    {
+//        InitializeComboBoxes();
+//    }
+//}
 
 //        private void InitializeMainLayout()
 //        {

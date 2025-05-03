@@ -106,7 +106,7 @@ namespace RATAPPLibrary.Services
             //FIXME this should likely be elsewhere but for now 
             //check if breeder exists, if not create new breeder
             var breeder = await _context.Breeder
-                .Where(b => b.UserId == userId )
+                .Where(b => b.UserId == userId)
                 .FirstOrDefaultAsync();
             if (breeder == null)
             {

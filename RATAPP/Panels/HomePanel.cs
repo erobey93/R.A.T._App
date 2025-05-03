@@ -51,10 +51,12 @@ namespace RATAPP.Panels
             _animals = await _animalService.GetAllAnimalsAsync();
         }
 
-       private void InitializeComponents()
+        private void InitializeComponents()
         {
             this.Dock = DockStyle.Fill;
             this.BackColor = Color.White;
+
+            InitializeFilterControls();
 
             var headerPanel = new Panel
             {
@@ -74,8 +76,6 @@ namespace RATAPP.Panels
             headerPanel.Controls.Add(welcomeLabel);
 
             this.Controls.Add(headerPanel);
-
-            InitializeFilterControls();
             InitializeDataDisplayArea();
             InitializeRemindersPanel();
             InitializeLoadingSpinner();
@@ -87,8 +87,7 @@ namespace RATAPP.Panels
             {
                 Dock = DockStyle.Top,
                 Height = 60,
-                Padding = new Padding(20, 10, 20, 10),
-                //Location = new Point(0, startY) // Set the Location based on startY
+                Padding = new Padding(20, 0, 20, 10)
             };
 
             speciesComboBox = CreateComboBox(new string[] { "All Species", "Rat", "Mouse" }, 0); //TODO get from db 
@@ -146,7 +145,7 @@ namespace RATAPP.Panels
         //TODO having some issues witht the data display area, need to fix this but currently it is showing up so leaving for now 
         private void InitializeDataDisplayArea()
         {
-            int topPanelHeight = 180;
+            int topPanelHeight = 120;
 
             dataDisplayArea = new DataGridView
             {
@@ -158,7 +157,7 @@ namespace RATAPP.Panels
                 RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
                 RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
             };
-           
+
             dataDisplayArea.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn { Name = "Species", HeaderText = "Species" },
@@ -188,7 +187,7 @@ namespace RATAPP.Panels
         //set up reminder panel to the right of the main data grid view panel on the home page 
         private void InitializeRemindersPanel()
         {
-            int topPanelHeight = 180;
+            int topPanelHeight = 120;
 
             remindersPanel = new Panel
             {

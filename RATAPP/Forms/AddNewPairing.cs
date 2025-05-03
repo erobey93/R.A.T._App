@@ -1,17 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using RATAPP.Forms;
+using RATAPP.Helpers;
+using RATAPPLibrary.Data.Models.Breeding;
+using RATAPPLibrary.Services;
 
 namespace RATAPP.Forms
 {
+    /// <summary>
+    /// Form for adding new pairings, either single or multiple.
+    /// Uses helper classes to manage UI, data, and events.
+    /// </summary>
     public partial class AddPairingForm : Form
     {
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        // Helper classes
+        private readonly FormDataManager _dataManager;
+        private readonly FormEventHandler _eventHandler;
+        private readonly LoadingSpinnerHelper _spinner;
+
+        // UI Controls
         private TabControl tabControl;
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
+        private ComboBox speciesComboBox;
         private TextBox pairingIdTextBox;
         private ComboBox projectComboBox;
         private DateTimePicker pairingDatePicker;
@@ -20,814 +31,355 @@ namespace RATAPP.Forms
         private DataGridView multiplePairingsGrid;
         private Button addToGridButton;
         private Button saveAllButton;
-        private PictureBox loadingSpinner;
+        private Button importButton;
 
         public AddPairingForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
-            _context = context;
+            // Initialize services
+            var breedingService = new BreedingService(context);
+            var speciesService = new SpeciesService(context);
+            var animalService = new AnimalService(context);
+            var projectService = new ProjectService(context);
+
+            // Initialize helper classes
+            _dataManager = new FormDataManager(
+                breedingService,
+                speciesService,
+                projectService,
+                animalService);
+
+            _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
+            _eventHandler = new FormEventHandler(_dataManager, _spinner);
+
             InitializeComponents();
-            LoadAnimals();
-            LoadProjects();
+            InitializeEventHandlers();
         }
 
         private void InitializeComponents()
         {
+            // Set form properties
             this.Text = "Add Pairing";
-            this.Size = new Size(900, 650);
+            this.Size = new Size(1200, 900);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
+            this.AutoScroll = true;
 
-            // Create header
-            var headerPanel = new Panel
+            // Create header with description
+            var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Pairing");
+            headerPanel.Height = 70;
+            var headerLabel = headerPanel.Controls[0] as Label;
+            if (headerLabel != null)
             {
-                Dock = DockStyle.Top,
-                Height = 60,
-                BackColor = Color.FromArgb(0, 120, 212)
-            };
-
-            var headerLabel = new Label
+                headerLabel.Location = new Point(25, 10);
+            }
+            var descriptionLabel = new Label
             {
-                Text = "Add Pairing",
-                Font = new Font("Segoe UI", 20, FontStyle.Bold),
+                Text = "Create new breeding pairs and manage pairing records",
+                Font = new Font("Segoe UI", 10),
                 ForeColor = Color.White,
-                AutoSize = true,
-                Location = new Point(20, 12)
+                AutoSize = true
             };
-            headerPanel.Controls.Add(headerLabel);
-
+            headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
 
             // Create container panel for tabControl
             var tabContainerPanel = new Panel
             {
                 Location = new Point(0, headerPanel.Bottom),
-                Width = this.ClientSize.Width, // Match form width
-                Height = this.ClientSize.Height - headerPanel.Height // Calculate height
+                Width = this.ClientSize.Width,
+                Height = this.ClientSize.Height - headerPanel.Height,
+                Dock = DockStyle.Fill
             };
 
-            // Create tab control with modern styling
+            // Create and style tab control
             tabControl = new TabControl
             {
-                Dock = DockStyle.Fill, // Dock to fill the container panel
+                Dock = DockStyle.Fill,
                 Font = new Font("Segoe UI", 10),
                 Padding = new Point(12, 4)
             };
 
-            // Single Pairing Tab
-            var singlePairingTab = new TabPage("Single Pairing");
+            // Initialize tabs
+            var singlePairingTab = FormComponentFactory.CreateTabPage("Single Pairing");
             InitializeSinglePairingTab(singlePairingTab);
             tabControl.TabPages.Add(singlePairingTab);
 
-            // Multiple Pairings Tab
-            var multiplePairingsTab = new TabPage("Multiple Pairings");
+            var multiplePairingsTab = FormComponentFactory.CreateTabPage("Multiple Pairings");
             InitializeMultiplePairingsTab(multiplePairingsTab);
             tabControl.TabPages.Add(multiplePairingsTab);
 
-            // Add tabControl to the container panel, then add the panel to the form
             tabContainerPanel.Controls.Add(tabControl);
             this.Controls.Add(tabContainerPanel);
-
-            // Initialize loading spinner
-            InitializeLoadingSpinner();
         }
 
         private void InitializeSinglePairingTab(TabPage tab)
         {
-            var mainPanel = new Panel
+            var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
+
+            // Create two columns for better organization
+            var leftColumn = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 550,
+                Padding = new Padding(0, 0, 10, 0)
+            };
+
+            var rightColumn = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(20)
+                Padding = new Padding(10, 0, 0, 0)
             };
 
-            // Create a GroupBox for better visual organization
-            var pairingGroup = new GroupBox
-            {
-                Text = "Pairing Information",
-                Dock = DockStyle.Top,
-                Height = 300,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 60, 60),
-                Padding = new Padding(15)
-            };
+            // Create groups for related fields
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 280);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 280);
 
-            var formPanel = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 6,
-                Padding = new Padding(10),
-                ColumnStyles = {
-                    new ColumnStyle(SizeType.Percent, 30F),
-                    new ColumnStyle(SizeType.Percent, 70F)
-                }
-            };
+            // Create and configure form fields with validation indicators
+            speciesComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(speciesComboBox);
+            var speciesField = CreateRequiredFormField("Species", speciesComboBox);
 
-            // Dam (Female)
-            var damLabel = new Label
-            {
-                Text = "Dam (Female):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(damLabel, 0, 0);
+            pairingIdTextBox = new TextBox();
+            FormStyleHelper.ApplyTextBoxStyle(pairingIdTextBox);
+            var pairingIdField = CreateRequiredFormField("Pairing ID", pairingIdTextBox);
 
-            damComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(damComboBox, 1, 0);
+            projectComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(projectComboBox);
+            var projectField = CreateRequiredFormField("Project", projectComboBox);
 
-            // Sire (Male)
-            var sireLabel = new Label
-            {
-                Text = "Sire (Male):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(sireLabel, 0, 1);
+            damComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(damComboBox);
+            var damField = CreateRequiredFormField("Dam (Female)", damComboBox);
 
-            sireComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(sireComboBox, 1, 1);
+            sireComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(sireComboBox);
+            var sireField = CreateRequiredFormField("Sire (Male)", sireComboBox);
 
-            // Pairing ID
-            var pairingIdLabel = new Label
-            {
-                Text = "Pairing ID:",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(pairingIdLabel, 0, 2);
+            pairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
+            var dateField = CreateRequiredFormField("Pairing Date", pairingDatePicker);
 
-            pairingIdTextBox = new TextBox
-            {
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(pairingIdTextBox, 1, 2);
+            // Organize fields into groups
+            var basicInfoPanel = new Panel { Dock = DockStyle.Fill };
+            basicInfoPanel.Controls.AddRange(new Control[] {
+                speciesField, pairingIdField, projectField
+            });
+            basicInfoGroup.Controls.Add(basicInfoPanel);
 
-            // Project
-            var projectLabel = new Label
-            {
-                Text = "Project:",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(projectLabel, 0, 3);
+            var breedingInfoPanel = new Panel { Dock = DockStyle.Fill };
+            breedingInfoPanel.Controls.AddRange(new Control[] {
+                damField, sireField, dateField
+            });
+            breedingInfoGroup.Controls.Add(breedingInfoPanel);
 
-            projectComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(projectComboBox, 1, 3);
+            // Create buttons with improved styling
+            addButton = new Button { Text = "Add Pairing" };
+            FormStyleHelper.ApplyButtonStyle(addButton, true);
+            addButton.Margin = new Padding(0, 20, 0, 0);
 
-            // Pairing Date
-            var pairingDateLabel = new Label
-            {
-                Text = "Pairing Date:",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(pairingDateLabel, 0, 4);
+            cancelButton = new Button { Text = "Cancel" };
+            FormStyleHelper.ApplyButtonStyle(cancelButton, false);
+            cancelButton.Margin = new Padding(10, 20, 0, 0);
 
-            pairingDatePicker = new DateTimePicker
-            {
-                Format = DateTimePickerFormat.Short,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300
-            };
-            formPanel.Controls.Add(pairingDatePicker, 1, 4);
+            var buttonPanel = FormComponentFactory.CreateButtonPanel(addButton, cancelButton);
 
-            // Buttons
-            var buttonPanel = new Panel
-            {
-                Dock = DockStyle.Fill
-            };
+            // Organize panels
+            leftColumn.Controls.Add(basicInfoGroup);
+            rightColumn.Controls.Add(breedingInfoGroup);
 
-            addButton = new Button
-            {
-                Text = "Add Pairing",
-                Font = new Font("Segoe UI", 10),
-                Width = 150,
-                Height = 40,
-                Location = new Point(180, 10),
-                BackColor = Color.FromArgb(0, 120, 212),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            addButton.FlatAppearance.BorderSize = 0;
-            addButton.Click += AddButton_Click;
-            buttonPanel.Controls.Add(addButton);
+            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn, buttonPanel });
 
-            cancelButton = new Button
-            {
-                Text = "Cancel",
-                Font = new Font("Segoe UI", 10),
-                Width = 150,
-                Height = 40,
-                Location = new Point(340, 10),
-                BackColor = Color.FromArgb(240, 240, 240),
-                ForeColor = Color.Black,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            cancelButton.FlatAppearance.BorderSize = 1;
-            cancelButton.Click += CancelButton_Click;
-            buttonPanel.Controls.Add(cancelButton);
-
-            formPanel.Controls.Add(buttonPanel, 1, 5);
-
-            pairingGroup.Controls.Add(formPanel);
-            mainPanel.Controls.Add(pairingGroup);
-
-            // Add information panel
-            var infoPanel = new GroupBox
-            {
-                Text = "Information",
-                Dock = DockStyle.Bottom,
-                Height = 150,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 60, 60),
-                Padding = new Padding(15)
-            };
-
-            var infoText = new Label
-            {
-                Text = "• Pairing ID should be unique for each pairing\n" +
-                       "• Ensure the dam and sire are of appropriate age for breeding\n" +
-                       "• The pairing date will be used to calculate expected litter dates\n" +
-                       "• You can view all pairings in the Breeding History section",
-                Font = new Font("Segoe UI", 9.5F),
-                Location = new Point(20, 30),
-                Size = new Size(700, 100)
-            };
-            infoPanel.Controls.Add(infoText);
+            // Add enhanced information panel
+            var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
+                "• Pairing ID must be unique for each pairing (required)\n" +
+                "• All fields marked with * are required\n" +
+                "• Ensure the dam and sire are of appropriate age for breeding\n" +
+                "• The pairing date will be used to calculate expected litter dates\n" +
+                "• Dam and sire must be of the same species\n" +
+                "• You can view all pairings in the Breeding History section");
 
             mainPanel.Controls.Add(infoPanel);
 
+            // Set tab order
+            SetTabOrder();
             tab.Controls.Add(mainPanel);
         }
 
         private void InitializeMultiplePairingsTab(TabPage tab)
         {
-            var mainPanel = new Panel
+            var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
+
+            // Create input group with improved layout
+            var inputGroup = FormComponentFactory.CreateFormSection("Add New Pairing", DockStyle.Top, 280);
+            inputGroup.Margin = new Padding(0, 0, 0, 20);
+
+            // Create form fields with validation indicators
+            var multiPairingIdTextBox = new TextBox();
+            FormStyleHelper.ApplyTextBoxStyle(multiPairingIdTextBox);
+            var pairingIdField = CreateRequiredFormField("Pairing ID", multiPairingIdTextBox);
+
+            var multiProjectComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(multiProjectComboBox);
+            var projectField = CreateRequiredFormField("Project", multiProjectComboBox);
+
+            var multiDamComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(multiDamComboBox);
+            var damField = CreateRequiredFormField("Dam (Female)", multiDamComboBox);
+
+            var multiSireComboBox = new ComboBox();
+            FormStyleHelper.ApplyComboBoxStyle(multiSireComboBox);
+            var sireField = CreateRequiredFormField("Sire (Male)", multiSireComboBox);
+
+            var multiPairingDatePicker = new DateTimePicker { Format = DateTimePickerFormat.Short };
+            var dateField = CreateRequiredFormField("Pairing Date", multiPairingDatePicker);
+
+            // Create Add to Grid button with improved styling
+            addToGridButton = new Button { Text = "Add to List" };
+            FormStyleHelper.ApplyButtonStyle(addToGridButton, true);
+            addToGridButton.Margin = new Padding(0, 10, 0, 0);
+            var addToGridPanel = FormComponentFactory.CreateButtonPanel(addToGridButton, null);
+
+            // Organize fields into two columns
+            var leftColumn = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 550,
+                Padding = new Padding(0, 0, 20, 0)
+            };
+
+            var rightColumn = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(20)
+                Padding = new Padding(10, 0, 0, 0)
             };
 
-            // Create input panel (same as single pairing but with "Add to List" button)
-            var inputGroup = new GroupBox
-            {
-                Text = "New Pairing",
-                Dock = DockStyle.Top,
-                Height = 250,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 60, 60),
-                Padding = new Padding(15)
-            };
-
-            var formPanel = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 6,
-                Padding = new Padding(10),
-                ColumnStyles = {
-                    new ColumnStyle(SizeType.Percent, 30F),
-                    new ColumnStyle(SizeType.Percent, 70F)
-                }
-            };
-
-            // Dam (Female)
-            var damLabel = new Label
-            {
-                Text = "Dam (Female):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(damLabel, 0, 0);
-
-            var multiDamComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(multiDamComboBox, 1, 0);
-
-            // Sire (Male)
-            var sireLabel = new Label
-            {
-                Text = "Sire (Male):",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(sireLabel, 0, 1);
-
-            var multiSireComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(multiSireComboBox, 1, 1);
-
-            // Pairing ID
-            var pairingIdLabel = new Label
-            {
-                Text = "Pairing ID:",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(pairingIdLabel, 0, 2);
-
-            var multiPairingIdTextBox = new TextBox
-            {
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(multiPairingIdTextBox, 1, 2);
-
-            // Project
-            var projectLabel = new Label
-            {
-                Text = "Project:",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(projectLabel, 0, 3);
-
-            var multiProjectComboBox = new ComboBox
-            {
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300,
-                FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
-            };
-            formPanel.Controls.Add(multiProjectComboBox, 1, 3);
-
-            // Pairing Date
-            var pairingDateLabel = new Label
-            {
-                Text = "Pairing Date:",
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right
-            };
-            formPanel.Controls.Add(pairingDateLabel, 0, 4);
-
-            var multiPairingDatePicker = new DateTimePicker
-            {
-                Format = DateTimePickerFormat.Short,
-                Font = new Font("Segoe UI", 10),
-                Anchor = AnchorStyles.Left | AnchorStyles.Right,
-                Width = 300
-            };
-            formPanel.Controls.Add(multiPairingDatePicker, 1, 4);
-
-            // Add to Grid button
-            var buttonPanel = new Panel
-            {
-                Dock = DockStyle.Fill
-            };
-
-            addToGridButton = new Button
-            {
-                Text = "Add to List",
-                Font = new Font("Segoe UI", 10),
-                Width = 150,
-                Height = 40,
-                Location = new Point(180, 10),
-                BackColor = Color.FromArgb(0, 120, 212),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            addToGridButton.FlatAppearance.BorderSize = 0;
-            addToGridButton.Click += (s, e) => {
-                // Show loading spinner
-                loadingSpinner.Visible = true;
-                this.Refresh();
-
-                try
-                {
-                    // Validate inputs
-                    if (multiDamComboBox.SelectedIndex == -1 || multiSireComboBox.SelectedIndex == -1 ||
-                        string.IsNullOrWhiteSpace(multiPairingIdTextBox.Text) || multiProjectComboBox.SelectedIndex == -1)
-                    {
-                        MessageBox.Show("Please fill in all required fields", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-
-                    // Add to grid
-                    multiplePairingsGrid.Rows.Add(
-                        multiDamComboBox.SelectedItem.ToString(),
-                        multiSireComboBox.SelectedItem.ToString(),
-                        multiPairingIdTextBox.Text,
-                        multiProjectComboBox.SelectedItem.ToString(),
-                        multiPairingDatePicker.Value.ToShortDateString()
-                    );
-
-                    // Clear inputs for next entry
-                    multiPairingIdTextBox.Text = "";
-
-                    // Simulate a brief delay for the operation
-                    System.Threading.Thread.Sleep(300);
-                }
-                finally
-                {
-                    // Hide loading spinner
-                    loadingSpinner.Visible = false;
-                    this.Refresh();
-                }
-            };
-            buttonPanel.Controls.Add(addToGridButton);
-
-            formPanel.Controls.Add(buttonPanel, 1, 5);
-
-            inputGroup.Controls.Add(formPanel);
-            mainPanel.Controls.Add(inputGroup);
-
-            // Create grid for multiple pairings
-            var gridGroup = new GroupBox
-            {
-                Text = "Pairings to Add",
-                Dock = DockStyle.Fill,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 60, 60),
-                Padding = new Padding(15)
-            };
-
-            multiplePairingsGrid = new DataGridView
-            {
-                Dock = DockStyle.Fill,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
-                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
-                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders,
-                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                AllowUserToAddRows = false,
-                AllowUserToDeleteRows = true,
-                Font = new Font("Segoe UI", 9),
-                BackColor = Color.White,
-                BorderStyle = BorderStyle.None,
-                RowHeadersVisible = false,
-                CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal,
-                GridColor = Color.FromArgb(230, 230, 230),
-                AlternatingRowsDefaultCellStyle = new DataGridViewCellStyle
-                {
-                    BackColor = Color.FromArgb(247, 247, 247)
-                }
-            };
-
-            multiplePairingsGrid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                BackColor = Color.FromArgb(0, 120, 212),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold)
-            };
-
-            multiplePairingsGrid.Columns.AddRange(new DataGridViewColumn[]
-            {
-                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
-                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
-                new DataGridViewTextBoxColumn { Name = "PairingID", HeaderText = "Pairing ID" },
-                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
-                new DataGridViewTextBoxColumn { Name = "PairingDate", HeaderText = "Pairing Date" },
-                new DataGridViewButtonColumn { Name = "Remove", HeaderText = "Remove", Text = "Remove", UseColumnTextForButtonValue = true }
+            leftColumn.Controls.AddRange(new Control[] {
+                pairingIdField, projectField, damField
             });
 
-            multiplePairingsGrid.CellContentClick += (s, e) => {
-                if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
-                {
-                    // Show loading spinner
-                    loadingSpinner.Visible = true;
-                    this.Refresh();
+            rightColumn.Controls.AddRange(new Control[] {
+                sireField, dateField, addToGridPanel
+            });
 
-                    try
-                    {
-                        // Remove the row
-                        multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
+            var formPanel = new Panel { Dock = DockStyle.Fill };
+            formPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn });
+            inputGroup.Controls.Add(formPanel);
 
-                        // Simulate a brief delay for the operation
-                        System.Threading.Thread.Sleep(300);
-                    }
-                    finally
-                    {
-                        // Hide loading spinner
-                        loadingSpinner.Visible = false;
-                        this.Refresh();
-                    }
-                }
-            };
+            // Create grid with improved styling
+            multiplePairingsGrid = FormComponentFactory.CreateDataGrid();
+            FormStyleHelper.ApplyDataGridViewStyle(multiplePairingsGrid);
+            multiplePairingsGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            multiplePairingsGrid.Margin = new Padding(0, 10, 0, 10);
 
+            var gridGroup = FormComponentFactory.CreateFormSection("Pairings to Add", DockStyle.Fill, 0);
             gridGroup.Controls.Add(multiplePairingsGrid);
 
-            // Add Save All button
-            var bottomPanel = new Panel
+            // Add columns to grid with improved formatting
+            multiplePairingsGrid.Columns.AddRange(new DataGridViewColumn[]
             {
-                Dock = DockStyle.Bottom,
-                Height = 60,
-                Padding = new Padding(0, 10, 0, 0)
+                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "PairingID", HeaderText = "Pairing ID", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "PairingDate", HeaderText = "Pairing Date", Width = 100 },
+                new DataGridViewButtonColumn { 
+                    Name = "Remove", 
+                    HeaderText = "", 
+                    Text = "Remove", 
+                    UseColumnTextForButtonValue = true,
+                    Width = 80
+                }
+            });
+
+            // Create bottom buttons with improved styling
+            saveAllButton = new Button { Text = "Save All Pairings" };
+            FormStyleHelper.ApplyButtonStyle(saveAllButton, true);
+            
+            importButton = new Button { Text = "Import Data" };
+            FormStyleHelper.ApplyButtonStyle(importButton, true);
+            
+            var cancelMultiButton = new Button { Text = "Cancel" };
+            FormStyleHelper.ApplyButtonStyle(cancelMultiButton, false);
+            
+            var bottomPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                Margin = new Padding(0, 10, 0, 0)
+            };
+            
+            bottomPanel.Controls.AddRange(new Control[] { saveAllButton, importButton, cancelMultiButton });
+            foreach (Control button in bottomPanel.Controls)
+            {
+                button.Margin = new Padding(0, 0, 10, 0);
+            }
+
+            // Add help text
+            var helpText = new Label
+            {
+                Text = "Add multiple pairings by filling in the details above and clicking 'Add to List'. " +
+                      "Click 'Save All Pairings' when you're ready to save all entries. Use 'Import Data' to bulk import from Excel.",
+                Font = new Font("Segoe UI", 9),
+                ForeColor = Color.FromArgb(100, 100, 100),
+                AutoSize = true,
+                Margin = new Padding(0, 5, 0, 10)
             };
 
-            saveAllButton = new Button
-            {
-                Text = "Save All Pairings",
-                Font = new Font("Segoe UI", 10),
-                Width = 150,
-                Height = 40,
-                Location = new Point(300, 10),
-                BackColor = Color.FromArgb(0, 120, 212),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            saveAllButton.FlatAppearance.BorderSize = 0;
-            saveAllButton.Click += SaveAllButton_Click;
-            bottomPanel.Controls.Add(saveAllButton);
-
-            var cancelMultiButton = new Button
-            {
-                Text = "Cancel",
-                Font = new Font("Segoe UI", 10),
-                Width = 150,
-                Height = 40,
-                Location = new Point(460, 10),
-                BackColor = Color.FromArgb(240, 240, 240),
-                ForeColor = Color.Black,
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
-            };
-            cancelMultiButton.FlatAppearance.BorderSize = 1;
-            cancelMultiButton.Click += CancelButton_Click;
-            bottomPanel.Controls.Add(cancelMultiButton);
-
-            mainPanel.Controls.Add(bottomPanel);
-            mainPanel.Controls.Add(gridGroup);
-
+            mainPanel.Controls.AddRange(new Control[] {
+                inputGroup,
+                helpText,
+                gridGroup,
+                bottomPanel
+            });
             tab.Controls.Add(mainPanel);
-
-            // Copy the items from the single pairing tab
-            multiDamComboBox.Items.Clear();
-            multiSireComboBox.Items.Clear();
-            multiProjectComboBox.Items.Clear();
-
-            // We'll populate these in the LoadAnimals and LoadProjects methods
         }
 
-        private void InitializeLoadingSpinner()
+        private Panel CreateRequiredFormField(string label, Control control)
         {
-            loadingSpinner = new PictureBox
+            var panel = FormComponentFactory.CreateFormField(label + " *", control);
+            panel.Margin = new Padding(0, 0, 0, 10);
+            return panel;
+        }
+
+        private void SetTabOrder()
+        {
+            int tabIndex = 0;
+            foreach (Control control in this.Controls)
             {
-                Size = new Size(50, 50),
-                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP\\RATAPPLibrary\\RATAPP\\Resources\\Loading_2.gif"),
-                SizeMode = PictureBoxSizeMode.StretchImage,
-                Visible = false
+                if (control is ComboBox || control is TextBox || control is DateTimePicker || control is Button)
+                {
+                    control.TabIndex = tabIndex++;
+                }
+            }
+        }
+
+        private void InitializeEventHandlers()
+        {
+            this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsync(
+                speciesComboBox, damComboBox, sireComboBox, projectComboBox);
+
+            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedAsync(
+                speciesComboBox, damComboBox, sireComboBox);
+
+            addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
+                pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
+
+            addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
+                pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
+
+            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
+                multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
+
+            importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
+
+            cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
+
+            multiplePairingsGrid.CellContentClick += (s, e) =>
+            {
+                if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
+                {
+                    multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
+                }
             };
-            this.Controls.Add(loadingSpinner);
-            this.Resize += (s, e) => CenterLoadingSpinner();
-        }
-
-        private void CenterLoadingSpinner()
-        {
-            loadingSpinner.Location = new Point(
-                (ClientSize.Width - loadingSpinner.Width) / 2,
-                (ClientSize.Height - loadingSpinner.Height) / 2
-            );
-        }
-
-        private void LoadAnimals()
-        {
-            // Show loading spinner
-            loadingSpinner.Visible = true;
-            this.Refresh();
-
-            try
-            {
-                // TODO: Load actual animals from database
-                // For now, add sample data
-
-                // Add female rats to dam combo box
-                damComboBox.Items.Clear();
-                damComboBox.Items.AddRange(new string[] {
-                    "F001 - Daisy (Female)",
-                    "F002 - Luna (Female)",
-                    "F003 - Bella (Female)",
-                    "F004 - Molly (Female)",
-                    "F005 - Coco (Female)"
-                });
-
-                // Add male rats to sire combo box
-                sireComboBox.Items.Clear();
-                sireComboBox.Items.AddRange(new string[] {
-                    "M001 - Max (Male)",
-                    "M002 - Charlie (Male)",
-                    "M003 - Buddy (Male)",
-                    "M004 - Rocky (Male)",
-                    "M005 - Duke (Male)"
-                });
-
-                // Also populate the multiple pairings tab combo boxes
-                if (tabControl.TabPages.Count > 1)
-                {
-                    var multiDamComboBox = tabControl.TabPages[1].Controls[0].Controls[0].Controls[0].Controls[1] as ComboBox;
-                    var multiSireComboBox = tabControl.TabPages[1].Controls[0].Controls[0].Controls[0].Controls[3] as ComboBox;
-
-                    if (multiDamComboBox != null && multiSireComboBox != null)
-                    {
-                        multiDamComboBox.Items.Clear();
-                        multiDamComboBox.Items.AddRange(new string[] {
-                            "F001 - Daisy (Female)",
-                            "F002 - Luna (Female)",
-                            "F003 - Bella (Female)",
-                            "F004 - Molly (Female)",
-                            "F005 - Coco (Female)"
-                        });
-
-                        multiSireComboBox.Items.Clear();
-                        multiSireComboBox.Items.AddRange(new string[] {
-                            "M001 - Max (Male)",
-                            "M002 - Charlie (Male)",
-                            "M003 - Buddy (Male)",
-                            "M004 - Rocky (Male)",
-                            "M005 - Duke (Male)"
-                        });
-                    }
-                }
-
-                // Simulate a brief delay for the operation
-                System.Threading.Thread.Sleep(500);
-            }
-            finally
-            {
-                // Hide loading spinner
-                loadingSpinner.Visible = false;
-                this.Refresh();
-            }
-        }
-
-        private void LoadProjects()
-        {
-            // Show loading spinner
-            loadingSpinner.Visible = true;
-            this.Refresh();
-
-            try
-            {
-                // TODO: Load actual projects from database
-                // For now, add sample data
-                projectComboBox.Items.Clear();
-                projectComboBox.Items.AddRange(new string[] {
-                    "Breeding Program A",
-                    "Research Project B",
-                    "Color Study C",
-                    "Behavior Study D",
-                    "General Breeding"
-                });
-
-                // Also populate the multiple pairings tab project combo box
-                if (tabControl.TabPages.Count > 1)
-                {
-                    var multiProjectComboBox = tabControl.TabPages[1].Controls[0].Controls[0].Controls[0].Controls[7] as ComboBox;
-
-                    if (multiProjectComboBox != null)
-                    {
-                        multiProjectComboBox.Items.Clear();
-                        multiProjectComboBox.Items.AddRange(new string[] {
-                            "Breeding Program A",
-                            "Research Project B",
-                            "Color Study C",
-                            "Behavior Study D",
-                            "General Breeding"
-                        });
-                    }
-                }
-
-                // Simulate a brief delay for the operation
-                System.Threading.Thread.Sleep(500);
-            }
-            finally
-            {
-                // Hide loading spinner
-                loadingSpinner.Visible = false;
-                this.Refresh();
-            }
-        }
-
-        private void AddButton_Click(object sender, EventArgs e)
-        {
-            // Show loading spinner
-            loadingSpinner.Visible = true;
-            this.Refresh();
-
-            try
-            {
-                // Validate inputs
-                if (damComboBox.SelectedIndex == -1 || sireComboBox.SelectedIndex == -1 ||
-                    string.IsNullOrWhiteSpace(pairingIdTextBox.Text) || projectComboBox.SelectedIndex == -1)
-                {
-                    MessageBox.Show("Please fill in all required fields", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                // TODO: Save pairing to database
-
-                // Simulate processing delay
-                System.Threading.Thread.Sleep(1000);
-
-                MessageBox.Show($"Pairing added successfully!\n\nDam: {damComboBox.SelectedItem}\nSire: {sireComboBox.SelectedItem}\nPairing ID: {pairingIdTextBox.Text}\nProject: {projectComboBox.SelectedItem}\nPairing Date: {pairingDatePicker.Value.ToShortDateString()}",
-                    "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Clear form for next entry
-                pairingIdTextBox.Text = "";
-                damComboBox.SelectedIndex = -1;
-                sireComboBox.SelectedIndex = -1;
-                projectComboBox.SelectedIndex = -1;
-                pairingDatePicker.Value = DateTime.Today;
-            }
-            finally
-            {
-                // Hide loading spinner
-                loadingSpinner.Visible = false;
-                this.Refresh();
-            }
-        }
-
-        private void SaveAllButton_Click(object sender, EventArgs e)
-        {
-            // Show loading spinner
-            loadingSpinner.Visible = true;
-            this.Refresh();
-
-            try
-            {
-                if (multiplePairingsGrid.Rows.Count == 0)
-                {
-                    MessageBox.Show("Please add at least one pairing to the list", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                // TODO: Save all pairings to database
-
-                // Simulate processing delay
-                System.Threading.Thread.Sleep(1500);
-
-                MessageBox.Show($"Successfully added {multiplePairingsGrid.Rows.Count} pairings!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                // Clear grid for next batch
-                multiplePairingsGrid.Rows.Clear();
-            }
-            finally
-            {
-                // Hide loading spinner
-                loadingSpinner.Visible = false;
-                this.Refresh();
-            }
-        }
-
-        private void CancelButton_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Are you sure you want to cancel? Any unsaved data will be lost.",
-                "Confirm Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                this.Close();
-            }
         }
     }
 }
-
-

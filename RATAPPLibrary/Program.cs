@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Services;
 
-using System.Text; 
+using System.Text;
 
 namespace RATAPPLibrary
 {
@@ -12,7 +12,7 @@ namespace RATAPPLibrary
     {
         public static void Main(string[] args)
         {
-            
+
             var builder = WebApplication.CreateBuilder(args);
 
             // Manually set the environment if needed
@@ -35,8 +35,8 @@ namespace RATAPPLibrary
             }
 
 
-        // Register PasswordHashing as a service for dependency injection
-        builder.Services.AddScoped<PasswordHashing>();
+            // Register PasswordHashing as a service for dependency injection
+            builder.Services.AddScoped<PasswordHashing>();
 
             // Register services
             builder.Services.AddScoped<LoginService>();

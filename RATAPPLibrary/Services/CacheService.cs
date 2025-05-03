@@ -30,7 +30,7 @@ namespace RATAPPLibrary.Services
                 {
                     return (T)item.Value;
                 }
-                
+
                 // Remove expired item
                 _cache.TryRemove(key, out _);
             }

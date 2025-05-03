@@ -391,7 +391,8 @@ namespace RATAPP.Panels
                 Height = 35
             };
             addButton.FlatAppearance.BorderSize = 0;
-            addButton.Click += (s, e) => {
+            addButton.Click += (s, e) =>
+            {
                 // TODO: Add entry to database
                 MessageBox.Show("Entry added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -592,7 +593,8 @@ namespace RATAPP.Panels
                 Height = 35
             };
             addButton.FlatAppearance.BorderSize = 0;
-            addButton.Click += (s, e) => {
+            addButton.Click += (s, e) =>
+            {
                 // TODO: Add budget item to database
                 MessageBox.Show("Budget item added successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 

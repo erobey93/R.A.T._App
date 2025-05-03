@@ -18,16 +18,16 @@ namespace RATAPPLibrary.Data.Models
         public DateTime DateOfBirth { get; set; } // Date of birth is currently required but I'm setting it in my RATAPP to the current date what I'd like to do is to autoset it to the day that the animal is created on until the user updates it in this library
         public DateTime? DateOfDeath { get; set; } // Nullable DateTime for DateOfDeath
         public int Age { get; set; } //age should be auto calculated or set by user and then DOB calculated 
-        public required string Name { get; set; } 
+        public required string Name { get; set; }
         public int StockId { get; set; } // FIXME this should not be here but EF if fing up need to research shadow properties more and better understand EF
-        public string? imageUrl { get; set; } 
-        public string? comment { get; set; } 
+        public string? imageUrl { get; set; }
+        public string? comment { get; set; }
         public int? weight { get; set; } //FIXME not convinced weight should be in here, but for now its fine 
 
         // Navigation Properties for EF
         public virtual Line? Line { get; set; } // Navigation property to Line table
         public virtual ICollection<Litter>? Litters { get; set; } // Navigation property for related litters
-                                                          //may make sense to have genetics and ancestry here as well TODO - add these/think through logic 
+                                                                  //may make sense to have genetics and ancestry here as well TODO - add these/think through logic 
         public virtual ICollection<AnimalTrait>? Traits { get; set; } // Navigation property for all traits for a specific animal
         public virtual ICollection<Genotype>? Genotypes { get; set; } // Navigation property for genomic data
         //data rules for animal
@@ -82,7 +82,8 @@ namespace RATAPPLibrary.Data.Models
         public DateTime DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
         public required string species { get; set; }
-        public string? imageUrl { get; set; }   
+        public string? imageUrl { get; set; }
+        public List<string>? AdditionalImages { get; set; }
         public required string Line { get; set; } //this is weird FIXME how to handle line given the messed up db that EF won't let me change LINE SHOULD BE CREATED BASED ON VARIETY FOR NOW 
         public string? earType { get; set; }
         public string? markings { get; set; }
