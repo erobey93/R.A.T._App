@@ -15,7 +15,7 @@ namespace RATAPPLibraryUT
     [TestClass]
     public class BreedingServiceTests
     {
-        private BreedingService _breedingService;
+        private BreedingCalculatorService _breedingService;
         private RatAppDbContext _context;
         private DbContextOptions<RatAppDbContext> _options;
 
@@ -31,7 +31,7 @@ namespace RATAPPLibraryUT
             _context = new RatAppDbContext(_options);
 
             // Initialize BreedingService with the DbContext
-            _breedingService = new BreedingService(_context);
+            _breedingService = new BreedingCalculatorService(_context);
 
             // Clear the database before each test
             _context.Database.EnsureDeleted();

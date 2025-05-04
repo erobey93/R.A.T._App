@@ -41,7 +41,7 @@ namespace RATAPP.Forms
         private AddLitterForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
             // Initialize services
-            var breedingService = new BreedingService(context);
+            var breedingService = new BreedingCalculatorService(context);
             var speciesService = new SpeciesService(context);
             var animalService = new AnimalService(context);
             var projectService = new ProjectService(context);
@@ -209,7 +209,7 @@ namespace RATAPP.Forms
             var numFemalesField = CreateRequiredFormField("Number of Females:", numFemales);
 
             litterNotes = new TextBox { Multiline = true, Height = 80 };
-            FormStyleHelper.ApplyTextBoxStyle(litterNotes, 400);
+            FormStyleHelper.ApplyTextBoxStyle(litterNotes); //FIXME this may not work properly check UI
             var notesField = FormComponentFactory.CreateFormField("Notes:", litterNotes);
 
             // Organize fields into groups

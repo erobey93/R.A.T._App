@@ -13,7 +13,7 @@ using Point = System.Drawing.Point;
 
 namespace RATAPP.Panels
 {
-    public partial class PairingsAndLittersPanel : Panel, INavigable
+    public partial class PairingsAndLittersPanel : ResponsivePanel
     {
         private TabControl tabControl;
         private TabPage pairingsTab;
@@ -37,19 +37,19 @@ namespace RATAPP.Panels
         private bool _linesGridView;
 
         private RATAppBaseForm _parentForm;
-        private BreedingService _breedingService;
+        private BreedingCalculatorService _breedingService;
         private AnimalService _animalService;
         private LineService _lineService;
         private StockService _stockService;
 
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
 
-        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context) : base(parentForm)
         {
             _parentForm = parentForm;
             _context = context;
             _animalService = new AnimalService(_context);
-            _breedingService = new BreedingService(_context);
+            _breedingService = new BreedingCalculatorService(_context);
             _lineService = new LineService(_context);
             _stockService = new StockService(_context);
 

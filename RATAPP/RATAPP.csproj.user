@@ -55,11 +55,11 @@
     <Compile Update="Panels\GeneticsPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Update="Panels\HomePanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Update="Forms\IndividualAnimalAncestry.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Panels\HomePanel.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Update="Panels\PairingsandLittersPanel.cs">
       <SubType>Component</SubType>
@@ -68,6 +68,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="Panels\ReportsPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Panels\ResponsivePanel.cs">
       <SubType>Component</SubType>
     </Compile>
   </ItemGroup>

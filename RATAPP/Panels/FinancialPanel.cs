@@ -2,11 +2,12 @@
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using iTextSharp.text.pdf;
 using RATAPP.Forms;
 
 namespace RATAPP.Panels
 {
-    public partial class FinancialPanel : Panel, INavigable
+    public partial class FinancialPanel : ResponsivePanel
     {
         private RATAppBaseForm _parentForm;
         private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
@@ -24,7 +25,7 @@ namespace RATAPP.Panels
         private DataGridView budgetGrid;
         private DataGridView overviewGrid;
 
-        public FinancialPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public FinancialPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context) : base(parentForm)
         {
             _parentForm = parentForm;
             _context = context;

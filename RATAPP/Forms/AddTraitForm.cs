@@ -22,8 +22,19 @@ namespace RATAPP.Forms
         private Button saveButton;
         private Button cancelButton;
 
-        public AddTraitForm(TraitService traitService, GeneService geneService, RatAppDbContext context)
-            : base(context)
+        public AddTraitForm(TraitService traitService, GeneService geneService, RatAppDbContext context, Trait selectedTrait) : base(context) //TODO haven't actually done anything with selected trait, but it does make sense to have (I think?) FIXME
+        {
+            _traitService = traitService;
+            _geneService = geneService;
+
+            InitializeComponents();
+            SetupLayout();
+            RegisterEventHandlers();
+            LoadTraitTypes();
+            LoadSpecies();
+        }
+
+        public AddTraitForm(TraitService traitService, GeneService geneService, RatAppDbContext context) : base(context) //TODO haven't actually done anything with selected trait, but it does make sense to have (I think?) FIXME
         {
             _traitService = traitService;
             _geneService = geneService;

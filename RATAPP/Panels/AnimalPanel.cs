@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 //NOTES
 // * I think passing a state around is likely the best way to handle whether we're in edit mode, or not
@@ -23,7 +24,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 // Need to make sure that I don't have any business logic in here 
 namespace RATAPP.Panels
 {
-    public partial class AnimalPanel : Panel, INavigable
+    public partial class AnimalPanel : ResponsivePanel
     {
         // Class-level fields for controls specific to Animal Page
         private Label animalNameLabel;
@@ -135,7 +136,7 @@ namespace RATAPP.Panels
         };
 
         // Constructor for initializing the panel
-        public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, AnimalDto[] allAnimals, AnimalDto currAnimal)
+        public AnimalPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, AnimalDto[] allAnimals, AnimalDto currAnimal) : base(parentForm)
         {
             _context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(context);
@@ -1256,7 +1257,9 @@ namespace RATAPP.Panels
                     _isEditMode = false;
 
                     //return to home page
-                    _parentForm.HomeButton_Click(sender, e);
+                    var homePanel = await HomePanel.CreateAsync(this._parentForm, _context, "TODO-fix username", "role - TODO");
+                    _parentForm.NavigateTo(homePanel); 
+                    //_parentForm.NavigateTo(this); HomeButton_Click(sender, e);
                 }
                 // If the user clicks 'Cancel', do nothing and return to edit mode
                 else if (result == DialogResult.Cancel)

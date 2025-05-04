@@ -5,7 +5,7 @@ using RATAPPLibrary.Services;
 
 namespace RATAPP.Panels
 {
-    public class ReportsPanel : Panel, INavigable
+    public class ReportsPanel : ResponsivePanel
     {
         private RatAppDbContext _context;
         private ReportsService _reportService;
@@ -16,8 +16,9 @@ namespace RATAPP.Panels
         private TabControl reportTabControl;
         private Chart reportChart;
         private DataGridView reportDataGridView;
+        private RATAppBaseForm parentForm;
 
-        public ReportsPanel(RatAppDbContext context)
+        public ReportsPanel(RatAppDbContext context, RATAppBaseForm parentForm) : base(parentForm)
         {
             _context = context;
             _reportService = new ReportsService(_context);

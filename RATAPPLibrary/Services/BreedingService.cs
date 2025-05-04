@@ -12,7 +12,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace RATAPPLibrary.Services
 {
-    public class BreedingService
+    public class BreedingCalculatorService
     {
         private readonly RatAppDbContext _context;
         private readonly LineService _lineService;
@@ -20,7 +20,7 @@ namespace RATAPPLibrary.Services
         private readonly LineageService _lineageService;
         private readonly AnimalService _animalService;
 
-        public BreedingService(RatAppDbContext context)
+        public BreedingCalculatorService(RatAppDbContext context)
         {
             _context = context;
             _lineService = new LineService(context);

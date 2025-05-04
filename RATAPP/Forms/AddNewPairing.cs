@@ -36,7 +36,7 @@ namespace RATAPP.Forms
         public AddPairingForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
         {
             // Initialize services
-            var breedingService = new BreedingService(context);
+            var breedingService = new BreedingCalculatorService(context);
             var speciesService = new SpeciesService(context);
             var animalService = new AnimalService(context);
             var projectService = new ProjectService(context);

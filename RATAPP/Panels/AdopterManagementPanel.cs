@@ -13,7 +13,7 @@ using RATAPPLibrary.Data.Models;
 
 namespace RATAPP.Panels
 {
-    public partial class AdopterManagementPanel : Panel, INavigable
+    public partial class AdopterManagementPanel : ResponsivePanel
     {
         private RatAppDbContext _context;
         private string _currentUsername;
@@ -41,7 +41,7 @@ namespace RATAPP.Panels
             return panel;
         }
 
-        public AdopterManagementPanel(RATAppBaseForm baseForm, RatAppDbContext context)
+        public AdopterManagementPanel(RATAppBaseForm baseForm, RatAppDbContext context) : base(baseForm)
         {
             _baseForm = baseForm;
             _context = context;

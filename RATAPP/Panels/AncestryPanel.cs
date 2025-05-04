@@ -1,4 +1,5 @@
-﻿using RATAPP.Forms;
+﻿using iTextSharp.text.pdf;
+using RATAPP.Forms;
 using RATAPPLibrary.Data.Models;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Windows.Forms;
 
 namespace RATAPP.Panels
 {
-    public partial class AncestryPanel : Panel, INavigable
+    public partial class AncestryPanel : ResponsivePanel
     {
         private TreeView ancestryTree;
         private Panel infoPanel;
@@ -25,7 +26,7 @@ namespace RATAPP.Panels
         // The currently selected rodent
         private Rodent selectedRodent;
 
-        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
+        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context) : base(parentForm) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
         {
             _parentForm = parentForm;
             _context = context;

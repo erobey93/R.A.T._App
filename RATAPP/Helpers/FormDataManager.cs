@@ -11,13 +11,13 @@ namespace RATAPP.Helpers
     /// </summary>
     public class FormDataManager
     {
-        private readonly BreedingService _breedingService;
+        private readonly BreedingCalculatorService _breedingService;
         private readonly SpeciesService _speciesService;
         private readonly ProjectService _projectService;
         private readonly AnimalService _animalService;
 
         public FormDataManager(
-            BreedingService breedingService,
+            BreedingCalculatorService breedingService,
             SpeciesService speciesService,
             ProjectService projectService,
             AnimalService animalService)

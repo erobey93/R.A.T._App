@@ -8,19 +8,25 @@ using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using PdfSharp.Drawing;
 using RATAPP.Forms;
+using iTextSharp.text.pdf;
+using PdfReader = PdfSharp.Pdf.IO.PdfReader;
+using PdfDocument = PdfSharp.Pdf.PdfDocument;
+using PdfPage = PdfSharp.Pdf.PdfPage;
 
 namespace RATAPP.Panels
 {
     //TODO - just messing around but not a fundamental implementation 
-    public partial class PdfGenerationPanel : Panel, INavigable
+    public partial class PdfGenerationPanel : ResponsivePanel
     {
         private ComboBox cmbAnimalOrLitterId;
         private Button btnGeneratePdf;
         private Panel pdfPreviewPanel;
+        RATAppBaseForm parentForm;
 
-        public PdfGenerationPanel()
+        public PdfGenerationPanel(RATAppBaseForm parentForm) : base(parentForm) //FIXME - I just put the parentForm in here without thinking about it at all as this class isn't implemented but it needs to be handled b/f actual implementation
         {
             InitializeComponents();
+            this.parentForm = parentForm;
         }
 
         private void InitializeComponents()
