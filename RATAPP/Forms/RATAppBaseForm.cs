@@ -1,10 +1,10 @@
-﻿
-using System;
+﻿using System;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPP.Panels;
+using RATAPP.Helpers;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
@@ -14,6 +14,7 @@ namespace RATAPP.Forms
     public interface INavigable
     {
         Task RefreshDataAsync();
+        void ResizeUI(); // New method for responsive UI updates
     }
 
     public partial class RATAppBaseForm : Form
@@ -25,14 +26,27 @@ namespace RATAPP.Forms
         private PictureBox logoPictureBox;
         private INavigable _activePanel;
         private RatAppDbContext _context;
+        private FlowLayoutPanel topNavButtonsPanel; // New panel for top nav buttons
+
+        // Responsive layout helper
+        private ResponsiveLayoutHelper _responsiveHelper;
 
         public string UserName { get; set; }
         public Panel ContentPanel => contentPanel;
+
+        // Expose the responsive helper to child panels
+        public ResponsiveLayoutHelper ResponsiveHelper => _responsiveHelper;
 
         public RATAppBaseForm(RatAppDbContext context)
         {
             _context = context;
             InitializeComponent();
+
+            // Initialize the responsive helper after all controls are created
+            _responsiveHelper = new ResponsiveLayoutHelper(this);
+
+            // Handle form resize events
+            this.Resize += RATAppBaseForm_Resize;
         }
 
         private void InitializeComponent()
@@ -44,6 +58,7 @@ namespace RATAPP.Forms
             this.Size = new Size(1200, 800);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.WindowState = FormWindowState.Maximized;
+            this.MinimumSize = new Size(800, 600); // Set minimum size
 
             InitializePanels();
             InitializeTopNav();
@@ -69,13 +84,15 @@ namespace RATAPP.Forms
             {
                 Dock = DockStyle.Left,
                 Width = 200,
-                BackColor = Color.FromArgb(240, 240, 240)
+                BackColor = Color.FromArgb(240, 240, 240),
+                AutoScroll = true // Enable scrolling for smaller screens
             };
 
             contentPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.White
+                BackColor = Color.White,
+                AutoScroll = true // Enable scrolling for smaller screens
             };
         }
 
@@ -83,7 +100,7 @@ namespace RATAPP.Forms
         {
             logoPictureBox = new PictureBox
             {
-                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"), // Replace with actual path
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Size = new Size(40, 40),
                 Location = new Point(10, 10)
@@ -98,16 +115,36 @@ namespace RATAPP.Forms
                 Location = new Point(60, 15)
             };
 
-            var refreshButton = CreateTopNavButton("Refresh", 0, RefreshButton_Click);
-            var utilitiesButton = CreateTopNavButton("Utilities", 1, UtilitiesButton_Click);
-            var logoutButton = CreateTopNavButton("Log Out", 2, LogoutButton_Click);
-            var settingsButton = CreateTopNavButton("Settings", 3, SettingsButton_Click);
+            // Create a flow layout panel for top nav buttons
+            topNavButtonsPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.LeftToRight,
+                AutoSize = true,
+                Location = new Point(200, 15),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
+            };
 
-            topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, refreshButton, utilitiesButton, logoutButton });
+            var refreshButton = CreateTopNavButton("Refresh", RefreshButton_Click);
+            var utilitiesButton = CreateTopNavButton("Utilities", UtilitiesButton_Click);
+            var logoutButton = CreateTopNavButton("Log Out", LogoutButton_Click);
+            var settingsButton = CreateTopNavButton("Settings", SettingsButton_Click);
+
+            topNavButtonsPanel.Controls.AddRange(new Control[] { refreshButton, utilitiesButton, logoutButton, settingsButton });
+
+            topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, topNavButtonsPanel });
         }
 
         private void InitializeSideNav()
         {
+            // Create a flow layout panel for side nav buttons to enable scrolling
+            var sideNavButtonsPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                Dock = DockStyle.Fill,
+                WrapContents = false,
+                AutoSize = true
+            };
+
             var buttons = new[]
              {
                 CreateSideNavButton("Research", ResearchButton_Click),
@@ -120,10 +157,16 @@ namespace RATAPP.Forms
                 CreateSideNavButton("Home", HomeButton_Click),
             };
 
-            sideNavPanel.Controls.AddRange(buttons);
+            foreach (var button in buttons)
+            {
+                button.Width = sideNavPanel.Width - 2; // Account for borders
+                sideNavButtonsPanel.Controls.Add(button);
+            }
+
+            sideNavPanel.Controls.Add(sideNavButtonsPanel);
         }
 
-        private Button CreateTopNavButton(string text, int count, EventHandler onClick)
+        private Button CreateTopNavButton(string text, EventHandler onClick)
         {
             var button = new Button
             {
@@ -132,9 +175,9 @@ namespace RATAPP.Forms
                 BackColor = Color.Transparent,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 10),
-                Size = new Size(100, 40),
-                Location = new Point(count * 110 + 200, 10),
-                FlatAppearance = { BorderSize = 0 }
+                Size = new Size(100, 30),
+                FlatAppearance = { BorderSize = 0 },
+                Margin = new Padding(5, 0, 0, 0)
             };
             button.Click += onClick;
             return button;
@@ -145,12 +188,12 @@ namespace RATAPP.Forms
             var button = new Button
             {
                 Text = text,
-                Dock = DockStyle.Top,
                 ForeColor = Color.Black,
                 BackColor = Color.Transparent,
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Segoe UI", 12),
                 Height = 50,
+                Width = sideNavPanel.Width - 2, // Account for borders
                 TextAlign = ContentAlignment.MiddleLeft,
                 Padding = new Padding(20, 0, 0, 0),
                 FlatAppearance = { BorderSize = 0 }
@@ -173,6 +216,12 @@ namespace RATAPP.Forms
         {
             contentPanel.Controls.Clear();
             contentPanel.Controls.Add(panelToShow);
+
+            // Register the new panel with the responsive helper
+            _responsiveHelper.RegisterControl(panelToShow);
+
+            // Refresh the layout
+            _responsiveHelper.RefreshLayout();
         }
 
         private async void RefreshButton_Click(object sender, EventArgs e)
@@ -185,7 +234,7 @@ namespace RATAPP.Forms
 
         private void UtilitiesButton_Click(object sender, EventArgs e)
         {
-            Button utilitiesButton = (Button)sender; // cast sender as button 
+            Button utilitiesButton = (Button)sender;
 
             ContextMenuStrip utilitiesContextMenu = new ContextMenuStrip();
 
@@ -240,7 +289,7 @@ namespace RATAPP.Forms
         private void AncestryButton_Click(object sender, EventArgs e)
         {
             // Handle Ancestry button click
-            var ancestryPanel = new AncestryPanel(this, _context); // Create a new instance of the ReportsPanel
+            var ancestryPanel = new AncestryPanel(this, _context);
             _activePanel = ancestryPanel;
             ShowPanel(ancestryPanel);
         }
@@ -254,7 +303,7 @@ namespace RATAPP.Forms
         private void AdopterButton_Click(object sender, EventArgs e)
         {
             // Handle Adopter Management button click
-            var adopterPanel = new AdopterManagementPanel(this, _context); // Create a new instance of the ReportsPanel
+            var adopterPanel = new AdopterManagementPanel(this, _context);
             _activePanel = adopterPanel;
             ShowPanel(adopterPanel);
         }
@@ -270,7 +319,7 @@ namespace RATAPP.Forms
 
         private void ReportsButton_Click(object sender, EventArgs e)
         {
-            var reportsPanel = new ReportsPanel(_context); // Create a new instance of the ReportsPanel
+            var reportsPanel = new ReportsPanel(_context);
             _activePanel = reportsPanel;
             ShowPanel(reportsPanel);
         }
@@ -323,8 +372,350 @@ namespace RATAPP.Forms
             _activePanel = geneticsPanel;
             ShowPanel(geneticsPanel);
         }
+
+        private void RATAppBaseForm_Resize(object sender, EventArgs e)
+        {
+            // Update the position of the top nav buttons panel
+            topNavButtonsPanel.Location = new Point(
+                Math.Max(appNameLabel.Right + 20, this.Width - topNavButtonsPanel.Width - 20),
+                15
+            );
+
+            // Notify the active panel about the resize
+            if (_activePanel != null)
+            {
+                _activePanel.ResizeUI();
+            }
+        }
     }
 }
+
+//using System;
+//using System.Drawing;
+//using System.Linq;
+//using System.Threading.Tasks;
+//using System.Windows.Forms;
+//using RATAPP.Panels;
+//using RATAPPLibrary.Data.DbContexts;
+//using RATAPPLibrary.Services;
+//using RATAPPLibrary.Services.Genetics;
+
+//namespace RATAPP.Forms
+//{
+//    public interface INavigable
+//    {
+//        Task RefreshDataAsync();
+//    }
+
+//    public partial class RATAppBaseForm : Form
+//    {
+//        private Panel topNavPanel;
+//        private Panel sideNavPanel;
+//        public Panel contentPanel;
+//        private Label appNameLabel;
+//        private PictureBox logoPictureBox;
+//        private INavigable _activePanel;
+//        private RatAppDbContext _context;
+
+//        public string UserName { get; set; }
+//        public Panel ContentPanel => contentPanel;
+
+//        public RATAppBaseForm(RatAppDbContext context)
+//        {
+//            _context = context;
+//            InitializeComponent();
+//        }
+
+//        private void InitializeComponent()
+//        {
+//            this.SuspendLayout();
+
+//            // Form properties
+//            this.Text = "R.A.T. APP";
+//            this.Size = new Size(1200, 800);
+//            this.StartPosition = FormStartPosition.CenterScreen;
+//            this.WindowState = FormWindowState.Maximized;
+
+//            InitializePanels();
+//            InitializeTopNav();
+//            InitializeSideNav();
+
+//            this.Controls.Add(contentPanel);
+//            this.Controls.Add(sideNavPanel);
+//            this.Controls.Add(topNavPanel);
+
+//            this.ResumeLayout(false);
+//        }
+
+//        private void InitializePanels()
+//        {
+//            topNavPanel = new Panel
+//            {
+//                Dock = DockStyle.Top,
+//                Height = 60,
+//                BackColor = Color.FromArgb(0, 120, 212)
+//            };
+
+//            sideNavPanel = new Panel
+//            {
+//                Dock = DockStyle.Left,
+//                Width = 200,
+//                BackColor = Color.FromArgb(240, 240, 240)
+//            };
+
+//            contentPanel = new Panel
+//            {
+//                Dock = DockStyle.Fill,
+//                BackColor = Color.White
+//            };
+//        }
+
+//        private void InitializeTopNav()
+//        {
+//            logoPictureBox = new PictureBox
+//            {
+//                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"), // Replace with actual path
+//                SizeMode = PictureBoxSizeMode.Zoom,
+//                Size = new Size(40, 40),
+//                Location = new Point(10, 10)
+//            };
+
+//            appNameLabel = new Label
+//            {
+//                Text = "R.A.T. APP",
+//                ForeColor = Color.White,
+//                Font = new Font("Segoe UI", 16, FontStyle.Bold),
+//                AutoSize = true,
+//                Location = new Point(60, 15)
+//            };
+
+//            var refreshButton = CreateTopNavButton("Refresh", 0, RefreshButton_Click);
+//            var utilitiesButton = CreateTopNavButton("Utilities", 1, UtilitiesButton_Click);
+//            var logoutButton = CreateTopNavButton("Log Out", 2, LogoutButton_Click);
+//            var settingsButton = CreateTopNavButton("Settings", 3, SettingsButton_Click);
+
+//            topNavPanel.Controls.AddRange(new Control[] { logoPictureBox, appNameLabel, refreshButton, utilitiesButton, logoutButton });
+//        }
+
+//        private void InitializeSideNav()
+//        {
+//            var buttons = new[]
+//             {
+//                CreateSideNavButton("Research", ResearchButton_Click),
+//                CreateSideNavButton("Financial", FinancialButton_Click),
+//                CreateSideNavButton("Reports", ReportsButton_Click),
+//                CreateSideNavButton("Adopter Management", AdopterButton_Click),
+//                CreateSideNavButton("Genetics", GeneticsButton_Click),
+//                CreateSideNavButton("Ancestry", AncestryButton_Click),
+//                CreateSideNavButton("Breeding", BreedingButton_Click),
+//                CreateSideNavButton("Home", HomeButton_Click),
+//            };
+
+//            sideNavPanel.Controls.AddRange(buttons);
+//        }
+
+//        private Button CreateTopNavButton(string text, int count, EventHandler onClick)
+//        {
+//            var button = new Button
+//            {
+//                Text = text,
+//                ForeColor = Color.White,
+//                BackColor = Color.Transparent,
+//                FlatStyle = FlatStyle.Flat,
+//                Font = new Font("Segoe UI", 10),
+//                Size = new Size(100, 40),
+//                Location = new Point(count * 110 + 200, 10),
+//                FlatAppearance = { BorderSize = 0 }
+//            };
+//            button.Click += onClick;
+//            return button;
+//        }
+
+//        private Button CreateSideNavButton(string text, EventHandler onClick)
+//        {
+//            var button = new Button
+//            {
+//                Text = text,
+//                Dock = DockStyle.Top,
+//                ForeColor = Color.Black,
+//                BackColor = Color.Transparent,
+//                FlatStyle = FlatStyle.Flat,
+//                Font = new Font("Segoe UI", 12),
+//                Height = 50,
+//                TextAlign = ContentAlignment.MiddleLeft,
+//                Padding = new Padding(20, 0, 0, 0),
+//                FlatAppearance = { BorderSize = 0 }
+//            };
+//            button.Click += onClick;
+//            return button;
+//        }
+
+//        public void SetActivePanel(INavigable panel)
+//        {
+//            _activePanel = panel;
+//        }
+
+//        public void SetUserName(string username)
+//        {
+//            UserName = username;
+//        }
+
+//        public void ShowPanel(Panel panelToShow)
+//        {
+//            contentPanel.Controls.Clear();
+//            contentPanel.Controls.Add(panelToShow);
+//        }
+
+//        private async void RefreshButton_Click(object sender, EventArgs e)
+//        {
+//            if (_activePanel != null)
+//            {
+//                await _activePanel.RefreshDataAsync();
+//            }
+//        }
+
+//        private void UtilitiesButton_Click(object sender, EventArgs e)
+//        {
+//            Button utilitiesButton = (Button)sender; // cast sender as button 
+
+//            ContextMenuStrip utilitiesContextMenu = new ContextMenuStrip();
+
+//            ToolStripMenuItem settingsItem = new ToolStripMenuItem("Settings");
+//            settingsItem.Click += SettingsItem_Click;
+//            utilitiesContextMenu.Items.Add(settingsItem);
+
+//            ToolStripMenuItem styleItem = new ToolStripMenuItem("Style");
+//            styleItem.Click += StyleItem_Click;
+//            utilitiesContextMenu.Items.Add(styleItem);
+
+//            ToolStripMenuItem errorLogsItem = new ToolStripMenuItem("Error Logs");
+//            errorLogsItem.Click += ErrorLogsItem_Click;
+//            utilitiesContextMenu.Items.Add(errorLogsItem);
+
+//            ToolStripMenuItem bulkImportItem = new ToolStripMenuItem("Bulk Import Animals");
+//            bulkImportItem.Click += BulkImportItem_Click;
+//            utilitiesContextMenu.Items.Add(bulkImportItem);
+
+//            // Show the context menu below the Utilities button
+//            utilitiesContextMenu.Show(utilitiesButton, new Point(0, utilitiesButton.Height));
+//        }
+
+//        private void SettingsItem_Click(object sender, EventArgs e)
+//        {
+//            // Handle Settings menu item click
+//            MessageBox.Show("Settings clicked");
+//            // Add your settings logic here
+//        }
+
+//        private void StyleItem_Click(object sender, EventArgs e)
+//        {
+//            // Handle Style menu item click
+//            MessageBox.Show("Style clicked");
+//            // Add your style logic here
+//        }
+
+//        private void ErrorLogsItem_Click(object sender, EventArgs e)
+//        {
+//            // Handle Error Logs menu item click
+//            MessageBox.Show("Error Logs clicked");
+//            // Add your error logs logic here
+//        }
+
+//        private void BulkImportItem_Click(object sender, EventArgs e)
+//        {
+//            // Handle Error Logs menu item click
+//            MessageBox.Show("Bulk Import clicked");
+//            // Add your error logs logic here
+//        }
+
+//        private void AncestryButton_Click(object sender, EventArgs e)
+//        {
+//            // Handle Ancestry button click
+//            var ancestryPanel = new AncestryPanel(this, _context); // Create a new instance of the ReportsPanel
+//            _activePanel = ancestryPanel;
+//            ShowPanel(ancestryPanel);
+//        }
+
+//        private void SettingsButton_Click(object sender, EventArgs e)
+//        {
+//            // Handle Settings button click
+//            MessageBox.Show("Settings button clicked");
+//        }
+
+//        private void AdopterButton_Click(object sender, EventArgs e)
+//        {
+//            // Handle Adopter Management button click
+//            var adopterPanel = new AdopterManagementPanel(this, _context); // Create a new instance of the ReportsPanel
+//            _activePanel = adopterPanel;
+//            ShowPanel(adopterPanel);
+//        }
+
+//        private void ResearchButton_Click(object sender, EventArgs e)
+//        {
+//            throw new NotImplementedException();
+//            //var researchService = new ResearchService(_context);
+//            //var researchPanel = new ResearchPanel(this, researchService);
+//            //_activePanel = researchPanel;
+//            //ShowPanel(researchPanel);
+//        }
+
+//        private void ReportsButton_Click(object sender, EventArgs e)
+//        {
+//            var reportsPanel = new ReportsPanel(_context); // Create a new instance of the ReportsPanel
+//            _activePanel = reportsPanel;
+//            ShowPanel(reportsPanel);
+//        }
+
+//        private void LogoutButton_Click(object sender, EventArgs e)
+//        {
+//            DialogResult result = MessageBox.Show(
+//                "Are you sure you want to exit?",
+//                "Exit Confirmation",
+//                MessageBoxButtons.YesNo,
+//                MessageBoxIcon.Question
+//            );
+
+//            if (result == DialogResult.Yes)
+//            {
+//                Application.Exit();
+//            }
+//        }
+
+//        public async void HomeButton_Click(object sender, EventArgs e)
+//        {
+//            var homePanel = await HomePanel.CreateAsync(this, _context, UserName, "role - TODO");
+//            _activePanel = homePanel;
+//            ShowPanel(homePanel);
+//        }
+
+//        private void BreedingButton_Click(object sender, EventArgs e)
+//        {
+//            var pairingsAndLittersPanel = new PairingsAndLittersPanel(this, _context);
+//            _activePanel = pairingsAndLittersPanel;
+//            ShowPanel(pairingsAndLittersPanel);
+//        }
+
+//        private void FinancialButton_Click(object sender, EventArgs e)
+//        {
+//            // Financial button click
+//            var financialPanel = new FinancialPanel(this, _context);
+//            _activePanel = financialPanel;
+//            ShowPanel(financialPanel);
+//        }
+
+//        private void GeneticsButton_Click(object sender, EventArgs e)
+//        {
+//            var geneticsPanel = new GeneticsPanel(
+//                this,
+//                new TraitService(_context),
+//                new GeneService(_context),
+//                new BreedingCalculationService(_context),
+//                _context);
+//            _activePanel = geneticsPanel;
+//            ShowPanel(geneticsPanel);
+//        }
+//    }
+//}
 //using Azure;
 //using Microsoft.AspNetCore.Rewrite;
 //using Microsoft.EntityFrameworkCore;
