@@ -1,8 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using System.Security.AccessControl;
+using Trait = RATAPPLibrary.Data.Models.Genetics.Trait;
 
 namespace RATAPPLibrary.Services
 {
@@ -280,7 +282,7 @@ namespace RATAPPLibrary.Services
         }
 
         ////map trait type and name
-        private async Task<Dictionary<string, List<string>>> MapTraitTypeAndNameAsync(IEnumerable<Trait> traits)
+        private async Task<Dictionary<string, List<string>>> MapTraitTypeAndNameAsync(IEnumerable<Data.Models.Genetics.Trait> traits)
         {
             Dictionary<string, List<string>> traitMap = new Dictionary<string, List<string>>();
             foreach (var trait in traits)
@@ -420,6 +422,26 @@ namespace RATAPPLibrary.Services
         {
             var traitType = await _context.TraitType.FindAsync(traitTypeId);
             return traitType.Name;
+        }
+
+        // Delete trait
+        //TODO may need to account for dependencies on the trait i.e. in animal trait? 
+        public async Task<bool> DeleteTraitAsync(int traitId)
+        {
+            // Check if the trait exists
+            var trait = await _context.Trait.FirstOrDefaultAsync(t => t.Id == traitId);
+
+            if (trait != null)
+            {
+                // Delete the trait
+                _context.Trait.Remove(trait);
+                await _context.SaveChangesAsync(); // Save changes to the database
+
+                return true; // Indicate successful deletion
+            }
+
+            // Return false if the trait does not exist
+            return false;
         }
     }
 }

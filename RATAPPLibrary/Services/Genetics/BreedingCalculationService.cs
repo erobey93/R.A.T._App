@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services.Genetics.Interfaces;
 using System;
@@ -283,6 +284,11 @@ namespace RATAPPLibrary.Services.Genetics
         }
 
         public Task<List<PossibleOffspring>> GetPossibleOffspringAsync(Guid calculationId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<object> CalculateBreedingOutcomes(Animal dam, Animal sire)
         {
             throw new NotImplementedException();
         }

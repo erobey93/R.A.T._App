@@ -315,6 +315,7 @@ namespace RATAPP.Forms
         private void GeneticsButton_Click(object sender, EventArgs e)
         {
             var geneticsPanel = new GeneticsPanel(
+                this,
                 new TraitService(_context),
                 new GeneService(_context),
                 new BreedingCalculationService(_context),
