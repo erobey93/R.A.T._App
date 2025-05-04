@@ -581,6 +581,12 @@ namespace RATAPP.Panels
 
         private void AnimalImageClicked(object sender, EventArgs e)
         {
+            // Only allow image updates in edit mode
+            if (!_isEditMode)
+            {
+                return;
+            }
+
             // Open a file dialog to select an image
             OpenFileDialog dialog = new OpenFileDialog
             {
@@ -593,35 +599,31 @@ namespace RATAPP.Panels
             {
                 try
                 {
-                    // Get the selected file path
                     string selectedFilePath = dialog.FileName;
 
                     // Ensure the file exists and is a valid image
                     if (File.Exists(selectedFilePath))
                     {
-                        // Check if the file is an image by looking at the file extension
                         string[] validImageExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff" };
                         string fileExtension = Path.GetExtension(selectedFilePath).ToLower();
 
                         if (validImageExtensions.Contains(fileExtension))
                         {
-                            // Load the image from the file
-                            Image newImage = Image.FromFile(selectedFilePath);
+                            // Dispose of existing image
+                            if (animalPhotoBox.Image != null)
+                            {
+                                animalPhotoBox.Image.Dispose();
+                            }
 
-                            // Set the image in the animalPhotoBox
-                            animalPhotoBox.Image = newImage;
+                            // Load and set the new image
+                            animalPhotoBox.Image = Image.FromFile(selectedFilePath);
 
-                            // Normalize the file path (this removes double slashes)
+                            // Update the image URL with normalized path
                             string normalizedFilePath = CleanFilePath(selectedFilePath);
-
-                            // Update the image URL for the animal (using the normalized file path)
                             _animal.imageUrl = normalizedFilePath;
 
-                            // Show a message confirming the image update
-                            ShowMessage("Image updated successfully! Image URL: " + _animal.imageUrl);
-
-                            // Refresh the control to ensure the new image is displayed
-                            Refresh();  // This should update the UI to reflect the new image
+                            ShowMessage("Image updated successfully!");
+                            Refresh();
                         }
                         else
                         {
@@ -635,7 +637,6 @@ namespace RATAPP.Panels
                 }
                 catch (Exception ex)
                 {
-                    // Handle any errors (e.g., if the file isn't a valid image or any other exceptions)
                     ShowMessage("Error updating image: " + ex.Message);
                 }
             }
@@ -846,30 +847,37 @@ namespace RATAPP.Panels
         // Add image to textbox
         private void AddImageToAnimalTextbox(AnimalDto animal)
         {
-            //check that the image url exists 
-            if (animal.imageUrl != null)
+            // Remove any existing click handlers to prevent duplicates
+            animalPhotoBox.Click -= AnimalImageClicked;
+
+            // Set cursor based on edit mode
+            animalPhotoBox.Cursor = _isEditMode ? Cursors.Hand : Cursors.Default;
+
+            // Add click handler only in edit mode
+            if (_isEditMode)
+            {
+                animalPhotoBox.Click += AnimalImageClicked;
+            }
+
+            // Try to load and display the image
+            if (animal?.imageUrl != null)
             {
                 try
                 {
-                    //get the correctly formatted image url and set the image 
                     string imageUrl = CleanFilePath(animal.imageUrl);
-                    animalPhotoBox.Image = Image.FromFile(imageUrl);
+                    if (File.Exists(imageUrl))
+                    {
+                        // Dispose of any existing image
+                        if (animalPhotoBox.Image != null)
+                        {
+                            animalPhotoBox.Image.Dispose();
+                        }
+                        animalPhotoBox.Image = Image.FromFile(imageUrl);
+                    }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    MessageBox.Show(e.Message);  //FIXME - for now, show the error but continue with the rest of the logic 
-                }
-
-                if (_isEditMode)
-                {
-                    animalPhotoBox.Click += AnimalImageClicked;
-                }
-            }
-            else
-            {
-                if (_isEditMode)
-                {
-                    animalPhotoBox.Click += AnimalImageClicked;
+                    ShowMessage($"Error loading image: {ex.Message}");
                 }
             }
         }
@@ -949,18 +957,43 @@ namespace RATAPP.Panels
         }
 
         // Method to initialize the animal's photo box
-        //TODO work on formatting a bit more
         private void InitializePhotoBox()
         {
-            animalPhotoBox = new PictureBox
+            // If animalPhotoBox already exists, preserve its state
+            if (animalPhotoBox != null)
             {
-                Location = new Point(750, 20),
-                Size = new Size(200, 200),
-                BorderStyle = BorderStyle.FixedSingle,
-                SizeMode = PictureBoxSizeMode.Zoom // To fit photo inside the box
-            };
+                var existingImage = animalPhotoBox.Image;
+                this.Controls.Remove(animalPhotoBox);
+                animalPhotoBox.Dispose();
+                
+                animalPhotoBox = new PictureBox
+                {
+                    Location = new Point(750, 20),
+                    Size = new Size(200, 200),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    SizeMode = PictureBoxSizeMode.Zoom,
+                    Image = existingImage,
+                    Cursor = _isEditMode ? Cursors.Hand : Cursors.Default
+                };
+            }
+            else
+            {
+                animalPhotoBox = new PictureBox
+                {
+                    Location = new Point(750, 20),
+                    Size = new Size(200, 200),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    SizeMode = PictureBoxSizeMode.Zoom,
+                    Cursor = _isEditMode ? Cursors.Hand : Cursors.Default
+                };
+            }
 
-            // Add picture box to the form or panel
+            // Only add click handler in edit mode
+            if (_isEditMode)
+            {
+                animalPhotoBox.Click += AnimalImageClicked;
+            }
+
             this.Controls.Add(animalPhotoBox);
             Refresh();
         }
@@ -968,34 +1001,60 @@ namespace RATAPP.Panels
         // Initialize the scrollable thumbnail panel
         private void InitializeThumbnailPanel()
         {
-            // Initialize the FlowLayoutPanel (which will allow scrolling)
+            // If thumbnailPanel exists, preserve its state
+            List<string> existingImages = new List<string>();
+            if (thumbnailPanel != null)
+            {
+                // Store existing thumbnail paths
+                foreach (Control control in thumbnailPanel.Controls)
+                {
+                    if (control is PictureBox pictureBox && pictureBox.Tag is string imagePath)
+                    {
+                        existingImages.Add(imagePath);
+                    }
+                }
+                this.Controls.Remove(thumbnailPanel);
+                thumbnailPanel.Dispose();
+            }
+
+            // Initialize the FlowLayoutPanel
             thumbnailPanel = new FlowLayoutPanel
             {
-                Size = new Size(200, 100), // Adjust size as needed for thumbnails
-                Location = new Point(750, 240), // Adjust location to be below the main image
-                AutoScroll = true, // Enable scrolling if thumbnails overflow
-                FlowDirection = FlowDirection.LeftToRight, // Arrange thumbnails horizontally
-                BorderStyle = BorderStyle.FixedSingle // Add border for visual clarity
+                Size = new Size(200, 100),
+                Location = new Point(750, 240),
+                AutoScroll = true,
+                FlowDirection = FlowDirection.LeftToRight,
+                BorderStyle = BorderStyle.FixedSingle
             };
 
-            // Add "Add Image" button at the start of thumbnail panel
-            Button addImageButton = new Button
+            // Only add the "Add Image" button in edit mode
+            if (_isEditMode)
             {
-                Size = new Size(50, 50),
-                Text = "+",
-                Font = new Font("Segoe UI", 20),
-                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                Margin = new Padding(5),
-                Cursor = Cursors.Hand,
-                FlatStyle = FlatStyle.Flat
-            };
-            addImageButton.Click += AddThumbnailImage;
-            thumbnailPanel.Controls.Add(addImageButton);
+                Button addImageButton = new Button
+                {
+                    Size = new Size(50, 50),
+                    Text = "+",
+                    Font = new Font("Segoe UI", 20),
+                    TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                    Margin = new Padding(5),
+                    Cursor = Cursors.Hand,
+                    FlatStyle = FlatStyle.Flat
+                };
+                addImageButton.Click += AddThumbnailImage;
+                thumbnailPanel.Controls.Add(addImageButton);
+            }
 
             this.Controls.Add(thumbnailPanel);
 
-            // Add existing thumbnails to the panel
-            if (_animal != null && _animal.AdditionalImages != null)
+            // Restore existing thumbnails or add from _animal
+            if (existingImages.Count > 0)
+            {
+                foreach (var imagePath in existingImages)
+                {
+                    AddThumbnailToPanel(imagePath);
+                }
+            }
+            else if (_animal != null && _animal.AdditionalImages != null)
             {
                 foreach (var imagePath in _animal.AdditionalImages)
                 {
@@ -1054,20 +1113,34 @@ namespace RATAPP.Panels
                         Size = new Size(50, 50),
                         SizeMode = PictureBoxSizeMode.Zoom,
                         Margin = new Padding(5),
-                        Cursor = Cursors.Hand
+                        Cursor = _isEditMode ? Cursors.Hand : Cursors.Default,
+                        Tag = imagePath // Store the image path for state preservation
                     };
 
                     // Create context menu for thumbnail
                     ContextMenuStrip menu = new ContextMenuStrip();
                     menu.Items.Add("View", null, (s, e) => OnThumbnailClick(imagePath));
-                    menu.Items.Add("Delete", null, (s, e) => DeleteThumbnail(thumbnail, imagePath));
+                    
+                    // Only add delete option in edit mode
+                    if (_isEditMode)
+                    {
+                        menu.Items.Add("Delete", null, (s, e) => DeleteThumbnail(thumbnail, imagePath));
+                    }
+                    
                     thumbnail.ContextMenuStrip = menu;
 
                     // Add click handler
                     thumbnail.Click += (s, e) => OnThumbnailClick(imagePath);
 
-                    // Add to panel after the add button
-                    thumbnailPanel.Controls.Add(thumbnail);
+                    // Add to panel after the add button (if in edit mode) or at the end
+                    if (_isEditMode && thumbnailPanel.Controls.Count > 0 && thumbnailPanel.Controls[0] is Button)
+                    {
+                        thumbnailPanel.Controls.Add(thumbnail);
+                    }
+                    else
+                    {
+                        thumbnailPanel.Controls.Add(thumbnail);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1192,12 +1265,38 @@ namespace RATAPP.Panels
 
         private void UpdateButtonClick(object sender, EventArgs e)
         {
-            // Logic to update animal data 
+            // Set edit mode
             _isEditMode = true;
 
-            //first clear out old controls
+            // Store current image states
+            Image mainImage = animalPhotoBox?.Image;
+            List<string> thumbnailPaths = new List<string>();
+            if (thumbnailPanel != null)
+            {
+                foreach (Control control in thumbnailPanel.Controls)
+                {
+                    if (control is PictureBox pictureBox && pictureBox.Tag is string imagePath)
+                    {
+                        thumbnailPaths.Add(imagePath);
+                    }
+                }
+            }
+
+            // Clear and reinitialize controls
             this.Controls.Clear();
             InitializeComponent(_animal);
+
+            // Restore image states if needed
+            if (mainImage != null && animalPhotoBox != null)
+            {
+                animalPhotoBox.Image = mainImage;
+            }
+
+            // Additional images will be restored through InitializeThumbnailPanel
+            if (_animal.AdditionalImages == null)
+            {
+                _animal.AdditionalImages = thumbnailPaths;
+            }
         }
 
         private async Task CancelButtonClick(object sender, EventArgs e)
@@ -1494,60 +1593,42 @@ namespace RATAPP.Panels
                 line = "2";
             }
 
-            if (_animal != null)
+            // Collect additional images from thumbnails
+            List<string> additionalImages = new List<string>();
+            if (thumbnailPanel != null)
             {
-                AnimalDto animal = new AnimalDto
+                foreach (Control control in thumbnailPanel.Controls)
                 {
-                    Id = _animal.Id,
-                    regNum = regNumTextBox.Text,
-                    name = animalNameTextBox.Text,
-                    sex = sexComboBox.Text, // Assuming there's a TextBox for sex
-                    DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
-                    DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
-                                               //? null
-                                               //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
-                    species = speciesComboBox.Text,
-                    comment = commentsTextBox.Text,
-                    imageUrl = _animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
-                    Line = line, // Assuming there's a TextBox for line
-                    damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
-                    sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
-                    variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
-                    color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
-                    markings = markingComboBox.Text,
-                    earType = earTypeComboBox.Text,
-                    breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
-                };
-                return animal;
+                    if (control is PictureBox pictureBox && pictureBox.Tag is string imagePath)
+                    {
+                        additionalImages.Add(imagePath);
+                    }
+                }
             }
-            else
+
+            AnimalDto animal = new AnimalDto
             {
-                AnimalDto animal = new AnimalDto
-                {
-                    //id will have to be created for a new animal 
-                    regNum = regNumTextBox.Text,
-                    name = animalNameTextBox.Text,
-                    sex = sexComboBox.Text, // Assuming there's a TextBox for sex
-                    DateOfBirth = dob,  //dobTextBox.Text : DateTime.Parse(dobTextBox.Text), // Assuming dobTextBox contains the Date of Birth FIXME 
-                    DateOfDeath = DateTime.Now,//string.IsNullOrWhiteSpace(dodTextBox.Text) //FIXME getting an error on NULL value for DateOfDeath should be allowed 
-                                               //? null
-                                               //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
-                    species = speciesComboBox.Text,
-                    comment = commentsTextBox.Text,
-                    imageUrl = null, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
-                    Line = line, // Assuming there's a TextBox for line
-                    damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
-                    sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
-                    variety = varietyComboBox.Text, // Assuming there's a TextBox for variety
-                    color = colorComboBox.Text, // Assuming there's a TextBox for color TODO
-                    markings = markingComboBox.Text,
-                    earType = earTypeComboBox.Text,
-                    breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
-                };
-                return animal;
-            }
+                Id = _animal?.Id ?? 0,
+                regNum = regNumTextBox.Text,
+                name = animalNameTextBox.Text,
+                sex = sexComboBox.Text,
+                DateOfBirth = dob,
+                DateOfDeath = DateTime.Now,
+                species = speciesComboBox.Text,
+                comment = commentsTextBox.Text,
+                imageUrl = _animal?.imageUrl ?? null,
+                AdditionalImages = additionalImages,
+                Line = line,
+                damId = _dam?.Id,
+                sireId = _sire?.Id,
+                variety = varietyComboBox.Text,
+                color = colorComboBox.Text,
+                markings = markingComboBox.Text,
+                earType = earTypeComboBox.Text,
+                breeder = "TLDR",
+                genotype = "XYZ"
+            };
+            return animal;
 
         }
 
