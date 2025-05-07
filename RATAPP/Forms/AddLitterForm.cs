@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
 using RATAPP.Helpers;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
@@ -74,14 +75,14 @@ namespace RATAPP.Forms
 
         private void InitializeComponents()
         {
-            // Set form properties
+            //Properties
             this.Text = "Add Litter";
             this.Size = new Size(1200, 900);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
             this.AutoScroll = true;
 
-            // Create header with description
+            // Header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Litter");
             headerPanel.Height = 60;
             var headerLabel = headerPanel.Controls[0] as Label;
@@ -413,13 +414,20 @@ namespace RATAPP.Forms
             }
         }
 
-        private void InitializeEventHandlers()
+        private async void InitializeEventHandlers()
         {
             this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsync(
                 speciesComboBox, damComboBox, sireComboBox, projectComboBox);
 
-            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedAsync(
+            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
                 speciesComboBox, damComboBox, sireComboBox);
+
+
+            damComboBox.SelectedIndexChanged += async(s, e) => await _eventHandler.HandleDamSelectionChangedAsync(
+                damComboBox, sireComboBox, pairComboBox);
+
+            sireComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSireSelectionChangedAsync(
+                sireComboBox, damComboBox, pairComboBox);
 
             addButton.Click += async (s, e) => await _eventHandler.HandleAddLitterClickAsync(
                 litterIdTextBox.Text,

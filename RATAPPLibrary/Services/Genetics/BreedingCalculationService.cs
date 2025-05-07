@@ -19,6 +19,7 @@ namespace RATAPPLibrary.Services.Genetics
             _context = context;
         }
 
+        //using a pre-existing pairingId, create a "Breeding Calculation object that can be used to perform various calculations on that pair 
         public async Task<BreedingCalculation> CreateBreedingCalculationAsync(int pairingId)
         {
             var pairing = await _context.Pairing
@@ -288,6 +289,8 @@ namespace RATAPPLibrary.Services.Genetics
             throw new NotImplementedException();
         }
 
+        //perform a test pairing to see possible outcomes 
+        //TODO
         public IEnumerable<object> CalculateBreedingOutcomes(Animal dam, Animal sire)
         {
             throw new NotImplementedException();

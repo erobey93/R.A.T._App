@@ -357,7 +357,7 @@ namespace RATAPP.Forms
             this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsync(
                 speciesComboBox, damComboBox, sireComboBox, projectComboBox);
 
-            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedAsync(
+            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
                 speciesComboBox, damComboBox, sireComboBox);
 
             addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(

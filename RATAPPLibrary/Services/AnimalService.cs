@@ -90,6 +90,41 @@ namespace RATAPPLibrary.Services
             }
         }
 
+        //this returns an animal object without creating the animal in the database as I'm currently assuming that the animal exists FIXME because I should check, but there COULD be instances where this may make sense not sure though
+        public async Task <Animal> MapAnimalDtoBackToAnimal(AnimalDto animalDto)
+        {
+            // Get or create the line for the animal based on the variety
+            var line = await _lineService.GetOrCreateLineAsync_ByName(int.Parse(animalDto.Line));
+            if (line == null)
+            {
+                throw new InvalidOperationException($"Line '{animalDto.Line}' not found. Please ensure it exists in the database.");
+            }
+
+            // Find the species in the database by its scientific name
+            var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.species);
+            if (species == null)
+            {
+                throw new InvalidOperationException($"Species '{animalDto.species}' not found. Please ensure it exists in the database.");
+            }
+
+            //Find the stock id based on the line 
+            int stockId = line.StockId;
+            var newAnimal = new Animal
+            {
+                registrationNumber = animalDto.regNum,
+                StockId = stockId,
+                Name = animalDto.name,
+                DateOfBirth = animalDto.DateOfBirth,
+                DateOfDeath = animalDto.DateOfDeath,
+                Sex = animalDto.sex,
+                LineId = line.Id,
+                comment = animalDto.comment,
+                imageUrl = animalDto.imageUrl,
+            };
+
+            return newAnimal; 
+        }
+
         //set animals traits
         public async Task SetAnimalTraits(AnimalDto animalDto)
         {

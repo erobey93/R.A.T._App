@@ -79,17 +79,30 @@ namespace RATAPPLibrary.Services
             return pastPairings;
         }
 
-        //get all pairings for animal id
-        //looking for dam, or sire with matching ID
-        public async Task<List<Pairing>> GetAllPairingsByAnimalIdAsync(int animalID)
+        //get all pairings for dam and sire
+        //looking for dam, and sire with matching ID
+        public async Task<List<Pairing>> GetAllActivePairingsByAnimalIdAsync(int animalID)
         {
             // Retrieve active pairings where PairingEndDate is null
-            var pastPairings = await _context.Pairing
-                                               .Where(p => p.SireId == animalID || p.DamId == animalID)
+            var activePairings = await _context.Pairing
+                                               .Where(p => p.PairingEndDate == null && p.PairingStartDate != null && p.SireId == animalID || p.DamId == animalID)
                                                .ToListAsync();
 
             // Return the list, which may be empty if id doesn't exist
-            return pastPairings;
+            return activePairings;
+        }
+
+        //get all pairings for dam and sire
+        //looking for dam, and sire with matching ID
+        public async Task<List<Pairing>> GetAllActivePairingsByDamandSireIdAsync(int damID, int sireID)
+        {
+            // Retrieve active pairings where PairingEndDate is null
+            var activePairings = await _context.Pairing
+                                               .Where(p => p.PairingEndDate == null && p.PairingStartDate != null && p.SireId == sireID && p.DamId == damID)
+                                               .ToListAsync();
+
+            // Return the list, which may be empty if id doesn't exist
+            return activePairings;
         }
 
         //get all pairings for line
@@ -265,6 +278,7 @@ namespace RATAPPLibrary.Services
                 DateTime lastUpdated = DateTime.Now;
 
                 _context.Litter.Add(litter);
+                _context.SaveChanges(); 
 
                 return true;
             }

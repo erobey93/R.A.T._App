@@ -22,11 +22,14 @@ namespace RATAPP.Forms
         private Button saveButton;
         private Button cancelButton;
 
+        RatAppDbContext _context; //TODO
+
         public AddTraitForm(TraitService traitService, GeneService geneService, RatAppDbContext context)
             : base(context)
         {
             _traitService = traitService;
             _geneService = geneService;
+            _context = context; 
 
             InitializeComponents();
             SetupLayout();

@@ -912,8 +912,8 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var dam = (Animal)dam1Combo.SelectedItem;
-            var sire = (Animal)sire1Combo.SelectedItem;
+            var dam = (AnimalDto)dam1Combo.SelectedItem;
+            var sire = (AnimalDto)sire1Combo.SelectedItem;
 
             // Clear previous results
             resultPanel.Controls.Clear();
@@ -929,8 +929,16 @@ namespace RATAPP.Panels
 
             try
             {
-                // Calculate breeding results
-                var results = _breedingService.CalculateBreedingOutcomes(dam, sire);
+                //get the animalDto objects for dam and sire back as Animal objects
+                var getDamAsAnimalObj = _animalService.MapAnimalDtoBackToAnimal(dam);
+                var getSireAsAnimalObj = _animalService.MapAnimalDtoBackToAnimal(sire);
+
+                var damAsAnimalObj = getDamAsAnimalObj.Result;
+                var sireAsAnimalObj = getSireAsAnimalObj.Result;
+
+                // Calculate Possible Outcomes
+                var results = _breedingService.CalculateBreedingOutcomes(damAsAnimalObj, sireAsAnimalObj); //IDK why this was here because we want the possible phenotype/genotype outcomes 
+                //var results = await _breedingService.CalculateOffspringProbabilitiesAsync();
 
                 if (results == null || !results.Any())
                 {
@@ -1068,14 +1076,14 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var selectedAnimal = (Animal)animalSelector.SelectedItem;
+            var selectedAnimal = animalSelector.SelectedItem;
 
             // Clear previous pedigree
             pedigreeDisplayPanel.Controls.Clear();
 
             Label pedigreeTitle = new Label
             {
-                Text = $"Pedigree for {selectedAnimal.Name}",
+                Text = $"Pedigree for {selectedAnimal}",
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 AutoSize = true,
                 Location = new Point(10, 10)
@@ -1084,11 +1092,12 @@ namespace RATAPP.Panels
 
             try
             {
-                var animal = _animalService.MapSingleAnimaltoDto(selectedAnimal);
-                var animalResult = animal.Result;
+                //var animal = _animalService.MapSingleAnimaltoDto(selectedAnimal);
+                //var animalResult = animal.Result;
+                var animal = animalSelector.SelectedItem as AnimalDto; 
 
                 // Create a new form to display the pedigree in a larger view
-                var pedigreeForm = IndividualAnimalAncestryForm.Create(_baseForm, _context, animalResult);
+                var pedigreeForm = IndividualAnimalAncestryForm.Create(_baseForm, _context, animal);
 
                 // Add the form to the pedigree panel
                 pedigreeForm.TopLevel = false;

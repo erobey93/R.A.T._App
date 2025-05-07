@@ -68,7 +68,7 @@ namespace RATAPP.Helpers
                         Size = control.Size,
                         Font = control.Font,
                         Padding = control is Padding ? ((dynamic)control).Padding : new Padding(0),
-                        Margin = control is Margin ? ((dynamic)control).Margin : new Padding(0)
+                        Margin = control is Margins ? ((dynamic)control).Margin : new Padding(0)
                     };
                 }
 
@@ -219,7 +219,7 @@ namespace RATAPP.Helpers
                     Size = control.Size,
                     Font = control.Font,
                     Padding = control is Padding ? ((dynamic)control).Padding : new Padding(0),
-                    Margin = control is Margin ? ((dynamic)control).Margin : new Padding(0)
+                    Margin = control is Margins ? ((dynamic)control).Margin : new Padding(0)
                 };
 
                 // Recursively register child controls

@@ -268,7 +268,9 @@ namespace RATAPP.Forms
         {
             if (animalComboBox.SelectedItem != null)
             {
-                selectedAnimal = (Animal)animalComboBox.SelectedItem;
+                var animalDto = animalComboBox.SelectedItem as AnimalDto;
+                var parseAnimalDto = await _animalService.MapAnimalDtoBackToAnimal(animalDto);
+                selectedAnimal = parseAnimalDto;
                 currentTraits = await _traitService.GetTraitMapForSingleAnimal(selectedAnimal.Id);
                 await RefreshTraitLists();
             }
