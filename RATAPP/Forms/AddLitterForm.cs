@@ -21,7 +21,7 @@ namespace RATAPP.Forms
         private readonly FormDataManager _dataManager;
         private readonly FormEventHandler _eventHandler;
         private readonly LoadingSpinnerHelper _spinner;
-        private readonly RatAppDbContext _context; 
+        private readonly RatAppDbContextFactory _contextFactory;
 
         // UI Controls
         private TabControl tabControl;
@@ -52,25 +52,17 @@ namespace RATAPP.Forms
         //state
         bool pairSelected = false; 
 
-        private AddLitterForm(RatAppDbContext context)
+        private AddLitterForm(RatAppDbContextFactory contextFactory)
         {
-            // Initialize services
-           _breedingService = new BreedingService(context);
-            _speciesService = new SpeciesService(context);
-            _animalService = new AnimalService(context);
-           _projectService = new ProjectService(context);
+            _contextFactory = contextFactory;
 
-            // Initialize helper classes
-            //_dataManager = new FormDataManager(
-            //    breedingService,
-            //    speciesService,
-            //    projectService,
-            //    animalService);
+            // Initialize services with context factory
+            _breedingService = new BreedingService(contextFactory);
+            _speciesService = new SpeciesService(contextFactory);
+            _animalService = new AnimalService(contextFactory);
+            _projectService = new ProjectService(contextFactory);
 
             _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
-            //_eventHandler = new FormEventHandler(_dataManager, _spinner);
-
-            _context = context; 
 
             InitializeComponents();
             InitializeEventHandlers();
@@ -80,14 +72,27 @@ namespace RATAPP.Forms
         /// Static factory method that initializes the form and ensures the data is loaded.
         /// Use like: var form = await AddLitterForm.CreateAsync(context);
         /// </summary>
-        public static async Task<AddLitterForm> CreateAsync(RatAppDbContext context)
+        public static async Task<AddLitterForm> CreateAsync(RatAppDbContextFactory contextFactory)
         {
-            var form = new AddLitterForm(context);
-            //await form._eventHandler.HandleFormLoadAsyncLitter(
-            //    form.speciesComboBox, form.damComboBox, form.sireComboBox, form.projectComboBox, form.pairComboBox);
-            form.InitializeEventHandlers(); 
-
+            var form = new AddLitterForm(contextFactory);
+            await form.LoadInitialDataAsync();
             return form;
+        }
+
+        private async Task LoadInitialDataAsync()
+        {
+            try
+            {
+                _spinner.Show();
+                await LoadSpecies();
+                await LoadAnimals();
+                await LoadPairs();
+                await LoadProjects();
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
         }
 
         private void InitializeComponents()
@@ -159,11 +164,7 @@ namespace RATAPP.Forms
         //this is the original way that I was managing data, but I have moved to using my helpers for clarity + to prevent my controller classes from getting too large
         private async void LitterPanel_Load(object sender, EventArgs e)
         {
-            await LoadPairs(); //get pairs
-            await LoadSpecies(); //get species
-            await LoadAnimals(); //get dams and sires (animals) but don't use until other filters have been applied 
-            await LoadProjects(); //get projects 
-            //await RefreshLitterGrid(); TODO
+            await LoadInitialDataAsync();
         }
 
         //What data do I need before anything else happens?

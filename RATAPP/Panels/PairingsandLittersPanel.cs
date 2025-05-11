@@ -28,7 +28,7 @@ namespace RATAPP.Panels
         private Button addButton;
         private Button updateButton;
         private Button deleteButton;
-        //private DataGridView dataDisplayArea;
+        private PictureBox loadingSpinner;
 
         private Pairing[] _pairings;
         private Litter[] _litters;
@@ -42,22 +42,66 @@ namespace RATAPP.Panels
         private LineService _lineService;
         private StockService _stockService;
 
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        private readonly RatAppDbContextFactory _contextFactory;
+        private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
 
-        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory)
         {
             _parentForm = parentForm;
-            _context = context;
-            _animalService = new AnimalService(_context);
-            _breedingService = new BreedingService(_context);
-            _lineService = new LineService(_context);
-            _stockService = new StockService(_context);
+            _contextFactory = contextFactory;
+            _animalService = new AnimalService(contextFactory);
+            _breedingService = new BreedingService(contextFactory);
+            _lineService = new LineService(contextFactory);
+            _stockService = new StockService(contextFactory);
 
-            _littersGridView = false; //start with showing pairings page, when switched will show litters page, or line page
+            _littersGridView = false;
             _linesGridView = false;
 
             InitializeComponents();
+            InitializeLoadingSpinner();
+        }
 
+        private void InitializeLoadingSpinner()
+        {
+            loadingSpinner = new PictureBox
+            {
+                Size = new Size(50, 50),
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif"),
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Visible = false
+            };
+            this.Controls.Add(loadingSpinner);
+            this.Resize += (s, e) => CenterLoadingSpinner();
+        }
+
+        private void CenterLoadingSpinner()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Location = new Point(
+                    (ClientSize.Width - loadingSpinner.Width) / 2,
+                    (ClientSize.Height - loadingSpinner.Height) / 2
+                );
+            }
+        }
+
+        private void ShowLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = true;
+                CenterLoadingSpinner();
+                this.Refresh();
+            }
+        }
+
+        private void HideLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = false;
+                this.Refresh();
+            }
         }
 
         private void InitializeComponents()
@@ -120,24 +164,48 @@ namespace RATAPP.Panels
 
         private async void TabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabControl.SelectedIndex == 0) // show pairings
+            try
             {
-                pairingsGridView.Visible = true;
-                littersGridView.Visible = false;
-                linesGridView.Visible = false;
+                await _loadingSemaphore.WaitAsync();
+                await LoadTabDataAsync(tabControl.SelectedIndex);
             }
-            else if (tabControl.SelectedIndex == 1) // show litters
+            finally
             {
-                pairingsGridView.Visible = false;
-                littersGridView.Visible = true;
-                linesGridView.Visible = false;
+                _loadingSemaphore.Release();
+            }
+        }
 
-            }
-            else if (tabControl.SelectedIndex == 2) //show lines 
+        private async Task LoadTabDataAsync(int tabIndex)
+        {
+            try
             {
-                pairingsGridView.Visible = false;
-                littersGridView.Visible = false;
-                linesGridView.Visible = true;
+                ShowLoadingIndicator();
+
+                // Update visibility
+                pairingsGridView.Visible = tabIndex == 0;
+                littersGridView.Visible = tabIndex == 1;
+                linesGridView.Visible = tabIndex == 2;
+
+                // Load data based on selected tab
+                switch (tabIndex)
+                {
+                    case 0:
+                        await GetBreedingData();
+                        PopulatePairingDataDisplayArea();
+                        break;
+                    case 1:
+                        await GetBreedingData();
+                        PopulateLittersDataDisplayArea();
+                        break;
+                    case 2:
+                        await GetBreedingData();
+                        await PopulateLineDataDisplayArea();
+                        break;
+                }
+            }
+            finally
+            {
+                HideLoadingIndicator();
             }
         }
 
@@ -241,22 +309,21 @@ namespace RATAPP.Panels
 
             if (currentTab == "Pairings")
             {
-                //open the add pairings form 
-                AddPairingForm addPairing = new AddPairingForm(_context);
+                AddPairingForm addPairing = new AddPairingForm(_contextFactory);
                 addPairing.ShowDialog();
-                //this form would likely work for updating pairings too, but need to add in a way to populate it with the existing pairing 
+                await LoadTabDataAsync(tabControl.SelectedIndex);
             }
             else if (currentTab == "Litters")
             {
-                //open the add pairings form 
-                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_context);//new AddLitterForm(_context, "Rat"); //TODO hardcoded need to think through how to get this 
+                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_contextFactory);
                 addLitter.ShowDialog();
+                await LoadTabDataAsync(tabControl.SelectedIndex);
             }
             else if(currentTab == "Line Management")
             {
-                //open the add pairings form 
-                AddLineForm addLine = new AddLineForm(_context);
+                AddLineForm addLine = new AddLineForm(_contextFactory);
                 addLine.ShowDialog();
+                await LoadTabDataAsync(tabControl.SelectedIndex);
             }
             else
             {
@@ -468,4 +535,3 @@ namespace RATAPP.Panels
         }
     }
 }
-
