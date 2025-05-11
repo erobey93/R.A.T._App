@@ -438,7 +438,7 @@ namespace RATAPPLibrary.Data.DbContexts
             // Configure the relationship with Stock
             modelBuilder.Entity<Line>()
                 .HasOne(l => l.Stock)       // Each Line belongs to one Stock
-                .WithMany()                 // A Stock can have many Lines (if this is the intended relationship)
+                .WithMany()                 // A Stock can have many Lines
                 .HasForeignKey(l => l.StockId) // Foreign key in Line table is StockId
                 .OnDelete(DeleteBehavior.NoAction); // Prevent cascading delete TODO 
 

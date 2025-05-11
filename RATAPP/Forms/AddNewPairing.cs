@@ -23,6 +23,7 @@ namespace RATAPP.Forms
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
         private ComboBox speciesComboBox;
+        private ComboBox pairingComboBox; //FIXME remove, not needed but I need to make a new method to handle this
         private TextBox pairingIdTextBox;
         private ComboBox projectComboBox;
         private DateTimePicker pairingDatePicker;
@@ -354,7 +355,7 @@ namespace RATAPP.Forms
 
         private void InitializeEventHandlers()
         {
-            this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsync(
+            this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncPairing(
                 speciesComboBox, damComboBox, sireComboBox, projectComboBox);
 
             speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(

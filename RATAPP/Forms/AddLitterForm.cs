@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Microsoft.EntityFrameworkCore;
 using RATAPP.Helpers;
+using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
 
@@ -18,6 +21,7 @@ namespace RATAPP.Forms
         private readonly FormDataManager _dataManager;
         private readonly FormEventHandler _eventHandler;
         private readonly LoadingSpinnerHelper _spinner;
+        private readonly RatAppDbContext _context; 
 
         // UI Controls
         private TabControl tabControl;
@@ -39,23 +43,34 @@ namespace RATAPP.Forms
         private Button addToGridButton;
         private Button saveAllButton;
 
-        private AddLitterForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        //services
+        private BreedingService _breedingService;
+        private SpeciesService _speciesService;
+        private AnimalService _animalService;
+        private ProjectService _projectService;
+
+        //state
+        bool pairSelected = false; 
+
+        private AddLitterForm(RatAppDbContext context)
         {
             // Initialize services
-            var breedingService = new BreedingService(context);
-            var speciesService = new SpeciesService(context);
-            var animalService = new AnimalService(context);
-            var projectService = new ProjectService(context);
+           _breedingService = new BreedingService(context);
+            _speciesService = new SpeciesService(context);
+            _animalService = new AnimalService(context);
+           _projectService = new ProjectService(context);
 
             // Initialize helper classes
-            _dataManager = new FormDataManager(
-                breedingService,
-                speciesService,
-                projectService,
-                animalService);
+            //_dataManager = new FormDataManager(
+            //    breedingService,
+            //    speciesService,
+            //    projectService,
+            //    animalService);
 
             _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
-            _eventHandler = new FormEventHandler(_dataManager, _spinner);
+            //_eventHandler = new FormEventHandler(_dataManager, _spinner);
+
+            _context = context; 
 
             InitializeComponents();
             InitializeEventHandlers();
@@ -65,11 +80,13 @@ namespace RATAPP.Forms
         /// Static factory method that initializes the form and ensures the data is loaded.
         /// Use like: var form = await AddLitterForm.CreateAsync(context);
         /// </summary>
-        public static async Task<AddLitterForm> CreateAsync(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public static async Task<AddLitterForm> CreateAsync(RatAppDbContext context)
         {
             var form = new AddLitterForm(context);
-            await form._eventHandler.HandleFormLoadAsync(
-                form.speciesComboBox, form.damComboBox, form.sireComboBox, form.projectComboBox);
+            //await form._eventHandler.HandleFormLoadAsyncLitter(
+            //    form.speciesComboBox, form.damComboBox, form.sireComboBox, form.projectComboBox, form.pairComboBox);
+            form.InitializeEventHandlers(); 
+
             return form;
         }
 
@@ -84,7 +101,7 @@ namespace RATAPP.Forms
 
             // Header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Litter");
-            headerPanel.Height = 60;
+            headerPanel.Height = 50;
             var headerLabel = headerPanel.Controls[0] as Label;
             if (headerLabel != null)
             {
@@ -137,6 +154,132 @@ namespace RATAPP.Forms
 
             tabContainerPanel.Controls.Add(tabControl);
             this.Controls.Add(tabContainerPanel);
+        }
+
+        //this is the original way that I was managing data, but I have moved to using my helpers for clarity + to prevent my controller classes from getting too large
+        private async void LitterPanel_Load(object sender, EventArgs e)
+        {
+            await LoadPairs(); //get pairs
+            await LoadSpecies(); //get species
+            await LoadAnimals(); //get dams and sires (animals) but don't use until other filters have been applied 
+            await LoadProjects(); //get projects 
+            //await RefreshLitterGrid(); TODO
+        }
+
+        //What data do I need before anything else happens?
+        //Animals
+        //bind animal data to combo box options 
+        private async Task LoadAnimals()
+        {
+            try
+            {
+                var animals = await _animalService.GetAllAnimalsAsync();
+
+                // Populate dam and sire combos for breeding calculator
+                damComboBox.Items.Clear();
+                sireComboBox.Items.Clear();
+                //animalSelector.Items.Clear();
+
+                // Add all animals to the pedigree selector
+                foreach (var animal in animals)
+                {
+                    //animalSelector.Items.Add(animal); TODO not sure if I need this for this form 
+
+                    // Add females to dam combo
+                    if (animal.sex == "Female")
+                    {
+                        damComboBox.Items.Add(animal);
+                    }
+                    // Add males to sire combo
+                    else if (animal.sex == "Male")
+                    {
+                        sireComboBox.Items.Add(animal);
+                    }
+                }
+
+                damComboBox.DisplayMember = "Name"; //display member is what the user sees 
+                damComboBox.ValueMember = "Id"; //value member is what we use when we're trying to work with the obect i.e. how the backend identifies the object 
+                sireComboBox.DisplayMember = "Name";
+                sireComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading animals: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        //species
+        //load species objects to species combo box items 
+        private async Task LoadSpecies()
+        {
+            try
+            {
+                var species = await _speciesService.GetAllSpeciesAsync();
+
+                speciesComboBox.Items.Clear();
+                speciesComboBox.Items.Add("All Species");
+
+                foreach (var s in species)
+                {
+                    speciesComboBox.Items.Add(s);
+                }
+
+                speciesComboBox.SelectedIndex = 0;
+                speciesComboBox.DisplayMember = "CommonName";
+                speciesComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading species: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task LoadPairs()
+        {
+            try
+            {
+                var pairs = await _breedingService.GetAllActivePairingsAsync();
+
+                pairComboBox.Items.Clear();
+                pairComboBox.Items.Add("All Pairings");
+
+                foreach (var p in pairs)
+                {
+                    pairComboBox.Items.Add(p);
+                }
+
+                pairComboBox.SelectedIndex = 0;
+                pairComboBox.DisplayMember = "pairingId"; //FIXME I may need a way to make it easier for user to distinguish pairs i.e. dam+sire+date? 
+                pairComboBox.ValueMember = "pairingId";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading pairings: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task LoadProjects()
+        {
+            try
+            {
+                var projects = await _projectService.GetAllProjectsAsync();
+
+                projectComboBox.Items.Clear();
+                projectComboBox.Items.Add("All Species");
+
+                foreach (var p in projects)
+                {
+                    projectComboBox.Items.Add(p);
+                }
+
+                projectComboBox.SelectedIndex = 0;
+                projectComboBox.DisplayMember = "Name";
+                projectComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading projects: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void InitializeSingleLitterTab(TabPage tab)
@@ -414,32 +557,286 @@ namespace RATAPP.Forms
             }
         }
 
-        private async void InitializeEventHandlers()
+        //species selected index changed
+        //only show pairs, dams and sires for appropriate species 
+        //private async 
+
+        //sire combo box changed
+        //set pairs accordingly 
+        public async Task HandleSireSelectionChangedAsync()
         {
-            this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsync(
-                speciesComboBox, damComboBox, sireComboBox, projectComboBox);
+            if (sireComboBox.SelectedItem == null) return;
+            if (pairSelected == true) return;
 
-            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
-                speciesComboBox, damComboBox, sireComboBox);
+            try
+            {
+                _spinner.Show();
+                var selectedSire = sireComboBox.SelectedItem as AnimalDto;
+
+                // Clear existing items
+                pairComboBox.Items.Clear();
+
+                //check if the sire combo box is populated
+                if (damComboBox.SelectedItem != null)
+                {
+                    var selectedDam = damComboBox.SelectedItem as AnimalDto;
+
+                    var pairs = await _breedingService.GetAllActivePairingsByDamandSireIdAsync(selectedDam.Id, selectedSire.Id);
 
 
-            damComboBox.SelectedIndexChanged += async(s, e) => await _eventHandler.HandleDamSelectionChangedAsync(
-                damComboBox, sireComboBox, pairComboBox);
+                    foreach (var pair in pairs) //FIXME IDs don't really make sense it should find the dam and sire based on pair or find the pair based on dam and sire i.e. it should be filtering the pairs based on dam and sire if they exist 
+                    {
+                        pairComboBox.Items.Add(pair);
+                    }
 
-            sireComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSireSelectionChangedAsync(
-                sireComboBox, damComboBox, pairComboBox);
+                }
+                else //dam isn't populated so just get the pairs for the sire
+                {
+                    // Load active pairings for selected dam
+                    var pairs = await _breedingService.GetAllActivePairingsByAnimalIdAsync(selectedSire.Id);
 
-            addButton.Click += async (s, e) => await _eventHandler.HandleAddLitterClickAsync(
-                litterIdTextBox.Text,
-                litterNameTextBox.Text,
-                pairComboBox.SelectedIndex + 1,
-                litterDatePicker,
-                numPups,
-                numMales,
-                numFemales,
-                litterNotes);
+                    foreach (var pair in pairs) //FIXME IDs don't really make sense it should find the dam and sire based on pair or find the pair based on dam and sire i.e. it should be filtering the pairs based on dam and sire if they exist 
+                    {
+                        pairComboBox.Items.Add(pair);
+                    }
+                }
+            }
+            finally
+            {
+                pairComboBox.SelectedIndex = 0;
+                pairComboBox.DisplayMember = "pairId"; //display member is what the user sees 
+                pairComboBox.ValueMember = "pairId"; //value member is what we use when we're trying to work with the obect i.e. how the backend identifies the object 
+                _spinner.Hide();
+            }
+        }
 
-            addToGridButton.Click += (s, e) => _eventHandler.HandleAddLitterToGridClick(
+        //dam combo box changed
+        //set pairs accordingly 
+        public async Task HandleDamSelectionChangedAsync()
+        {
+            if (damComboBox.SelectedItem == null) return;
+            if (pairSelected == true) return;
+
+            try
+            {
+                _spinner.Show();
+                var selectedDam = damComboBox.SelectedItem as AnimalDto;
+
+                // Clear existing items
+                pairComboBox.Items.Clear();
+
+                //check if the dam combo box is populated
+                if (sireComboBox.SelectedItem != null)
+                {
+                    var selectedSire = sireComboBox.SelectedItem as AnimalDto;
+
+                    var pairs = await _breedingService.GetAllActivePairingsByDamandSireIdAsync(selectedDam.Id, selectedSire.Id);
+
+
+                    foreach (var pair in pairs) //FIXME IDs don't really make sense it should find the dam and sire based on pair or find the pair based on dam and sire i.e. it should be filtering the pairs based on dam and sire if they exist 
+                    {
+                        pairComboBox.Items.Add(pair);
+                    }
+
+                }
+                else //sire isn't populated so just get the pairs for the dam
+                {
+                    // Load active pairings for selected dam
+                    var pairs = await _breedingService.GetAllActivePairingsByAnimalIdAsync(selectedDam.Id);
+
+                    foreach (var pair in pairs) //FIXME IDs don't really make sense it should find the dam and sire based on pair or find the pair based on dam and sire i.e. it should be filtering the pairs based on dam and sire if they exist 
+                    {
+                        pairComboBox.Items.Add(pair);
+                    }
+                }
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+
+        public async Task HandlePairSelectionChangedAsync()
+        {
+            var selectedPair = pairComboBox.SelectedItem as Pairing;
+            if (selectedPair == null) return; //when first loaded, the object will be null
+            if (pairComboBox.SelectedItem == null) return; //but the initial value will not be 
+
+            try
+            {
+                _spinner.Show();
+
+                if (selectedPair.Dam != null)
+                {
+                    pairSelected = true; 
+                    // Clear existing items
+                    damComboBox.Items.Clear();
+                    sireComboBox.Items.Clear();
+                    projectComboBox.Items.Clear();
+                    speciesComboBox.Items.Clear(); 
+
+                    var dam = selectedPair.Dam;
+                    var sire = selectedPair.Sire;
+                    
+                    var project = selectedPair.Project;
+
+                    if (dam != null) {
+                        damComboBox.Items.Add(dam);
+                 
+                    }
+                    if (sire != null) {
+                        sireComboBox.Items.Add(sire);
+                    }
+                    if (project != null) {
+                        projectComboBox.Items.Add(project); 
+                    }
+                    if (project.Line != null)
+                    {
+                        int stockId = project.Line.StockId;
+                        var _stockService = new StockService(_context);
+                        var stockObj = await _stockService.GetStockAsync_ById(stockId);
+                        var stock = stockObj.Species; 
+                        if (stock != null) {
+                            speciesComboBox.Items.Add(stock);
+                        }
+                        //if (dam.Line.Stock != null) FIXME have to figure out why the Stock object is always null here but putting a bandaid fix for now since I do have stockID
+                        //{
+                        //    if (dam.Line.Stock.Species != null)
+                        //    {
+                        //        speciesComboBox.Items.Add(dam.Line.Stock.Species);
+                        //    }
+                        //}
+                    }
+                }
+            }
+            finally
+            {
+                damComboBox.SelectedIndex = 0; //FIXME is all of this needed? 
+                sireComboBox.SelectedIndex = 0;
+                projectComboBox.SelectedIndex = 0;
+                speciesComboBox.SelectedIndex = 0;
+                damComboBox.DisplayMember = "Name"; //display member is what the user sees 
+                damComboBox.ValueMember = "Id"; //value member is what we use when we're trying to work with the object i.e. how the backend identifies the object 
+                sireComboBox.DisplayMember = "Name";
+                sireComboBox.ValueMember = "Id";
+                projectComboBox.DisplayMember = "Name";
+                projectComboBox.ValueMember= "Id";
+                speciesComboBox.ValueMember = "Id";
+                speciesComboBox.DisplayMember = "CommonName";
+                _spinner.Hide();
+                //pairSelected = false; // put flag back to false so that it auto swaps after this is complete 
+            }
+        }
+
+        public async Task AddLitterClick(string litterId, string litterName, int pairId,
+          DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes)
+        {
+            try
+            {
+                _spinner.Show();
+
+                // Validate inputs
+                if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
+                {
+                    MessageBox.Show("Please fill in all required fields", "Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var litter = new Litter
+                {
+                    LitterId = litterId,
+                    Name = litterName,
+                    PairId = pairId,
+                    DateOfBirth = datePicker.Value,
+                    NumPups = !string.IsNullOrWhiteSpace(numPups.Text) ? int.Parse(numPups.Text) : null,
+                    NumMale = !string.IsNullOrWhiteSpace(numMales.Text) ? int.Parse(numMales.Text) : null,
+                    NumFemale = !string.IsNullOrWhiteSpace(numFemales.Text) ? int.Parse(numFemales.Text) : null,
+                    Notes = notes.Text,
+                    CreatedOn = DateTime.Now,
+                    LastUpdated = DateTime.Now
+                };
+
+                bool litterCreated = await _breedingService.CreateLitterAsync(litter);
+
+                if (litterCreated)
+                {
+                    MessageBox.Show("Litter added successfully!", "Success",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("An error occurred. Litter not created!", "Failure",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+
+        //cancel = close form 
+        public void HandleCancelClick(Form form)
+        {
+            if (MessageBox.Show("Are you sure you want to cancel? Any unsaved data will be lost.",
+                "Confirm Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                form.Close();
+            }
+        }
+
+
+        public void HandleAddLitterToGridClick(string litterId, string litterName, int pairId,
+            DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes,
+            DataGridView grid)
+        {
+            try
+            {
+                _spinner.Show();
+
+                // Validate inputs
+                if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
+                {
+                    MessageBox.Show("Please fill in all required fields", "Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                grid.Rows.Add(
+                    litterId,
+                    litterName,
+                    pairId.ToString(),
+                    datePicker.Value.ToShortDateString(),
+                    numPups.Text,
+                    numMales.Text,
+                    numFemales.Text,
+                    notes.Text
+                );
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+
+
+        //FIXME below is how I was previously doing it 
+        private void InitializeEventHandlers()
+        {
+            this.Load += LitterPanel_Load;
+            addButton.Click += (s,e) => AddLitterClick(
+                        litterIdTextBox.Text,
+                        litterNameTextBox.Text,
+                        pairComboBox.SelectedIndex + 1,
+                        litterDatePicker,
+                        numPups,
+                        numMales,
+                        numFemales,
+                        litterNotes);
+
+            addToGridButton.Click += (s, e) => HandleAddLitterToGridClick(
                 litterIdTextBox.Text,
                 litterNameTextBox.Text,
                 pairComboBox.SelectedIndex + 1,
@@ -450,10 +847,16 @@ namespace RATAPP.Forms
                 litterNotes,
                 multipleLittersGrid);
 
-            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllLittersAsync(
-                multipleLittersGrid);
+            //saveAllButton.Click += async (s, e) => await HandleSaveAllLittersAsync(
+            //    multipleLittersGrid); TODO this is for adding multiple litters which I am not doing yet 
 
-            cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
+            cancelButton.Click += (s, e) => HandleCancelClick(this);
+
+            sireComboBox.SelectedIndexChanged += async (s, e) => await HandleSireSelectionChangedAsync();
+
+            damComboBox.SelectedIndexChanged += async (s, e) => await HandleDamSelectionChangedAsync();
+
+            pairComboBox.SelectedIndexChanged += async (s, e) => await HandlePairSelectionChangedAsync();
 
             multipleLittersGrid.CellContentClick += (s, e) =>
             {
@@ -463,5 +866,106 @@ namespace RATAPP.Forms
                 }
             };
         }
+
+        //this is an example of how I could organize using helper classes, but I am finding this a bit confusing...
+        //    private async void InitializeEventHandlers()
+        //    {
+        //        this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncLitter(
+        //            speciesComboBox, damComboBox, sireComboBox, projectComboBox, pairComboBox);
+
+        //        speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
+        //            speciesComboBox, damComboBox, sireComboBox);
+
+
+        //        damComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleDamSelectionChangedAsync(
+        //            damComboBox, sireComboBox, pairComboBox);
+
+        //        sireComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSireSelectionChangedAsync(
+        //            sireComboBox, damComboBox, pairComboBox);
+
+        //        addButton.Click += async (s, e) => await _eventHandler.HandleAddLitterClickAsync(
+        //            litterIdTextBox.Text,
+        //            litterNameTextBox.Text,
+        //            pairComboBox.SelectedIndex + 1,
+        //            litterDatePicker,
+        //            numPups,
+        //            numMales,
+        //            numFemales,
+        //            litterNotes);
+
+        //        addToGridButton.Click += (s, e) => _eventHandler.HandleAddLitterToGridClick(
+        //            litterIdTextBox.Text,
+        //            litterNameTextBox.Text,
+        //            pairComboBox.SelectedIndex + 1,
+        //            litterDatePicker,
+        //            numPups,
+        //            numMales,
+        //            numFemales,
+        //            litterNotes,
+        //            multipleLittersGrid);
+
+        //        saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllLittersAsync(
+        //            multipleLittersGrid);
+
+        //        cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
+
+        //        //multipleLittersGrid.CellContentClick += (s, e) =>
+        //        //{
+        //        //    if (e.RowIndex >= 0 && e.ColumnIndex == multipleLittersGrid.Columns["Remove"].Index)
+        //        //    {
+        //        //        multipleLittersGrid.Rows.RemoveAt(e.RowIndex);
+        //        //    }
+        //        //};
+        //    }
+
+
+
+
+
+        //public async Task HandleSaveAllLittersAsync(DataGridView grid)
+        //{
+        //    try
+        //    {
+        //        _spinner.Show();
+
+        //        if (grid.Rows.Count == 0)
+        //        {
+        //            MessageBox.Show("Please add at least one litter to the list", "Validation Error",
+        //                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return;
+        //        }
+
+        //        foreach (DataGridViewRow row in grid.Rows)
+        //        {
+        //            var litter = new Litter
+        //            {
+        //                LitterId = row.Cells["LitterID"].Value.ToString(),
+        //                Name = row.Cells["Name"].Value.ToString(),
+        //                PairId = int.Parse(row.Cells["PairID"].Value.ToString()),
+        //                DateOfBirth = DateTime.Parse(row.Cells["BirthDate"].Value.ToString()),
+        //                NumPups = !string.IsNullOrWhiteSpace(row.Cells["NumPups"].Value?.ToString())
+        //                    ? int.Parse(row.Cells["NumPups"].Value.ToString()) : null,
+        //                NumMale = !string.IsNullOrWhiteSpace(row.Cells["NumMales"].Value?.ToString())
+        //                    ? int.Parse(row.Cells["NumMales"].Value.ToString()) : null,
+        //                NumFemale = !string.IsNullOrWhiteSpace(row.Cells["NumFemales"].Value?.ToString())
+        //                    ? int.Parse(row.Cells["NumFemales"].Value.ToString()) : null,
+        //                Notes = row.Cells["Notes"].Value?.ToString(),
+        //                CreatedOn = DateTime.Now,
+        //                LastUpdated = DateTime.Now
+        //            };
+
+        //            await _breedingService.CreateLitterAsync(litter);
+        //        }
+
+        //        MessageBox.Show($"Successfully added {grid.Rows.Count} litters!", "Success",
+        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+        //        grid.Rows.Clear();
+        //    }
+        //    finally
+        //    {
+        //        _spinner.Hide();
+        //    }
+        //}
     }
 }

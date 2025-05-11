@@ -378,7 +378,7 @@ namespace RATAPP.Panels
             }
             else
             {
-                MessageBox.Show("There are no litters in your database."); //FIXME this is popping up before the page is loaded, I only want it to pop up once on the page add as bug 
+                //MessageBox.Show("There are no litters in your database."); //FIXME this is popping up before the page is loaded, I only want it to pop up once on the page add as bug 
             }
         }
 

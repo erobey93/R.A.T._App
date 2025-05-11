@@ -4,6 +4,8 @@ using System.Windows.Forms;
 using System.Linq;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Data.Models;
+using Microsoft.EntityFrameworkCore;
+using RATAPPLibrary.Services;
 
 namespace RATAPP.Helpers
 {
@@ -21,27 +23,165 @@ namespace RATAPP.Helpers
             _spinner = spinner;
         }
 
-        public async Task HandleFormLoadAsync(ComboBox speciesBox, ComboBox damBox, ComboBox sireBox, ComboBox projectBox)
+        public async Task HandleFormLoadAsyncPairing(ComboBox speciesComboBox, ComboBox damBox, ComboBox sireBox, ComboBox projectComboBox)
         {
             try
             {
                 _spinner.Show();
 
-                // Load species
+                // LOAD SPECIES
                 var species = await _dataManager.GetSpeciesAsync();
-                speciesBox.Items.AddRange(species.ToArray()); // Use AddRange for a collection
-                speciesBox.ValueMember = "Id"; // What value do we use when we're referring to this, should always be an ID of some kind
-                speciesBox.DisplayMember = "Common Name"; // What do we want to display for users to select
+                speciesComboBox.Items.Clear();
+                speciesComboBox.Items.Add("All Species");
 
-                // Load projects
+                foreach (var s in species)
+                {
+                    speciesComboBox.Items.Add(s);
+                }
+
+                speciesComboBox.SelectedIndex = 0;
+                speciesComboBox.DisplayMember = "CommonName";
+                speciesComboBox.ValueMember = "Id";
+               
+
+                // LOAD PROJECTS
                 var projects = await _dataManager.GetProjectsAsync();
-                projectBox.Items.Clear(); // It's good practice to clear existing items
+                projectComboBox.Items.Clear(); // It's good practice to clear existing items
                 foreach (var project in projects)
                 {
-                    projectBox.Items.Add(project);
+                    projectComboBox.Items.Add(project);
                 }
-                projectBox.DisplayMember = "Name"; // Now this will work correctly
-                projectBox.ValueMember = "Id";
+                projectComboBox.DisplayMember = "Name"; // Now this will work correctly
+                projectComboBox.ValueMember = "Id";
+
+                //LOAD ANIMALS 
+                //var ratDams = _dataManager.GetDamsAsync("Rat"); //FIXME manually going in to get ratDams and mouseDams to start but I need to fix this logic 
+                //var mouseDams = _dataManager.GetDamsAsync("Mouse");
+
+                //var ratSires = _dataManager.GetDamsAsync("Rat");
+                //var mouseSires = _dataManager.GetSiresAsync("Mouse");
+
+                //damBox.Items.Clear();
+                //sireBox.Items.Clear();
+
+                //damBox.Items.Add("All Dams");
+                //sireBox.Items.Add("All Sires");
+
+                //foreach (var d in ratDams.Result)
+                //{
+                //    damBox.Items.Add(d);
+                //}
+                //foreach (var d in mouseDams.Result)
+                //{
+                //    damBox.Items.Add(d);
+                //}
+                //foreach (var s in ratSires.Result)
+                //{
+                //    sireBox.Items.Add(s);
+                //}
+                //foreach (var s in mouseSires.Result)
+                //{
+                //    sireBox.Items.Add(s);
+                //}
+                //damBox.DisplayMember = "Name";
+                //damBox.ValueMember = "Id";
+                //damBox.SelectedIndex = 0;
+
+                //sireBox.DisplayMember = "Name";
+                //sireBox.ValueMember = "Id";
+                //sireBox.SelectedIndex = 0;
+
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+        public async Task HandleFormLoadAsyncLitter(ComboBox speciesComboBox, ComboBox damBox, ComboBox sireBox, ComboBox projectComboBox, ComboBox pairsComboBox) //, ComboBox pairsComboBox
+        {
+            try
+            {
+                _spinner.Show();
+
+                // LOAD SPECIES
+                var species = await _dataManager.GetSpeciesAsync();
+                //speciesBox.Items.AddRange(species.ToArray()); // Use AddRange for a collection
+                //speciesBox.ValueMember = "Id"; // What value do we use when we're referring to this, should always be an ID of some kind
+                //speciesBox.DisplayMember = "Common Name"; // What do we want to display for users to select
+                speciesComboBox.Items.Clear();
+                speciesComboBox.Items.Add("All Species");
+
+                foreach (var s in species)
+                {
+                    speciesComboBox.Items.Add(s);
+                }
+
+                speciesComboBox.SelectedIndex = 0;
+                speciesComboBox.DisplayMember = "CommonName";
+                speciesComboBox.ValueMember = "Id";
+
+                // LOAD PAIRS  
+                var pairs = await _dataManager.GetPairingsAsync();
+
+                pairsComboBox.Items.Clear();
+                pairsComboBox.Items.Add("All Pairs");
+
+                foreach (var p in pairs)
+                {
+                    pairsComboBox.Items.Add(p);
+                }
+
+                pairsComboBox.SelectedIndex = 0;
+                pairsComboBox.DisplayMember = "pairingId"; //FIXME I may need a way to make it easier for user to distinguish pairs i.e. dam+sire+date? 
+                pairsComboBox.ValueMember = "pairingId";
+
+                // LOAD PROJECTS
+                var projects = await _dataManager.GetProjectsAsync();
+                projectComboBox.Items.Clear(); // It's good practice to clear existing items
+                foreach (var project in projects)
+                {
+                    projectComboBox.Items.Add(project);
+                }
+                projectComboBox.DisplayMember = "Name"; // Now this will work correctly
+                projectComboBox.ValueMember = "Id";
+
+                //LOAD ANIMALS 
+                var ratDams = _dataManager.GetDamsAsync("Rat"); //FIXME manually going in to get ratDams and mouseDams to start but I need to fix this logic 
+                var mouseDams = _dataManager.GetDamsAsync("Mouse");
+
+                var ratSires = _dataManager.GetDamsAsync("Rat");
+                var mouseSires = _dataManager.GetSiresAsync("Mouse");
+
+                damBox.Items.Clear();   
+                sireBox.Items.Clear();
+
+                damBox.Items.Add("All Dams");
+                sireBox.Items.Add("All Sires"); 
+
+                foreach (var d in ratDams.Result)
+                {
+                    damBox.Items.Add(d);
+                }
+                foreach (var d in mouseDams.Result)
+                {
+                    damBox.Items.Add(d);
+                }
+                foreach (var s in ratSires.Result)
+                {
+                    sireBox.Items.Add(s);
+                }
+                foreach(var s in mouseSires.Result)
+                {
+                    sireBox.Items.Add(s);
+                }
+                damBox.DisplayMember = "Name";
+                damBox.ValueMember = "Id";
+                damBox.SelectedIndex = 0;
+
+                sireBox.DisplayMember = "Name";
+                sireBox.ValueMember = "Id";
+                sireBox.SelectedIndex = 0;
+
             }
             finally
             {
