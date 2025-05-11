@@ -694,7 +694,7 @@ namespace RATAPP.Forms
                     if (project.Line != null)
                     {
                         int stockId = project.Line.StockId;
-                        var _stockService = new StockService(_context);
+                        var _stockService = new StockService(_contextFactory);
                         var stockObj = await _stockService.GetStockAsync_ById(stockId);
                         var stock = stockObj.Species; 
                         if (stock != null) {
@@ -827,7 +827,7 @@ namespace RATAPP.Forms
         //FIXME below is how I was previously doing it 
         private void InitializeEventHandlers()
         {
-            this.Load += LitterPanel_Load;
+            // Remove LitterPanel_Load since we're using LoadInitialDataAsync
             addButton.Click += (s,e) => AddLitterClick(
                         litterIdTextBox.Text,
                         litterNameTextBox.Text,
