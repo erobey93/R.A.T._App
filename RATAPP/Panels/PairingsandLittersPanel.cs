@@ -181,6 +181,7 @@ namespace RATAPP.Panels
             try
             {
                 ShowLoadingIndicator();
+                await GetBreedingData();
 
                 // Update visibility
                 pairingsGridView.Visible = tabIndex == 0;
@@ -191,15 +192,15 @@ namespace RATAPP.Panels
                 switch (tabIndex)
                 {
                     case 0:
-                        await GetBreedingData();
+                        //await GetBreedingData();
                         PopulatePairingDataDisplayArea();
                         break;
                     case 1:
-                        await GetBreedingData();
+                        //await GetBreedingData();
                         PopulateLittersDataDisplayArea();
                         break;
                     case 2:
-                        await GetBreedingData();
+                        //await GetBreedingData();
                         PopulateLineDataDisplayArea();
                         break;
                 }
@@ -334,10 +335,11 @@ namespace RATAPP.Panels
             // Implement add, update, or delete functionality based on the action and current tab TODO 
         }
 
-        public Task RefreshDataAsync()
+        public async Task RefreshDataAsync()
         {
             // Implement data refresh logic TODO
-            return Task.CompletedTask;
+            await GetBreedingData();
+            //return Task.CompletedTask;
         }
 
         private async void InitializePairingDataGridView()
@@ -372,11 +374,12 @@ namespace RATAPP.Panels
             this.Controls.Add(pairingsGridView);
         }
 
-        private void PopulatePairingDataDisplayArea()
+        private async void PopulatePairingDataDisplayArea()
         {
             string dam = "Unknown";
             string sire = "Unknown";
             string projName = "Unknown"; //TODO there should always be a project, dam and sire name....
+            await GetBreedingData();
 
             pairingsGridView.Rows.Clear();
             if (_pairings != null)
@@ -434,8 +437,9 @@ namespace RATAPP.Panels
             this.Controls.Add(littersGridView);
         }
 
-        private void PopulateLittersDataDisplayArea()
+        private async void PopulateLittersDataDisplayArea()
         {
+            await GetBreedingData();
             littersGridView.Rows.Clear();
             if (_litters != null)
             {
@@ -486,6 +490,8 @@ namespace RATAPP.Panels
         //for now, we are assuming rats and mice only, in the future, it will be any species 
         private async void PopulateLineDataDisplayArea()
         {
+            await GetBreedingData();
+
             linesGridView.Rows.Clear();
 
             if (_lineService == null)

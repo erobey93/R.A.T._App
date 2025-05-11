@@ -691,15 +691,34 @@ namespace RATAPP.Forms
                     if (project != null) {
                         projectComboBox.Items.Add(project); 
                     }
-                    if (project.Line != null)
+                    if (project != null)
                     {
-                        int stockId = project.Line.StockId;
                         var _stockService = new StockService(_contextFactory);
-                        var stockObj = await _stockService.GetStockAsync_ById(stockId);
-                        var stock = stockObj.Species; 
-                        if (stock != null) {
-                            speciesComboBox.Items.Add(stock);
+                        int stockId = 1;
+                        if (project.Id == 2)
+                        {
+                            stockId = 2;
+                           
                         }
+                        var stockObj = await _stockService.GetStockAsync_ById(stockId);
+                        var stock = stockObj.Species;
+                        if (stock != null)
+                        {
+                            speciesComboBox.Items.Add(stock);
+                            speciesComboBox.SelectedIndex = 0;
+                            speciesComboBox.ValueMember = "Id";
+                            speciesComboBox.DisplayMember = "CommonName";
+                        }
+                        //int stockId = project.Line.StockId; FIXME just patching this to work until I figure out what's wrong with line and other objects that are supposed to exist  this was working before the re-factor
+                        //var _stockService = new StockService(_contextFactory);
+                        //var stockObj = await _stockService.GetStockAsync_ById(stockId);
+                        //var stock = stockObj.Species; 
+                        //if (stock != null) {
+                        //    speciesComboBox.Items.Add(stock);
+                        //    speciesComboBox.SelectedIndex = 0;
+                        //    speciesComboBox.ValueMember = "Id";
+                        //    speciesComboBox.DisplayMember = "CommonName";
+                        //}
                         //if (dam.Line.Stock != null) FIXME have to figure out why the Stock object is always null here but putting a bandaid fix for now since I do have stockID
                         //{
                         //    if (dam.Line.Stock.Species != null)
@@ -708,22 +727,21 @@ namespace RATAPP.Forms
                         //    }
                         //}
                     }
+                    damComboBox.SelectedIndex = 0; //FIXME is all of this needed? 
+                    sireComboBox.SelectedIndex = 0;
+                    projectComboBox.SelectedIndex = 0;
+                    
+                    damComboBox.DisplayMember = "Name"; //display member is what the user sees 
+                    damComboBox.ValueMember = "Id"; //value member is what we use when we're trying to work with the object i.e. how the backend identifies the object 
+                    sireComboBox.DisplayMember = "Name";
+                    sireComboBox.ValueMember = "Id";
+                    projectComboBox.DisplayMember = "Name";
+                    projectComboBox.ValueMember = "Id";
+                    
                 }
             }
             finally
             {
-                damComboBox.SelectedIndex = 0; //FIXME is all of this needed? 
-                sireComboBox.SelectedIndex = 0;
-                projectComboBox.SelectedIndex = 0;
-                speciesComboBox.SelectedIndex = 0;
-                damComboBox.DisplayMember = "Name"; //display member is what the user sees 
-                damComboBox.ValueMember = "Id"; //value member is what we use when we're trying to work with the object i.e. how the backend identifies the object 
-                sireComboBox.DisplayMember = "Name";
-                sireComboBox.ValueMember = "Id";
-                projectComboBox.DisplayMember = "Name";
-                projectComboBox.ValueMember= "Id";
-                speciesComboBox.ValueMember = "Id";
-                speciesComboBox.DisplayMember = "CommonName";
                 _spinner.Hide();
                 //pairSelected = false; // put flag back to false so that it auto swaps after this is complete 
             }
