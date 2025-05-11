@@ -25,15 +25,15 @@ namespace RATAPP.Forms
         private Panel familyTreePanel; // Placeholder for family tree display
         private RichTextBox pedigreeTextBox; // Placeholder for pedigree display
 
-        public static IndividualAnimalAncestryForm Create(RATAppBaseForm baseForm, RatAppDbContext context, AnimalDto animal)
+        public static IndividualAnimalAncestryForm Create(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
-            return new IndividualAnimalAncestryForm(baseForm, context, animal);
+            return new IndividualAnimalAncestryForm(baseForm, contextFactory, animal);
         }
 
-        public IndividualAnimalAncestryForm(RATAppBaseForm baseForm, RatAppDbContext context, AnimalDto animal)
+        public IndividualAnimalAncestryForm(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
             _baseForm = baseForm;
-            _context = context;
+            //_context = context;
             _currentAnimal = animal;
 
             this.Dock = DockStyle.Fill;

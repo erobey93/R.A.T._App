@@ -7,7 +7,8 @@ namespace RATAPP.Panels
 {
     public class ReportsPanel : Panel, INavigable
     {
-        private RatAppDbContext _context;
+        //private RatAppDbContext _context;
+        private RatAppDbContextFactory _contextFactory;
         private ReportsService _reportService;
         private ComboBox reportTypeComboBox;
         private DateTimePicker startDatePicker;
@@ -17,10 +18,11 @@ namespace RATAPP.Panels
         private Chart reportChart;
         private DataGridView reportDataGridView;
 
-        public ReportsPanel(RatAppDbContext context)
+        public ReportsPanel(RatAppDbContextFactory contextFactory)
         {
-            _context = context;
-            _reportService = new ReportsService(_context);
+            //_context = context;
+            _contextFactory = contextFactory;   
+            _reportService = new ReportsService(contextFactory);
             InitializeComponent();
         }
 

@@ -49,33 +49,42 @@ namespace RATAPPLibrary.Services
         //Find gen 1, seq 2 for sire 
         public async Task<Animal> GetSireByAnimalId(int animalId)
         {
-            try
+            return await ExecuteInContextAsync(async _context =>
             {
-                var sireAncestryRecord = await _context.Lineages
-                    .Include(l => l.Ancestor)
-                    .FirstOrDefaultAsync(l => l.AnimalId == animalId && l.Generation == 1 && l.Sequence == 2 && l.RelationshipType == "Paternal"); // Assuming you have a maternal identifier.
-
-                if (sireAncestryRecord != null && sireAncestryRecord.Ancestor != null)
+                try
                 {
-                    return sireAncestryRecord.Ancestor;
-                }
+                    var sireAncestryRecord = await _context.Lineages
+                        .Include(l => l.Ancestor)
+                        .FirstOrDefaultAsync(l => l.AnimalId == animalId && l.Generation == 1 && l.Sequence == 2 && l.RelationshipType == "Paternal"); // Assuming you have a maternal identifier.
 
-                return null; // Dam not found
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (logging, etc.)
-                Console.WriteLine($"Error in GetDamByAnimalId: {ex.Message}");
-                return null; // Return null in case of error
-            }
+                    if (sireAncestryRecord != null && sireAncestryRecord.Ancestor != null)
+                    {
+                        return sireAncestryRecord.Ancestor;
+                    }
+
+                    return null; // Dam not found
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (logging, etc.)
+                    Console.WriteLine($"Error in GetDamByAnimalId: {ex.Message}");
+                    return null; // Return null in case of error
+                }
+            });
         }
 
         //return dam and sire as strings via animal id
         public async Task<(string dam, string sire)> GetDamAndSireByAnimalId(int animalId)
         {
-            var dam = await GetDamByAnimalId(animalId);
-            var sire = await GetSireByAnimalId(animalId);
-            return (dam?.DisplayName ?? "Unknown", sire?.DisplayName ?? "Unknown");
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                return await ExecuteInContextAsync(async _context =>
+            {
+                var dam = await GetDamByAnimalId(animalId);
+                var sire = await GetSireByAnimalId(animalId);
+                return (dam?.DisplayName ?? "Unknown", sire?.DisplayName ?? "Unknown");
+            });
+            });
         }
 
         //add a new lineage connection
@@ -83,36 +92,45 @@ namespace RATAPPLibrary.Services
         //Lineage connection addition must be followed by adding in any new connections with the updated data 
         public async Task<bool> AddLineageConnection(int animalId, int ancestorId, int generation, int sequence, string relationshipType)
         {
-            try
+            return await ExecuteInTransactionAsync(async _context =>
             {
-                var newLineage = new Lineage
+                return await ExecuteInTransactionAsync(async _context =>
                 {
-                    AnimalId = animalId,
-                    AncestorId = ancestorId,
-                    Generation = generation,
-                    Sequence = sequence,
-                    RelationshipType = relationshipType,
-                    RecordedAt = DateTime.UtcNow
-                };
-                _context.Lineages.Add(newLineage);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (logging, etc.)
-                Console.WriteLine($"Error in AddLineageConnection: {ex.Message}");
-                return false; // Return false in case of error
-            }
+                    try
+                    {
+                        var newLineage = new Lineage
+                        {
+                            AnimalId = animalId,
+                            AncestorId = ancestorId,
+                            Generation = generation,
+                            Sequence = sequence,
+                            RelationshipType = relationshipType,
+                            RecordedAt = DateTime.UtcNow
+                        };
+                        _context.Lineages.Add(newLineage);
+                        await _context.SaveChangesAsync();
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions (logging, etc.)
+                        Console.WriteLine($"Error in AddLineageConnection: {ex.Message}");
+                        return false; // Return false in case of error
+                    }
+                });
+            });
         }
 
         //check for matching animalId and ancestorId 
         public async Task<bool> DoesAncestryConnectionExist(int animalId, int ancestorId)
         {
-            var existingConnection = await _context.Lineages.FirstOrDefaultAsync(l =>
+            return await ExecuteInContextAsync(async _context =>
+            {
+                var existingConnection = await _context.Lineages.FirstOrDefaultAsync(l =>
                 l.AnimalId == animalId && l.AncestorId == ancestorId);
 
-            return existingConnection != null;
+                return existingConnection != null;
+            });
         }
 
 

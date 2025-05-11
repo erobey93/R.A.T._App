@@ -36,8 +36,8 @@ namespace RATAPP.Forms
             GeneService geneService,
             BreedingCalculationService breedingService,
             AnimalService animalService,
-            RatAppDbContext context)
-            : base(context)
+            RatAppDbContextFactory contextFactory)
+            : base(contextFactory)
         {
             _traitService = traitService;
             _geneService = geneService;

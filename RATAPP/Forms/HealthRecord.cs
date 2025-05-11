@@ -29,15 +29,15 @@ namespace RATAPP.Forms
         private RichTextBox healthTrendsTextBox;
         private Button addRecordButton;
 
-        public static HealthRecordForm Create(RATAppBaseForm baseForm, RatAppDbContext context, AnimalDto animal)
+        public static HealthRecordForm Create(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
-            return new HealthRecordForm(baseForm, context, animal);
+            return new HealthRecordForm(baseForm, contextFactory, animal);
         }
 
-        public HealthRecordForm(RATAppBaseForm baseForm, RatAppDbContext context, AnimalDto animal)
+        public HealthRecordForm(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
             _baseForm = baseForm;
-            _context = context;
+            //_context = contextFactory;
             _currentAnimal = animal;
 
             this.Dock = DockStyle.Fill;

@@ -21,7 +21,8 @@ namespace RATAPP.Panels
         private readonly GeneService _geneService;
         private readonly BreedingCalculationService _breedingService;
         private readonly AnimalService _animalService;
-        private readonly RatAppDbContext _context;
+        //private readonly RatAppDbContext _context;
+        private readonly RatAppDbContextFactory _contextFactory;
         private readonly RATAppBaseForm _baseForm;
 
         // UI Components
@@ -67,14 +68,15 @@ namespace RATAPP.Panels
         public Action<object, EventArgs> Load { get; private set; }
 
         public GeneticsPanel(RATAppBaseForm baseForm, TraitService traitService, GeneService geneService,
-                            BreedingCalculationService breedingService, RatAppDbContext context)
+                            BreedingCalculationService breedingService, RatAppDbContextFactory contextFactory)
         {
             _baseForm = baseForm;
             _traitService = traitService;
             _geneService = geneService;
             _breedingService = breedingService;
-            _animalService = new AnimalService(context); //TODO look at the difference between this implementation and how I've been implementing the service 
-            _context = context;
+            _animalService = new AnimalService(contextFactory); //TODO look at the difference between this implementation and how I've been implementing the service 
+            //_context = context;
+            _contextFactory = contextFactory;
 
             InitializeComponents();
             RegisterEventHandlers();
@@ -729,7 +731,7 @@ namespace RATAPP.Panels
         {
             try
             {
-                var speciesService = new SpeciesService(_context);
+                var speciesService = new SpeciesService(_contextFactory);
                 var species = await speciesService.GetAllSpeciesAsync();
 
                 speciesFilter.Items.Clear();
@@ -754,7 +756,7 @@ namespace RATAPP.Panels
         {
             try
             {
-                var animalService = new AnimalService(_context);
+                var animalService = new AnimalService(_contextFactory);
                 var animals = await animalService.GetAllAnimalsAsync();
 
                 // Populate dam and sire combos for breeding calculator
@@ -833,7 +835,7 @@ namespace RATAPP.Panels
 
         private void AddTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AddTraitForm(_traitService, _geneService, _context))
+            using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory))
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
@@ -851,7 +853,7 @@ namespace RATAPP.Panels
             }
 
             var selectedTrait = (Trait)traitRegistryGrid.SelectedRows[0].DataBoundItem;
-            using (var form = new AddTraitForm(_traitService, _geneService, _context)) //FIXME took , selectedTrait out
+            using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory)) //FIXME took , selectedTrait out
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
@@ -893,7 +895,7 @@ namespace RATAPP.Panels
 
         private void AssignTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_context), _context))
+            using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_contextFactory), _contextFactory))
             {
                 form.ShowDialog();
             }
@@ -1097,7 +1099,7 @@ namespace RATAPP.Panels
                 var animal = animalSelector.SelectedItem as AnimalDto; 
 
                 // Create a new form to display the pedigree in a larger view
-                var pedigreeForm = IndividualAnimalAncestryForm.Create(_baseForm, _context, animal);
+                var pedigreeForm = IndividualAnimalAncestryForm.Create(_baseForm, _contextFactory, animal);
 
                 // Add the form to the pedigree panel
                 pedigreeForm.TopLevel = false;

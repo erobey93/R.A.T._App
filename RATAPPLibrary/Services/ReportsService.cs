@@ -3,13 +3,13 @@
 //TODO - currently just a mock service to mess around with page a bit 
 namespace RATAPPLibrary.Services
 {
-    public class ReportsService
+    public class ReportsService : BaseService
     {
-        private readonly RatAppDbContext _context;
+        //private readonly RatAppDbContext _context;
         //ctor 
-        public ReportsService(RatAppDbContext context)
+        public ReportsService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            _context = context;
+            //_context = context;
         }
     }
 }

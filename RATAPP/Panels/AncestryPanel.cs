@@ -18,18 +18,18 @@ namespace RATAPP.Panels
         private Label generationsLabel;
 
         private RATAppBaseForm _parentForm;
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
         private AnimalDto[] _animals;
 
         // The currently selected rodent
         private Rodent selectedRodent;
 
-        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
+        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
         {
             _parentForm = parentForm;
-            _context = context;
-            _animalService = new RATAPPLibrary.Services.AnimalService(_context);
+            //_context = context;
+            _animalService = new RATAPPLibrary.Services.AnimalService(contextFactory);
 
             InitializeComponent();
             InitializeCustomComponents();

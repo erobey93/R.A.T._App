@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPP.Forms;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Forms
 {
     public partial class AddLineForm : Form
     {
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private TabControl tabControl;
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
@@ -22,9 +23,9 @@ namespace RATAPP.Forms
         private Button saveAllButton;
         private PictureBox loadingSpinner;
 
-        public AddLineForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public AddLineForm(RatAppDbContextFactory contextFactory)
         {
-            _context = context;
+            //_context = context;
             InitializeComponents();
             LoadAnimals();
             LoadProjects();

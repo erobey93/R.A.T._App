@@ -10,6 +10,7 @@ using RATAPPLibrary.Services;
 using PdfSharp.Charting;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Panels
 {
@@ -199,7 +200,7 @@ namespace RATAPP.Panels
                         break;
                     case 2:
                         await GetBreedingData();
-                        await PopulateLineDataDisplayArea();
+                        PopulateLineDataDisplayArea();
                         break;
                 }
             }
@@ -345,7 +346,7 @@ namespace RATAPP.Panels
 
             //get all pairings and litters from db 
             //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
-            await GetBreedingData();
+            //await GetBreedingData();
 
             pairingsGridView.Location = new Point(0, topPanelHeight);
             pairingsGridView.Width = 1000;
@@ -445,7 +446,7 @@ namespace RATAPP.Panels
             }
             else
             {
-                //MessageBox.Show("There are no litters in your database."); //FIXME this is popping up before the page is loaded, I only want it to pop up once on the page add as bug 
+                MessageBox.Show("There are no litters in your database."); //FIXME this is popping up before the page is loaded, I only want it to pop up once on the page add as bug 
             }
         }
 

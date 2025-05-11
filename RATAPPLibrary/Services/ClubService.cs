@@ -11,7 +11,7 @@ namespace RATAPPLibrary.Services
     /// Service for managing breeding clubs and breeder-club relationships.
     /// Handles operations for Club and BreederClub entities.
     /// </summary>
-    public interface IClubService
+    public interface IClubService //: BaseService TODO use new BaseService + context factory pattern 
     {
         Task<Club> CreateClubAsync(string name);
         Task<Club> GetClubByIdAsync(int id);

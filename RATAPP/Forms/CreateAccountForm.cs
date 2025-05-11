@@ -9,7 +9,8 @@ namespace RATAPP.Forms
 {
     public partial class CreateAccountForm : Form
     {
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory _contextFactory; 
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
         private RATAPPLibrary.Services.AccountService _accountService;
@@ -31,12 +32,13 @@ namespace RATAPP.Forms
         private readonly Font INPUT_FONT = new Font("Segoe UI", 12);
         private readonly Font BUTTON_FONT = new Font("Segoe UI", 12);
 
-        public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
+        public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
-            _context = context;
+            //_context = context;
+            _contextFactory = contextFactory; //FIXME I don't think I actually need to be passing this around, but keeping the current pattern for now 
             _configuration = configuration;
             _passwordHashing = passwordHashing;
-            _accountService = new AccountService(_context, _configuration, _passwordHashing);
+            _accountService = new AccountService(contextFactory, _configuration, _passwordHashing);
 
             // Get screen dimensions
             screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
@@ -391,7 +393,7 @@ namespace RATAPP.Forms
         {
             // Navigate back to the login form
             this.Hide();
-            var loginForm = new LoginForm(_context, _configuration, _passwordHashing);
+            var loginForm = new LoginForm(_contextFactory, _configuration, _passwordHashing);
             loginForm.Show();
         }
 

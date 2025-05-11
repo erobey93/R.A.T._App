@@ -31,8 +31,8 @@ namespace RATAPP.Forms
         private Animal selectedAnimal;
         private Dictionary<string, List<string>> currentTraits;
 
-        public AssignTraitForm(TraitService traitService, GeneService geneService, AnimalService animalService, RatAppDbContext context)
-            : base(context)
+        public AssignTraitForm(TraitService traitService, GeneService geneService, AnimalService animalService, RatAppDbContextFactory contextFactory)
+            : base(contextFactory)
         {
             _traitService = traitService;
             _geneService = geneService;

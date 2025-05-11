@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPP.Helpers;
+using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
 
@@ -34,13 +35,17 @@ namespace RATAPP.Forms
         private Button saveAllButton;
         private Button importButton;
 
-        public AddPairingForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        private RatAppDbContextFactory _contextFactory; 
+
+        public AddPairingForm(RatAppDbContextFactory contextFactory) //RATAPPLibrary.Data.DbContexts.RatAppDbContext context
         {
             // Initialize services
-            var breedingService = new BreedingService(context);
-            var speciesService = new SpeciesService(context);
-            var animalService = new AnimalService(context);
-            var projectService = new ProjectService(context);
+            var breedingService = new BreedingService(contextFactory);
+            var speciesService = new SpeciesService(contextFactory);
+            var animalService = new AnimalService(contextFactory);
+            var projectService = new ProjectService(contextFactory);
+
+            _contextFactory = contextFactory;   
 
             // Initialize helper classes
             //_dataManager = new FormDataManager(
