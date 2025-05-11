@@ -4,6 +4,7 @@ using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPPLibrary.Services
 {
+    //base service serves as a central location for all services to manage their context as opposed to passing the same context around which leads to data races and other issues 
     public abstract class BaseService
     {
         private readonly RatAppDbContextFactory _contextFactory;

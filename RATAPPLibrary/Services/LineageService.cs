@@ -5,13 +5,13 @@ using RATAPPLibrary.Data.Models.Ancestry;
 
 namespace RATAPPLibrary.Services
 {
-    public class LineageService
+    public class LineageService : BaseService
     {
-        private readonly RatAppDbContext _context;
+        //private readonly RatAppDbContext _context;
 
-        public LineageService(RatAppDbContext context)
+        public LineageService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            _context = context;
+            //_context = context;
         }
 
         //get dam via animal id
@@ -19,25 +19,28 @@ namespace RATAPPLibrary.Services
         //Find gen 1, seq 1 for dam
         public async Task<Animal> GetDamByAnimalId(int animalId)
         {
-            try
+            return await ExecuteInContextAsync(async _context =>
             {
-                var damAncestryRecord = await _context.Lineages
-                    .Include(l => l.Ancestor)
-                    .FirstOrDefaultAsync(l => l.AnimalId == animalId && l.Generation == 1 && l.Sequence == 1 && l.RelationshipType == "Maternal"); // Assuming you have a maternal identifier.
-
-                if (damAncestryRecord != null && damAncestryRecord.Ancestor != null)
+                try
                 {
-                    return damAncestryRecord.Ancestor;
-                }
+                    var damAncestryRecord = await _context.Lineages
+                        .Include(l => l.Ancestor)
+                        .FirstOrDefaultAsync(l => l.AnimalId == animalId && l.Generation == 1 && l.Sequence == 1 && l.RelationshipType == "Maternal"); // Assuming you have a maternal identifier.
 
-                return null; // Dam not found
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions (logging, etc.)
-                Console.WriteLine($"Error in GetDamByAnimalId: {ex.Message}");
-                return null; // Return null in case of error
-            }
+                    if (damAncestryRecord != null && damAncestryRecord.Ancestor != null)
+                    {
+                        return damAncestryRecord.Ancestor;
+                    }
+
+                    return null; // Dam not found
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (logging, etc.)
+                    Console.WriteLine($"Error in GetDamByAnimalId: {ex.Message}");
+                    return null; // Return null in case of error
+                }
+            });
         }
 
 

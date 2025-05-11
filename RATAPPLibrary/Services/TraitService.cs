@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using System.Security.AccessControl;
@@ -8,16 +9,16 @@ using Trait = RATAPPLibrary.Data.Models.Genetics.Trait;
 
 namespace RATAPPLibrary.Services
 {
-    public class TraitService
+    public class TraitService : BaseService
     {
         //get all phenotypes - aka traits
-        private readonly Data.DbContexts.RatAppDbContext _context;
+        //private readonly Data.DbContexts.RatAppDbContext _context;
         private SpeciesService _speciesService;
 
-        public TraitService(Data.DbContexts.RatAppDbContext context)
+        public TraitService(RatAppDbContextFactory contextFactory)
         {
-            _context = context;
-            _speciesService = new SpeciesService(context);
+            //_context = context;
+            _speciesService = new SpeciesService(contextFactory);
         }
 
         // Get TraitTypeId by Name

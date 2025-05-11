@@ -1,20 +1,19 @@
 ﻿using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models.Breeding;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 //TODO still working on structure, but for now I'm using services to handle the logic of creating new entities
 //TODO I'm not sure if this is the best way to do this, but I'm trying to keep the controllers as clean as possible
 namespace RATAPPLibrary.Services
 {
-    public class LineService
+    public class LineService : BaseService
     {
         private readonly RatAppDbContext _context;
 
-        public LineService() { }
-
-        public LineService(RatAppDbContext context)
+        public LineService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            _context = context;
+            //_context = context;
         }
 
         //get line by name is a unique case because if it doesn't exist, it should be created 
