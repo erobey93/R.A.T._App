@@ -43,14 +43,14 @@ namespace RATAPP.Forms
             var projectService = new ProjectService(context);
 
             // Initialize helper classes
-            _dataManager = new FormDataManager(
-                breedingService,
-                speciesService,
-                projectService,
-                animalService);
+            //_dataManager = new FormDataManager(
+            //    breedingService,
+            //    speciesService,
+            //    projectService,
+            //    animalService);
 
             _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
-            _eventHandler = new FormEventHandler(_dataManager, _spinner);
+            //_eventHandler = new FormEventHandler(_dataManager, _spinner);
 
             InitializeComponents();
             InitializeEventHandlers();
@@ -355,32 +355,32 @@ namespace RATAPP.Forms
 
         private void InitializeEventHandlers()
         {
-            this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncPairing(
-                speciesComboBox, damComboBox, sireComboBox, projectComboBox);
+            //this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncPairing(
+            //    speciesComboBox, damComboBox, sireComboBox, projectComboBox);
 
-            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
-                speciesComboBox, damComboBox, sireComboBox);
+            //speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
+            //    speciesComboBox, damComboBox, sireComboBox);
 
-            addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
-                pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
+            //addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
+            //    pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
 
-            addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
-                pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
+            //addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
+            //    pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
 
-            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
-                multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
+            //saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
+            //    multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
 
-            importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
+            //importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
 
-            cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
+            //cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
 
-            multiplePairingsGrid.CellContentClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
-                {
-                    multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
-                }
-            };
+            //multiplePairingsGrid.CellContentClick += (s, e) =>
+            //{
+            //    if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
+            //    {
+            //        multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
+            //    }
+            //};
         }
     }
 }

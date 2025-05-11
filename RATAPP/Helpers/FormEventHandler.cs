@@ -395,45 +395,45 @@ namespace RATAPP.Helpers
             }
         }
 
-        public async Task HandleAddLitterClickAsync(string litterId, string litterName, int pairId, 
-            DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes)
-        {
-            try
-            {
-                _spinner.Show();
+        //public async Task HandleAddLitterClickAsync(string litterId, string litterName, int pairId, 
+        //    DateTimePicker datePicker, TextBox numPups, TextBox numMales, TextBox numFemales, TextBox notes)
+        //{
+        //    try
+        //    {
+        //        _spinner.Show();
 
-                // Validate inputs
-                if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
-                {
-                    MessageBox.Show("Please fill in all required fields", "Validation Error", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+        //        // Validate inputs
+        //        if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
+        //        {
+        //            MessageBox.Show("Please fill in all required fields", "Validation Error", 
+        //                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return;
+        //        }
 
-                var litter = new Litter
-                {
-                    LitterId = litterId,
-                    Name = litterName,
-                    PairId = pairId,
-                    DateOfBirth = datePicker.Value,
-                    NumPups = !string.IsNullOrWhiteSpace(numPups.Text) ? int.Parse(numPups.Text) : null,
-                    NumMale = !string.IsNullOrWhiteSpace(numMales.Text) ? int.Parse(numMales.Text) : null,
-                    NumFemale = !string.IsNullOrWhiteSpace(numFemales.Text) ? int.Parse(numFemales.Text) : null,
-                    Notes = notes.Text,
-                    CreatedOn = DateTime.Now,
-                    LastUpdated = DateTime.Now
-                };
+        //        var litter = new Litter
+        //        {
+        //            LitterId = litterId,
+        //            Name = litterName,
+        //            PairId = pairId,
+        //            DateOfBirth = datePicker.Value,
+        //            NumPups = !string.IsNullOrWhiteSpace(numPups.Text) ? int.Parse(numPups.Text) : null,
+        //            NumMale = !string.IsNullOrWhiteSpace(numMales.Text) ? int.Parse(numMales.Text) : null,
+        //            NumFemale = !string.IsNullOrWhiteSpace(numFemales.Text) ? int.Parse(numFemales.Text) : null,
+        //            Notes = notes.Text,
+        //            CreatedOn = DateTime.Now,
+        //            LastUpdated = DateTime.Now
+        //        };
 
-                await _dataManager.SaveLitterAsync(litter);
+        //        await _dataManager.SaveLitterAsync(litter);
 
-                MessageBox.Show("Litter added successfully!", "Success", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            finally
-            {
-                _spinner.Hide();
-            }
-        }
+        //        MessageBox.Show("Litter added successfully!", "Success", 
+        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //    }
+        //    finally
+        //    {
+        //        _spinner.Hide();
+        //    }
+        //}
 
         public void HandleAddPairingToGridClick(string id, ComboBox damBox, ComboBox sireBox, ComboBox projectBox, 
             DateTimePicker datePicker, DataGridView grid)
@@ -541,51 +541,51 @@ namespace RATAPP.Helpers
             }
         }
 
-        public async Task HandleSaveAllLittersAsync(DataGridView grid)
-        {
-            try
-            {
-                _spinner.Show();
+        //public async Task HandleSaveAllLittersAsync(DataGridView grid)
+        //{
+        //    try
+        //    {
+        //        _spinner.Show();
 
-                if (grid.Rows.Count == 0)
-                {
-                    MessageBox.Show("Please add at least one litter to the list", "Validation Error", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+        //        if (grid.Rows.Count == 0)
+        //        {
+        //            MessageBox.Show("Please add at least one litter to the list", "Validation Error", 
+        //                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return;
+        //        }
 
-                foreach (DataGridViewRow row in grid.Rows)
-                {
-                    var litter = new Litter
-                    {
-                        LitterId = row.Cells["LitterID"].Value.ToString(),
-                        Name = row.Cells["Name"].Value.ToString(),
-                        PairId = int.Parse(row.Cells["PairID"].Value.ToString()),
-                        DateOfBirth = DateTime.Parse(row.Cells["BirthDate"].Value.ToString()),
-                        NumPups = !string.IsNullOrWhiteSpace(row.Cells["NumPups"].Value?.ToString()) 
-                            ? int.Parse(row.Cells["NumPups"].Value.ToString()) : null,
-                        NumMale = !string.IsNullOrWhiteSpace(row.Cells["NumMales"].Value?.ToString()) 
-                            ? int.Parse(row.Cells["NumMales"].Value.ToString()) : null,
-                        NumFemale = !string.IsNullOrWhiteSpace(row.Cells["NumFemales"].Value?.ToString()) 
-                            ? int.Parse(row.Cells["NumFemales"].Value.ToString()) : null,
-                        Notes = row.Cells["Notes"].Value?.ToString(),
-                        CreatedOn = DateTime.Now,
-                        LastUpdated = DateTime.Now
-                    };
+        //        foreach (DataGridViewRow row in grid.Rows)
+        //        {
+        //            var litter = new Litter
+        //            {
+        //                LitterId = row.Cells["LitterID"].Value.ToString(),
+        //                Name = row.Cells["Name"].Value.ToString(),
+        //                PairId = int.Parse(row.Cells["PairID"].Value.ToString()),
+        //                DateOfBirth = DateTime.Parse(row.Cells["BirthDate"].Value.ToString()),
+        //                NumPups = !string.IsNullOrWhiteSpace(row.Cells["NumPups"].Value?.ToString()) 
+        //                    ? int.Parse(row.Cells["NumPups"].Value.ToString()) : null,
+        //                NumMale = !string.IsNullOrWhiteSpace(row.Cells["NumMales"].Value?.ToString()) 
+        //                    ? int.Parse(row.Cells["NumMales"].Value.ToString()) : null,
+        //                NumFemale = !string.IsNullOrWhiteSpace(row.Cells["NumFemales"].Value?.ToString()) 
+        //                    ? int.Parse(row.Cells["NumFemales"].Value.ToString()) : null,
+        //                Notes = row.Cells["Notes"].Value?.ToString(),
+        //                CreatedOn = DateTime.Now,
+        //                LastUpdated = DateTime.Now
+        //            };
 
-                    await _dataManager.SaveLitterAsync(litter);
-                }
+        //            await _dataManager.SaveLitterAsync(litter);
+        //        }
 
-                MessageBox.Show($"Successfully added {grid.Rows.Count} litters!", "Success", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //        MessageBox.Show($"Successfully added {grid.Rows.Count} litters!", "Success", 
+        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                grid.Rows.Clear();
-            }
-            finally
-            {
-                _spinner.Hide();
-            }
-        }
+        //        grid.Rows.Clear();
+        //    }
+        //    finally
+        //    {
+        //        _spinner.Hide();
+        //    }
+        //}
 
         public void HandleCancelClick(Form form)
         {

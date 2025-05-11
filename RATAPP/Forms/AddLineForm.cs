@@ -545,7 +545,7 @@ namespace RATAPP.Forms
                         multiplelinesGrid.Rows.RemoveAt(e.RowIndex);
 
                         // Simulate a brief delay for the operation
-                        System.Threading.Thread.Sleep(300);
+                        Thread.Sleep(300);
                     }
                     finally
                     {

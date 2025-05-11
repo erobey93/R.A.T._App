@@ -738,8 +738,8 @@ namespace RATAPP.Forms
                 // Validate inputs
                 if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
                 {
-                    MessageBox.Show("Please fill in all required fields", "Validation Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //MessageBox.Show("Please fill in all required fields", "Validation Error",
+                    //    MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -769,6 +769,7 @@ namespace RATAPP.Forms
                     MessageBox.Show("An error occurred. Litter not created!", "Failure",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
+
                 
             }
             finally

@@ -68,10 +68,10 @@ namespace RATAPP.Helpers
             return await _breedingService.GetAllPairingsBySpeciesAsync(species);
         }
 
-        public async Task SaveLitterAsync(Litter litter)
-        {
-            await _breedingService.CreateLitterAsync(litter);
-        }
+        //public async Task SaveLitterAsync(Litter litter)
+        //{
+        //    await _breedingService.CreateLitterAsync(litter);
+        //}
 
         public async Task SavePairingAsync(Pairing pairing)
         {
