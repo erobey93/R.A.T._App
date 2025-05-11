@@ -110,6 +110,7 @@ namespace RATAPP.Panels
                 InitializeComboBoxes();
             }
 
+            
             InitializeLabels();
             InitializePhotoBox();
             InitializeThumbnailPanel();
@@ -877,15 +878,17 @@ namespace RATAPP.Panels
         {
             try
             {
-                await _loadingSemaphore.WaitAsync();
+                //await _loadingSemaphore.WaitAsync();
                 ShowLoadingIndicator();
 
                 var animal = await _animalService.GetAnimalByIdAsync(animalId);
                 _animal = animal;
 
                 await SetDefaultDamAndSire();
+                //_loadingSemaphore.Release();
                 await GetAnimalDamAndSire();
                 InitializeTextBoxes(_animal);
+
             }
             catch (Exception ex)
             {
@@ -895,7 +898,7 @@ namespace RATAPP.Panels
             finally
             {
                 HideLoadingIndicator();
-                _loadingSemaphore.Release();
+               
             }
         }
 
@@ -912,7 +915,7 @@ namespace RATAPP.Panels
             {
                 try
                 {
-                    await _loadingSemaphore.WaitAsync();
+                    //await _loadingSemaphore.WaitAsync();
                     var dam = await _lineageService.GetDamByAnimalId(_animal.Id);
                     if (dam != null)
                     {
@@ -927,7 +930,7 @@ namespace RATAPP.Panels
                 }
                 finally
                 {
-                    _loadingSemaphore.Release();
+                    //_loadingSemaphore.Release();
                 }
             }
         }
@@ -938,7 +941,7 @@ namespace RATAPP.Panels
             {
                 try
                 {
-                    await _loadingSemaphore.WaitAsync();
+                    //await _loadingSemaphore.WaitAsync();
                     var existingAnimal = await _animalService.GetAnimalByIdAsync(id.Value);
                     if (existingAnimal != null)
                     {
@@ -947,7 +950,7 @@ namespace RATAPP.Panels
                 }
                 finally
                 {
-                    _loadingSemaphore.Release();
+                    //_loadingSemaphore.Release();
                 }
             }
 
