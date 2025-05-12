@@ -5,8 +5,35 @@ using Microsoft.EntityFrameworkCore;
 namespace RATAPPLibrary.Services
 {
     /// <summary>
-    /// Service class for managing Line entities in the database.
-    /// Inherits from BaseService to leverage database context management and transaction support.
+    /// Service for managing breeding lines and varieties in the R.A.T. App.
+    /// Handles the creation, tracking, and management of distinct animal lines
+    /// within breeding programs.
+    /// 
+    /// Key Features:
+    /// - Line Management:
+    ///   * Create and track distinct breeding lines
+    ///   * Associate lines with specific stocks
+    ///   * Maintain line genealogy
+    /// 
+    /// Usage:
+    /// - Creating new breeding lines
+    /// - Looking up existing lines
+    /// - Updating line information
+    /// - Managing line associations with stocks
+    /// 
+    /// Data Structure:
+    /// - Each Line represents a distinct breeding variety
+    /// - Lines are associated with Stocks (which link to Species)
+    /// - Lines track naming and organizational hierarchy
+    /// 
+    /// Known Limitations:
+    /// - GetOrCreateLineAsync_ByName may create duplicate lines (needs review)
+    /// - No validation for line naming conventions
+    /// - No support for line merging or splitting
+    /// 
+    /// Dependencies:
+    /// - Inherits from BaseService for database operations
+    /// - Requires RatAppDbContext for data access
     /// </summary>
     public class LineService : BaseService
     {
@@ -19,11 +46,21 @@ namespace RATAPPLibrary.Services
         }
 
         /// <summary>
-        /// Retrieves a Line by its name. If a Line with the given name does not exist, it creates a new one.
+        /// Retrieves a Line by its ID, creating it if it doesn't exist.
+        /// 
+        /// IMPORTANT: Current implementation has potential issues:
+        /// - May create duplicate lines
+        /// - Uses line.Name before line is initialized
+        /// - Uses line.StockId before line is initialized
+        /// 
+        /// TODO:
+        /// - Review and fix initialization logic
+        /// - Add proper validation
+        /// - Consider renaming method to better reflect ID-based lookup
+        /// 
         /// </summary>
-        /// <param name="lineName">The name of the Line to retrieve or create.</param>
-        /// <param name="stockId">The ID of the Stock to which the new Line should be associated if created.</param>
-        /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task result contains the retrieved or newly created <see cref="Line"/>.</returns>
+        /// <param name="lineId">The ID of the Line to retrieve or create</param>
+        /// <returns>The retrieved or newly created Line</returns>
         public async Task<Line> GetOrCreateLineAsync_ByName(int lineId)
         {
             return await ExecuteInContextAsync(async context =>

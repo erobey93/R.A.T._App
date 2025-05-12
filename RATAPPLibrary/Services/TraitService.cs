@@ -9,7 +9,42 @@ using Trait = RATAPPLibrary.Data.Models.Genetics.Trait;
 
 namespace RATAPPLibrary.Services
 {
-    public class TraitService : BaseService
+    /// <summary>
+    /// Service for managing animal traits and characteristics in the R.A.T. App.
+    /// Handles the creation, organization, and tracking of physical traits and their
+    /// associations with animals.
+    /// 
+    /// Key Features:
+    /// - Trait Management:
+    ///   * Create and track trait types (color, pattern, etc.)
+    ///   * Manage species-specific traits
+    ///   * Associate traits with animals
+    /// 
+    /// Data Structure:
+    /// - TraitType: Categories of traits (e.g., color, markings, ear type)
+    /// - Trait: Specific characteristics within a type
+    /// - AnimalTrait: Links traits to specific animals
+    /// 
+    /// Relationships:
+    /// - Traits belong to TraitTypes
+    /// - Traits are species-specific
+    /// - Animals can have multiple traits
+    /// 
+    /// Known Limitations:
+    /// - Basic genotype support ("N/A" placeholder)
+    /// - No trait inheritance calculations
+    /// - Limited trait combination logic
+    /// - No validation for trait compatibility
+    /// 
+    /// Future Enhancements:
+    /// - Implement genotype generation
+    /// - Add trait stacking (e.g., angora + rex = texel)
+    /// - Improve trait inheritance tracking
+    /// 
+    /// Dependencies:
+    /// - SpeciesService: For species validation
+    /// - Inherits from BaseService for database operations
+    /// </summary>
     {
         //get all phenotypes - aka traits
         //private readonly Data.DbContexts.RatAppDbContext _context;
@@ -178,7 +213,25 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //Create a new trait i.e. a trait within a trait type, so this is species specific 
+        /// <summary>
+        /// Creates a new trait for a specific species and trait type.
+        /// 
+        /// Process:
+        /// 1. Validates inputs (name, species, trait type)
+        /// 2. Checks for existing traits
+        /// 3. Creates trait with default genotype
+        /// 
+        /// Required Fields:
+        /// - name: Trait identifier
+        /// - traitTypeId: Category of trait
+        /// - species: Associated species
+        /// 
+        /// Note: Currently uses "N/A" for genotype.
+        /// TODO: Implement proper genotype generation based on trait
+        /// 
+        /// Throws:
+        /// - InvalidOperationException for validation failures
+        /// </summary>
         public async Task<Trait> CreateTraitAsync(string name, int traitTypeId, string species, string? description = null)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -274,8 +327,24 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        // get all traits for a specific animal by animal id
-        // returns a map of trait type and trait name 
+        /// <summary>
+        /// Retrieves all traits associated with a specific animal.
+        /// Returns a mapping of trait types to trait names.
+        /// 
+        /// Example Output:
+        /// {
+        ///   "Color": ["Black", "White"],
+        ///   "Ear Type": ["Standard"],
+        ///   "Coat Type": ["Rex"]
+        /// }
+        /// 
+        /// Note: Returns empty trait lists if animal has no traits,
+        /// rather than throwing an exception.
+        /// 
+        /// TODO: Consider if this error handling approach is optimal
+        /// </summary>
+        /// <param name="animalId">ID of animal to get traits for</param>
+        /// <returns>Dictionary mapping trait types to lists of trait names</returns>
         public async Task<Dictionary<string, List<string>>> GetTraitMapForSingleAnimal(int animalId)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -354,7 +423,21 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get colors for animal
+        /// <summary>
+        /// Retrieves traits of a specific type for an animal.
+        /// Currently used primarily for color traits, but supports any trait type.
+        /// 
+        /// Process:
+        /// 1. Gets all traits of specified type for species
+        /// 2. Filters for traits associated with animal
+        /// 
+        /// Note: Currently assumes one trait per type per animal.
+        /// TODO: Consider supporting multiple traits per type
+        /// </summary>
+        /// <param name="animalId">Animal to get traits for</param>
+        /// <param name="traitType">Type of traits to retrieve</param>
+        /// <param name="species">Species to filter traits by</param>
+        /// <returns>Collection of matching traits</returns>
         public async Task<IEnumerable<Trait>> GetColorTraitsForSingleAnimal(int animalId, string traitType, string species)
         {
             return await ExecuteInContextAsync(async _context =>

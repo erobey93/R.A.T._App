@@ -10,6 +10,44 @@ using System.Threading.Tasks;
 
 namespace RATAPPLibrary.Services.Genetics
 {
+    /// <summary>
+    /// Service for performing genetic calculations and breeding predictions in the R.A.T. App.
+    /// Handles complex genetic inheritance patterns, trait probability calculations,
+    /// and breeding risk assessments.
+    /// 
+    /// Key Features:
+    /// - Breeding Calculations:
+    ///   * Mendelian inheritance modeling
+    ///   * Trait probability calculations
+    ///   * Genetic risk assessment
+    /// 
+    /// Genetic Models:
+    /// - Basic Mendelian inheritance (0.25 probability)
+    /// - Wild type dominance handling
+    /// - Recessive trait expression
+    /// 
+    /// Risk Assessment:
+    /// - Gene monitoring requirements
+    /// - Critical impact level tracking
+    /// - Variable expressivity handling
+    /// 
+    /// Known Limitations:
+    /// - Basic Mendelian probability only
+    /// - Limited complex inheritance patterns
+    /// - Some methods not implemented
+    /// - Basic phenotype determination
+    /// 
+    /// Planned Improvements:
+    /// - Complex inheritance patterns
+    /// - Multi-gene interactions
+    /// - Epigenetic factors
+    /// - Complete test pairing implementation
+    /// 
+    /// Dependencies:
+    /// - Inherits from BaseService
+    /// - Uses Entity Framework for data access
+    /// - Implements IBreedingCalculationService
+    /// </summary>
     public class BreedingCalculationService : BaseService, IBreedingCalculationService
     {
         //private readonly RatAppDbContext _context;
@@ -20,6 +58,22 @@ namespace RATAPPLibrary.Services.Genetics
         }
 
         //using a pre-existing pairingId, create a "Breeding Calculation object that can be used to perform various calculations on that pair 
+        /// <summary>
+        /// Creates a new breeding calculation for a specific pairing.
+        /// 
+        /// Process:
+        /// 1. Validates pairing exists
+        /// 2. Creates calculation record with unique ID
+        /// 3. Associates with pairing
+        /// 
+        /// Note: This is the first step in performing breeding calculations.
+        /// The calculation ID is used in subsequent operations.
+        /// 
+        /// Throws:
+        /// - InvalidOperationException if pairing not found
+        /// </summary>
+        /// <param name="pairingId">ID of the breeding pair</param>
+        /// <returns>New BreedingCalculation object</returns>
         public async Task<BreedingCalculation> CreateBreedingCalculationAsync(int pairingId)
         {
             return await ExecuteInContextAsync(async _context =>
@@ -46,6 +100,33 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        /// <summary>
+        /// Calculates possible offspring outcomes and their probabilities.
+        /// 
+        /// Process:
+        /// 1. Loads parent genotypes and chromosomes
+        /// 2. Calculates allele combinations
+        /// 3. Determines phenotypes
+        /// 4. Groups similar outcomes
+        /// 
+        /// Genetic Model:
+        /// - Uses basic Mendelian inheritance (0.25 probability)
+        /// - Considers chromosome pairs and genes
+        /// - Handles allele combinations
+        /// 
+        /// Results Include:
+        /// - Genotype descriptions
+        /// - Phenotype predictions
+        /// - Probability calculations
+        /// - Parental allele tracking
+        /// 
+        /// TODO:
+        /// - Add complex inheritance patterns
+        /// - Consider gene interactions
+        /// - Improve probability calculations
+        /// </summary>
+        /// <param name="calculationId">ID of breeding calculation</param>
+        /// <returns>List of possible offspring with probabilities</returns>
         public async Task<List<PossibleOffspring>> CalculateOffspringProbabilitiesAsync(Guid calculationId)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -176,6 +257,32 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        /// <summary>
+        /// Validates the genetic compatibility of a potential breeding pair.
+        /// 
+        /// Checks:
+        /// - Genes requiring monitoring
+        /// - Critical impact genes
+        /// - High-risk allele combinations
+        /// 
+        /// Risk Assessment:
+        /// - Identifies monitored genes
+        /// - Calculates affected offspring probability
+        /// - Flags incompatible combinations
+        /// 
+        /// Results:
+        /// - Overall compatibility status
+        /// - List of warnings
+        /// - List of genetic risks
+        /// 
+        /// TODO:
+        /// - Add more compatibility criteria
+        /// - Enhance risk calculations
+        /// - Consider genetic diversity
+        /// </summary>
+        /// <param name="damId">ID of female animal</param>
+        /// <param name="sireId">ID of male animal</param>
+        /// <returns>Compatibility assessment result</returns>
         public async Task<BreedingCompatibilityResult> ValidateBreedingPairAsync(int damId, int sireId)
         {
             return await ExecuteInTransactionAsync(async _context =>

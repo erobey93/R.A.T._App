@@ -9,6 +9,41 @@ using System.Threading.Tasks;
 
 namespace RATAPPLibrary.Services.Genetics
 {
+    /// <summary>
+    /// Service for managing genetic information in the R.A.T. App.
+    /// Handles genes, alleles, and genotypes at a molecular level.
+    /// 
+    /// Key Features:
+    /// - Gene Management:
+    ///   * Create and track genes
+    ///   * Manage allele variants
+    ///   * Track genotypes
+    /// 
+    /// Gene Categories:
+    /// - Physical: Appearance traits
+    /// - Medical: Health conditions
+    /// - Behavioral: Temperament traits
+    /// 
+    /// Impact Levels:
+    /// - Cosmetic: Appearance only
+    /// - Health: Affects wellbeing
+    /// - Critical: Serious conditions
+    /// 
+    /// Expression Ages:
+    /// - Birth: Present at birth
+    /// - Juvenile: Develops in youth
+    /// - Adult: Late-onset traits
+    /// 
+    /// Validation Rules:
+    /// - Gene positions must be unique per chromosome
+    /// - Allele symbols must be unique per gene
+    /// - Only one wild type allele per gene
+    /// - Maternal/Paternal alleles must match gene
+    /// 
+    /// Dependencies:
+    /// - Inherits from BaseService
+    /// - Implements IGeneService
+    /// </summary>
     public class GeneService : BaseService, IGeneService
     {
         //private readonly RatAppDbContext _context;
@@ -21,6 +56,27 @@ namespace RATAPPLibrary.Services.Genetics
             //_context = context;
         }
 
+        /// <summary>
+        /// Creates a new gene with specified characteristics.
+        /// 
+        /// Required Information:
+        /// - Name and common name
+        /// - Chromosome pair and position
+        /// - Category and impact level
+        /// - Expression timing
+        /// 
+        /// Validation:
+        /// - Position must be unique on chromosome
+        /// - Category must be valid
+        /// - Impact level must be valid
+        /// - Expression age must be valid
+        /// 
+        /// Throws:
+        /// - ArgumentException for invalid inputs
+        /// - InvalidOperationException for duplicates
+        /// </summary>
+        /// <param name="request">Gene creation details</param>
+        /// <returns>Created Gene object</returns>
         public async Task<Gene> CreateGeneAsync(CreateGeneRequest request)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -58,6 +114,30 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        /// <summary>
+        /// Creates a new allele variant for a gene.
+        /// 
+        /// Required Information:
+        /// - Gene association
+        /// - Name and symbol
+        /// - Wild type status
+        /// - Phenotype expression
+        /// - Risk assessment
+        /// 
+        /// Validation:
+        /// - Symbol must be unique per gene
+        /// - Only one wild type allowed
+        /// - Risk level must be specified
+        /// 
+        /// Note: Wild type alleles are typically dominant
+        /// and represent the most common variant.
+        /// 
+        /// Throws:
+        /// - ArgumentException for invalid inputs
+        /// - InvalidOperationException for duplicates
+        /// </summary>
+        /// <param name="request">Allele creation details</param>
+        /// <returns>Created Allele object</returns>
         public async Task<Allele> CreateAlleleAsync(CreateAlleleRequest request)
         {
             return await ExecuteInContextAsync(async _context =>
@@ -159,6 +239,29 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        /// <summary>
+        /// Assigns a genotype to an animal for a specific chromosome pair.
+        /// 
+        /// Process:
+        /// 1. Validates no existing genotype
+        /// 2. Verifies allele compatibility
+        /// 3. Creates genotype record
+        /// 
+        /// Validation:
+        /// - No duplicate genotypes allowed
+        /// - Alleles must be from same gene
+        /// - Both alleles must exist
+        /// 
+        /// Used For:
+        /// - Recording genetic makeup
+        /// - Tracking inherited traits
+        /// - Breeding calculations
+        /// 
+        /// Throws:
+        /// - InvalidOperationException for validation failures
+        /// </summary>
+        /// <param name="request">Genotype assignment details</param>
+        /// <returns>Created Genotype object</returns>
         public async Task<Genotype> AssignGenotypeToAnimalAsync(AssignGenotypeRequest request)
         {
             return await ExecuteInTransactionAsync(async _context =>
