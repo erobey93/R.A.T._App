@@ -12,193 +12,180 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace RATAPPLibrary.Services
 {
-    public class BreedingService
+    public class BreedingService : BaseService
     {
-        private readonly RatAppDbContext _context;
         private readonly LineService _lineService;
         private readonly TraitService _traitService;
         private readonly LineageService _lineageService;
         private readonly AnimalService _animalService;
 
-        public BreedingService(RatAppDbContext context)
+        public BreedingService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            _context = context;
-            _lineService = new LineService(context);
-            _traitService = new TraitService(context);
-            _lineageService = new LineageService(context);
-            _animalService = new AnimalService(context);
-
+            // Initialize other services with the same context factory
+            _lineService = new LineService(contextFactory);
+            _traitService = new TraitService(contextFactory);
+            _lineageService = new LineageService(contextFactory);
+            _animalService = new AnimalService(contextFactory);
         }
 
         //PAIRINGS
         //get all pairings
         public async Task<List<Pairing>> GetAllPairingsAsync()
         {
-            var pairings = await _context.Pairing.ToListAsync();
-            if (pairings.Count == 0)
+            return await ExecuteInContextAsync(async context =>
             {
-                return new List<Pairing>();
-            }
-            return pairings;
+                var pairings = await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                    .ToListAsync();
+                return pairings ?? new List<Pairing>();
+            });
         }
 
         //get all current pairings (no pairing end date, so "active")
-        //get all pairings
         public async Task<List<Pairing>> GetAllActivePairingsAsync()
         {
-            // Retrieve active pairings where PairingEndDate is null
-            var activePairings = await _context.Pairing
-                                               .Where(p => p.PairingEndDate == null && p.PairingStartDate != null)
-                                               .ToListAsync();
-
-            // Return the list, which may be empty if no active pairings exist
-            return activePairings;
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                    .Where(p => p.PairingEndDate == null && p.PairingStartDate != null)
+                    .ToListAsync();
+            });
         }
 
         //get all upcoming pairings (no pairing start, or end date)
         public async Task<List<Pairing>> GetAllUpcomingPairingsAsync()
         {
-            // Retrieve active pairings where PairingEndDate is null
-            var futurePairings = await _context.Pairing
-                                               .Where(p => p.PairingEndDate == null && p.PairingStartDate == null)
-                                               .ToListAsync();
-
-            // Return the list, which may be empty if no future pairings exist
-            return futurePairings;
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                    .Where(p => p.PairingEndDate == null && p.PairingStartDate == null)
+                    .ToListAsync();
+            });
         }
 
         //get all past pairings (pairing start and end date)
         public async Task<List<Pairing>> GetAllPastPairingsAsync()
         {
-            // Retrieve active pairings where PairingEndDate is null
-            var pastPairings = await _context.Pairing
-                                               .Where(p => p.PairingEndDate != null && p.PairingStartDate != null)
-                                               .ToListAsync();
-
-            // Return the list, which may be empty if no past pairings exist
-            return pastPairings;
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                    .Where(p => p.PairingEndDate != null && p.PairingStartDate != null)
+                    .ToListAsync();
+            });
         }
 
-        //get all pairings for animal id
-        //looking for dam, or sire with matching ID
-        public async Task<List<Pairing>> GetAllPairingsByAnimalIdAsync(int animalID)
+        //get all pairings for dam and sire
+        public async Task<List<Pairing>> GetAllActivePairingsByAnimalIdAsync(int animalID)
         {
-            // Retrieve active pairings where PairingEndDate is null
-            var pastPairings = await _context.Pairing
-                                               .Where(p => p.SireId == animalID || p.DamId == animalID)
-                                               .ToListAsync();
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                    .Where(p => p.PairingEndDate == null && p.PairingStartDate != null && 
+                               (p.SireId == animalID || p.DamId == animalID))
+                    .ToListAsync();
+            });
+        }
 
-            // Return the list, which may be empty if id doesn't exist
-            return pastPairings;
+        //get all pairings for dam and sire with matching IDs
+        public async Task<List<Pairing>> GetAllActivePairingsByDamandSireIdAsync(int damID, int sireID)
+        {
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                    .Where(p => p.PairingEndDate == null && p.PairingStartDate != null && 
+                               p.SireId == sireID && p.DamId == damID)
+                    .ToListAsync();
+            });
         }
 
         //get all pairings for line
         public async Task<List<Pairing>> GetAllPairingsByLineIdAsync(int lineID)
         {
-            //probably should get pairing, check for project then get line id but TODO this works for now 
-
-            // Retrieve active pairings where PairingEndDate is null
-            var linePairings = await _context.Pairing
-                                               .Where(p => p.Project.LineId == lineID)
-                                               .ToListAsync();
-
-            // Return the list, which may be empty if lineID doesn't exist
-            return linePairings;
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Project)
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Where(p => p.Project.LineId == lineID)
+                    .ToListAsync();
+            });
         }
 
         //get pairings by species 
         public async Task<List<Pairing>> GetAllPairingsBySpeciesAsync(string species)
         {
-            //probably should get pairing, check for project then get line, stock, species first to check if its populated but TODO this works for now 
-            // Retrieve active pairings where PairingEndDate is null
-            var pastPairings = await _context.Pairing
-                                               .Where(p => p.Project.Line.Stock.Species.CommonName == species)
-                                               .ToListAsync();
-
-            // Return the list, which may be empty if id doesn't exist
-            return pastPairings;
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Project)
+                        .ThenInclude(proj => proj.Line)
+                            .ThenInclude(line => line.Stock)
+                                .ThenInclude(stock => stock.Species)
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Where(p => p.Project.Line.Stock.Species.CommonName == species)
+                    .ToListAsync();
+            });
         }
 
-        //add new pairing 
-        //individual variables TODO may remove this and switch to just using objects 
+        //add new pairing with individual variables
         public async Task<bool> CreatePairingAsync(string pairingId, int damId, int sireId, int projectId, DateTime? startDate, DateTime? endDate)
         {
-            try
+            return await ExecuteInTransactionAsync(async context =>
             {
-                //check if the pairing already exists based on pairingId
-                //if it exists return exception
-                //if it does not exist, add it 
-                //if the add fails, return an exception 
-                var existingPairing = await _context.Pairing.FirstOrDefaultAsync(p => p.pairingId == pairingId);
+                var existingPairing = await context.Pairing.FirstOrDefaultAsync(p => p.pairingId == pairingId);
                 if (existingPairing != null)
                 {
                     throw new InvalidOperationException($"Pairing with ID {pairingId} already exists.");
                 }
 
-                DateTime createdOn = DateTime.Now;
-                DateTime lastUpdated = DateTime.Now;
-
-                //map to a pairing object 
-                Pairing pairing = mapToPairingObject(pairingId, damId, sireId, projectId, createdOn, lastUpdated, startDate, endDate);
-
-                //make a new entry in the animal pairing table for the specified dam and sire 
-                _context.Pairing.Add(pairing);
-                _context.SaveChanges(); 
-
+                var pairing = mapToPairingObject(pairingId, damId, sireId, projectId, DateTime.Now, DateTime.Now, startDate, endDate);
+                context.Pairing.Add(pairing);
+                await context.SaveChangesAsync();
                 return true;
-            }
-            catch (Exception ex)
-            {
-                // Log the error details to the console or a logging service
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
-                // throw the exception again to propagate further TODO need to think through error handling more thoroughly 
-                throw;
-            }
+            });
         }
 
-        //add new pairing 
-        //when passed pairing object 
+        //add new pairing with pairing object
         public async Task<bool> CreatePairingAsync(Pairing pair)
         {
-            try
+            return await ExecuteInTransactionAsync(async context =>
             {
-                //check if the pairing already exists based on pairingId
-                //if it exists return exception
-                //if it does not exist, add it 
-                //if the add fails, return an exception 
-                var existingPairing = await _context.Pairing.FirstOrDefaultAsync(p => p.pairingId == pair.pairingId);
+                var existingPairing = await context.Pairing.FirstOrDefaultAsync(p => p.pairingId == pair.pairingId);
                 if (existingPairing != null)
                 {
                     throw new InvalidOperationException($"Pairing with ID {pair.pairingId} already exists.");
                 }
 
-                DateTime createdOn = DateTime.Now;
-                DateTime lastUpdated = DateTime.Now;
-
-                //make a new entry in the animal pairing table for the specified dam and sire 
-                _context.Pairing.Add(pair);
-                _context.SaveChanges();
-
-                return true;    
-            }
-            catch (Exception ex)
-            {
-                // Log the error details to the console or a logging service
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
-                // throw the exception again to propagate further
-                throw;
-            }
+                context.Pairing.Add(pair);
+                await context.SaveChangesAsync();
+                return true;
+            });
         }
 
         //map to pairing object 
-        public Pairing mapToPairingObject(string pairingId, int damId, int sireId, int projectId, DateTime createdOn, DateTime lastUpdated, DateTime? startDate, DateTime? endDate)
+        private Pairing mapToPairingObject(string pairingId, int damId, int sireId, int projectId, 
+            DateTime createdOn, DateTime lastUpdated, DateTime? startDate, DateTime? endDate)
         {
-
-            Pairing pairing = new Pairing
+            return new Pairing
             {
                 pairingId = pairingId,
                 DamId = damId,
@@ -206,119 +193,91 @@ namespace RATAPPLibrary.Services
                 ProjectId = projectId,
                 PairingStartDate = startDate,
                 PairingEndDate = endDate,
-                CreatedOn = createdOn, //TODO probably should have created on automatically set for new entries as it should never be changed 
+                CreatedOn = createdOn,
                 LastUpdated = lastUpdated,
             };
-
-            return pairing;
-
         }
 
-
-        //delete pairing 
-        //TODO 
-
-        //update pairing
-        //TODO 
-        //cannot update pairing id as this would conflict with litters 
-        //you can only update certain pieces of a pairing such as start and end date once a litter has been associated with a pairing
-        //so, this must be checked for i.e. is there a litter associated with this pairing? 
-        /// <summary>
-       
-        /// </summary>
-        /// <returns></returns>
-        //
-
-
-
         //LITTERS
-
-        //when a litter is added there should be pups associated with it which implies that new animals will be created 
-
-        //get all litters 
         public async Task<List<Litter>> GetAllLittersAsync()
         {
-            var litters = await _context.Litter.ToListAsync();
-            if (litters.Count == 0)
+            return await ExecuteInContextAsync(async context =>
             {
-                return new List<Litter>();
-            }
-            return litters;
+                var litters = await context.Litter
+                    .Include(l => l.Pair)
+                        .ThenInclude(p => p.Dam)
+                    .Include(l => l.Pair)
+                        .ThenInclude(p => p.Sire)
+                    .Include(l => l.Pair)
+                        .ThenInclude(p => p.Project)
+                    .ToListAsync();
+                return litters ?? new List<Litter>();
+            });
         }
 
         //add new litter 
         public async Task<bool> CreateLitterAsync(Litter litter)
         {
-            try
+            return await ExecuteInTransactionAsync(async context =>
             {
-                //check if the pairing already exists based on pairingId
-                //if it exists return exception
-                //if it does not exist, add it 
-                //if the add fails, return an exception 
-                var existingLitter = await _context.Pairing.FirstOrDefaultAsync(p => p.Id == litter.Id);
+                var existingLitter = await context.Litter.FirstOrDefaultAsync(l => l.Id == litter.Id);
                 if (existingLitter != null)
                 {
                     throw new InvalidOperationException($"Litter with ID {litter.Id} already exists.");
                 }
 
-                DateTime createdOn = DateTime.Now;
-                DateTime lastUpdated = DateTime.Now;
+                litter.CreatedOn = DateTime.Now;
+                litter.LastUpdated = DateTime.Now;
 
-                _context.Litter.Add(litter);
-
+                context.Litter.Add(litter);
+                await context.SaveChangesAsync();
                 return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-
-                throw;
-            }
+            });
         }
 
-        //update litter, individual variable not object 
-        //TODO - litter ID cannot be updated as this would conflict with associated pups
-        //this is the basic update method I need a method for updating animals associated with litters
-        //i.e. adding or deleting animals from litters 
+        //update litter
         public async Task<Litter> UpdateLitterAsync(int litterId, string name, DateTime dob, int numPups)
         {
-            var litter = await _context.Litter.FindAsync(litterId);
+            return await ExecuteInTransactionAsync(async context =>
+            {
+                var litter = await context.Litter.FindAsync(litterId);
+                if (litter == null) 
+                {
+                    throw new KeyNotFoundException($"Litter {litterId} not found");
+                }
 
-            if (litter == null) throw new KeyNotFoundException($"Litter {litterId} not found");
+                litter.Name = name;
+                litter.DateOfBirth = dob;
+                litter.NumPups = numPups;
+                litter.LastUpdated = DateTime.Now;
 
-            litter.Name = name;
-            litter.DateOfBirth = dob;
-            litter.NumPups = numPups;
-            litter.LastUpdated = DateTime.Now;
-
-            await _context.SaveChangesAsync();
-            return litter;
+                await context.SaveChangesAsync();
+                return litter;
+            });
         }
-
-        //TODO
-        //update pups in litter (actual animal objects)
-
-        //add 
-        //delete
-        //an animal doesn't have to be associated with a litter, so the user should be able to "remove animal" from a litter
-        //the user should also be able to "add animal" to a litter
-
 
         //delete litter
-        //TODO: for now, only allow this to happen if there are no animals associated with the litter 
         public async Task DeleteLitterAsync(int litterId)
         {
-            var litter = await _context.Litter.FindAsync(litterId);
+            await ExecuteInTransactionAsync(async context =>
+            {
+                var litter = await context.Litter
+                    .Include(l => l.Animals)
+                    .FirstOrDefaultAsync(l => l.Id == litterId);
 
-            if (litter == null) throw new KeyNotFoundException($"Litter {litterId} not found");
-            if (litter.Animals != null) throw new InvalidOperationException($"Litter {litterId} has pups associated with it so it cannot be deleted"); //TODO need to set this up, eventually there should just be a warning about deleting litters with pups associated 
-            
-            _context.Litter.Remove(litter);
+                if (litter == null)
+                {
+                    throw new KeyNotFoundException($"Litter {litterId} not found");
+                }
 
-            await _context.SaveChangesAsync();
+                if (litter.Animals?.Any() == true)
+                {
+                    throw new InvalidOperationException($"Litter {litterId} has pups associated with it so it cannot be deleted");
+                }
+
+                context.Litter.Remove(litter);
+                await context.SaveChangesAsync();
+            });
         }
-
-        //TODO when a litter is added, new animals should be created for said pups ? - future feature 
     }
 }

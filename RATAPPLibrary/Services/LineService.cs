@@ -2,102 +2,157 @@
 using RATAPPLibrary.Data.Models.Breeding;
 using Microsoft.EntityFrameworkCore;
 
-//TODO still working on structure, but for now I'm using services to handle the logic of creating new entities
-//TODO I'm not sure if this is the best way to do this, but I'm trying to keep the controllers as clean as possible
 namespace RATAPPLibrary.Services
 {
-    public class LineService
+    /// <summary>
+    /// Service class for managing Line entities in the database.
+    /// Inherits from BaseService to leverage database context management and transaction support.
+    /// </summary>
+    public class LineService : BaseService
     {
-        private readonly RatAppDbContext _context;
-
-        public LineService() { }
-
-        public LineService(RatAppDbContext context)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LineService"/> class.
+        /// </summary>
+        /// <param name="contextFactory">The factory used to create <see cref="RatAppDbContext"/> instances.</param>
+        public LineService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            _context = context;
         }
 
-        //get line by name is a unique case because if it doesn't exist, it should be created 
-        //since we know the species (if we're assuming stock is organized by species)
-        //and we have the name of the line, so that's all that's needed 
+        /// <summary>
+        /// Retrieves a Line by its name. If a Line with the given name does not exist, it creates a new one.
+        /// </summary>
+        /// <param name="lineName">The name of the Line to retrieve or create.</param>
+        /// <param name="stockId">The ID of the Stock to which the new Line should be associated if created.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task result contains the retrieved or newly created <see cref="Line"/>.</returns>
         public async Task<Line> GetOrCreateLineAsync_ByName(int lineId)
         {
-            // Find the correct LineId based on the variety
-            var line = await _context.Line.FirstOrDefaultAsync(l => l.Id == lineId);
-
-            if (line == null)
+            return await ExecuteInContextAsync(async context =>
             {
-                // Create a new Line if it doesn't exist
-                line = new Line
+                // Search for a Line with the given name.
+                var line = await context.Line.FirstOrDefaultAsync(l => l.Id == lineId);
+
+                // If no Line with the specified name is found, create a new one.
+                if (line == null)
                 {
-                    Name = "TODO",
-                    StockId = 2 //TODO these should have some automatic way of being set unless the user is allowed to set them 
-                };
+                    line = new Line
+                    {
+                        Name = line.Name,
+                        StockId = line.StockId
+                    };
 
-                _context.Line.Add(line);
-                await _context.SaveChangesAsync();
-            }
+                    // Add the new Line to the context.
+                    context.Line.Add(line);
+                    // Save the changes to the database.
+                    await context.SaveChangesAsync();
+                }
 
-            return line;
+                // Return the existing or newly created Line.
+                return line;
+            });
         }
 
+        /// <summary>
+        /// Retrieves a Line by its unique identifier.
+        /// </summary>
+        /// <param name="id">The ID of the Line to retrieve.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task result contains the <see cref="Line"/> if found.</returns>
+        /// <exception cref="Exception">Thrown if no Line with the specified ID is found.</exception>
         public async Task<Line> GetLineAsync_ById(int id)
         {
-            // Find the correct LineId based on the variety
-            var line = await _context.Line.FirstOrDefaultAsync(l => l.Id == id);
-
-            if (line == null)
+            return await ExecuteInContextAsync(async context =>
             {
-                // return error message - line not found 
-                throw new Exception("Line not found");
-            }
-
-            return line;
+                // Find the Line with the given ID.
+                var line = await context.Line.FindAsync(id);
+                // If no Line is found with the specified ID, throw an exception.
+                if (line == null)
+                {
+                    throw new Exception($"Line with ID {id} not found.");
+                }
+                // Return the found Line.
+                return line;
+            });
         }
 
-
-        // Get all lines
+        /// <summary>
+        /// Retrieves all Line entities from the database.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task result contains a <see cref="List{Line}"/> of all Lines.</returns>
         public async Task<List<Line>> GetAllLinesAsync()
         {
-            return await _context.Line.ToListAsync();
+            return await ExecuteInContextAsync(async context =>
+            {
+                // Retrieve all Lines from the database.
+                return await context.Line.ToListAsync();
+            });
         }
 
-        // Create a new line
+        /// <summary>
+        /// Creates a new Line in the database.
+        /// </summary>
+        /// <param name="line">The <see cref="Line"/> entity to create.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task result contains the newly created <see cref="Line"/>.</returns>
         public async Task<Line> CreateLineAsync(Line line)
         {
-            _context.Line.Add(line);
-            await _context.SaveChangesAsync();
-            return line;
+            return await ExecuteInTransactionAsync(async context =>
+            {
+                // Add the new Line to the context.
+                context.Line.Add(line);
+                // Save the changes to the database within a transaction.
+                await context.SaveChangesAsync();
+                // Return the newly created Line.
+                return line;
+            });
         }
 
-        // Update an existing line
+        /// <summary>
+        /// Updates an existing Line in the database.
+        /// </summary>
+        /// <param name="line">The <see cref="Line"/> entity with updated values.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation. The task result contains the updated <see cref="Line"/>.</returns>
+        /// <exception cref="Exception">Thrown if no Line with the specified ID is found.</exception>
         public async Task<Line> UpdateLineAsync(Line line)
         {
-            var existingLine = await _context.Line.FindAsync(line.Id);
-
-            if (existingLine == null)
+            return await ExecuteInTransactionAsync(async context =>
             {
-                throw new Exception("Line not found");
-            }
+                // Find the existing Line by its ID.
+                var existingLine = await context.Line.FindAsync(line.Id);
+                // If no Line is found with the specified ID, throw an exception.
+                if (existingLine == null)
+                {
+                    throw new Exception($"Line with ID {line.Id} not found.");
+                }
 
-            _context.Entry(existingLine).CurrentValues.SetValues(line);
-            await _context.SaveChangesAsync();
-
-            return line;
+                // Update the values of the existing Line with the values from the provided Line entity.
+                context.Entry(existingLine).CurrentValues.SetValues(line);
+                // Save the changes to the database within a transaction.
+                await context.SaveChangesAsync();
+                // Return the updated Line.
+                return existingLine;
+            });
         }
 
-        // Delete a line by ID
+        /// <summary>
+        /// Deletes a Line from the database based on its ID.
+        /// </summary>
+        /// <param name="id">The ID of the Line to delete.</param>
+        /// <returns>A <see cref="Task"/> that represents the asynchronous operation.</returns>
+        /// <exception cref="Exception">Thrown if no Line with the specified ID is found.</exception>
         public async Task DeleteLineAsync(int id)
         {
-            var line = await _context.Line.FindAsync(id);
-
-            if (line == null)
+            await ExecuteInTransactionAsync(async context =>
             {
-                throw new Exception("Line not found");
-            }
-
-            _context.Line.Remove(line);
-            await _context.SaveChangesAsync();
+                // Find the Line to delete by its ID.
+                var line = await context.Line.FindAsync(id);
+                // If no Line is found with the specified ID, throw an exception.
+                if (line == null)
+                {
+                    throw new Exception($"Line with ID {id} not found.");
+                }
+                // Remove the Line from the context.
+                context.Line.Remove(line);
+                // Save the changes to the database within a transaction.
+                await context.SaveChangesAsync();
+            });
         }
     }
 }

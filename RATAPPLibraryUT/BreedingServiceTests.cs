@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using System.Linq;
 using Assert = Microsoft.VisualStudio.TestTools.UnitTesting.Assert;
 using RATAPPLibrary.Data.Models;
-using Microsoft.VisualBasic;
 
 namespace RATAPPLibraryUT
 {
@@ -136,11 +135,15 @@ namespace RATAPPLibraryUT
             };
 
             // Act
-            var createdPairing = await _breedingService.CreatePairingAsync(newPairing);
+            await _breedingService.CreatePairingAsync(newPairing.pairingId,newPairing.DamId, newPairing.SireId, newPairing.ProjectId, newPairing.PairingStartDate, newPairing.PairingEndDate);
+
+            List<Pairing> pairings = await _breedingService.GetAllPairingsAsync();
+
+            var createdPairing = pairings[0];
 
             // Assert
             Assert.IsNotNull(createdPairing);
-            Assert.IsTrue(createdPairing);
+            //Assert.IsTrue(createdPairing); FIXME
 
             //to check the below variables I need to go get the pairing, it doesn't make sense to return it in this method TODO 
             //Assert.IsTrue(createdPairing.Id > 0);
@@ -168,6 +171,8 @@ namespace RATAPPLibraryUT
             Assert.AreEqual("1", pairing[0].pairingId);
             Assert.AreEqual(1, pairing[0].Id);
         }
+
+        //TODO check this because I defintitely had pairing get functionality implemented 
 
         /// <summary>
         /// This method tests the GetPairingByLineIdAsync method.
@@ -210,6 +215,7 @@ namespace RATAPPLibraryUT
             Assert.AreEqual(1, pairings[0].Id);
         }
 
+        //TODO don't have update pairing yet 
         /// <summary>
         /// This method tests the UpdatePairingAsync method.
         /// It validates that:
@@ -236,6 +242,7 @@ namespace RATAPPLibraryUT
             //Assert.AreEqual(1, updatedPairing.MaleId); // Original value should remain unchanged
         }
 
+        //TODO need create litter (this is weird, I thought I had this method?)
         /// <summary>
         /// This method tests the CreateLitterAsync method.
         /// It validates that:
@@ -257,8 +264,8 @@ namespace RATAPPLibraryUT
                 Notes = "Healthy litter"
             };
 
-            // Act
-            var createdLitter = await _breedingService.CreateLitterAsync(newLitter);
+        //    // Act
+           var createdLitter = await _breedingService.CreateLitterAsync(newLitter);
 
             // Assert
             Assert.IsNotNull(createdLitter);
@@ -269,6 +276,7 @@ namespace RATAPPLibraryUT
             //Assert.AreEqual(8, createdLitter.NumberSurvived);
         }
 
+        //TODO don't have get active pairings yet 
         /// <summary>
         /// This method tests the GetActivePairingsAsync method.
         /// It validates that:

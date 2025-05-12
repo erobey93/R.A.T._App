@@ -53,10 +53,25 @@ namespace RATAPP.Helpers
             return await _breedingService.GetAllPairingsAsync();
         }
 
-        public async Task SaveLitterAsync(Litter litter)
+        public async Task<List<Pairing>> GetActivePairingsByDamandSire(int damID, int sireID)
         {
-            await _breedingService.CreateLitterAsync(litter);
+            return await _breedingService.GetAllActivePairingsByDamandSireIdAsync(damID, sireID);
         }
+
+        public async Task<List<Pairing>> GetActivePairingsByAnimalId(int animalID)
+        {
+            return await _breedingService.GetAllActivePairingsByAnimalIdAsync(animalID);
+        }
+
+        public async Task<List<Pairing>> GetPairingsBySpeciesAsync(string species)
+        {
+            return await _breedingService.GetAllPairingsBySpeciesAsync(species);
+        }
+
+        //public async Task SaveLitterAsync(Litter litter)
+        //{
+        //    await _breedingService.CreateLitterAsync(litter);
+        //}
 
         public async Task SavePairingAsync(Pairing pairing)
         {

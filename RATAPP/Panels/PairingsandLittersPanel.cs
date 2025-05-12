@@ -10,6 +10,7 @@ using RATAPPLibrary.Services;
 using PdfSharp.Charting;
 using Font = System.Drawing.Font;
 using Point = System.Drawing.Point;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Panels
 {
@@ -28,7 +29,7 @@ namespace RATAPP.Panels
         private Button addButton;
         private Button updateButton;
         private Button deleteButton;
-        //private DataGridView dataDisplayArea;
+        private PictureBox loadingSpinner;
 
         private Pairing[] _pairings;
         private Litter[] _litters;
@@ -42,22 +43,66 @@ namespace RATAPP.Panels
         private LineService _lineService;
         private StockService _stockService;
 
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        private readonly RatAppDbContextFactory _contextFactory;
+        private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
 
-        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public PairingsAndLittersPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory)
         {
             _parentForm = parentForm;
-            _context = context;
-            _animalService = new AnimalService(_context);
-            _breedingService = new BreedingService(_context);
-            _lineService = new LineService(_context);
-            _stockService = new StockService(_context);
+            _contextFactory = contextFactory;
+            _animalService = new AnimalService(contextFactory);
+            _breedingService = new BreedingService(contextFactory);
+            _lineService = new LineService(contextFactory);
+            _stockService = new StockService(contextFactory);
 
-            _littersGridView = false; //start with showing pairings page, when switched will show litters page, or line page
+            _littersGridView = false;
             _linesGridView = false;
 
             InitializeComponents();
+            InitializeLoadingSpinner();
+        }
 
+        private void InitializeLoadingSpinner()
+        {
+            loadingSpinner = new PictureBox
+            {
+                Size = new Size(50, 50),
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif"),
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Visible = false
+            };
+            this.Controls.Add(loadingSpinner);
+            this.Resize += (s, e) => CenterLoadingSpinner();
+        }
+
+        private void CenterLoadingSpinner()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Location = new Point(
+                    (ClientSize.Width - loadingSpinner.Width) / 2,
+                    (ClientSize.Height - loadingSpinner.Height) / 2
+                );
+            }
+        }
+
+        private void ShowLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = true;
+                CenterLoadingSpinner();
+                this.Refresh();
+            }
+        }
+
+        private void HideLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = false;
+                this.Refresh();
+            }
         }
 
         private void InitializeComponents()
@@ -120,24 +165,49 @@ namespace RATAPP.Panels
 
         private async void TabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabControl.SelectedIndex == 0) // show pairings
+            try
             {
-                pairingsGridView.Visible = true;
-                littersGridView.Visible = false;
-                linesGridView.Visible = false;
+                await _loadingSemaphore.WaitAsync();
+                await LoadTabDataAsync(tabControl.SelectedIndex);
             }
-            else if (tabControl.SelectedIndex == 1) // show litters
+            finally
             {
-                pairingsGridView.Visible = false;
-                littersGridView.Visible = true;
-                linesGridView.Visible = false;
+                _loadingSemaphore.Release();
+            }
+        }
 
-            }
-            else if (tabControl.SelectedIndex == 2) //show lines 
+        private async Task LoadTabDataAsync(int tabIndex)
+        {
+            try
             {
-                pairingsGridView.Visible = false;
-                littersGridView.Visible = false;
-                linesGridView.Visible = true;
+                ShowLoadingIndicator();
+                await GetBreedingData();
+
+                // Update visibility
+                pairingsGridView.Visible = tabIndex == 0;
+                littersGridView.Visible = tabIndex == 1;
+                linesGridView.Visible = tabIndex == 2;
+
+                // Load data based on selected tab
+                switch (tabIndex)
+                {
+                    case 0:
+                        //await GetBreedingData();
+                        PopulatePairingDataDisplayArea();
+                        break;
+                    case 1:
+                        //await GetBreedingData();
+                        PopulateLittersDataDisplayArea();
+                        break;
+                    case 2:
+                        //await GetBreedingData();
+                        PopulateLineDataDisplayArea();
+                        break;
+                }
+            }
+            finally
+            {
+                HideLoadingIndicator();
             }
         }
 
@@ -239,25 +309,52 @@ namespace RATAPP.Panels
             string action = clickedButton.Text;
             string currentTab = tabControl.SelectedTab.Text;
 
-            if (currentTab == "Pairings")
+            if(clickedButton.Text == "Add")
             {
-                //open the add pairings form 
-                AddPairingForm addPairing = new AddPairingForm(_context);
-                addPairing.ShowDialog();
-                //this form would likely work for updating pairings too, but need to add in a way to populate it with the existing pairing 
+                if (currentTab == "Pairings")
+                {
+                    AddPairingForm addPairing = new AddPairingForm(_contextFactory);
+                    addPairing.ShowDialog();
+                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Litters")
+                {
+                    AddLitterForm addLitter = await AddLitterForm.CreateAsync(_contextFactory);
+                    addLitter.ShowDialog();
+                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Line Management")
+                {
+                    AddLineForm addLine = new AddLineForm(_contextFactory);
+                    addLine.ShowDialog();
+                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
             }
-            else if (currentTab == "Litters")
+            else if (clickedButton.Text == "Update")
             {
-                //open the add pairings form 
-                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_context);//new AddLitterForm(_context, "Rat"); //TODO hardcoded need to think through how to get this 
-                addLitter.ShowDialog();
+                if (currentTab == "Pairings")
+                {
+                    //TODO update is the same as add except for the data is filled in 
+                    //UpdatePairingForm updatePairing = new UpdatePairingForm(_contextFactory);
+                    //updatePairing.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Litters")
+                {
+                    //TODO update is the same as add except for the data is filled in 
+                    //UpdateLitterForm updateLitter = await UpdateLitterForm.CreateAsync(_contextFactory);
+                    //updateLitter.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Line Management")
+                {
+                    //TODO
+                    //AddLineForm addLine = new AddLineForm(_contextFactory);
+                    //addLine.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
             }
-            else if(currentTab == "Line Management")
-            {
-                //open the add pairings form 
-                AddLineForm addLine = new AddLineForm(_context);
-                addLine.ShowDialog();
-            }
+           
             else
             {
                 MessageBox.Show($"{action} {currentTab}");
@@ -266,10 +363,11 @@ namespace RATAPP.Panels
             // Implement add, update, or delete functionality based on the action and current tab TODO 
         }
 
-        public Task RefreshDataAsync()
+        public async Task RefreshDataAsync()
         {
             // Implement data refresh logic TODO
-            return Task.CompletedTask;
+            await GetBreedingData();
+            //return Task.CompletedTask;
         }
 
         private async void InitializePairingDataGridView()
@@ -278,7 +376,7 @@ namespace RATAPP.Panels
 
             //get all pairings and litters from db 
             //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
-            await GetBreedingData();
+            //await GetBreedingData();
 
             pairingsGridView.Location = new Point(0, topPanelHeight);
             pairingsGridView.Width = 1000;
@@ -304,11 +402,12 @@ namespace RATAPP.Panels
             this.Controls.Add(pairingsGridView);
         }
 
-        private void PopulatePairingDataDisplayArea()
+        private async void PopulatePairingDataDisplayArea()
         {
             string dam = "Unknown";
             string sire = "Unknown";
             string projName = "Unknown"; //TODO there should always be a project, dam and sire name....
+            await GetBreedingData();
 
             pairingsGridView.Rows.Clear();
             if (_pairings != null)
@@ -366,8 +465,9 @@ namespace RATAPP.Panels
             this.Controls.Add(littersGridView);
         }
 
-        private void PopulateLittersDataDisplayArea()
+        private async void PopulateLittersDataDisplayArea()
         {
+            await GetBreedingData();
             littersGridView.Rows.Clear();
             if (_litters != null)
             {
@@ -418,6 +518,8 @@ namespace RATAPP.Panels
         //for now, we are assuming rats and mice only, in the future, it will be any species 
         private async void PopulateLineDataDisplayArea()
         {
+            await GetBreedingData();
+
             linesGridView.Rows.Clear();
 
             if (_lineService == null)
@@ -468,4 +570,3 @@ namespace RATAPP.Panels
         }
     }
 }
-

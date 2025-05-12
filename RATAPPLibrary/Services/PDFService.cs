@@ -4,7 +4,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace RATAPPLibrary.Services
 {
-    public class PdfService
+    public class PdfService  //: BaseService TODO use new BaseService + context factory pattern 
     {
         public interface IPdfService
         {

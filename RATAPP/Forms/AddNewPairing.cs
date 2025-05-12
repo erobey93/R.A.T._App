@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using RATAPP.Helpers;
+using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
 
@@ -23,6 +24,7 @@ namespace RATAPP.Forms
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
         private ComboBox speciesComboBox;
+        private ComboBox pairingComboBox; //FIXME remove, not needed but I need to make a new method to handle this
         private TextBox pairingIdTextBox;
         private ComboBox projectComboBox;
         private DateTimePicker pairingDatePicker;
@@ -33,23 +35,27 @@ namespace RATAPP.Forms
         private Button saveAllButton;
         private Button importButton;
 
-        public AddPairingForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        private RatAppDbContextFactory _contextFactory; 
+
+        public AddPairingForm(RatAppDbContextFactory contextFactory) //RATAPPLibrary.Data.DbContexts.RatAppDbContext context
         {
             // Initialize services
-            var breedingService = new BreedingService(context);
-            var speciesService = new SpeciesService(context);
-            var animalService = new AnimalService(context);
-            var projectService = new ProjectService(context);
+            var breedingService = new BreedingService(contextFactory);
+            var speciesService = new SpeciesService(contextFactory);
+            var animalService = new AnimalService(contextFactory);
+            var projectService = new ProjectService(contextFactory);
+
+            _contextFactory = contextFactory;   
 
             // Initialize helper classes
-            _dataManager = new FormDataManager(
-                breedingService,
-                speciesService,
-                projectService,
-                animalService);
+            //_dataManager = new FormDataManager(
+            //    breedingService,
+            //    speciesService,
+            //    projectService,
+            //    animalService);
 
             _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
-            _eventHandler = new FormEventHandler(_dataManager, _spinner);
+            //_eventHandler = new FormEventHandler(_dataManager, _spinner);
 
             InitializeComponents();
             InitializeEventHandlers();
@@ -354,32 +360,32 @@ namespace RATAPP.Forms
 
         private void InitializeEventHandlers()
         {
-            this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsync(
-                speciesComboBox, damComboBox, sireComboBox, projectComboBox);
+            //this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncPairing(
+            //    speciesComboBox, damComboBox, sireComboBox, projectComboBox);
 
-            speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedAsync(
-                speciesComboBox, damComboBox, sireComboBox);
+            //speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
+            //    speciesComboBox, damComboBox, sireComboBox);
 
-            addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
-                pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
+            //addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
+            //    pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
 
-            addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
-                pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
+            //addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
+            //    pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
 
-            saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
-                multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
+            //saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
+            //    multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
 
-            importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
+            //importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
 
-            cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
+            //cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
 
-            multiplePairingsGrid.CellContentClick += (s, e) =>
-            {
-                if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
-                {
-                    multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
-                }
-            };
+            //multiplePairingsGrid.CellContentClick += (s, e) =>
+            //{
+            //    if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
+            //    {
+            //        multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
+            //    }
+            //};
         }
     }
 }

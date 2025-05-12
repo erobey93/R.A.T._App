@@ -9,7 +9,7 @@ namespace RATAPP.Panels
     public partial class FinancialPanel : Panel, INavigable
     {
         private RATAppBaseForm _parentForm;
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private TabControl tabControl;
         private ComboBox timeFrameComboBox;
         private ComboBox yearComboBox;
@@ -24,10 +24,10 @@ namespace RATAPP.Panels
         private DataGridView budgetGrid;
         private DataGridView overviewGrid;
 
-        public FinancialPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public FinancialPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory)
         {
             _parentForm = parentForm;
-            _context = context;
+            //_context = context;
             InitializeComponents();
         }
 

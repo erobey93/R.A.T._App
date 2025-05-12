@@ -4,6 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPP.Forms;
+using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Services;
 using static System.Windows.Forms.AxHost;
 
 namespace RATAPP.Panels
@@ -16,39 +19,56 @@ namespace RATAPP.Panels
         private TextBox searchBar;
         private Button searchButton;
         private Button addButton;
-        private Button bulkAddButton; //TODO 
+        private Button bulkAddButton;
         private Panel remindersPanel;
         private DataGridView dataDisplayArea;
         private RATAppBaseForm _parentForm;
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
-        private RATAPPLibrary.Services.AnimalService _animalService;
-        private RATAPPLibrary.Data.Models.AnimalDto[] _animals;
+        private readonly RatAppDbContextFactory _contextFactory;
+        private readonly AnimalService _animalService;
+        private AnimalDto[] _animals;
         private PictureBox loadingSpinner;
+        private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
 
-        private HomePanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
+        private HomePanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, string username, string role)
         {
             _parentForm = parentForm;
             _username = username;
-            _context = context;
-            _animalService = new RATAPPLibrary.Services.AnimalService(_context);
+            _contextFactory = contextFactory;
+            _animalService = new AnimalService(contextFactory);
         }
 
-        public static async Task<HomePanel> CreateAsync(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContext context, string username, string role)
+        public static async Task<HomePanel> CreateAsync(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, string username, string role)
         {
-            var panel = new HomePanel(parentForm, context, username, role);
+            var panel = new HomePanel(parentForm, contextFactory, username, role);
             await panel.InitializePanelAsync();
             return panel;
         }
 
         public async Task InitializePanelAsync()
         {
-            await GetAnimalsAsync();
-            InitializeComponents();
+            try
+            {
+                await _loadingSemaphore.WaitAsync();
+                await GetAnimalsAsync();
+                InitializeComponents();
+            }
+            finally
+            {
+                _loadingSemaphore.Release();
+            }
         }
 
         private async Task GetAnimalsAsync()
         {
-            _animals = await _animalService.GetAllAnimalsAsync();
+            try
+            {
+                ShowLoadingIndicator();
+                _animals = await _animalService.GetAllAnimalsAsync();
+            }
+            finally
+            {
+                HideLoadingIndicator();
+            }
         }
 
         private void InitializeComponents()
@@ -90,8 +110,8 @@ namespace RATAPP.Panels
                 Padding = new Padding(20, 0, 20, 10)
             };
 
-            speciesComboBox = CreateComboBox(new string[] { "All Species", "Rat", "Mouse" }, 0); //TODO get from db 
-            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female", "Unknown" }, 190); //TODO get from db 
+            speciesComboBox = CreateComboBox(new string[] { "All Species", "Rat", "Mouse" }, 0);
+            sexComboBox = CreateComboBox(new string[] { "All Sexes", "Male", "Female", "Unknown" }, 190);
 
             searchBar = new TextBox
             {
@@ -140,9 +160,6 @@ namespace RATAPP.Panels
             return button;
         }
 
-        //method to initialize the data display area which holds all the animal data from db
-        //and allows for filtering and searching
-        //TODO having some issues witht the data display area, need to fix this but currently it is showing up so leaving for now 
         private void InitializeDataDisplayArea()
         {
             int topPanelHeight = 120;
@@ -184,7 +201,6 @@ namespace RATAPP.Panels
             }
         }
 
-        //set up reminder panel to the right of the main data grid view panel on the home page 
         private void InitializeRemindersPanel()
         {
             int topPanelHeight = 120;
@@ -198,7 +214,6 @@ namespace RATAPP.Panels
                 BackColor = Color.FromArgb(245, 245, 245)
             };
 
-            // Reminders header
             var remindersHeader = new Label
             {
                 Text = "Reminders",
@@ -210,7 +225,6 @@ namespace RATAPP.Panels
             };
             remindersPanel.Controls.Add(remindersHeader);
 
-            // Today's reminders section
             var todayLabel = new Label
             {
                 Text = "Today",
@@ -220,11 +234,9 @@ namespace RATAPP.Panels
             };
             remindersPanel.Controls.Add(todayLabel);
 
-            // Sample reminders for today
             CreateReminderItem("Pup Pickup 6-7pm", 80, Color.FromArgb(255, 100, 100));
             CreateReminderItem("Respond to Adoption Applications", 110, Color.FromArgb(255, 100, 100));
 
-            // Next week reminders section
             var nextWeekLabel = new Label
             {
                 Text = "Next Week",
@@ -234,13 +246,10 @@ namespace RATAPP.Panels
             };
             remindersPanel.Controls.Add(nextWeekLabel);
 
-            // Sample reminders for next week
-            //TODO - I want some kind of calendar functionality this is just a mock up of the actual functionality 
             CreateReminderItem("Antibiotics Finished for Groups 1-3 (Monday)", 180, Color.FromArgb(100, 150, 255));
             CreateReminderItem("Vet appointment (Wednesday)", 210, Color.FromArgb(100, 150, 255));
             CreateReminderItem("Pickup Wilco Supplies (Friday)", 240, Color.FromArgb(100, 150, 255));
 
-            // Refresh button
             var refreshButton = new Button
             {
                 Text = "Refresh Reminders",
@@ -255,7 +264,6 @@ namespace RATAPP.Panels
             refreshButton.Click += RefreshReminders_Click;
             remindersPanel.Controls.Add(refreshButton);
 
-            // Refresh button
             var openCalendarButton = new Button
             {
                 Text = "Open Calendar",
@@ -298,17 +306,14 @@ namespace RATAPP.Panels
 
         private void RefreshReminders_Click(object sender, EventArgs e)
         {
-            // TODO: Implement backend logic to fetch actual reminders
             MessageBox.Show("Refreshing reminders...\n\nThis would fetch the latest reminders from the database.",
                 "Reminders", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void OpenCalendar_Click(object sender, EventArgs e)
         {
-            //TODO: do actual implementation of calendar, but this is a workable example for now 
-            var calendarForm = new CalendarForm(_context);
+            var calendarForm = new CalendarForm(_contextFactory);
             calendarForm.ShowDialog();
-
         }
 
         private void InitializeLoadingSpinner()
@@ -330,6 +335,25 @@ namespace RATAPP.Panels
                 (ClientSize.Width - loadingSpinner.Width) / 2,
                 (ClientSize.Height - loadingSpinner.Height) / 2
             );
+        }
+
+        private void ShowLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = true;
+                CenterLoadingSpinner();
+                this.Refresh();
+            }
+        }
+
+        private void HideLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = false;
+                this.Refresh();
+            }
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -359,7 +383,7 @@ namespace RATAPP.Panels
                 var animal = _animals.FirstOrDefault(a => a.Id == animalId);
                 if (animal != null)
                 {
-                    var animalDetailsPanel = new AnimalPanel(_parentForm, _context, _animals, animal);
+                    var animalDetailsPanel = new AnimalPanel(_parentForm, _contextFactory, _animals, animal);
                     _parentForm.ShowPanel(animalDetailsPanel);
                 }
             }
@@ -367,7 +391,7 @@ namespace RATAPP.Panels
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            var animalPanel = new AnimalPanel(_parentForm, _context, _animals, null);
+            var animalPanel = new AnimalPanel(_parentForm, _contextFactory, _animals, null);
             _parentForm.ShowPanel(animalPanel);
         }
 
@@ -375,17 +399,11 @@ namespace RATAPP.Panels
         {
             try
             {
-                loadingSpinner.Visible = true;
-                CenterLoadingSpinner();
-                this.Refresh();
+                await _loadingSemaphore.WaitAsync();
+                ShowLoadingIndicator();
 
                 _animals = await _animalService.GetAllAnimalsAsync();
-                await Task.Delay(1000); // Simulated delay, remove in production
-
                 PopulateDataDisplayArea();
-
-                loadingSpinner.Visible = false;
-                this.Refresh();
 
                 MessageBox.Show("Data refresh complete", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -395,8 +413,8 @@ namespace RATAPP.Panels
             }
             finally
             {
-                loadingSpinner.Visible = false;
-                this.Refresh();
+                HideLoadingIndicator();
+                _loadingSemaphore.Release();
             }
         }
     }

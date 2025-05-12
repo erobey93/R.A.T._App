@@ -41,19 +41,19 @@ namespace RATAPP.Forms
 
         public static async Task<DocumentsForm> CreateAsync(
             RATAppBaseForm baseForm,
-            RatAppDbContext context,
+            RatAppDbContextFactory contextFactory,
             string username,
             string role)
         {
-            var panel = new DocumentsForm(baseForm, context);
+            var panel = new DocumentsForm(baseForm, contextFactory);
             await panel.LoadDocumentsAsync();
             return panel;
         }
 
-        public DocumentsForm(RATAppBaseForm baseForm, RatAppDbContext context)
+        public DocumentsForm(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory)
         {
             _baseForm = baseForm;
-            _context = context;
+            //_context = context;
             // _currentUsername = username;
             //_userRole = role;
 

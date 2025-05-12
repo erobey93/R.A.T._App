@@ -1,6 +1,7 @@
 ﻿namespace RATAPPLibrary.Services
 {
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Internal;
     using Microsoft.IdentityModel.Tokens;
     using RATAPPLibrary.Data.DbContexts;
     using RATAPPLibrary.Data.Models;
@@ -18,59 +19,62 @@
 
     //}
 
-    public class LoginService
+    public class LoginService : BaseService  //: BaseService TODO use new BaseService + context factory pattern 
     {
-        private readonly RatAppDbContext _context;
+        //private readonly RatAppDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly PasswordHashing _passwordHashing;
 
-        public LoginService(RatAppDbContext context, IConfiguration configuration, PasswordHashing passwordHashing)
+        public LoginService(RatAppDbContextFactory contextFactory, IConfiguration configuration, PasswordHashing passwordHashing) : base(contextFactory)
         {
-            _context = context;
+            //_context = context;
             _configuration = configuration;
             _passwordHashing = passwordHashing;
         }
 
         public async Task<LoginResponse> Login(LoginRequest request)
         {
-            //Retrieve the user with their credentials
-            var user = await _context.Users
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                //Retrieve the user with their credentials
+                var user = await _context.Users
                 .Include(u => u.Credentials)  // Ensure the credentials are included in the user query
                 .FirstOrDefaultAsync(u => u.Credentials.Username == request.Username);
 
-            if (user == null)
-            {
-                // User not found
-                throw new UnauthorizedAccessException("Invalid credentials");
-            }
+                if (user == null)
+                {
+                    // User not found
+                    throw new UnauthorizedAccessException("Invalid credentials");
+                }
 
-            //Hash the input password using the same hashing method
-            //string hashedInputPassword = _passwordHashing.HashPassword(request.Password);
+                //Hash the input password using the same hashing method
+                //string hashedInputPassword = _passwordHashing.HashPassword(request.Password);
 
-            //verify password FIXME currently just verifying text to text needs to have hash (salt algorithm) 
-            if (!_passwordHashing.VerifyPasswordTempFix(request.Password, user.Credentials.Password)) //FIXME 
-            {
-                // Password is incorrect
-                throw new UnauthorizedAccessException("Invalid credentials");
-            }
+                //verify password FIXME currently just verifying text to text needs to have hash (salt algorithm) 
+                if (!_passwordHashing.VerifyPasswordTempFix(request.Password, user.Credentials.Password)) //FIXME 
+                {
+                    // Password is incorrect
+                    throw new UnauthorizedAccessException("Invalid credentials");
+                }
 
-            //Verify the password hash
-            //if (!_passwordHashing.VerifyPassword(hashedInputPassword, user.Credentials.Password))
-            //{
-            //    // Password is incorrect
-            //    throw new UnauthorizedAccessException("Invalid credentials");
-            //}
+                //Verify the password hash
+                //if (!_passwordHashing.VerifyPassword(hashedInputPassword, user.Credentials.Password))
+                //{
+                //    // Password is incorrect
+                //    throw new UnauthorizedAccessException("Invalid credentials");
+                //}
 
-            // If authentication is successful, generate a JWT token
-            var token = GenerateJwtToken(user);
+                // If authentication is successful, generate a JWT token
+                var token = GenerateJwtToken(user);
 
-            // Create and return the response
-            return new LoginResponse
-            {
-                Token = token,
-                Username = user.Credentials.Username,
-                Role = "Admin"//user.AccountType.Name // Example: assuming AccountType has a 'Name' property FIXME roles will need to be handled in a seperate story 
-            };
+                // Create and return the response
+                return new LoginResponse
+                {
+                    Token = token,
+                    Username = user.Credentials.Username,
+                    Role = "Admin"//user.AccountType.Name // Example: assuming AccountType has a 'Name' property FIXME roles will need to be handled in a seperate story 
+                };
+            });
         }
 
         public string GenerateJwtToken(User user)

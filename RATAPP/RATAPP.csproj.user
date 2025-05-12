@@ -10,6 +10,15 @@
     <Compile Update="Forms\AddNewPairing.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\AddTraitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\AssignTraitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\BreedingCalculatorForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\CalendarForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -41,6 +50,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="Panels\FinancialPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Panels\GeneticsPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Update="Panels\HomePanel.cs">

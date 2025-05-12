@@ -25,7 +25,9 @@ namespace RATAPP
             // Setup DbContext
             var optionsBuilder = new DbContextOptionsBuilder<RatAppDbContext>();
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("DefaultConnection")); // Ensure your connection string is in appsettings.json
-            var context = new RatAppDbContext(optionsBuilder.Options);
+            //var context = new RatAppDbContext(optionsBuilder.Options);
+            string connectionString = configuration.GetConnectionString("DefaultConnection"); 
+            var contextFactory = new RatAppDbContextFactory(connectionString);
 
             // Initialize PasswordHashing
             var passwordHashing = new PasswordHashing();
@@ -33,7 +35,7 @@ namespace RATAPP
             // Start the application
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LoginForm(context, configuration, passwordHashing));
+            Application.Run(new LoginForm(contextFactory, configuration, passwordHashing));
         }
     }
 }

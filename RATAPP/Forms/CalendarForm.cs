@@ -2,22 +2,24 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore.Internal;
 using RATAPP.Forms;
+using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Forms
 {
     public partial class CalendarForm : Form
     {
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private MonthCalendar calendar;
         private DataGridView alertsGrid;
         private Panel addAlertPanel;
         private Panel upcomingEventsPanel;
         private TabControl tabControl;
 
-        public CalendarForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context)
+        public CalendarForm(RatAppDbContextFactory contextFactory)
         {
-            _context = context;
+            //_context = context;
             InitializeComponents();
             LoadAlerts();
             LoadUpcomingEvents();

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPP.Panels;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Services;
+using RATAPPLibrary.Services.Genetics;
 
 namespace RATAPP.Forms
 {
@@ -22,14 +24,15 @@ namespace RATAPP.Forms
         private Label appNameLabel;
         private PictureBox logoPictureBox;
         private INavigable _activePanel;
-        private RatAppDbContext _context;
+        private RatAppDbContextFactory _contextFactory; 
 
         public string UserName { get; set; }
         public Panel ContentPanel => contentPanel;
 
-        public RATAppBaseForm(RatAppDbContext context)
+        public RATAppBaseForm(RatAppDbContextFactory contextFactory)
         {
-            _context = context;
+            //_context = context;
+            _contextFactory = contextFactory;
             InitializeComponent();
         }
 
@@ -238,7 +241,7 @@ namespace RATAPP.Forms
         private void AncestryButton_Click(object sender, EventArgs e)
         {
             // Handle Ancestry button click
-            var ancestryPanel = new AncestryPanel(this, _context); // Create a new instance of the ReportsPanel
+            var ancestryPanel = new AncestryPanel(this, _contextFactory); // Create a new instance of the ReportsPanel
             _activePanel = ancestryPanel;
             ShowPanel(ancestryPanel);
         }
@@ -252,7 +255,7 @@ namespace RATAPP.Forms
         private void AdopterButton_Click(object sender, EventArgs e)
         {
             // Handle Adopter Management button click
-            var adopterPanel = new AdopterManagementPanel(this, _context); // Create a new instance of the ReportsPanel
+            var adopterPanel = new AdopterManagementPanel(this, _contextFactory); // Create a new instance of the ReportsPanel
             _activePanel = adopterPanel;
             ShowPanel(adopterPanel);
         }
@@ -268,7 +271,7 @@ namespace RATAPP.Forms
 
         private void ReportsButton_Click(object sender, EventArgs e)
         {
-            var reportsPanel = new ReportsPanel(_context); // Create a new instance of the ReportsPanel
+            var reportsPanel = new ReportsPanel(_contextFactory); // Create a new instance of the ReportsPanel
             _activePanel = reportsPanel;
             ShowPanel(reportsPanel);
         }
@@ -290,14 +293,14 @@ namespace RATAPP.Forms
 
         public async void HomeButton_Click(object sender, EventArgs e)
         {
-            var homePanel = await HomePanel.CreateAsync(this, _context, UserName, "role - TODO");
+            var homePanel = await HomePanel.CreateAsync(this, _contextFactory, UserName, "role - TODO");
             _activePanel = homePanel;
             ShowPanel(homePanel);
         }
 
         private void BreedingButton_Click(object sender, EventArgs e)
         {
-            var pairingsAndLittersPanel = new PairingsAndLittersPanel(this, _context);
+            var pairingsAndLittersPanel = new PairingsAndLittersPanel(this, _contextFactory);
             _activePanel = pairingsAndLittersPanel;
             ShowPanel(pairingsAndLittersPanel);
         }
@@ -305,15 +308,21 @@ namespace RATAPP.Forms
         private void FinancialButton_Click(object sender, EventArgs e)
         {
             // Financial button click
-            var financialPanel = new FinancialPanel(this, _context);
+            var financialPanel = new FinancialPanel(this, _contextFactory);
             _activePanel = financialPanel;
             ShowPanel(financialPanel);
         }
 
         private void GeneticsButton_Click(object sender, EventArgs e)
         {
-            // Handle Genetics button click
-            MessageBox.Show("Genetics button clicked");
+            var geneticsPanel = new GeneticsPanel(
+                this,
+                new TraitService(_contextFactory),
+                new GeneService(_contextFactory),
+                new BreedingCalculationService(_contextFactory),
+                _contextFactory);
+            _activePanel = geneticsPanel;
+            ShowPanel(geneticsPanel);
         }
     }
 }

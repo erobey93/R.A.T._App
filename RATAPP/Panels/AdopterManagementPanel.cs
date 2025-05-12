@@ -15,7 +15,8 @@ namespace RATAPP.Panels
 {
     public partial class AdopterManagementPanel : Panel, INavigable
     {
-        private RatAppDbContext _context;
+        //private RatAppDbContext _context;
+        private RatAppDbContextFactory _contextFactory;
         private string _currentUsername;
         private string _userRole;
         private RATAppBaseForm _baseForm;
@@ -34,17 +35,18 @@ namespace RATAPP.Panels
         private RichTextBox notesTextBox;
         private Label notesLabel;
 
-        public static async Task<AdopterManagementPanel> CreateAsync(RATAppBaseForm baseForm, RatAppDbContext context)
+        public static async Task<AdopterManagementPanel> CreateAsync(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory)
         {
-            var panel = new AdopterManagementPanel(baseForm, context);
+            var panel = new AdopterManagementPanel(baseForm, contextFactory);
             await panel.LoadDataAsync();
             return panel;
         }
 
-        public AdopterManagementPanel(RATAppBaseForm baseForm, RatAppDbContext context)
+        public AdopterManagementPanel(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory)
         {
             _baseForm = baseForm;
-            _context = context;
+            _contextFactory = contextFactory;
+            //_context = context;
             //_currentUsername = username;
             //_userRole = role;
 

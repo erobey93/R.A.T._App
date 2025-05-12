@@ -11,15 +11,16 @@ namespace RATAPP
 {
     public partial class LoginForm : Form
     {
-        private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
+        private RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory _contextFactory;
         private IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
 
-        public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContext context, Microsoft.Extensions.Configuration.IConfigurationRoot configuration, PasswordHashing passwordHashing)
+        public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
-            _context = context;
+            //_context = context;
             _configuration = configuration;
             _passwordHashing = passwordHashing;
+            _contextFactory = contextFactory;
 
             CreateLoginForm();
         }
@@ -77,7 +78,7 @@ namespace RATAPP
             try
             {
                 // Create an instance of your login service and call the async Login method
-                var loginService = new LoginService(_context, _configuration, _passwordHashing); // Inject dependencies
+                var loginService = new LoginService(_contextFactory, _configuration, _passwordHashing); // Inject dependencies
                 var response = await loginService.Login(new RATAPPLibrary.Data.Models.Requests.LoginRequest { Username = username, Password = password });
 
                 // Get the instance of the main form (RatAppBaseForm)
@@ -86,7 +87,7 @@ namespace RATAPP
                 if (baseForm == null)
                 {
                     // If for some reason the base form doesn't exist, create it here
-                    baseForm = new RATAppBaseForm(_context);
+                    baseForm = new RATAppBaseForm(_contextFactory);
                 }
 
                 // Set user info
@@ -95,18 +96,18 @@ namespace RATAPP
                 // Depending on the role, show the appropriate panel
                 Panel contentPanelToShow = null;
 
-                var homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
+                var homePanel = await HomePanel.CreateAsync(baseForm, _contextFactory, response.Username, response.Role); // You will need to create this panel
                 if (response.Role == "Admin")
                 {
                     // Create and show admin-specific panel
                     //TODO decide if I want to do anything differently if logged in as admin, for now logic is the same 
-                    homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
+                    homePanel = await HomePanel.CreateAsync(baseForm, _contextFactory, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
                 else if (response.Role == "User")
                 {
                     // Create and show user-specific panel
-                    homePanel = await HomePanel.CreateAsync(baseForm, _context, response.Username, response.Role); // You will need to create this panel
+                    homePanel = await HomePanel.CreateAsync(baseForm, _contextFactory, response.Username, response.Role); // You will need to create this panel
                     contentPanelToShow = homePanel;
                 }
 
@@ -151,8 +152,8 @@ namespace RATAPP
                 Location = new Point((this.ClientSize.Width - 300) / 2, y)
             };
 
-            textBox.Enter += (s, e) => { if (textBox.Text == placeholder) { textBox.Text = ""; textBox.ForeColor = System.Drawing.Color.Black; } };
-            textBox.Leave += (s, e) => { if (string.IsNullOrWhiteSpace(textBox.Text)) { textBox.Text = placeholder; textBox.ForeColor = System.Drawing.Color.Gray; } };
+            textBox.Enter += (s, e) => { if (textBox.Text == placeholder) { textBox.Text = ""; textBox.ForeColor = Color.Black; } };
+            textBox.Leave += (s, e) => { if (string.IsNullOrWhiteSpace(textBox.Text)) { textBox.Text = placeholder; textBox.ForeColor = Color.Gray; } };
             textBox.Text = placeholder;
             textBox.ForeColor = Color.Gray;
 
@@ -160,7 +161,7 @@ namespace RATAPP
         }
 
         //generic button to be used for all login buttons
-        private Button CreateButton(string text, int y, System.Drawing.Color color)
+        private Button CreateButton(string text, int y, Color color)
         {
             return new Button
             {
@@ -199,7 +200,7 @@ namespace RATAPP
         private void BtnCreateAccount_Click(object sender, EventArgs e)
         {
             // Open the CreateAccountForm
-            var createAccountForm = new CreateAccountForm(_context, _configuration, _passwordHashing);
+            var createAccountForm = new CreateAccountForm(_contextFactory, _configuration, _passwordHashing);
             createAccountForm.Show();
             this.Hide();
         }
@@ -229,7 +230,7 @@ namespace RATAPP
         {
             //if valid credentials, open update form
             //update form is still TODO just getting basic outline there for now 
-            var updateCredentialsForm = new UpdateCredentialsForm(_context);
+            var updateCredentialsForm = new UpdateCredentialsForm(_contextFactory);
             updateCredentialsForm.Show();
             this.Hide();
         }

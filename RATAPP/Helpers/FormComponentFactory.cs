@@ -22,7 +22,7 @@ namespace RATAPP.Helpers
                 Height = height,
                 Font = new Font("Segoe UI", 10, FontStyle.Bold),
                 ForeColor = Color.FromArgb(60, 60, 60),
-                Padding = new Padding(15)
+                Padding = new Padding(20)
             };
         }
 
