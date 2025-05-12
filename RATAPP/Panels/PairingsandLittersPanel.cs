@@ -327,7 +327,13 @@ namespace RATAPP.Panels
                     {
                         projName = pairing.Project.Name;
                     }
-                    pairingsGridView.Rows.Add(pairing.pairingId, dam, sire, projName, pairing.PairingStartDate, pairing.PairingEndDate, "TODO - edit pairing button?");
+                    pairingsGridView.Rows.Add(pairing.pairingId, dam, sire, projName, pairing.PairingStartDate, pairing.PairingEndDate, "Go");
+
+                // Add click handler for the "Go" button if not already added
+                if (pairingsGridView.CellClick == null)
+                {
+                    pairingsGridView.CellClick += PairingsGridView_CellClick;
+                }
                 }
             }
             else
@@ -373,12 +379,29 @@ namespace RATAPP.Panels
             {
                 foreach (var litter in _litters)
                 {
-                    littersGridView.Rows.Add(litter.LitterId, litter.Name, litter.Pair.Project.Name, litter.Pair.Dam, litter.Pair.Sire, litter.DateOfBirth, litter.NumPups, "TODO - edit litter button?");
+                    littersGridView.Rows.Add(litter.LitterId, litter.Name, litter.Pair.Project.Name, litter.Pair.Dam, litter.Pair.Sire, litter.DateOfBirth, litter.NumPups, "Go");
+                }
+
+                // Add click handler for the "Go" button if not already added
+                if (littersGridView.CellClick == null)
+                {
+                    littersGridView.CellClick += LittersGridView_CellClick;
                 }
             }
             else
             {
                 MessageBox.Show("There are no litters in your database."); //FIXME this is popping up before the page is loaded, I only want it to pop up once on the page add as bug 
+            }
+        }
+
+        private void LittersGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Check if click was on the "Go" button column
+            if (e.ColumnIndex == littersGridView.Columns["LitterPage"].Index && e.RowIndex >= 0)
+            {
+                string litterId = littersGridView.Rows[e.RowIndex].Cells["LitterId"].Value.ToString();
+                LitterDetailsForm detailsForm = new LitterDetailsForm(_context, litterId);
+                detailsForm.ShowDialog();
             }
         }
 
@@ -416,6 +439,17 @@ namespace RATAPP.Panels
         //populate line data grid view via line + stock service 
         //stock is correlated with species, so that will auto populate based on the species that the user has selected
         //for now, we are assuming rats and mice only, in the future, it will be any species 
+        private void PairingsGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Check if click was on the "Go" button column
+            if (e.ColumnIndex == pairingsGridView.Columns["PairingPage"].Index && e.RowIndex >= 0)
+            {
+                string pairingId = pairingsGridView.Rows[e.RowIndex].Cells["PairingId"].Value.ToString();
+                PairingDetailsForm detailsForm = new PairingDetailsForm(_context, pairingId);
+                detailsForm.ShowDialog();
+            }
+        }
+
         private async void PopulateLineDataDisplayArea()
         {
             linesGridView.Rows.Clear();
@@ -468,4 +502,3 @@ namespace RATAPP.Panels
         }
     }
 }
-
