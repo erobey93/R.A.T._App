@@ -37,7 +37,7 @@ namespace RATAPP.Forms
 
         private RatAppDbContextFactory _contextFactory; 
 
-        public AddPairingForm(RatAppDbContextFactory contextFactory) //RATAPPLibrary.Data.DbContexts.RatAppDbContext context
+        public AddPairingForm(RatAppDbContextFactory contextFactory)
         {
             // Initialize services
             var breedingService = new BreedingService(contextFactory);
@@ -47,15 +47,7 @@ namespace RATAPP.Forms
 
             _contextFactory = contextFactory;   
 
-            // Initialize helper classes
-            //_dataManager = new FormDataManager(
-            //    breedingService,
-            //    speciesService,
-            //    projectService,
-            //    animalService);
-
             _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif");
-            //_eventHandler = new FormEventHandler(_dataManager, _spinner);
 
             InitializeComponents();
             InitializeEventHandlers();
