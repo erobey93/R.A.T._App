@@ -309,24 +309,52 @@ namespace RATAPP.Panels
             string action = clickedButton.Text;
             string currentTab = tabControl.SelectedTab.Text;
 
-            if (currentTab == "Pairings")
+            if(clickedButton.Text == "Add")
             {
-                AddPairingForm addPairing = new AddPairingForm(_contextFactory);
-                addPairing.ShowDialog();
-                await LoadTabDataAsync(tabControl.SelectedIndex);
+                if (currentTab == "Pairings")
+                {
+                    AddPairingForm addPairing = new AddPairingForm(_contextFactory);
+                    addPairing.ShowDialog();
+                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Litters")
+                {
+                    AddLitterForm addLitter = await AddLitterForm.CreateAsync(_contextFactory);
+                    addLitter.ShowDialog();
+                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Line Management")
+                {
+                    AddLineForm addLine = new AddLineForm(_contextFactory);
+                    addLine.ShowDialog();
+                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
             }
-            else if (currentTab == "Litters")
+            else if (clickedButton.Text == "Update")
             {
-                AddLitterForm addLitter = await AddLitterForm.CreateAsync(_contextFactory);
-                addLitter.ShowDialog();
-                await LoadTabDataAsync(tabControl.SelectedIndex);
+                if (currentTab == "Pairings")
+                {
+                    //TODO update is the same as add except for the data is filled in 
+                    //UpdatePairingForm updatePairing = new UpdatePairingForm(_contextFactory);
+                    //updatePairing.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Litters")
+                {
+                    //TODO update is the same as add except for the data is filled in 
+                    //UpdateLitterForm updateLitter = await UpdateLitterForm.CreateAsync(_contextFactory);
+                    //updateLitter.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Line Management")
+                {
+                    //TODO
+                    //AddLineForm addLine = new AddLineForm(_contextFactory);
+                    //addLine.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
             }
-            else if(currentTab == "Line Management")
-            {
-                AddLineForm addLine = new AddLineForm(_contextFactory);
-                addLine.ShowDialog();
-                await LoadTabDataAsync(tabControl.SelectedIndex);
-            }
+           
             else
             {
                 MessageBox.Show($"{action} {currentTab}");
