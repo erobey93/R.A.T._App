@@ -11,6 +11,44 @@ using static System.Windows.Forms.AxHost;
 
 namespace RATAPP.Panels
 {
+    /// <summary>
+    /// Main dashboard and navigation panel for the R.A.T. App.
+    /// Provides a central interface for accessing animal records and key features.
+    /// 
+    /// Key Features:
+    /// - Animal List Management:
+    ///   * View all animals
+    ///   * Filter by species/sex
+    ///   * Search functionality
+    ///   * Quick access to details
+    /// 
+    /// - Reminders System:
+    ///   * Today's tasks
+    ///   * Upcoming events
+    ///   * Calendar integration
+    /// 
+    /// UI Components:
+    /// - Filter controls
+    /// - Data grid display
+    /// - Reminders panel
+    /// - Action buttons
+    /// 
+    /// State Management:
+    /// - Tracks current filters
+    /// - Manages animal data
+    /// - Handles async loading
+    /// 
+    /// Known Limitations:
+    /// - Hardcoded reminder data
+    /// - Basic filter options
+    /// - Fixed grid columns
+    /// - Limited calendar integration
+    /// 
+    /// Dependencies:
+    /// - AnimalService for data
+    /// - Windows Forms components
+    /// - Implements INavigable
+    /// </summary>
     public partial class HomePanel : Panel, INavigable
     {
         private string _username;
@@ -37,6 +75,21 @@ namespace RATAPP.Panels
             _animalService = new AnimalService(contextFactory);
         }
 
+        /// <summary>
+        /// Creates and initializes a new HomePanel instance asynchronously.
+        /// Factory method pattern to handle async initialization.
+        /// 
+        /// Process:
+        /// 1. Creates panel instance
+        /// 2. Loads initial data
+        /// 3. Sets up UI components
+        /// 
+        /// Parameters:
+        /// - parentForm: Parent form for navigation
+        /// - contextFactory: Database context factory
+        /// - username: Current user's name
+        /// - role: User's role (for permissions)
+        /// </summary>
         public static async Task<HomePanel> CreateAsync(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, string username, string role)
         {
             var panel = new HomePanel(parentForm, contextFactory, username, role);
@@ -160,6 +213,28 @@ namespace RATAPP.Panels
             return button;
         }
 
+        /// <summary>
+        /// Sets up the main data grid for displaying animal records.
+        /// 
+        /// Grid Features:
+        /// - Auto-sizing columns
+        /// - Sortable headers
+        /// - Detail view buttons
+        /// - Custom formatting
+        /// 
+        /// Columns:
+        /// - Species
+        /// - Animal ID
+        /// - Name
+        /// - Sex
+        /// - DOB
+        /// - Variety
+        /// - Details button
+        /// 
+        /// Events:
+        /// - Cell click handling for details
+        /// - Auto-refresh on data changes
+        /// </summary>
         private void InitializeDataDisplayArea()
         {
             int topPanelHeight = 120;
@@ -201,6 +276,27 @@ namespace RATAPP.Panels
             }
         }
 
+        /// <summary>
+        /// Creates and configures the reminders panel.
+        /// Currently uses hardcoded data (TODO: Implement database storage).
+        /// 
+        /// Features:
+        /// - Today's reminders
+        /// - Upcoming events
+        /// - Color-coded priorities
+        /// - Refresh functionality
+        /// - Calendar integration
+        /// 
+        /// Layout:
+        /// - Fixed width sidebar
+        /// - Scrollable content
+        /// - Action buttons
+        /// 
+        /// TODO:
+        /// - Implement reminder storage
+        /// - Add reminder creation
+        /// - Support recurring events
+        /// </summary>
         private void InitializeRemindersPanel()
         {
             int topPanelHeight = 120;
