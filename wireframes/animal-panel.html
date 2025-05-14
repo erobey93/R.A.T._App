@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R.A.T. App - Animal Panel Wireframe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .panel {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 800px;
+        }
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+        .form-section {
+            flex: 1;
+            padding-right: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .photo-section {
+            width: 400px;
+        }
+        .main-photo {
+            width: 100%;
+            height: 300px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        .thumbnail-gallery {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .thumbnail {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .add-photo {
+            width: 60px;
+            height: 60px;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #666;
+        }
+        .tabs {
+            margin: 20px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: white;
+            border-color: #ddd;
+            border-radius: 4px 4px 0 0;
+            margin-bottom: -1px;
+        }
+        .tab-content {
+            padding: 20px 0;
+        }
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .save-button {
+            background: #28a745;
+            color: white;
+        }
+        .cancel-button {
+            background: #dc3545;
+            color: white;
+        }
+        .feature-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .feature-button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <div class="main-content">
+            <div class="form-section">
+                <div class="form-group">
+                    <label>Registration #/ID</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>Animal Name</label>
+                    <input type="text">
+                </div>
+                <div class="form-group">
+                    <label>Species</label>
+                    <select>
+                        <option>Rat</option>
+                        <option>Mouse</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sex</label>
+                    <select>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Variety</label>
+                    <select>
+                        <option>Standard</option>
+                        <option>Fancy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Dam</label>
+                    <select>
+                        <option>Select Dam...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sire</label>
+                    <select>
+                        <option>Select Sire...</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="photo-section">
+                <div class="main-photo">Click to Add Photo</div>
+                <div class="thumbnail-gallery">
+                    <div class="thumbnail"></div>
+                    <div class="thumbnail"></div>
+                    <div class="thumbnail"></div>
+                    <div class="add-photo">+</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active">Basic Info</div>
+            <div class="tab">Health Records</div>
+            <div class="tab">Genetics</div>
+            <div class="tab">Breeding History</div>
+            <div class="tab">Documents</div>
+        </div>
+
+        <div class="tab-content">
+            <div class="form-group">
+                <label>Comments</label>
+                <textarea style="width: 100%; height: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="save-button">Save Changes</button>
+            <button class="cancel-button">Cancel</button>
+        </div>
+
+        <div class="feature-buttons">
+            <button class="feature-button">Ancestry</button>
+            <button class="feature-button">Genetics</button>
+            <button class="feature-button">Breeding History</button>
+            <button class="feature-button">Documents</button>
+            <button class="feature-button">Health</button>
+        </div>
+    </div>
+</body>
+</html>
