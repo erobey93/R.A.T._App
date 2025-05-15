@@ -439,7 +439,7 @@ namespace RATAPP.Panels
                 Size = new Size(50, 50),
                 Text = "+",
                 Font = new Font("Segoe UI", 20),
-                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleCenter,
                 Margin = new Padding(5),
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat
