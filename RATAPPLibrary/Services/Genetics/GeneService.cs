@@ -11,7 +11,6 @@ namespace RATAPPLibrary.Services.Genetics
 {
     public class GeneService : BaseService, IGeneService
     {
-        //private readonly RatAppDbContext _context;
         private readonly string[] _validCategories = { "physical", "medical", "behavioral" };
         private readonly string[] _validImpactLevels = { "cosmetic", "health", "critical" };
         private readonly string[] _validExpressionAges = { "birth", "juvenile", "adult" };
