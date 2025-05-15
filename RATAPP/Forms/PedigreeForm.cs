@@ -14,7 +14,7 @@ namespace RATAPP.Forms
         private readonly AnimalDto _currentAnimal;
         private readonly LineageService _lineageService;
         private readonly TraitService _traitService;
-        private readonly PDFService _pdfService;
+        private readonly PdfService _pdfService;
 
         // UI Components
         private Panel certificatePanel;
@@ -37,7 +37,7 @@ namespace RATAPP.Forms
             _currentAnimal = animal;
             _lineageService = new LineageService(contextFactory);
             _traitService = new TraitService(contextFactory);
-            _pdfService = new PDFService();
+            _pdfService = new PdfService();
 
             InitializeComponents();
             LoadPedigreeData();

@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
+using static RATAPPLibrary.Services.PdfService;
 
 namespace RATAPP.Forms
 {
@@ -13,7 +15,7 @@ namespace RATAPP.Forms
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly AnimalDto _animal;
         private readonly Litter _litter;
-        private readonly PDFService _pdfService;
+        private readonly PdfService _pdfService;
         private readonly bool _isLitterCertificate;
 
         // UI Components
@@ -48,7 +50,7 @@ namespace RATAPP.Forms
             _contextFactory = contextFactory;
             _animal = animal;
             _litter = litter;
-            _pdfService = new PDFService();
+            _pdfService = new PdfService();
             _isLitterCertificate = litter != null;
 
             InitializeComponents();
@@ -237,7 +239,7 @@ namespace RATAPP.Forms
 
         private void LoadLitterData()
         {
-            dateLabel.Text = _litter.DateOfBirth.ToString("MM-dd-yy");
+            dateLabel.Text = _litter.DateOfBirth.ToString(); //"MM-dd-yy" TODO formatting not working 
             litterLabel.Text = $"Litter Name/ID: {_litter.Name}";
             damLabel.Text = $"Dam: {_litter.Pair?.Dam?.Name ?? "Unknown"}";
             sireLabel.Text = $"Sire: {_litter.Pair?.Sire?.Name ?? "Unknown"}";

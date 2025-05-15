@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
 
 namespace RATAPP.Forms
@@ -12,7 +13,7 @@ namespace RATAPP.Forms
     {
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly Litter _litter;
-        private readonly PDFService _pdfService;
+        private readonly PdfService _pdfService;
 
         // UI Components
         private Label titleLabel;
@@ -34,7 +35,7 @@ namespace RATAPP.Forms
         {
             _contextFactory = contextFactory;
             _litter = litter;
-            _pdfService = new PDFService();
+            _pdfService = new PdfService();
 
             InitializeComponents();
             LoadLitterData();

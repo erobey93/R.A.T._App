@@ -10,7 +10,7 @@ namespace RATAPP.Forms
 {
     public class IndividualAnimalAncestryForm : Form
     {
-        private RatAppDbContext _context;
+        private static RatAppDbContextFactory _context;
         private AnimalDto _currentAnimal; // Assuming Rat is your animal model
         private RATAppBaseForm _baseForm;
 
@@ -27,6 +27,7 @@ namespace RATAPP.Forms
 
         public static IndividualAnimalAncestryForm Create(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
+            _context = contextFactory;
             return new IndividualAnimalAncestryForm(baseForm, contextFactory, animal);
         }
 
@@ -178,13 +179,13 @@ namespace RATAPP.Forms
 
         private void ViewPedigreeButton_Click(object sender, EventArgs e)
         {
-            var pedigreeForm = PedigreeForm.Create(_baseForm.ContextFactory, _currentAnimal);
+            var pedigreeForm = PedigreeForm.Create(_context, _currentAnimal);
             pedigreeForm.ShowDialog();
         }
 
         private void BirthCertButton_Click(object sender, EventArgs e)
         {
-            var birthCertForm = BirthCertificateForm.CreateForAnimal(_baseForm.ContextFactory, _currentAnimal);
+            var birthCertForm = BirthCertificateForm.CreateForAnimal(_context, _currentAnimal);
             birthCertForm.ShowDialog();
         }
     }

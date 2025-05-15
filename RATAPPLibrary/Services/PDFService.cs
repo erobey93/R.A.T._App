@@ -1,5 +1,7 @@
 ﻿using PdfSharp.Drawing;
 using PdfSharp.Pdf;
+using RATAPPLibrary.Data.Models;
+using RATAPPLibrary.Data.Models.Breeding;
 using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -28,7 +30,7 @@ namespace RATAPPLibrary.Services
                 gfx.DrawRectangle(borderPen, 20, 20, page.Width - 40, page.Height - 40);
 
                 // Draw title
-                var titleFont = new XFont("Times New Roman", 24, XFontStyle.Bold);
+                var titleFont = new XFont("Times New Roman", 24); //FIXME , XFontStyle.Bold doesn't work need to fix 
                 var normalFont = new XFont("Times New Roman", 12);
                 var smallFont = new XFont("Times New Roman", 10);
 
@@ -95,7 +97,7 @@ namespace RATAPPLibrary.Services
                 gfx.DrawRectangle(borderPen, 20, 20, page.Width - 40, page.Height - 40);
 
                 // Draw title
-                var titleFont = new XFont("Times New Roman", 24, XFontStyle.Bold);
+                var titleFont = new XFont("Times New Roman", 24); //FIXME , XFontStyle.Bold
                 var normalFont = new XFont("Times New Roman", 12);
                 var smallFont = new XFont("Times New Roman", 10);
 
@@ -103,7 +105,7 @@ namespace RATAPPLibrary.Services
                     new XRect(0, 40, page.Width, 30), XStringFormats.Center);
 
                 // Draw date of birth
-                gfx.DrawString(litter.DateOfBirth.ToString("MM-dd-yy"), normalFont, XBrushes.Black,
+                gfx.DrawString(litter.DateOfBirth.ToString(), normalFont, XBrushes.Black, //FUXNE .ToString("MM-dd-yy")
                     new XRect(0, 80, page.Width, 20), XStringFormats.Center);
                 gfx.DrawString("Date of Birth", normalFont, XBrushes.Black,
                     new XRect(0, 100, page.Width, 20), XStringFormats.Center);
@@ -158,7 +160,7 @@ namespace RATAPPLibrary.Services
                 gfx.DrawRectangle(borderPen, 20, 20, page.Width - 40, page.Height - 40);
 
                 // Draw title
-                var titleFont = new XFont("Times New Roman", 24, XFontStyle.Bold);
+                var titleFont = new XFont("Times New Roman", 24); //FIXME BOLD issue
                 var normalFont = new XFont("Times New Roman", 12);
                 var smallFont = new XFont("Times New Roman", 10);
 
@@ -166,7 +168,7 @@ namespace RATAPPLibrary.Services
                     new XRect(0, 40, page.Width, 30), XStringFormats.Center);
 
                 // Draw breeder name
-                gfx.DrawString("TLDR", new XFont("Times New Roman", 16, XFontStyle.Bold),
+                gfx.DrawString("TLDR", new XFont("Times New Roman", 16), //FIXME BOLD issue 
                     XBrushes.Black, new XPoint(40, 80));
 
                 // Draw animal details

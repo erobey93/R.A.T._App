@@ -16,6 +16,9 @@
     <Compile Update="Forms\AssignTraitForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\BirthCertificateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\BreedingCalculatorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -28,7 +31,13 @@
     <Compile Update="Forms\HealthRecord.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\LitterDetailsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\LoginForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\PedigreeForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Forms\RATAppBaseForm.cs">
