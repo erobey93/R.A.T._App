@@ -99,6 +99,10 @@ namespace RATAPP.Forms
             viewPedigreeButton = CreateButton("View Pedigree", 340, 220, 150, Color.FromArgb(255, 152, 0));
             viewPedigreeButton.Click += ViewPedigreeButton_Click;
 
+            // Birth Certificate Button
+            var birthCertButton = CreateButton("Birth Certificate", 340, 260, 150, Color.FromArgb(0, 150, 136));
+            birthCertButton.Click += BirthCertButton_Click;
+
             // Family Tree Panel (Placeholder)
             familyTreePanel = new Panel
             {
@@ -176,6 +180,12 @@ namespace RATAPP.Forms
         {
             var pedigreeForm = PedigreeForm.Create(_baseForm.ContextFactory, _currentAnimal);
             pedigreeForm.ShowDialog();
+        }
+
+        private void BirthCertButton_Click(object sender, EventArgs e)
+        {
+            var birthCertForm = BirthCertificateForm.CreateForAnimal(_baseForm.ContextFactory, _currentAnimal);
+            birthCertForm.ShowDialog();
         }
     }
 }
