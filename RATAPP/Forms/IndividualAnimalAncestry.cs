@@ -174,12 +174,8 @@ namespace RATAPP.Forms
 
         private void ViewPedigreeButton_Click(object sender, EventArgs e)
         {
-            // TODO: Implement logic to display the pedigree
-            MessageBox.Show("View Pedigree functionality to be implemented.");
-            pedigreeTextBox.Visible = true;
-            familyTreePanel.Visible = false;
-            // Generate and display the pedigree text in pedigreeTextBox
-            pedigreeTextBox.Text = "Placeholder Pedigree Text...";
+            var pedigreeForm = PedigreeForm.Create(_baseForm.ContextFactory, _currentAnimal);
+            pedigreeForm.ShowDialog();
         }
     }
 }
