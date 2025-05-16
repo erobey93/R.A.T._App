@@ -172,7 +172,8 @@ dotnet test RATAPPLibraryUT
 - Get user feedback on core desktop functionality
 
 ### Medium Term
-- Implement complete Web App (identical to desktop but with subscriber tiers and enhanced security)
+- Complete REST API project (currently only animal management endpoints developed)
+- Implement Web App (identical to desktop but with subscriber tiers and enhanced security)
 - Implement advanced genetics calculations
 - Expand reporting capabilities
 - Add research page with data analysis tools
