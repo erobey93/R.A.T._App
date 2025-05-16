@@ -12,14 +12,39 @@
     using System.Security.Claims;
     using System.Text;
 
-    //TODO need to add interface for testing purposes 
-    //public interface ILoginService
-    //{
-    //    public async Task<LoginResponse> Login(LoginRequest request);
-
-    //}
-
-    public class LoginService : BaseService  //: BaseService TODO use new BaseService + context factory pattern 
+    /// <summary>
+    /// Service for managing user authentication in the R.A.T. App.
+    /// Handles user login, JWT token generation, and password verification.
+    /// 
+    /// Key Features:
+    /// - User Authentication:
+    ///   * Username/password validation
+    ///   * JWT token generation
+    ///   * Basic role-based access
+    /// 
+    /// Current Implementation:
+    /// - Basic password verification (text comparison)
+    /// - Hardcoded JWT configuration
+    /// - Fixed "Admin" role assignment
+    /// 
+    /// Known Limitations:
+    /// - Missing proper password hashing/salt
+    /// - No proper role management
+    /// - Hardcoded JWT configuration values
+    /// - Missing interface for testing
+    /// 
+    /// Planned Improvements:
+    /// - Implement proper password hashing
+    /// - Add role-based authorization
+    /// - Move JWT config to configuration files
+    /// - Add interface for better testability
+    /// 
+    /// Dependencies:
+    /// - IConfiguration: For JWT settings (planned)
+    /// - PasswordHashing: For password verification
+    /// - Inherits from BaseService for database operations
+    /// </summary>
+    public class LoginService : BaseService
     {
         //private readonly RatAppDbContext _context;
         private readonly IConfiguration _configuration;
@@ -32,6 +57,24 @@
             _passwordHashing = passwordHashing;
         }
 
+        /// <summary>
+        /// Authenticates a user and generates a JWT token upon successful login.
+        /// 
+        /// Process:
+        /// 1. Validates username exists
+        /// 2. Verifies password (currently using basic text comparison)
+        /// 3. Generates JWT token with claims
+        /// 
+        /// Security Notes:
+        /// - TODO: Implement proper password hashing
+        /// - TODO: Add proper role management
+        /// - TODO: Add login attempt tracking
+        /// 
+        /// Throws:
+        /// - UnauthorizedAccessException for invalid credentials
+        /// </summary>
+        /// <param name="request">Login request containing username and password</param>
+        /// <returns>LoginResponse with token and user info</returns>
         public async Task<LoginResponse> Login(LoginRequest request)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -77,6 +120,27 @@
             });
         }
 
+        /// <summary>
+        /// Generates a JWT token for authenticated users.
+        /// 
+        /// Current Implementation:
+        /// - Uses hardcoded secret key (TEMPORARY)
+        /// - Uses hardcoded issuer and audience
+        /// - Fixed 1-hour expiration
+        /// - Assigns "Admin" role to all users
+        /// 
+        /// Token Claims:
+        /// - Username
+        /// - Role (hardcoded as "Admin")
+        /// - User ID
+        /// 
+        /// TODO:
+        /// - Move configuration to appsettings.json
+        /// - Implement proper role-based claims
+        /// - Add refresh token support
+        /// </summary>
+        /// <param name="user">User to generate token for</param>
+        /// <returns>JWT token string</returns>
         public string GenerateJwtToken(User user)
         {
             // Temporarily hard-code the JWT values for now

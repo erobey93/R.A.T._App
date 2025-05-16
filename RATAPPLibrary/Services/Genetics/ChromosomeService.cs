@@ -8,6 +8,39 @@ using System.Threading.Tasks;
 
 namespace RATAPPLibrary.Services.Genetics
 {
+    /// <summary>
+    /// Service for managing chromosomes and chromosome pairs in the R.A.T. App.
+    /// Handles the creation, validation, and organization of genetic material
+    /// at the chromosome level.
+    /// 
+    /// Key Features:
+    /// - Chromosome Management:
+    ///   * Create and track chromosomes
+    ///   * Manage chromosome pairs
+    ///   * Validate genetic compatibility
+    /// 
+    /// Inheritance Patterns:
+    /// - Supported Types:
+    ///   * Autosomal
+    ///   * X-linked
+    ///   * Y-linked
+    ///   * Mitochondrial
+    /// 
+    /// Validation Rules:
+    /// - Chromosome numbers must be unique per species
+    /// - Pairs must be from same species
+    /// - Pairs must have matching chromosome numbers
+    /// - Valid inheritance patterns only
+    /// 
+    /// Data Structure:
+    /// - Chromosome: Individual genetic unit
+    /// - ChromosomePair: Maternal/Paternal pair
+    /// - Tracks creation and update timestamps
+    /// 
+    /// Dependencies:
+    /// - RatAppDbContext for data access
+    /// - Implements IChromosomeService
+    /// </summary>
     public class ChromosomeService : IChromosomeService
     {
         private readonly RatAppDbContext _context;
@@ -18,6 +51,28 @@ namespace RATAPPLibrary.Services.Genetics
             _context = context;
         }
 
+        /// <summary>
+        /// Creates a new chromosome for a specific species.
+        /// 
+        /// Validation:
+        /// - Name cannot be empty
+        /// - Number must be positive
+        /// - Number must be unique per species
+        /// 
+        /// Process:
+        /// 1. Validates input parameters
+        /// 2. Checks for existing chromosome
+        /// 3. Creates new chromosome with UUID
+        /// 4. Sets creation timestamps
+        /// 
+        /// Throws:
+        /// - ArgumentException for invalid inputs
+        /// - InvalidOperationException for duplicates
+        /// </summary>
+        /// <param name="name">Chromosome identifier</param>
+        /// <param name="number">Chromosome number</param>
+        /// <param name="speciesId">Associated species</param>
+        /// <returns>Created Chromosome object</returns>
         public async Task<Chromosome> CreateChromosomeAsync(string name, int number, int speciesId)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -49,6 +104,29 @@ namespace RATAPPLibrary.Services.Genetics
             return chromosome;
         }
 
+        /// <summary>
+        /// Creates a chromosome pair from maternal and paternal chromosomes.
+        /// 
+        /// Process:
+        /// 1. Validates chromosome compatibility
+        /// 2. Verifies inheritance pattern
+        /// 3. Creates pair with unique ID
+        /// 
+        /// Inheritance Patterns:
+        /// - autosomal: Standard chromosome pairs
+        /// - x-linked: Sex chromosome X inheritance
+        /// - y-linked: Sex chromosome Y inheritance
+        /// - mitochondrial: Maternal inheritance
+        /// 
+        /// Validation:
+        /// - Both chromosomes must exist
+        /// - Must be from same species
+        /// - Must have matching numbers
+        /// - Pattern must be valid
+        /// 
+        /// Throws:
+        /// - InvalidOperationException for validation failures
+        /// </summary>
         public async Task<ChromosomePair> CreateChromosomePairAsync(
             Guid maternalId,
             Guid paternalId,
@@ -112,6 +190,23 @@ namespace RATAPPLibrary.Services.Genetics
                 throw new InvalidOperationException($"Chromosome number {number} already exists for species {speciesId}");
         }
 
+        /// <summary>
+        /// Validates that two chromosomes can form a valid pair.
+        /// 
+        /// Checks:
+        /// 1. Both chromosomes exist
+        /// 2. Same species
+        /// 3. Matching chromosome numbers
+        /// 
+        /// Used By:
+        /// - CreateChromosomePairAsync
+        /// - Other services needing pair validation
+        /// 
+        /// Throws:
+        /// - InvalidOperationException if validation fails
+        /// </summary>
+        /// <param name="maternalId">Maternal chromosome ID</param>
+        /// <param name="paternalId">Paternal chromosome ID</param>
         public async Task ValidateChromosomePairAsync(Guid maternalId, Guid paternalId)
         {
             var maternal = await _context.Chromosomes.FindAsync(maternalId);

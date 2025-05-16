@@ -7,7 +7,41 @@ using RATAPPLibrary.Data.Models.Requests;
 
 namespace RATAPPLibrary.Services
 {
-    public class AccountService  : BaseService
+    /// <summary>
+    /// Service for managing user accounts and profiles in the R.A.T. App.
+    /// Handles account creation, breeder profile management, and credential updates.
+    /// 
+    /// Key Features:
+    /// - Account Management:
+    ///   * User account creation
+    ///   * Breeder profile creation
+    ///   * Credential updates
+    /// 
+    /// Data Structure:
+    /// - User accounts contain:
+    ///   * Credentials (username/password)
+    ///   * Individual info (name, contact details)
+    ///   * Account type
+    ///   * Optional breeder profile
+    /// 
+    /// Known Limitations:
+    /// - Basic password storage (no hashing)
+    /// - Fixed profile image ("xxxx")
+    /// - Limited account type management
+    /// - Basic error handling
+    /// 
+    /// Planned Improvements:
+    /// - Implement password hashing
+    /// - Add proper profile image handling
+    /// - Enhance account type management
+    /// - Improve error handling and logging
+    /// 
+    /// Dependencies:
+    /// - IConfiguration: For app settings
+    /// - PasswordHashing: For credential management
+    /// - Inherits from BaseService for database operations
+    /// </summary>
+    public class AccountService : BaseService
     {
         //private readonly RatAppDbContext _context;
         private readonly IConfiguration _configuration;
@@ -20,7 +54,27 @@ namespace RATAPPLibrary.Services
             _passwordHashing = passwordHashing;
         }
 
-        // Method to create a new user account
+        /// <summary>
+        /// Creates a new user account with associated profile information.
+        /// 
+        /// Process:
+        /// 1. Validates username availability
+        /// 2. Creates credentials
+        /// 3. Creates individual profile
+        /// 4. Creates/associates account type
+        /// 5. Creates user record
+        /// 
+        /// Required Information:
+        /// - Username and password
+        /// - Personal details (name, contact info)
+        /// - Location (city, state)
+        /// - Account type
+        /// 
+        /// Note: Currently stores password as plain text
+        /// TODO: Implement password hashing before storage
+        /// 
+        /// Returns: True if account created successfully
+        /// </summary>
         public async Task<bool> CreateAccountAsync(string username, string password, string email, string firstName, string lastName, string phone, string city, string state, string accountTypeName)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -97,6 +151,20 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        /// <summary>
+        /// Creates a new breeder profile for an existing user.
+        /// 
+        /// Process:
+        /// 1. Finds user by username
+        /// 2. Checks if breeder profile exists
+        /// 3. Creates new breeder profile if none exists
+        /// 
+        /// Note: Currently only supports one breeder profile per user
+        /// TODO: Consider supporting multiple breeder profiles
+        /// 
+        /// Returns: True if breeder profile created successfully
+        /// </summary>
+        /// <param name="userName">Username of the user to create breeder profile for</param>
         public async Task<bool> CreateNewBreeder(string userName)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -133,6 +201,27 @@ namespace RATAPPLibrary.Services
             });
 
         }
+        /// <summary>
+        /// Updates user credentials (password).
+        /// 
+        /// Process:
+        /// 1. Validates user exists
+        /// 2. Verifies current password
+        /// 3. Updates to new password
+        /// 
+        /// Security Notes:
+        /// - Currently uses plain text password comparison
+        /// - No password complexity requirements
+        /// - No username update support
+        /// 
+        /// TODO:
+        /// - Implement password hashing
+        /// - Add password complexity validation
+        /// - Add username update capability
+        /// - Improve error handling
+        /// 
+        /// Returns: True if credentials updated successfully
+        /// </summary>
         public async Task<bool> UpdateCredentialsAsync(UpdateCredentialsRequest request)
         {
             return await ExecuteInTransactionAsync(async _context =>

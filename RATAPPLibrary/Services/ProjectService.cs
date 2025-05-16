@@ -8,8 +8,37 @@ using System.Threading.Tasks;
 namespace RATAPPLibrary.Services
 {
     /// <summary>
-    /// Service for managing breeding projects.
-    /// Handles operations for Project entities and their relationships.
+    /// Service for managing breeding research projects in the R.A.T. App.
+    /// Handles the organization and tracking of breeding programs, including
+    /// project metadata, line associations, and breeding records.
+    /// 
+    /// Key Features:
+    /// - Project Management:
+    ///   * Create and track breeding projects
+    ///   * Associate projects with specific lines
+    ///   * Maintain project metadata and notes
+    /// 
+    /// Special Features:
+    /// - Default Project Support:
+    ///   * Automatic creation of default project
+    ///   * Fallback for unassigned pairings
+    ///   * Protected from deletion
+    /// 
+    /// Data Structure:
+    /// - Projects contain:
+    ///   * Name and description
+    ///   * Line association
+    ///   * Creation and update timestamps
+    ///   * Optional notes and metadata
+    /// 
+    /// Known Limitations:
+    /// - No support for project hierarchies
+    /// - Limited project status tracking
+    /// - Basic metadata support only
+    /// 
+    /// Dependencies:
+    /// - LineService: For line validation and default line creation
+    /// - Inherits from BaseService for database operations
     /// </summary>
     public interface IProjectService 
     {
@@ -34,7 +63,22 @@ namespace RATAPPLibrary.Services
         }
 
         /// <summary>
-        /// Creates a new breeding project.
+        /// Creates a new breeding project with the specified details.
+        /// 
+        /// Process:
+        /// 1. Validates line exists
+        /// 2. Checks for duplicate project names within line
+        /// 3. Creates project with timestamps
+        /// 
+        /// Required Fields:
+        /// - name: Project identifier
+        /// - lineId: Associated breeding line
+        /// 
+        /// Optional:
+        /// - description: Project details
+        /// 
+        /// Throws:
+        /// - InvalidOperationException if line not found or project name exists
         /// </summary>
         public async Task<Project> CreateProjectAsync(string name, int lineId, string? description = null)
         {
@@ -178,8 +222,23 @@ namespace RATAPPLibrary.Services
         }
 
         /// <summary>
-        /// Gets or creates the default project.
-        /// The default project is used when no specific project is specified for pairings.
+        /// Gets or creates the default project for unassigned pairings.
+        /// 
+        /// Purpose:
+        /// - Provides a fallback project for breeding pairs
+        /// - Ensures all pairings have a project association
+        /// - Maintains data integrity
+        /// 
+        /// Process:
+        /// 1. Looks for existing default project
+        /// 2. If not found:
+        ///    - Creates/gets default line
+        ///    - Creates default project
+        ///    - Sets standard metadata
+        /// 
+        /// Note: The default project is protected from deletion
+        /// and should be used sparingly, mainly as a temporary
+        /// assignment until a proper project is created.
         /// </summary>
         public async Task<Project> GetDefaultProjectAsync()
         {
