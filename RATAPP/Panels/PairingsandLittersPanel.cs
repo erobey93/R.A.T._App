@@ -14,6 +14,39 @@ using RATAPPLibrary.Data.DbContexts;
 
 namespace RATAPP.Panels
 {
+    /// <summary>
+    /// Panel for managing breeding operations in the R.A.T. App.
+    /// Provides tabbed interface for handling pairings, litters, and breeding lines.
+    /// 
+    /// Key Features:
+    /// - Breeding Management:
+    ///   * Create/track breeding pairs
+    ///   * Monitor litters
+    ///   * Manage breeding lines
+    /// 
+    /// UI Components:
+    /// - Tabbed interface
+    /// - Data grids for each tab
+    /// - Search and filter controls
+    /// - Action buttons
+    /// 
+    /// Data Management:
+    /// - Asynchronous data loading
+    /// - Cached breeding data
+    /// - Real-time updates
+    /// 
+    /// Known Limitations:
+    /// - Basic search functionality
+    /// - Limited filter options
+    /// - No bulk operations
+    /// - Some TODO implementations
+    /// 
+    /// Dependencies:
+    /// - BreedingService
+    /// - AnimalService
+    /// - LineService
+    /// - StockService
+    /// </summary>
     public partial class PairingsAndLittersPanel : Panel, INavigable
     {
         private TabControl tabControl;
@@ -107,6 +140,26 @@ namespace RATAPP.Panels
             }
         }
 
+        /// <summary>
+        /// Initializes all UI components of the breeding management panel.
+        /// Sets up tabbed interface and common controls.
+        /// 
+        /// Components:
+        /// - Tab Control:
+        ///   * Pairings tab
+        ///   * Litters tab
+        ///   * Line management tab
+        /// 
+        /// - Common Controls:
+        ///   * Search box
+        ///   * Filter dropdown
+        ///   * Action buttons
+        /// 
+        /// Layout:
+        /// - Dock-fill main container
+        /// - Fixed-height control panels
+        /// - Responsive data grids
+        /// </summary>
         private void InitializeComponents()
         {
             this.Dock = DockStyle.Fill;
@@ -214,6 +267,26 @@ namespace RATAPP.Panels
             }
         }
 
+        /// <summary>
+        /// Loads data for the selected tab asynchronously.
+        /// Handles loading indicators and error states.
+        /// 
+        /// Process:
+        /// 1. Shows loading indicator
+        /// 2. Fetches relevant data
+        /// 3. Updates UI visibility
+        /// 4. Populates data grid
+        /// 
+        /// Data Loading:
+        /// - Pairings: Active and historical
+        /// - Litters: All associated with pairs
+        /// - Lines: All breeding lines
+        /// 
+        /// Error Handling:
+        /// - Shows loading state
+        /// - Handles empty data sets
+        /// - Manages async errors
+        /// </summary>
         private async Task LoadTabDataAsync(int tabIndex)
         {
             try

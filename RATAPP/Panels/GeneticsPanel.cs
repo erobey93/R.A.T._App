@@ -21,7 +21,6 @@ namespace RATAPP.Panels
         private readonly GeneService _geneService;
         private readonly BreedingCalculationService _breedingService;
         private readonly AnimalService _animalService;
-        //private readonly RatAppDbContext _context;
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly RATAppBaseForm _baseForm;
 
@@ -82,7 +81,7 @@ namespace RATAPP.Panels
             RegisterEventHandlers();
         }
 
-        private void InitializeComponents()
+        private async void InitializeComponents()
         {
             // Main panel setup
             this.Dock = DockStyle.Fill;
@@ -118,6 +117,9 @@ namespace RATAPP.Panels
             // Add controls to main panel
             this.Controls.Add(mainTabControl);
             this.Controls.Add(headerPanel);
+
+            //get the data when the page loads
+            await RefreshDataAsync();
         }
 
         private void InitializeHeaderPanel()
@@ -219,15 +221,14 @@ namespace RATAPP.Panels
                 ReadOnly = true,
                 Font = new Font("Segoe UI", 9)
             };
-
             traitRegistryGrid.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "ID", Width = 60 },
-                new DataGridViewTextBoxColumn { Name = "CommonName", HeaderText = "Name", Width = 150 },
-                new DataGridViewTextBoxColumn { Name = "TraitType", HeaderText = "Type", Width = 120 },
-                new DataGridViewTextBoxColumn { Name = "Genotype", HeaderText = "Genotype", Width = 120 },
-                new DataGridViewTextBoxColumn { Name = "Species", HeaderText = "Species", Width = 120 },
-                new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description", Width = 200 }
+    new DataGridViewTextBoxColumn { Name = "Id", DataPropertyName = "Id", HeaderText = "ID", Width = 60 },
+    new DataGridViewTextBoxColumn { Name = "CommonName", DataPropertyName = "CommonName", HeaderText = "Name", Width = 150 },
+    new DataGridViewTextBoxColumn { Name = "TraitType", DataPropertyName = "TraitType", HeaderText = "Type", Width = 120 },
+    new DataGridViewTextBoxColumn { Name = "Genotype", DataPropertyName = "Genotype", HeaderText = "Genotype", Width = 120 },
+    new DataGridViewTextBoxColumn { Name = "Species", DataPropertyName = "Species", HeaderText = "Species", Width = 120 },
+    new DataGridViewTextBoxColumn { Name = "Description", DataPropertyName = "Description", HeaderText = "Description", Width = 200 }
             });
 
             // Create button panel
@@ -813,18 +814,29 @@ namespace RATAPP.Panels
                     traits = traits.Where(t => t.SpeciesID == selectedSpecies.Id).ToList();
                 }
 
-                traitRegistryGrid.DataSource = null;
-                traitRegistryGrid.DataSource = traits;
+                // Flatten the data for display
+                var displayData = traits.Select(t => new
+                {
+                    t.Id,
+                    t.CommonName,
+                    TraitType = t.TraitType?.Name ?? "Unknown", // Display the name or "Unknown" if null
+                    t.Genotype,
+                    Species = t.Species?.CommonName ?? "Unknown", // Display the common name or "Unknown" if null
+                }).ToList();
 
-                // Set column display properties
+                // Bind the flattened data to the grid
+                traitRegistryGrid.DataSource = null;
+                traitRegistryGrid.DataSource = displayData;
+
+                // Ensure the column display names match the new properties
                 if (traitRegistryGrid.Columns.Contains("TraitType"))
                 {
-                    traitRegistryGrid.Columns["TraitType"].DataPropertyName = "Name";
+                    traitRegistryGrid.Columns["TraitType"].HeaderText = "Type";
                 }
 
                 if (traitRegistryGrid.Columns.Contains("Species"))
                 {
-                    traitRegistryGrid.Columns["Species"].DataPropertyName = "CommonName";
+                    traitRegistryGrid.Columns["Species"].HeaderText = "Species";
                 }
             }
             catch (Exception ex)
@@ -833,13 +845,14 @@ namespace RATAPP.Panels
             }
         }
 
-        private void AddTraitButton_Click(object sender, EventArgs e)
+
+        private async void AddTraitButton_Click(object sender, EventArgs e)
         {
             using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory))
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
-                    RefreshTraitGrid();
+                    await RefreshTraitGrid();
                 }
             }
         }

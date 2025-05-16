@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R.A.T. App - Home Panel Wireframe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .panel {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: 800px;
+            position: relative;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 25px;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .filter-bar select, .filter-bar input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 150px;
+        }
+        .filter-bar button {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .main-content {
+            display: flex;
+            gap: 20px;
+        }
+        .data-grid {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .grid-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            background: #f8f9fa;
+            padding: 10px;
+            font-weight: bold;
+            border-bottom: 2px solid #ddd;
+        }
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .grid-row:hover {
+            background: #f5f5f5;
+        }
+        .reminders-panel {
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+        }
+        .reminders-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
+        .reminder-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+        }
+        .reminder-item.urgent {
+            border-left-color: #dc3545;
+        }
+        .action-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .action-buttons button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <div class="header">
+            <h1>Welcome, User</h1>
+        </div>
+        
+        <div class="filter-bar">
+            <select>
+                <option>All Species</option>
+                <option>Rat</option>
+                <option>Mouse</option>
+            </select>
+            <select>
+                <option>All Sexes</option>
+                <option>Male</option>
+                <option>Female</option>
+            </select>
+            <input type="text" placeholder="Search by Name, ID...">
+            <button>Search</button>
+            <button>Add New Animal</button>
+        </div>
+
+        <div class="main-content">
+            <div class="data-grid">
+                <div class="grid-header">
+                    <div>Species</div>
+                    <div>Animal ID</div>
+                    <div>Name</div>
+                    <div>Sex</div>
+                    <div>DOB</div>
+                    <div>Variety</div>
+                    <div>Details</div>
+                </div>
+                <div class="grid-row">
+                    <div>Rat</div>
+                    <div>001</div>
+                    <div>Luna</div>
+                    <div>Female</div>
+                    <div>01/15/2025</div>
+                    <div>Standard</div>
+                    <div><button>View</button></div>
+                </div>
+                <div class="grid-row">
+                    <div>Mouse</div>
+                    <div>002</div>
+                    <div>Mickey</div>
+                    <div>Male</div>
+                    <div>02/20/2025</div>
+                    <div>Fancy</div>
+                    <div><button>View</button></div>
+                </div>
+                <!-- More rows would be dynamically added -->
+            </div>
+
+            <div class="reminders-panel">
+                <div class="reminders-header">Reminders</div>
+                <div class="reminder-item urgent">
+                    <div>Pup Pickup 6-7pm</div>
+                    <small>Today</small>
+                </div>
+                <div class="reminder-item">
+                    <div>Respond to Adoption Applications</div>
+                    <small>Today</small>
+                </div>
+                <div class="reminder-item">
+                    <div>Vet appointment</div>
+                    <small>Tomorrow</small>
+                </div>
+                <div class="action-buttons">
+                    <button>Refresh Reminders</button>
+                    <button>Open Calendar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

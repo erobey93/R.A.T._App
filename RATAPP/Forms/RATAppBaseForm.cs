@@ -260,10 +260,11 @@ namespace RATAPP.Forms
             ShowPanel(adopterPanel);
         }
 
+        //TODO - not yet implemented
         private void ResearchButton_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
-            //var researchService = new ResearchService(_context);
+            MessageBox.Show("The research page will be here", "Research Page Not Yet Implemented", MessageBoxButtons.OK);
+            //var researchService = new ResearchService(_contextFactory);
             //var researchPanel = new ResearchPanel(this, researchService);
             //_activePanel = researchPanel;
             //ShowPanel(researchPanel);
@@ -271,9 +272,10 @@ namespace RATAPP.Forms
 
         private void ReportsButton_Click(object sender, EventArgs e)
         {
-            var reportsPanel = new ReportsPanel(_contextFactory); // Create a new instance of the ReportsPanel
-            _activePanel = reportsPanel;
-            ShowPanel(reportsPanel);
+            MessageBox.Show("The reports page will be here", "Reports Page Not Yet Implemented", MessageBoxButtons.OK);
+            //var reportsPanel = new ReportsPanel(_contextFactory); // Create a new instance of the ReportsPanel
+            //_activePanel = reportsPanel;
+            //ShowPanel(reportsPanel);
         }
 
         private void LogoutButton_Click(object sender, EventArgs e)
@@ -307,10 +309,11 @@ namespace RATAPP.Forms
 
         private void FinancialButton_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("The financial page will be here", "Financial Page Not Yet Implemented", MessageBoxButtons.OK);
             // Financial button click
-            var financialPanel = new FinancialPanel(this, _contextFactory);
-            _activePanel = financialPanel;
-            ShowPanel(financialPanel);
+            //var financialPanel = new FinancialPanel(this, _contextFactory);
+            //_activePanel = financialPanel;
+            //ShowPanel(financialPanel);
         }
 
         private void GeneticsButton_Click(object sender, EventArgs e)

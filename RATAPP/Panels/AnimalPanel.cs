@@ -11,6 +11,45 @@ using System.Windows.Forms;
 
 namespace RATAPP.Panels
 {
+    /// <summary>
+    /// Panel for managing individual animal records in the R.A.T. App.
+    /// Provides a comprehensive interface for viewing, creating, and editing animal information.
+    /// 
+    /// Key Features:
+    /// - Animal Information Display/Edit:
+    ///   * Basic details (name, ID, species)
+    ///   * Physical characteristics
+    ///   * Lineage information
+    ///   * Image management
+    /// 
+    /// UI Components:
+    /// - Text fields for data entry
+    /// - Combo boxes for selections
+    /// - Image handling with thumbnails
+    /// - Navigation and action buttons
+    /// 
+    /// Modes:
+    /// - View Mode: Display only
+    /// - Edit Mode: Allow modifications
+    /// - New Animal Mode: Create records
+    /// 
+    /// State Management:
+    /// - Tracks current animal data
+    /// - Manages parent relationships
+    /// - Handles image references
+    /// - Maintains edit state
+    /// 
+    /// Known Limitations:
+    /// - Hardcoded image paths
+    /// - Basic error handling
+    /// - Limited data validation
+    /// - Some TODO implementations
+    /// 
+    /// Dependencies:
+    /// - Various services (Animal, Lineage, etc.)
+    /// - Windows Forms components
+    /// - Database context
+    /// </summary>
     public partial class AnimalPanel : Panel, INavigable
     {
         // Services
@@ -86,6 +125,27 @@ namespace RATAPP.Panels
             LoadSpinner();
         }
 
+        /// <summary>
+        /// Initializes the panel's UI components and loads animal data.
+        /// 
+        /// Process:
+        /// 1. Sets up panel properties
+        /// 2. Initializes UI components
+        /// 3. Loads animal data if provided
+        /// 4. Configures edit mode
+        /// 
+        /// Components Created:
+        /// - Labels and text fields
+        /// - Combo boxes for selections
+        /// - Image display areas
+        /// - Action buttons
+        /// 
+        /// State Configuration:
+        /// - Edit mode determined by animal parameter
+        /// - UI elements enabled/disabled accordingly
+        /// - Data loaded from services if animal exists
+        /// </summary>
+        /// <param name="animal">Animal data to display, or null for new animal</param>
         private void InitializeComponent(AnimalDto animal)
         {
             _animal = animal;
@@ -439,7 +499,7 @@ namespace RATAPP.Panels
                 Size = new Size(50, 50),
                 Text = "+",
                 Font = new Font("Segoe UI", 20),
-                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleCenter,
                 Margin = new Padding(5),
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat
@@ -979,7 +1039,7 @@ namespace RATAPP.Panels
         {
             try
             {
-                await _loadingSemaphore.WaitAsync();
+                //await _loadingSemaphore.WaitAsync();
                 var options = new List<string>();
                 string animalSpecies = GetAnimalSpecies();
 
@@ -1053,7 +1113,7 @@ namespace RATAPP.Panels
             }
             finally
             {
-                _loadingSemaphore.Release();
+                //_loadingSemaphore.Release();
             }
         }
 
@@ -1351,6 +1411,29 @@ namespace RATAPP.Panels
         }
 
         //save and update animal logic below 
+        /// <summary>
+        /// Handles saving animal data to the database.
+        /// 
+        /// Process:
+        /// 1. Validates form data
+        /// 2. Creates/updates animal record
+        /// 3. Handles success/failure scenarios
+        /// 
+        /// Validation:
+        /// - Required fields
+        /// - Data format
+        /// - Unique constraints
+        /// 
+        /// Error Handling:
+        /// - Shows user-friendly messages
+        /// - Logs technical errors
+        /// - Maintains data integrity
+        /// 
+        /// State Updates:
+        /// - Refreshes UI after save
+        /// - Updates edit mode
+        /// - Reloads data if needed
+        /// </summary>
         private async Task SaveButtonClick(object sender, EventArgs e)
         {
             AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
@@ -1390,7 +1473,7 @@ namespace RATAPP.Panels
         {
             try
             {
-                await _loadingSemaphore.WaitAsync();
+                //await _loadingSemaphore.WaitAsync();
                 return (List<string>)await _traitService.GetTraitsByTypeAndSpeciesAsync(type, species);
             }
             catch (Exception ex)
@@ -1401,7 +1484,7 @@ namespace RATAPP.Panels
             }
             finally
             {
-                _loadingSemaphore.Release();
+                //_loadingSemaphore.Release();
             }
         }
 

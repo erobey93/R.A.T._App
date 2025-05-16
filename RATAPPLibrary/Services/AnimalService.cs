@@ -12,6 +12,26 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace RATAPPLibrary.Services
 {
+    /// <summary>
+    /// Service for managing animal-related operations in the R.A.T. App.
+    /// Handles CRUD operations for animals, including trait management, lineage tracking, and species associations.
+    /// 
+    /// Key Features:
+    /// - Create and update animals with traits, lineage, and species information
+    /// - Manage animal relationships (dam/sire)
+    /// - Track animal traits (color, markings, ear type, coat type)
+    /// - Query animals by various criteria (sex, species, registration number)
+    /// 
+    /// Known Limitations:
+    /// - Breeder information is currently hardcoded (TODO)
+    /// - Some trait management features need refinement
+    /// - Error handling for missing traits needs improvement
+    /// 
+    /// Dependencies:
+    /// - LineService: Manages animal line/variety information
+    /// - TraitService: Handles animal trait management
+    /// - LineageService: Manages ancestry relationships
+    /// </summary>
     public class AnimalService : BaseService
     {
         //private readonly RatAppDbContext _context;
@@ -27,7 +47,33 @@ namespace RATAPPLibrary.Services
             _lineageService = new LineageService(contextFactory);
         }
 
-        //TODO switched to passing an animalDto object instead of individual parameters
+        /// <summary>
+        /// Creates a new animal in the database with associated traits and lineage information.
+        /// 
+        /// Process:
+        /// 1. Validates animal doesn't already exist
+        /// 2. Creates/retrieves line and species associations
+        /// 3. Creates the animal record
+        /// 4. Sets dam/sire relationships
+        /// 5. Assigns animal traits
+        /// 
+        /// Required AnimalDto fields:
+        /// - Id: Unique identifier
+        /// - regNum: Registration number
+        /// - Line: Line/variety identifier
+        /// - species: Common name of species
+        /// - Basic info (name, sex, DOB, etc.)
+        /// 
+        /// Optional fields:
+        /// - damId/sireId: Parent identifiers
+        /// - traits (color, markings, ear type, variety)
+        /// - comment, imageUrl
+        /// 
+        /// Throws:
+        /// - InvalidOperationException: If animal already exists or required entities not found
+        /// </summary>
+        /// <param name="animalDto">Data transfer object containing animal information</param>
+        /// <returns>The created Animal entity</returns>
         public async Task<Animal> CreateAnimalAsync(AnimalDto animalDto)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -131,7 +177,16 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //set animals traits
+        /// <summary>
+        /// Sets or updates an animal's traits based on the provided DTO.
+        /// Handles color, variety, ear type, and markings.
+        /// 
+        /// Note: Traits are optional - if a trait doesn't exist in the database,
+        /// the operation will silently continue without throwing an error.
+        /// 
+        /// TODO: Improve error handling for missing traits
+        /// </summary>
+        /// <param name="animalDto">DTO containing trait information</param>
         public async Task SetAnimalTraits(AnimalDto animalDto)
         {
             await ExecuteInTransactionAsync(async _context =>
@@ -191,7 +246,14 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //set animal's dam and sire 
+        /// <summary>
+        /// Establishes parental relationships for an animal by creating lineage connections.
+        /// Creates maternal (dam) and paternal (sire) connections in the lineage table.
+        /// 
+        /// Note: If a connection attempt fails, it will be silently caught and ignored.
+        /// This behavior may need review for better error handling.
+        /// </summary>
+        /// <param name="animalDto">DTO containing dam and sire IDs</param>
         public async Task SetAnimalDamAndSire(AnimalDto animalDto)
         {
             await ExecuteInContextAsync(async _context =>
@@ -259,7 +321,17 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get all animal info by sex 
+        /// <summary>
+        /// Retrieves animals filtered by both sex and species.
+        /// 
+        /// Usage:
+        /// - Useful for breeding pair selection
+        /// - Finding potential mates
+        /// - Filtering animal lists
+        /// </summary>
+        /// <param name="sex">Sex to filter by ("M" or "F")</param>
+        /// <param name="species">Species common name to filter by</param>
+        /// <returns>Array of AnimalDto objects matching criteria</returns>
         public async Task<AnimalDto[]> GetAnimalInfoBySexAndSpecies(string sex, string species)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -354,8 +426,24 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //update animal async
-        //TODO return type should probably be bool but think through this more 
+        /// <summary>
+        /// Updates an existing animal's information, including traits and lineage.
+        /// 
+        /// Process:
+        /// 1. Validates animal exists
+        /// 2. Updates basic information
+        /// 3. Updates/adds traits
+        /// 4. Updates/adds lineage connections
+        /// 
+        /// Note: 
+        /// - Existing traits are preserved
+        /// - New traits are added
+        /// - Lineage connections are only added if they don't exist
+        /// 
+        /// TODO: Consider changing return type to bool for success/failure indication
+        /// </summary>
+        /// <param name="animalDto">Updated animal information</param>
+        /// <returns>Updated Animal entity</returns>
         public async Task<Animal> UpdateAnimalAsync(AnimalDto animalDto)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -566,7 +654,22 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get animal's traits 
+        /// <summary>
+        /// Retrieves all traits associated with an animal.
+        /// 
+        /// Returns a dictionary with trait categories as keys:
+        /// - Color
+        /// - Marking
+        /// - Ear Type
+        /// - Coat Type
+        /// 
+        /// Note: If traits are not found, returns default "No X found" values
+        /// rather than throwing an exception.
+        /// 
+        /// TODO: Consider if this error handling approach is optimal
+        /// </summary>
+        /// <param name="id">Animal ID</param>
+        /// <returns>Dictionary mapping trait categories to lists of trait values</returns>
         public async Task<Dictionary<string, List<string>>> GetAnimalTraits(int id)
         {
             return await ExecuteInTransactionAsync(async _context =>
