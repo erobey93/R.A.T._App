@@ -1,4 +1,4 @@
-# R.A.T. App (Rodent Animal Tracking Application)
+# R.A.T. App (Rodent Ancestry+ Tracker)
 
 > **⚠️ PROOF OF CONCEPT STATUS**: This application is currently a Proof of Concept (POC) with all areas under active development. Features, APIs, Tests and data structures may change significantly as development progresses.
 
