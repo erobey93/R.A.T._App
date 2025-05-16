@@ -192,6 +192,9 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        //get x seq by animal id, or return 0 if none? 
+        //this would allow me to create a family tree relatively easily 
+        //just pop the animal id and make a neat document with them for now, more interesting in the future
 
         /// <summary>
         /// TODO: Implement connection update logic

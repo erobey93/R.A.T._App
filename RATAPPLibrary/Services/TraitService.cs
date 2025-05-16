@@ -145,19 +145,32 @@ namespace RATAPPLibrary.Services
                     throw new InvalidOperationException($"Trait type '{type}' does not exist.");
                 }
 
-                // search Traits by TraitTypeId and SpeciesID
-                var speciesId = _context.Species
-                    .Where(s => s.CommonName.ToLower() == species.ToLower())
-                    .Select(s => s.Id)
-                    .FirstOrDefault();
+                if(species != null && species != "Unknown")
+                { // search Traits by TraitTypeId and SpeciesID
+                    var speciesId = _context.Species
+                        .Where(s => s.CommonName.ToLower() == species.ToLower())
+                        .Select(s => s.Id)
+                        .FirstOrDefault();
 
-                var traits = await _context.Trait
-                    .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == speciesId)
-                    .ToListAsync();
+                    var traits = await _context.Trait
+                        .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == speciesId)
+                        .ToListAsync();
 
-                foreach (var trait in traits)
+                    foreach (var trait in traits)
+                    {
+                        traitList.Add(trait.CommonName);
+                    }
+                }
+                else
                 {
-                    traitList.Add(trait.CommonName);
+                    var traits = await _context.Trait
+                       .Where(t => t.TraitTypeId == traitType.Id)
+                       .ToListAsync();
+
+                    foreach (var trait in traits)
+                    {
+                        traitList.Add(trait.CommonName);
+                    }
                 }
 
                 return traitList;
@@ -287,7 +300,10 @@ namespace RATAPPLibrary.Services
         {
             return await ExecuteInContextAsync(async _context =>
             {
-                return await _context.Trait.ToListAsync();  // Get all traits from the database
+                return await _context.Trait
+           .Include(t => t.TraitType)   // Include TraitType navigation property
+           .Include(t => t.Species)    // Include Species navigation property
+           .ToListAsync();             // Get all traits with their related objects  // Get all traits from the database
             });
         }
 
@@ -580,5 +596,8 @@ namespace RATAPPLibrary.Services
                 return false;
             });
         }
+
+        //this should maybe go elsewhere, but this will return the trait with all of its information i.e. 
+        //trait, 
     }
 }

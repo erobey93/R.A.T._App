@@ -50,11 +50,9 @@ namespace RATAPPLibrary.Services.Genetics
     /// </summary>
     public class BreedingCalculationService : BaseService, IBreedingCalculationService
     {
-        //private readonly RatAppDbContext _context;
 
         public BreedingCalculationService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            //_context = context;
         }
 
         //using a pre-existing pairingId, create a "Breeding Calculation object that can be used to perform various calculations on that pair 
