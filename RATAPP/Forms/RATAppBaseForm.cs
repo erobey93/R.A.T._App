@@ -263,7 +263,7 @@ namespace RATAPP.Forms
         private void ResearchButton_Click(object sender, EventArgs e)
         {
             throw new NotImplementedException();
-            //var researchService = new ResearchService(_context);
+            //var researchService = new ResearchService(_contextFactory);
             //var researchPanel = new ResearchPanel(this, researchService);
             //_activePanel = researchPanel;
             //ShowPanel(researchPanel);

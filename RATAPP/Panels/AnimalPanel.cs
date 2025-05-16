@@ -439,7 +439,7 @@ namespace RATAPP.Panels
                 Size = new Size(50, 50),
                 Text = "+",
                 Font = new Font("Segoe UI", 20),
-                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleCenter,
                 Margin = new Padding(5),
                 Cursor = Cursors.Hand,
                 FlatStyle = FlatStyle.Flat
@@ -979,7 +979,7 @@ namespace RATAPP.Panels
         {
             try
             {
-                await _loadingSemaphore.WaitAsync();
+                //await _loadingSemaphore.WaitAsync();
                 var options = new List<string>();
                 string animalSpecies = GetAnimalSpecies();
 
@@ -1053,7 +1053,7 @@ namespace RATAPP.Panels
             }
             finally
             {
-                _loadingSemaphore.Release();
+                //_loadingSemaphore.Release();
             }
         }
 
@@ -1390,7 +1390,7 @@ namespace RATAPP.Panels
         {
             try
             {
-                await _loadingSemaphore.WaitAsync();
+                //await _loadingSemaphore.WaitAsync();
                 return (List<string>)await _traitService.GetTraitsByTypeAndSpeciesAsync(type, species);
             }
             catch (Exception ex)
@@ -1401,7 +1401,7 @@ namespace RATAPP.Panels
             }
             finally
             {
-                _loadingSemaphore.Release();
+                //_loadingSemaphore.Release();
             }
         }
 
