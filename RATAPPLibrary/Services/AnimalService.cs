@@ -259,7 +259,11 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get all animal info by sex 
+        /// <summary>
+        /// [Obsolete] Use GetAllAnimalsAsync with species and sex parameters instead.
+        /// Gets animals filtered by both sex and species.
+        /// </summary>
+        [Obsolete("Use GetAllAnimalsAsync(species, sex) instead")]
         public async Task<AnimalDto[]> GetAnimalInfoBySexAndSpecies(string sex, string species)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -286,7 +290,11 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get all animals by sex 
+        /// <summary>
+        /// [Obsolete] Use GetAllAnimalsAsync with sex parameter instead.
+        /// Gets animals filtered by sex.
+        /// </summary>
+        [Obsolete("Use GetAllAnimalsAsync(sex: sex) instead")]
         public async Task<AnimalDto[]> GetAnimalsBySex(string sex)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -307,6 +315,11 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        /// <summary>
+        /// [Obsolete] Use GetAllAnimalsAsync with species parameter instead.
+        /// Gets animals filtered by species.
+        /// </summary>
+        [Obsolete("Use GetAllAnimalsAsync(species: species) instead")]
         public async Task<AnimalDto[]> GetAnimalInfoBySpecies(string species)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -466,7 +479,12 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get animal by id
+        /// <summary>
+        /// Gets a specific animal by its ID
+        /// </summary>
+        /// <param name="id">The unique identifier of the animal</param>
+        /// <returns>Animal details as AnimalDto</returns>
+        /// <exception cref="KeyNotFoundException">Thrown when animal with specified ID is not found</exception>
         public async Task<AnimalDto> GetAnimalByIdAsync(int id)
         {
             return await ExecuteInContextAsync(async _context =>
@@ -481,30 +499,56 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //get all animals - TODO just basic data right now as all relationships are not built out yet
-        public async Task<AnimalDto[]> GetAllAnimalsAsync()
+        /// <summary>
+        /// Get all animals with optional filtering by species, sex, and search term
+        /// </summary>
+        /// <param name="species">Optional species filter</param>
+        /// <param name="sex">Optional sex filter (Male/Female/Unknown)</param>
+        /// <param name="searchTerm">Optional search term for name or ID</param>
+        /// <returns>Array of animals matching the specified criteria</returns>
+        public async Task<AnimalDto[]> GetAllAnimalsAsync(string? species = null, string? sex = null, string? searchTerm = null)
         {
             return await ExecuteInTransactionAsync(async _context =>
             {
-                // Fetch the animals and include related entities for species, line, dam, sire, and variety
-                //this is fetching all animals so must be dealt with as a group 
+                // Start with base query
                 var animals = await _context.Animal
-                .Include(a => a.Line)
-                //.Include(a => a.Litters).ThenInclude(l => l.Pair) // Assuming Litters is a navigation property and Dam is a navigation property on Litter TODO still need to set up ancestry and genetics so these won't be super functional right now 
-                .ToListAsync();
+                    .Include(a => a.Line)
+                    .ToListAsync();
 
-                List<AnimalDto> animalDto = new List<AnimalDto>();
+                List<AnimalDto> animalDtos = new List<AnimalDto>();
 
-                //map each individual animal and add it to the array to be returned 
+                // Map to DTOs
                 foreach (var animal in animals)
                 {
-                    animalDto.Add(await MapSingleAnimaltoDto(animal));
+                    animalDtos.Add(await MapSingleAnimaltoDto(animal));
                 }
 
-                return animalDto.ToArray(); //return the array of animals or a list need to research why one over the other given my use case TODO 
-            }); 
-        }
+                // Apply filters
+                var filteredAnimals = animalDtos.AsEnumerable();
 
+                if (!string.IsNullOrEmpty(species))
+                {
+                    filteredAnimals = filteredAnimals.Where(a => 
+                        a.species.Equals(species, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(sex))
+                {
+                    filteredAnimals = filteredAnimals.Where(a => 
+                        a.sex.Equals(sex, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    searchTerm = searchTerm.ToLower();
+                    filteredAnimals = filteredAnimals.Where(a =>
+                        a.name.ToLower().Contains(searchTerm) ||
+                        a.Id.ToString().Contains(searchTerm));
+                }
+
+                return filteredAnimals.ToArray();
+            });
+        }
         //convert from Animal to AnimalDto
         public async Task<AnimalDto> MapSingleAnimaltoDto(Animal a)
         {
