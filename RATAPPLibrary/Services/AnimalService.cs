@@ -120,16 +120,6 @@ namespace RATAPPLibrary.Services
 
                     await _context.SaveChangesAsync();
 
-                    //get the animal back from the db so that we have the id
-                    //FIXME this is SO UGLY, need to plan out this logic better 
-                    animalDto = await GetAnimalByRegAsync(animalDto.regNum);
-
-                    //set dam and sire
-                    await SetAnimalDamAndSire(animalDto);
-
-                    //set available animal traits 
-                    await SetAnimalTraits(animalDto);
-
                     return newAnimal;
                 }
                 else
@@ -139,6 +129,31 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        //complete create process TODO just trying this out given the new re-factor 
+        public async Task<Animal> CreateAnimalFullProcess(AnimalDto animal) {
+            //first, create the animal
+            var animal1 = await CreateAnimalAsync(animal);
+
+            //get the animal back from the db so that we have the id
+            var animalDtoWithReg = await GetAnimalByRegAsync(animal.regNum);
+
+            //set dam and sire
+            await SetAnimalDamAndSire(animalDtoWithReg);
+
+            //set available animal traits 
+            await SetAnimalTraits(animalDtoWithReg);
+
+            //get the animal object back with all new data attached (?) 
+            //animalDtoWithReg = await 
+
+            return animal1;
+
+            //then, get the id back
+            //then, add dam and sire
+            //finally, set traits
+
+
+        }
         //this returns an animal object without creating the animal in the database as I'm currently assuming that the animal exists FIXME because I should check, but there COULD be instances where this may make sense not sure though
         public async Task <Animal> MapAnimalDtoBackToAnimal(AnimalDto animalDto)
         {

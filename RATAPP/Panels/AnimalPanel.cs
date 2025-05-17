@@ -384,6 +384,7 @@ namespace RATAPP.Panels
                 if (_isEditMode)
                 {
                     animalPhotoBox.Click += AnimalImageClicked;
+                    //TODO should probably handle photo carasol logic here as well 
                 }
             }
         }
@@ -1446,7 +1447,7 @@ namespace RATAPP.Panels
 
             try
             {
-                Animal animal = await _animalService.CreateAnimalAsync(animalDto); //start by creating the animal not using the method I created as it returns an error TODO on this 
+                Animal animal = await _animalService.CreateAnimalFullProcess(animalDto); //start by creating the animal not using the method I created as it returns an error TODO on this 
                 CompleteSaveProcess(animalDto, "Animal data saved successfully!");
                 await GetAndResetAnimalData(animal); //TODO do I need to be passing back an entire animal object? why, or why not? 
             }
