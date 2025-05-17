@@ -1,16 +1,16 @@
-# R.A.T. App (Rodent Animal Tracking Application)
+# R.A.T. App (Rodent Ancestry+ Tracker)
 
-> **⚠️ PROOF OF CONCEPT STATUS**: This application is currently a Proof of Concept (POC) with all areas under active development. Features, APIs, and data structures may change significantly as development progresses.
+> **⚠️ PROOF OF CONCEPT STATUS**: This application is currently a Proof of Concept (POC) with all areas under active development. Features, APIs, Tests and data structures may change significantly as development progresses.
 
 ## Project Overview
 
-R.A.T. App is a comprehensive animal management system designed specifically for tracking and managing rodent populations in research and breeding environments. This application provides tools for detailed animal tracking, breeding management, lineage visualization, and research data organization.
+R.A.T. App is a comprehensive animal management system designed specifically for tracking and managing rodent populations in hobby breeding environments. This application provides tools for detailed animal tracking, breeding management, lineage visualization, genetics tracking and calculations, adopter management and personal research data organization.
 
 ### Development Status
 
 - 🚧 **Current Phase**: Proof of Concept
 - 📅 **Last Updated**: May 2025
-- 🎯 **Focus Areas**: Core functionality and data model validation
+- 🎯 **Focus Areas**: Core Desktop functionality, data model validation and endpoint development
 
 ## Features
 
@@ -27,7 +27,7 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 - Breeding calculator
 - **Known Limitations**: Advanced breeding predictions pending implementation
 
-### Lineage & Genetics [Beta]
+### Lineage & Genetics [In Development]
 - Family tree visualization
 - Genetic trait tracking
 - Ancestry mapping
@@ -39,7 +39,7 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 - Research project organization
 - **Known Limitations**: Basic reporting only in current version
 
-### User Management [Beta]
+### User Management [In Development]
 - Secure authentication
 - Role-based access control
 - Account management
@@ -49,15 +49,16 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 
 - **Desktop Application**: .NET/C# Windows Forms
 - **Web Component**: React/TypeScript
+- **Mobile Component**: TBD
 - **Database**: SQL Server with Entity Framework Core
-- **Testing**: MSTest framework
+- **Testing**: MSTest framework, XUnit 
 
 ## Installation & Setup
 
 ### Prerequisites
 - .NET 6.0 or later
 - SQL Server 2019 or later
-- Node.js 16+ (for web component)
+- Node.js 16+ (for web component) - Web componenet within this project will be deprecated, new web project is in React.ts 
 
 ### Database Setup
 1. Ensure SQL Server is installed and running
@@ -80,8 +81,8 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 
 ### First Run
 1. Start the application
-2. Create an initial admin account
-3. Configure basic settings
+2. Create an initial admin account - [In Development]
+3. Configure basic settings - [In Development]
 
 ## Usage Guide
 
@@ -94,7 +95,7 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 
 #### Animal Management
 - Add new animals with detailed information
-- Track health records
+- Track health records [In Development]
 - Manage traits and characteristics
 
 #### Breeding Management
@@ -102,9 +103,9 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 - Document litters
 - Track breeding outcomes
 
-#### Research Tools
+#### Research Tools [In Development]
 - Organize research projects
-- Generate reports
+- Generate reports on animal collections
 - Export data
 
 ## Project Structure
@@ -120,6 +121,7 @@ R.A.T. App is a comprehensive animal management system designed specifically for
 - BreedingService: Pairing and litter management
 - LineageService: Ancestry tracking
 - ProjectService: Research project organization
+- TODO need to update service list 
 
 ## Development
 
@@ -164,18 +166,26 @@ dotnet test RATAPPLibraryUT
 
 ### Short Term
 - Complete core animal management features
-- Enhance breeding management system
-- Improve lineage visualization
+- Complete core breeding management system
+- Complete core lineage/ancestry system
+- Complete basic genetics calculations, rules and overall system
+- Get user feedback on core desktop functionality
 
 ### Medium Term
-- Implement advanced genetic calculations
+- Complete REST API project (currently only animal management endpoints developed)
+- Implement Web App (identical to desktop but with subscriber tiers and enhanced security)
+- Implement advanced genetics calculations
 - Expand reporting capabilities
-- Add data analysis tools
+- Add research page with data analysis tools
+- Add financial management page
+- Expand data import/export capabilities (bulk import, bulk export, connect to web app)
 
 ### Long Term
 - Mobile application development
 - Cloud synchronization
 - Advanced research tools
+- Integration with email, AI and other business related APIs to improved adopter management system
+- Auto-create user websites from data
 
 ## Contributing
 
