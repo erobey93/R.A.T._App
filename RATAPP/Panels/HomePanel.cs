@@ -63,7 +63,7 @@ namespace RATAPP.Panels
         private RATAppBaseForm _parentForm;
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly AnimalService _animalService;
-        private AnimalDto[] _animals;
+        private RATAPPLibrary.Data.Models.AnimalDto[] _animals;
         private PictureBox loadingSpinner;
         private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
 

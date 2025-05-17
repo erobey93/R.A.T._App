@@ -62,12 +62,12 @@ namespace RATAPP.Panels
 
         // State
         private bool _isEditMode = false;
-        private AnimalDto _animal;
-        private AnimalDto _dam;
-        private AnimalDto _sire;
-        private AnimalDto[] _dams;
-        private AnimalDto[] _sires;
-        private AnimalDto[] _allAnimals;
+        private RATAPPLibrary.Data.Models.AnimalDto _animal;
+        private RATAPPLibrary.Data.Models.AnimalDto _dam;
+        private RATAPPLibrary.Data.Models.AnimalDto _sire;
+        private RATAPPLibrary.Data.Models.AnimalDto[] _dams;
+        private RATAPPLibrary.Data.Models.AnimalDto[] _sires;
+        private RATAPPLibrary.Data.Models.AnimalDto[] _allAnimals;
         private readonly RATAppBaseForm _parentForm;
 
         // UI Controls
@@ -101,15 +101,15 @@ namespace RATAPP.Panels
         private Panel featureButtonPanel;
 
         // Test image paths (TODO: Move to configuration)
-        private List<string> imagePaths = new List<string>
-        {
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00S0S_e4sHXNFmkdY_0t20CI_1200x900.jpg",
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00v0v_hu4XyatVj1Q_0t20CI_1200x900.jpg",
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_0214.JPG",
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
-        };
+        //private List<string> imagePaths = new List<string>
+        //{
+        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00S0S_e4sHXNFmkdY_0t20CI_1200x900.jpg",
+        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00v0v_hu4XyatVj1Q_0t20CI_1200x900.jpg",
+        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_0214.JPG",
+        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
+        //};
 
-        public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, AnimalDto[] allAnimals, AnimalDto currAnimal)
+        public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, RATAPPLibrary.Data.Models.AnimalDto[] allAnimals, RATAPPLibrary.Data.Models.AnimalDto currAnimal)
         {
             _contextFactory = contextFactory;
             _animalService = new AnimalService(contextFactory);
@@ -146,7 +146,7 @@ namespace RATAPP.Panels
         /// - Data loaded from services if animal exists
         /// </summary>
         /// <param name="animal">Animal data to display, or null for new animal</param>
-        private void InitializeComponent(AnimalDto animal)
+        private void InitializeComponent(RATAPPLibrary.Data.Models.AnimalDto animal)
         {
             _animal = animal;
             if (_animal == null)
@@ -358,7 +358,7 @@ namespace RATAPP.Panels
         }
 
         // Add image to textbox
-        private void AddImageToAnimalTextbox(AnimalDto animal)
+        private void AddImageToAnimalTextbox(RATAPPLibrary.Data.Models.AnimalDto animal)
         {
             //check that the image url exists 
             if (animal.imageUrl != null)
@@ -688,7 +688,7 @@ namespace RATAPP.Panels
             }
             int i = 0;
             //_isNavMode = true; //set the navigation mode to true
-            foreach (AnimalDto animal in _allAnimals)
+            foreach (RATAPPLibrary.Data.Models.AnimalDto animal in _allAnimals)
             {
                 //once we get to animal
                 if (animal.Id == _animal.Id && i > 0) //make sure there is a previous if there's not maybe go to the end of the line like a loop? For now, just stop 
@@ -807,7 +807,7 @@ namespace RATAPP.Panels
             //maybe a list would be better here so that I could do next and previous vs. having to find index but not sure yet 
             int i = 0;
             //_isNavMode = true;
-            foreach (AnimalDto animal in _allAnimals)
+            foreach (RATAPPLibrary.Data.Models.AnimalDto animal in _allAnimals)
             {
                 if (i == 1)
                 {
@@ -882,7 +882,7 @@ namespace RATAPP.Panels
                         comboBox.SelectedIndex = -1;
                     }
                 }
-                //if dam get the selected dam object and store to global dam variable 
+                //if dam get the selected dam object and store to global dam variable FIXME I need to implement data binding here
                 else if (comboBox.Name == "damComboBox")
                 {
                     //get the animal object from the list of animal objects stored earlier 
@@ -932,7 +932,7 @@ namespace RATAPP.Panels
         private void AddNewItemToDatabase(string newItem)
         {
             // TODO: Implement database logic to save the new item
-            Console.WriteLine($"New item added to the database: {newItem}");
+            Console.WriteLine($"New item added to the database logic TODO: {newItem}");
         }
 
         private async void LoadAnimalDataAsync(int animalId)
@@ -996,7 +996,7 @@ namespace RATAPP.Panels
             }
         }
 
-        private async Task<AnimalDto> GetOrCreateDefaultAnimal(int? id)
+        private async Task<RATAPPLibrary.Data.Models.AnimalDto> GetOrCreateDefaultAnimal(int? id)
         {
             if (id.HasValue && id.Value != 0)
             {
@@ -1015,7 +1015,7 @@ namespace RATAPP.Panels
                 }
             }
 
-            return new AnimalDto
+            return new RATAPPLibrary.Data.Models.AnimalDto
             {
                 Id = 0,
                 regNum = "0",
@@ -1048,6 +1048,7 @@ namespace RATAPP.Panels
                 {
                     case "speciesComboBox":
                         var species = await _speciesService.GetAllSpeciesAsync();
+                        //bind this data to the species combo box items
                         options.AddRange((List<string>)species);
                         break;
 
@@ -1056,16 +1057,31 @@ namespace RATAPP.Panels
                         break;
 
                     case "varietyComboBox":
+                        if (speciesComboBox.SelectedIndex == 0)
+                        {
+                            MessageBox.Show("Please enter a species");
+                            break;
+                        }
                         var animalCoats = await GetSpeciesTraitsByType(animalSpecies, "Coat Type");
                         options.AddRange(animalCoats);
                         break;
 
                     case "colorComboBox":
+                        if (speciesComboBox.SelectedIndex == 0)
+                        {
+                            MessageBox.Show("Please enter a species");
+                            break;
+                        }
                         var animalColors = await GetSpeciesTraitsByType(animalSpecies, "Color");
                         options.AddRange(animalColors);
                         break;
 
                     case "damComboBox":
+                        if (speciesComboBox.SelectedIndex == 0)
+                        {
+                            MessageBox.Show("Please enter a species");
+                            break;
+                        }
                         if (animalSpecies != "Unknown")
                         {
                             _dams = await _animalService.GetAnimalInfoBySexAndSpecies("Female", animalSpecies);
@@ -1081,6 +1097,11 @@ namespace RATAPP.Panels
                         break;
 
                     case "sireComboBox":
+                        if (speciesComboBox.SelectedIndex == 0)
+                        {
+                            MessageBox.Show("Please enter a species");
+                            break;
+                        }
                         if (animalSpecies != "Unknown")
                         {
                             _sires = await _animalService.GetAnimalInfoBySexAndSpecies("Male", animalSpecies);
@@ -1096,11 +1117,21 @@ namespace RATAPP.Panels
                         break;
 
                     case "earTypeComboBox":
+                        if (speciesComboBox.SelectedIndex == 0)
+                        {
+                            MessageBox.Show("Please enter a species");
+                            break;
+                        }
                         var animalEars = await GetSpeciesTraitsByType(animalSpecies, "Ear Type");
                         options.AddRange(animalEars);
                         break;
 
                     case "markingComboBox":
+                        if (speciesComboBox.SelectedIndex == 0)
+                        {
+                            MessageBox.Show("Please enter a species");
+                            break;
+                        }
                         var animalMarkings = await GetSpeciesTraitsByType(animalSpecies, "Marking");
                         options.AddRange(animalMarkings);
                         break;
@@ -1337,7 +1368,7 @@ namespace RATAPP.Panels
         }
 
         //parse textbox into animal dto object
-        private AnimalDto ParseAnimalData()
+        private RATAPPLibrary.Data.Models.AnimalDto ParseAnimalData()
         {
             //FIXME just for now 
             DateTime dob = DateTime.Now;
@@ -1356,7 +1387,7 @@ namespace RATAPP.Panels
 
             if (_animal != null)
             {
-                AnimalDto animal = new AnimalDto
+                RATAPPLibrary.Data.Models.AnimalDto animal = new RATAPPLibrary.Data.Models.AnimalDto
                 {
                     Id = _animal.Id,
                     regNum = regNumTextBox.Text,
@@ -1383,7 +1414,7 @@ namespace RATAPP.Panels
             }
             else
             {
-                AnimalDto animal = new AnimalDto
+                RATAPPLibrary.Data.Models.AnimalDto animal = new RATAPPLibrary.Data.Models.AnimalDto
                 {
                     //id will have to be created for a new animal 
                     regNum = regNumTextBox.Text,
@@ -1437,7 +1468,7 @@ namespace RATAPP.Panels
         /// </summary>
         private async Task SaveButtonClick(object sender, EventArgs e)
         {
-            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
+            RATAPPLibrary.Data.Models.AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
 
             if (animalDto == null) //if the data is invalid, show an error message and return
             {
@@ -1582,7 +1613,7 @@ namespace RATAPP.Panels
 
             // Second column (right side)
             colorLabel = CreateLabel("Color", 380, 20, labelFont);
-            genotypeLabel = CreateLabel("Genetics", 380, 60, labelFont);
+            genotypeLabel = CreateLabel("Genotype", 380, 60, labelFont);
             markingsLabel = CreateLabel("Markings", 380, 100, labelFont);
             breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
             earTypeLabel = CreateLabel("Ear Type", 380, 180, labelFont);
@@ -1628,7 +1659,7 @@ namespace RATAPP.Panels
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
         //TODO ID should be a string, but leaving it for now as db edits are annoying 
-        private async void InitializeTextBoxes(AnimalDto animal)
+        private async void InitializeTextBoxes(RATAPPLibrary.Data.Models.AnimalDto animal)
         {
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, _animal.regNum);
@@ -1745,7 +1776,7 @@ namespace RATAPP.Panels
         }
 
         // Handle the create new animal process 
-        private async Task HandleCreateNewAsync(AnimalDto animalDto)
+        private async Task HandleCreateNewAsync(RATAPPLibrary.Data.Models.AnimalDto animalDto)
         {
             throw new NotImplementedException();
             try
@@ -1775,7 +1806,7 @@ namespace RATAPP.Panels
         }
 
         // Handle the update process for an existing animal
-        private async Task HandleUpdateAsync(AnimalDto animalDto)
+        private async Task HandleUpdateAsync(RATAPPLibrary.Data.Models.AnimalDto animalDto)
         {
             try
             {
@@ -1791,7 +1822,7 @@ namespace RATAPP.Panels
         }
 
         // Helper methods for handling the high level save process
-        private void CompleteSaveProcess(AnimalDto animalDto, string successMessage)
+        private void CompleteSaveProcess(RATAPPLibrary.Data.Models.AnimalDto animalDto, string successMessage)
         {
             ShowMessage(successMessage);
             ToggleButtons(false);

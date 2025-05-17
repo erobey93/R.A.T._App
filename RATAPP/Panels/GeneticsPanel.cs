@@ -927,8 +927,8 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var dam = (AnimalDto)dam1Combo.SelectedItem;
-            var sire = (AnimalDto)sire1Combo.SelectedItem;
+            var dam = (RATAPPLibrary.Data.Models.AnimalDto)dam1Combo.SelectedItem;
+            var sire = (RATAPPLibrary.Data.Models.AnimalDto)sire1Combo.SelectedItem;
 
             // Clear previous results
             resultPanel.Controls.Clear();
@@ -1109,7 +1109,7 @@ namespace RATAPP.Panels
             {
                 //var animal = _animalService.MapSingleAnimaltoDto(selectedAnimal);
                 //var animalResult = animal.Result;
-                var animal = animalSelector.SelectedItem as AnimalDto; 
+                var animal = animalSelector.SelectedItem as RATAPPLibrary.Data.Models.AnimalDto; 
 
                 // Create a new form to display the pedigree in a larger view
                 var pedigreeForm = IndividualAnimalAncestryForm.Create(_baseForm, _contextFactory, animal);
