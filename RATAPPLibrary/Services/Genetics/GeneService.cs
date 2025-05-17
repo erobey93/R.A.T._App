@@ -11,7 +11,7 @@ namespace RATAPPLibrary.Services.Genetics
 {
     /// <summary>
     /// Service for managing genetic information in the R.A.T. App.
-    /// Handles genes, alleles, and genotypes at a molecular level.
+    /// Handles genes, alleles, and genotypes.
     /// 
     /// Key Features:
     /// - Gene Management:
@@ -24,9 +24,17 @@ namespace RATAPPLibrary.Services.Genetics
     /// - Medical: Health conditions
     /// - Behavioral: Temperament traits
     /// 
+    /// Gene Sub-Categories:
+    /// - Physical
+    ///     - Ear Type
+    ///     - Coat Type
+    ///     - Eye Color
+    ///     - Coat Color
+    ///     - 
+    /// 
     /// Impact Levels:
     /// - Cosmetic: Appearance only
-    /// - Health: Affects wellbeing
+    /// - Health: Affects physical wellbeing
     /// - Critical: Serious conditions
     /// 
     /// Expression Ages:
@@ -52,7 +60,6 @@ namespace RATAPPLibrary.Services.Genetics
 
         public GeneService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            //_context = context;
         }
 
         /// <summary>
