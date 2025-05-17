@@ -12,8 +12,44 @@ using RATAPPLibrary.Services;
 namespace RATAPP.Forms
 {
     /// <summary>
-    /// Form for adding new litters, either single or multiple.
-    /// Uses helper classes to manage UI, data, and events.
+    /// Form for adding new litters in the R.A.T. App.
+    /// Provides single and batch litter creation with validation.
+    /// 
+    /// Key Features:
+    /// - Single Litter Entry:
+    ///   * Basic litter information
+    ///   * Breeding pair selection
+    ///   * Pup count tracking
+    ///   * Notes and details
+    /// 
+    /// - Multiple Litter Entry:
+    ///   * Batch creation interface
+    ///   * Data grid for review
+    ///   * Bulk save operations
+    /// 
+    /// Data Validation:
+    /// - Required field checking
+    /// - Numeric input validation
+    /// - Date range verification
+    /// - Duplicate ID prevention
+    /// 
+    /// UI Components:
+    /// - Tabbed interface
+    /// - Form validation
+    /// - Loading indicators
+    /// - Error handling
+    /// 
+    /// Known Limitations:
+    /// - Basic error handling
+    /// - Limited bulk operations
+    /// - Fixed validation rules
+    /// - Some TODO implementations
+    /// 
+    /// Dependencies:
+    /// - BreedingService
+    /// - AnimalService
+    /// - ProjectService
+    /// - Form helper classes
     /// </summary>
     public partial class AddLitterForm : Form
     {
@@ -72,6 +108,25 @@ namespace RATAPP.Forms
         /// Static factory method that initializes the form and ensures the data is loaded.
         /// Use like: var form = await AddLitterForm.CreateAsync(context);
         /// </summary>
+        /// <summary>
+        /// Static factory method that initializes the form and loads required data.
+        /// Uses async initialization pattern for proper data loading.
+        /// 
+        /// Process:
+        /// 1. Creates form instance
+        /// 2. Loads species data
+        /// 3. Loads animal records
+        /// 4. Loads active pairs
+        /// 5. Loads projects
+        /// 
+        /// Error Handling:
+        /// - Shows loading indicator
+        /// - Manages async failures
+        /// - Provides user feedback
+        /// 
+        /// Usage:
+        /// var form = await AddLitterForm.CreateAsync(context);
+        /// </summary>
         public static async Task<AddLitterForm> CreateAsync(RatAppDbContextFactory contextFactory)
         {
             var form = new AddLitterForm(contextFactory);
@@ -79,6 +134,27 @@ namespace RATAPP.Forms
             return form;
         }
 
+        /// <summary>
+        /// Loads all required data for the form asynchronously.
+        /// Shows loading indicator during data fetch operations.
+        /// 
+        /// Data Loaded:
+        /// - Species list
+        /// - Available animals
+        /// - Active breeding pairs
+        /// - Current projects
+        /// 
+        /// Dependencies:
+        /// - Species service
+        /// - Animal service
+        /// - Breeding service
+        /// - Project service
+        /// 
+        /// Error Handling:
+        /// - Manages service exceptions
+        /// - Shows loading state
+        /// - Ensures UI responsiveness
+        /// </summary>
         private async Task LoadInitialDataAsync()
         {
             try

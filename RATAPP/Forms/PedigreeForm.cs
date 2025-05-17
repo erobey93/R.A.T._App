@@ -103,7 +103,7 @@ namespace RATAPP.Forms
                 Location = new Point(700, 30),
                 Size = new Size(100, 100),
                 SizeMode = PictureBoxSizeMode.Zoom,
-                Image = Image.FromFile("RATAPP/Resources/RATAPPLogo.png")
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\DALL·E 2024-01-29 19.13.34 - Create another logo for 'TLDR', a mousery and rattery in Portland, Oregon, similar to the previous design but with an emphasis on clearer visibility o.jpg")
             };
 
             // Generate PDF Button

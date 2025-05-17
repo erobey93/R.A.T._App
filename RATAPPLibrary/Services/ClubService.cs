@@ -8,8 +8,40 @@ using System.Threading.Tasks;
 namespace RATAPPLibrary.Services
 {
     /// <summary>
-    /// Service for managing breeding clubs and breeder-club relationships.
-    /// Handles operations for Club and BreederClub entities.
+    /// Service for managing breeding clubs and breeder-club relationships in the R.A.T. App.
+    /// Handles the creation, management, and association of breeding clubs and their members.
+    /// 
+    /// Key Features:
+    /// - Club Management:
+    ///   * Create and maintain breeding clubs
+    ///   * Track club memberships
+    ///   * Manage breeder associations
+    /// 
+    /// Data Structure:
+    /// - Club: Represents a breeding organization
+    /// - BreederClub: Many-to-many relationship between breeders and clubs
+    /// 
+    /// Relationships:
+    /// - One breeder can belong to multiple clubs
+    /// - One club can have multiple breeders
+    /// - All relationships tracked through BreederClub entity
+    /// 
+    /// Known Limitations:
+    /// - No club roles/permissions
+    /// - Basic club metadata only
+    /// - No club event tracking
+    /// - Not using BaseService pattern
+    /// 
+    /// Planned Improvements:
+    /// - Implement BaseService pattern
+    /// - Add club roles and permissions
+    /// - Add club event management
+    /// - Support club communication
+    /// - Add club resource sharing
+    /// 
+    /// Dependencies:
+    /// - RatAppDbContext for data access
+    /// - Will integrate with BaseService (planned)
     /// </summary>
     public interface IClubService //: BaseService TODO use new BaseService + context factory pattern 
     {
@@ -34,8 +66,22 @@ namespace RATAPPLibrary.Services
         }
 
         /// <summary>
-        /// Creates a new breeding club.
+        /// Creates a new breeding club with the specified name.
+        /// 
+        /// Process:
+        /// 1. Validates name is unique
+        /// 2. Creates club record
+        /// 3. Saves to database
+        /// 
+        /// Validation:
+        /// - Checks for existing club with same name
+        /// - Name cannot be empty/null (enforced by model)
+        /// 
+        /// Throws:
+        /// - InvalidOperationException if club name exists
         /// </summary>
+        /// <param name="name">Name for the new club</param>
+        /// <returns>Created Club object</returns>
         public async Task<Club> CreateClubAsync(string name)
         {
             var existingClub = await _context.Club.FirstOrDefaultAsync(c => c.Name == name);
@@ -109,8 +155,25 @@ namespace RATAPPLibrary.Services
         }
 
         /// <summary>
-        /// Associates a breeder with a club.
+        /// Associates a breeder with a club as a member.
+        /// 
+        /// Process:
+        /// 1. Checks if association already exists
+        /// 2. Creates new BreederClub record if not
+        /// 3. Saves to database
+        /// 
+        /// Note:
+        /// - Silent success if association exists
+        /// - No validation of breeder/club existence
+        /// 
+        /// TODO:
+        /// - Add breeder/club existence validation
+        /// - Add role/permission support
+        /// - Add membership metadata (join date, etc.)
         /// </summary>
+        /// <param name="breederId">ID of breeder to add</param>
+        /// <param name="clubId">ID of club to add to</param>
+        /// <returns>True if association created, false if already exists</returns>
         public async Task<bool> AddBreederToClubAsync(int breederId, int clubId)
         {
             var existingAssociation = await _context.BreederClub

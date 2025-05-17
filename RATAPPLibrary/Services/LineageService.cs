@@ -5,6 +5,28 @@ using RATAPPLibrary.Data.Models.Ancestry;
 
 namespace RATAPPLibrary.Services
 {
+    /// <summary>
+    /// Service for managing animal lineage and ancestry relationships in the R.A.T. App.
+    /// Handles tracking of parental relationships and generational connections between animals.
+    /// 
+    /// Key Features:
+    /// - Parent Tracking:
+    ///   * Dam (mother) identification and retrieval
+    ///   * Sire (father) identification and retrieval
+    /// - Lineage Management:
+    ///   * Create and verify ancestry connections
+    ///   * Track generational relationships
+    ///   * Support for both maternal and paternal lineages
+    /// 
+    /// Data Structure:
+    /// - Uses generation and sequence numbers to track ancestry
+    /// - Generation 1: Direct parents (dam=seq 1, sire=seq 2)
+    /// - Supports relationship type tracking (Maternal/Paternal)
+    /// 
+    /// Known Limitations:
+    /// - Update connections functionality incomplete (TODO)
+    /// - Error handling returns null for some scenarios
+    /// </summary>
     public class LineageService : BaseService
     {
         //private readonly RatAppDbContext _context;
@@ -14,9 +36,19 @@ namespace RATAPPLibrary.Services
             //_context = context;
         }
 
-        //get dam via animal id
-        //Find the animal id
-        //Find gen 1, seq 1 for dam
+        /// <summary>
+        /// Retrieves the dam (mother) of a specified animal.
+        /// 
+        /// Process:
+        /// 1. Searches lineage records for generation 1, sequence 1 (dam position)
+        /// 2. Verifies maternal relationship type
+        /// 3. Returns the associated ancestor animal record
+        /// 
+        /// Note: Returns null if dam not found or on error
+        /// TODO: Consider throwing exceptions instead of returning null
+        /// </summary>
+        /// <param name="animalId">ID of the animal to find dam for</param>
+        /// <returns>Animal object representing the dam, or null if not found</returns>
         public async Task<Animal> GetDamByAnimalId(int animalId)
         {
             return await ExecuteInContextAsync(async _context =>
@@ -44,9 +76,19 @@ namespace RATAPPLibrary.Services
         }
 
 
-        //get sire via animal id
-        //Find the animal id
-        //Find gen 1, seq 2 for sire 
+        /// <summary>
+        /// Retrieves the sire (father) of a specified animal.
+        /// 
+        /// Process:
+        /// 1. Searches lineage records for generation 1, sequence 2 (sire position)
+        /// 2. Verifies paternal relationship type
+        /// 3. Returns the associated ancestor animal record
+        /// 
+        /// Note: Returns null if sire not found or on error
+        /// TODO: Consider throwing exceptions instead of returning null
+        /// </summary>
+        /// <param name="animalId">ID of the animal to find sire for</param>
+        /// <returns>Animal object representing the sire, or null if not found</returns>
         public async Task<Animal> GetSireByAnimalId(int animalId)
         {
             return await ExecuteInContextAsync(async _context =>
@@ -87,9 +129,20 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //add a new lineage connection
-        //Add a new lineage connection between an animal and its ancestor
-        //Lineage connection addition must be followed by adding in any new connections with the updated data 
+        /// <summary>
+        /// Creates a new lineage connection between an animal and its ancestor.
+        /// 
+        /// Parameters:
+        /// - animalId: The descendant animal
+        /// - ancestorId: The ancestor animal
+        /// - generation: Generational distance (1 for parents, 2 for grandparents, etc.)
+        /// - sequence: Position in generation (1=dam side, 2=sire side)
+        /// - relationshipType: "Maternal" or "Paternal"
+        /// 
+        /// Note: After adding a connection, related connections should be updated
+        /// TODO: Implement update of related connections
+        /// </summary>
+        /// <returns>True if connection created successfully, false if error occurs</returns>
         public async Task<bool> AddLineageConnection(int animalId, int ancestorId, int generation, int sequence, string relationshipType)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -121,7 +174,13 @@ namespace RATAPPLibrary.Services
             });
         }
 
-        //check for matching animalId and ancestorId 
+        /// <summary>
+        /// Checks if a lineage connection exists between two animals.
+        /// Used to prevent duplicate connections and verify relationships.
+        /// </summary>
+        /// <param name="animalId">ID of the descendant animal</param>
+        /// <param name="ancestorId">ID of the ancestor animal</param>
+        /// <returns>True if connection exists, false otherwise</returns>
         public async Task<bool> DoesAncestryConnectionExist(int animalId, int ancestorId)
         {
             return await ExecuteInContextAsync(async _context =>
@@ -133,11 +192,21 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        //get x seq by animal id, or return 0 if none? 
+        //this would allow me to create a family tree relatively easily 
+        //just pop the animal id and make a neat document with them for now, more interesting in the future
 
-        // update connections
-        // when a new lineage connection is added
-        // the connections must be updated to reflect the new data
-        // this means searching for any connections 
+        /// <summary>
+        /// TODO: Implement connection update logic
+        /// 
+        /// Planned functionality:
+        /// - Update existing connections when new ones are added
+        /// - Maintain consistency in the lineage tree
+        /// - Handle relationship changes and updates
+        /// 
+        /// This will ensure the integrity of the ancestry data
+        /// when new connections are established.
+        /// </summary>
 
     }
 }
