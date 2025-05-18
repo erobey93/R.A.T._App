@@ -7,6 +7,7 @@
         public required int PairId { get; set; } // The unique identifier for the parental pairing
         public required string Name { get; set; } // The name of the litter
         public int? NumPups { get; set; } // The number of pups in the litter
+        public int? NumLivePups { get; set; }
         public DateTime? DateOfBirth { get; set; } // The date the litter was born
         public int? NumFemale { get; set; } // The number of female pups in the litter
         public int? NumMale { get; set; } // The number of male pups in the litter 

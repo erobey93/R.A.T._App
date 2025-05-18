@@ -161,6 +161,7 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create two columns for better organization
+            // Create two columns for better organization
             var leftColumn = new Panel
             {
                 Dock = DockStyle.Left,
@@ -170,7 +171,8 @@ namespace RATAPP.Forms
 
             var rightColumn = new Panel
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Right,
+                Width = 550,
                 Padding = new Padding(10, 0, 0, 0)
             };
 
