@@ -380,7 +380,7 @@ namespace RATAPP.Forms
             // Create groups for related fields
             var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
             var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250);
-            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 350);
+            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 350); //FIXME litter details not showing up 
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
