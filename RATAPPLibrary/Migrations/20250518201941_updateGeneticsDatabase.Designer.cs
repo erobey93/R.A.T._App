@@ -12,8 +12,8 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    [Migration("20250518070117_updateTraitTypeTable")]
-    partial class updateTraitTypeTable
+    [Migration("20250518201941_updateGeneticsDatabase")]
+    partial class updateGeneticsDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
