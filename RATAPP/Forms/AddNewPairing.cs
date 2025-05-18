@@ -380,7 +380,6 @@ namespace RATAPP.Forms
             }
         }
 
-
         private void InitializeMultiplePairingsTab(TabPage tab)
         {
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
@@ -533,60 +532,62 @@ namespace RATAPP.Forms
         private void InitializeEventHandlers()
         {
             cancelButton.Click += (s, e) => HandleCancelClick(this);
+            addButton.Click += (s, e) => AddPairingClick(
+            pairingIdTextBox.Text,
+            projectComboBox.SelectedIndex + 1,
+            sireComboBox.SelectedItem as AnimalDto,
+            damComboBox.SelectedItem as AnimalDto,
+            pairingDatePicker.Value,
+            speciesComboBox.SelectedItem as Species
+            
+            );
         }
 
-        //cancel = close form 
-        //public void HandleCancelClick(Form form)
-        //{
-        //    if (MessageBox.Show("Are you sure you want to cancel? Any unsaved data will be lost.",
-        //        "Confirm Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-        //    {
-        //        form.Close();
-        //    }
-        //}
+        public async Task AddPairingClick(string pairingId, int projectId,
+        AnimalDto sire, AnimalDto dam, DateTime pairingDate, Species species) //FIXME some categories missing I believe 
+        {
+            try
+            {
+                _spinner.Show();
 
-        //public async Task AddPairingClick(string pairingId, string litterName, int projectId,
-        // DateTimePicker datePicker, AnimalDto dam, AnimalDto sire)
-        //{
-        //    try
-        //    {
-        //        _spinner.Show();
+                // Validate inputs
+                if (string.IsNullOrWhiteSpace(pairingId)) //|| string.IsNullOrWhiteSpace(projectId)
+                {
+                    MessageBox.Show("Please fill in all required fields", "Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-        //        // Validate inputs
-        //        if (string.IsNullOrWhiteSpace(pairingId) || string.IsNullOrWhiteSpace(projectId))
-        //        {
-        //            //MessageBox.Show("Please fill in all required fields", "Validation Error",
-        //            //    MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            return;
-        //        }
+                var pairing = new Pairing
+                {
+                    pairingId = pairingId,
+                    SireId = sire.Id,
+                    DamId = dam.Id,
+                    ProjectId = projectId, 
+                    PairingStartDate = pairingDate,
+                    PairingEndDate = null,  //skip end date for now but I should allow users to enter this 
+                    CreatedOn = DateTime.Now,
+                    LastUpdated = DateTime.Now,
+                };
 
-        //        var pairing = new Pairing
-        //        {
+                bool pairingCreated = await _breedingService.CreatePairingAsync(pairing);
 
-        //            CreatedOn = DateTime.Now,
-        //            LastUpdated = DateTime.Now
-        //        };
-
-        //        bool litterCreated = await _breedingService.CreateLitterAsync(litter);
-
-        //        if (litterCreated)
-        //        {
-        //            MessageBox.Show("Litter added successfully!", "Success",
-        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //        }
-        //        else
-        //        {
-        //            MessageBox.Show("An error occurred. Litter not created!", "Failure",
-        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //        }
-
-
-        //    }
-        //    finally
-        //    {
-        //        _spinner.Hide();
-        //    }
-        //}
+                if (pairingCreated)
+                {
+                    MessageBox.Show("Pairing added successfully!", "Success",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("An error occurred. Pairing not created!", "Failure", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
 
         //cancel = close form 
         public void HandleCancelClick(Form form)
