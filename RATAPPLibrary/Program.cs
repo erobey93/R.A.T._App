@@ -1,10 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Services;
-
-using System.Text;
 
 namespace RATAPPLibrary
 {
@@ -12,66 +8,39 @@ namespace RATAPPLibrary
     {
         public static void Main(string[] args)
         {
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Manually set the environment if needed
-            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development"); //FIXME set to to production after testing 
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Development"); //FIXME: Set to production after testing 
 
-            // After setting the environment, you can configure services
             var _env = builder.Environment;
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-            if (_env.IsDevelopment())  // For development or tests, use InMemory
+            // Register the RatAppDbContextFactory as a singleton
+            builder.Services.AddSingleton(provider => new RatAppDbContextFactory(connectionString));
+
+            // Optionally, register RatAppDbContext itself for scoped dependency injection
+            builder.Services.AddScoped(provider =>
             {
-                //builder.Services.AddDbContext<RatAppDbContext>(options =>
-                //    options.UseInMemoryDatabase("TestDatabase"));
-                builder.Services.AddDbContext<RatAppDbContext>(options =>
-                   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            }
-            else  // For production, use SQL Server
-            {
-                builder.Services.AddDbContext<RatAppDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-            }
+                var factory = provider.GetRequiredService<RatAppDbContextFactory>();
+                return factory.CreateContext();
+            });
 
-
-            // Register PasswordHashing as a service for dependency injection
+            // Register other services
             builder.Services.AddScoped<PasswordHashing>();
-
-            // Register services
             builder.Services.AddScoped<LoginService>();
             builder.Services.AddScoped<AnimalService>();
             builder.Services.AddScoped<SpeciesService>();
             builder.Services.AddScoped<LineService>();
 
-            // Add DbContext and other services
-
-            //builder.Services.AddDbContext<RatAppDbContext>(options =>
-            //   options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
-                    };
-                });
-
+            // Configure controllers and Swagger
             builder.Services.AddControllers();
             builder.Services.AddSwaggerGen();
 
+            // Build and configure the application
             var app = builder.Build();
 
-            app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
             app.Run();
         }
