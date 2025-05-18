@@ -29,7 +29,6 @@ namespace RATAPP.Forms
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
         private ComboBox speciesComboBox;
-        private ComboBox pairingComboBox; //FIXME remove, not needed but I need to make a new method to handle this
         private TextBox pairingIdTextBox;
         private ComboBox projectComboBox;
         private DateTimePicker pairingDatePicker;
@@ -177,7 +176,7 @@ namespace RATAPP.Forms
 
             // Create groups for related fields
             var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250); //FIXME breeding info group not showing up 
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Pairing Information", DockStyle.Top, 250); //FIXME breeding info group not showing up 
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();

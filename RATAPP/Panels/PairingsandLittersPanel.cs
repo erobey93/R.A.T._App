@@ -53,6 +53,7 @@ namespace RATAPP.Panels
         private TabPage pairingsTab;
         private TabPage littersTab;
         private TabPage linesTab;
+        private TabPage projectsTab;
         private TextBox searchBox;
         private ComboBox filterComboBox;
         private Button searchButton;
@@ -67,6 +68,7 @@ namespace RATAPP.Panels
         private Pairing[] _pairings;
         private Litter[] _litters;
         private Line[] _lines;
+        private ProjectService _projects; 
         private bool _littersGridView;
         private bool _linesGridView;
 
@@ -75,6 +77,7 @@ namespace RATAPP.Panels
         private AnimalService _animalService;
         private LineService _lineService;
         private StockService _stockService;
+        private ProjectService _projectService;
 
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
@@ -89,6 +92,7 @@ namespace RATAPP.Panels
             _breedingService = new BreedingService(contextFactory);
             _lineService = new LineService(contextFactory);
             _stockService = new StockService(contextFactory);
+            _projectService = new ProjectService(contextFactory);
 
             _littersGridView = false;
             _linesGridView = false;
@@ -188,9 +192,14 @@ namespace RATAPP.Panels
             linesTab = new TabPage("Line Management");
             InitializeLineDataGridView();
 
+            // Initialize Line management tab (may change the name, but fine for now) TODO currently displaying line info 
+            projectsTab = new TabPage("Project Management");
+            InitializeLineDataGridView(); //need to make InitializeProjectDataGridView
+
             tabControl.TabPages.Add(pairingsTab);
             tabControl.TabPages.Add(littersTab);
             tabControl.TabPages.Add(linesTab);
+            tabControl.TabPages.Add(projectsTab);
 
             tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
 
@@ -211,11 +220,13 @@ namespace RATAPP.Panels
             var getPairings = await _breedingService.GetAllPairingsAsync();
             _pairings = getPairings.ToArray();
 
-            //get lines TODO...maybe? 
+            //get lines 
             var getLines = await _lineService.GetAllLinesAsync();
             _lines = getLines.ToArray();
 
-            //get projects TODO
+            //get projects TODO 
+            //var getprojects = await _projectService.GetAllProjectsAsync();
+            //_projects = getProjects.ToArray();
         }
 
         private async Task GetCurrentBreedingData()

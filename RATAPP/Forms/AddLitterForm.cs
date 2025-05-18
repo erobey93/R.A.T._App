@@ -373,14 +373,15 @@ namespace RATAPP.Forms
 
             var rightColumn = new Panel
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Right,
+                Width = 550,
                 Padding = new Padding(10, 0, 0, 0)
             };
 
             // Create groups for related fields
             var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
             var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250);
-            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 350); //FIXME litter details not showing up 
+            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 250); //FIXME litter details not showing up 
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
@@ -465,7 +466,7 @@ namespace RATAPP.Forms
             buttonPanel.Dock = DockStyle.Bottom; // Dock the button panel to the bottom
 
             // Organize panels
-            leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup });
+            leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup});
             rightColumn.Controls.AddRange(new Control[] { litterDetailsGroup });
 
             mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn });
