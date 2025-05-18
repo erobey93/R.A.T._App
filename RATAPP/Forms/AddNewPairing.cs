@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using RATAPP.Helpers;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Services;
 
@@ -15,9 +16,13 @@ namespace RATAPP.Forms
     public partial class AddPairingForm : Form
     {
         // Helper classes
-        private readonly FormDataManager _dataManager;
-        private readonly FormEventHandler _eventHandler;
+        //private readonly FormDataManager _dataManager;
+        //private readonly FormEventHandler _eventHandler;
         private readonly LoadingSpinnerHelper _spinner;
+        private BreedingService _breedingService;
+        private AnimalService _animalService;
+        private ProjectService _projectService;
+        private SpeciesService _speciesService;
 
         // UI Controls
         private TabControl tabControl;
@@ -35,15 +40,19 @@ namespace RATAPP.Forms
         private Button saveAllButton;
         private Button importButton;
 
-        private RatAppDbContextFactory _contextFactory; 
+        private RatAppDbContextFactory _contextFactory;
 
-        public AddPairingForm(RatAppDbContextFactory contextFactory)
+        //state
+        bool speciesSelected = false;
+
+
+        private AddPairingForm(RatAppDbContextFactory contextFactory)
         {
             // Initialize services
-            var breedingService = new BreedingService(contextFactory);
-            var speciesService = new SpeciesService(contextFactory);
-            var animalService = new AnimalService(contextFactory);
-            var projectService = new ProjectService(contextFactory);
+            _breedingService = new BreedingService(contextFactory);
+            _animalService = new AnimalService(contextFactory);
+            _projectService = new ProjectService(contextFactory);
+            _speciesService = new SpeciesService(contextFactory);
 
             _contextFactory = contextFactory;   
 
@@ -51,6 +60,36 @@ namespace RATAPP.Forms
 
             InitializeComponents();
             InitializeEventHandlers();
+        }
+
+        /// <summary>
+        /// Static factory method that initializes the form and ensures the data is loaded.
+        /// Use like: var form = await AddLitterForm.CreateAsync(context);
+        /// </summary>
+        /// <summary>
+        /// Static factory method that initializes the form and loads required data.
+        /// Uses async initialization pattern for proper data loading.
+        /// 
+        /// Process:
+        /// 1. Creates form instance
+        /// 2. Loads species data
+        /// 3. Loads animal records
+        /// 4. Loads active pairs
+        /// 5. Loads projects
+        /// 
+        /// Error Handling:
+        /// - Shows loading indicator
+        /// - Manages async failures
+        /// - Provides user feedback
+        /// 
+        /// Usage:
+        /// var form = await AddLitterForm.CreateAsync(context);
+        /// </summary>
+        public static async Task<AddPairingForm> CreateAsync(RatAppDbContextFactory contextFactory)
+        {
+            var form = new AddPairingForm(contextFactory);
+            await form.LoadInitialDataAsync();
+            return form;
         }
 
         private void InitializeComponents()
@@ -64,7 +103,7 @@ namespace RATAPP.Forms
 
             // Create header with description
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Add Pairing");
-            headerPanel.Height = 70;
+            headerPanel.Height = 50;
             var headerLabel = headerPanel.Controls[0] as Label;
             if (headerLabel != null)
             {
@@ -77,7 +116,15 @@ namespace RATAPP.Forms
                 ForeColor = Color.White,
                 AutoSize = true
             };
-            headerPanel.Controls.Add(descriptionLabel);
+            // Calculate the X position to place descriptionLabel to the right of headerLabel
+            int descriptionLabelX = headerLabel.Location.X + headerLabel.Width + 10; // Add some spacing (10)
+                                                                                     // Calculate the Y position to vertically align descriptionLabel with headerLabel
+            int descriptionLabelY = headerLabel.Location.Y;
+
+            descriptionLabel.Location = new Point(descriptionLabelX, descriptionLabelY);
+
+            headerPanel.Controls.Add(descriptionLabel); // Add the descriptionLabel to the headerPanel
+
             this.Controls.Add(headerPanel);
 
             // Create container panel for tabControl
@@ -119,7 +166,7 @@ namespace RATAPP.Forms
             {
                 Dock = DockStyle.Left,
                 Width = 550,
-                Padding = new Padding(0, 0, 10, 0)
+                Padding = new Padding(0, 0, 20, 0)
             };
 
             var rightColumn = new Panel
@@ -129,8 +176,8 @@ namespace RATAPP.Forms
             };
 
             // Create groups for related fields
-            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 280);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 280);
+            var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250); //FIXME breeding info group not showing up 
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
@@ -179,12 +226,13 @@ namespace RATAPP.Forms
             cancelButton.Margin = new Padding(10, 20, 0, 0);
 
             var buttonPanel = FormComponentFactory.CreateButtonPanel(addButton, cancelButton);
+            buttonPanel.Dock = DockStyle.Bottom; // Dock the button panel to the bottom
 
             // Organize panels
             leftColumn.Controls.Add(basicInfoGroup);
             rightColumn.Controls.Add(breedingInfoGroup);
 
-            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn, buttonPanel });
+            mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn});
 
             // Add enhanced information panel
             var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
@@ -196,11 +244,141 @@ namespace RATAPP.Forms
                 "• You can view all pairings in the Breeding History section");
 
             mainPanel.Controls.Add(infoPanel);
+            mainPanel.Controls.Add(buttonPanel);
 
             // Set tab order
             SetTabOrder();
             tab.Controls.Add(mainPanel);
         }
+
+        /// <summary>
+        /// Loads all required data for the form asynchronously.
+        /// Shows loading indicator during data fetch operations.
+        /// 
+        /// Data Loaded:
+        /// - Species list
+        /// - Available animals
+        /// - Active breeding pairs
+        /// - Current projects
+        /// 
+        /// Dependencies:
+        /// - Species service
+        /// - Animal service
+        /// - Breeding service
+        /// - Project service
+        /// 
+        /// Error Handling:
+        /// - Manages service exceptions
+        /// - Shows loading state
+        /// - Ensures UI responsiveness
+        /// </summary>
+        private async Task LoadInitialDataAsync()
+        {
+            try
+            {
+                _spinner.Show();
+                await LoadAnimals();
+                await LoadProjects();
+                await LoadSpecies(); 
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
+
+        //What data do I need before anything else happens?
+        //Animals
+        //bind animal data to combo box options 
+        private async Task LoadAnimals()
+        {
+            try
+            {
+                var animals = await _animalService.GetAllAnimalsAsync();
+
+                // Populate dam and sire combos for breeding calculator
+                damComboBox.Items.Clear();
+                sireComboBox.Items.Clear();
+                //animalSelector.Items.Clear();
+
+                // Add all animals to the pedigree selector
+                foreach (var animal in animals)
+                {
+                    //animalSelector.Items.Add(animal); TODO not sure if I need this for this form 
+
+                    // Add females to dam combo
+                    if (animal.sex == "Female")
+                    {
+                        damComboBox.Items.Add(animal);
+                    }
+                    // Add males to sire combo
+                    else if (animal.sex == "Male")
+                    {
+                        sireComboBox.Items.Add(animal);
+                    }
+                }
+
+                damComboBox.DisplayMember = "Name"; //display member is what the user sees 
+                damComboBox.ValueMember = "Id"; //value member is what we use when we're trying to work with the obect i.e. how the backend identifies the object 
+                sireComboBox.DisplayMember = "Name";
+                sireComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading animals: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task LoadProjects()
+        {
+            try
+            {
+                var projects = await _projectService.GetAllProjectsAsync();
+
+                projectComboBox.Items.Clear();
+                projectComboBox.Items.Add("All Projects");
+
+                foreach (var p in projects)
+                {
+                    projectComboBox.Items.Add(p);
+                }
+
+                projectComboBox.SelectedIndex = 0;
+                projectComboBox.DisplayMember = "Name";
+                projectComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading projects: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        //species
+        //load species objects to species combo box items 
+        private async Task LoadSpecies()
+        {
+            try
+            {
+                var species = await _speciesService.GetAllSpeciesAsync();
+
+                speciesComboBox.Items.Clear();
+                speciesComboBox.Items.Add("All Species");
+
+                foreach (var s in species)
+                {
+                    speciesComboBox.Items.Add(s);
+                }
+
+                speciesComboBox.SelectedIndex = 0;
+                speciesComboBox.DisplayMember = "CommonName";
+                speciesComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading species: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
 
         private void InitializeMultiplePairingsTab(TabPage tab)
         {
@@ -350,34 +528,105 @@ namespace RATAPP.Forms
             }
         }
 
+        #region Event Handlers
         private void InitializeEventHandlers()
         {
-            //this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncPairing(
-            //    speciesComboBox, damComboBox, sireComboBox, projectComboBox);
-
-            //speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
-            //    speciesComboBox, damComboBox, sireComboBox);
-
-            //addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
-            //    pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
-
-            //addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
-            //    pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
-
-            //saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
-            //    multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
-
-            //importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
-
-            //cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
-
-            //multiplePairingsGrid.CellContentClick += (s, e) =>
-            //{
-            //    if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
-            //    {
-            //        multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
-            //    }
-            //};
+            cancelButton.Click += (s, e) => HandleCancelClick(this);
         }
+
+        //cancel = close form 
+        //public void HandleCancelClick(Form form)
+        //{
+        //    if (MessageBox.Show("Are you sure you want to cancel? Any unsaved data will be lost.",
+        //        "Confirm Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+        //    {
+        //        form.Close();
+        //    }
+        //}
+
+        //public async Task AddPairingClick(string pairingId, string litterName, int projectId,
+        // DateTimePicker datePicker, AnimalDto dam, AnimalDto sire)
+        //{
+        //    try
+        //    {
+        //        _spinner.Show();
+
+        //        // Validate inputs
+        //        if (string.IsNullOrWhiteSpace(pairingId) || string.IsNullOrWhiteSpace(projectId))
+        //        {
+        //            //MessageBox.Show("Please fill in all required fields", "Validation Error",
+        //            //    MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //            return;
+        //        }
+
+        //        var pairing = new Pairing
+        //        {
+
+        //            CreatedOn = DateTime.Now,
+        //            LastUpdated = DateTime.Now
+        //        };
+
+        //        bool litterCreated = await _breedingService.CreateLitterAsync(litter);
+
+        //        if (litterCreated)
+        //        {
+        //            MessageBox.Show("Litter added successfully!", "Success",
+        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //        }
+        //        else
+        //        {
+        //            MessageBox.Show("An error occurred. Litter not created!", "Failure",
+        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //        }
+
+
+        //    }
+        //    finally
+        //    {
+        //        _spinner.Hide();
+        //    }
+        //}
+
+        //cancel = close form 
+        public void HandleCancelClick(Form form)
+        {
+            if (MessageBox.Show("Are you sure you want to cancel? Any unsaved data will be lost.",
+                "Confirm Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                form.Close();
+            }
+        }
+        #endregion
+
+        //new design logic below but I am going to wait until core functionality is complete and I have feedback to re-factor 
+        //private void InitializeEventHandlers()
+        //{
+        //    this.Load += async (s, e) => await _eventHandler.HandleFormLoadAsyncPairing(
+        //        speciesComboBox, damComboBox, sireComboBox, projectComboBox);
+
+        //    speciesComboBox.SelectedIndexChanged += async (s, e) => await _eventHandler.HandleSpeciesSelectionChangedDamAndSireAsync(
+        //        speciesComboBox, damComboBox, sireComboBox);
+
+        //    addButton.Click += async (s, e) => await _eventHandler.HandleAddPairingClickAsync(
+        //        pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker);
+
+        //    addToGridButton.Click += (s, e) => _eventHandler.HandleAddPairingToGridClick(
+        //        pairingIdTextBox.Text, damComboBox, sireComboBox, projectComboBox, pairingDatePicker, multiplePairingsGrid);
+
+        //    saveAllButton.Click += async (s, e) => await _eventHandler.HandleSaveAllPairingsAsync(
+        //        multiplePairingsGrid, damComboBox, sireComboBox, projectComboBox);
+
+        //    importButton.Click += (s, e) => MessageBox.Show("TODO - bulk import from excel logic goes here");
+
+        //    cancelButton.Click += (s, e) => _eventHandler.HandleCancelClick(this);
+
+        //    multiplePairingsGrid.CellContentClick += (s, e) =>
+        //    {
+        //        if (e.RowIndex >= 0 && e.ColumnIndex == multiplePairingsGrid.Columns["Remove"].Index)
+        //        {
+        //            multiplePairingsGrid.Rows.RemoveAt(e.RowIndex);
+        //        }
+        //    };
+        //}
     }
 }

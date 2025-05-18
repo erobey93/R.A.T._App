@@ -464,7 +464,7 @@ namespace RATAPP.Panels
             {
                 if (currentTab == "Pairings")
                 {
-                    AddPairingForm addPairing = new AddPairingForm(_contextFactory);
+                    AddPairingForm addPairing = await AddPairingForm.CreateAsync(_contextFactory);
                     addPairing.ShowDialog();
                     await LoadTabDataAsync(tabControl.SelectedIndex);
                 }

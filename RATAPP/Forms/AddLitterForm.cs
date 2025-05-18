@@ -41,7 +41,7 @@ namespace RATAPP.Forms
     /// 
     /// Known Limitations:
     /// - Basic error handling
-    /// - Limited bulk operations
+    /// - Bulk operations not yet functional 
     /// - Fixed validation rules
     /// - Some TODO implementations
     /// 
@@ -237,7 +237,7 @@ namespace RATAPP.Forms
             this.Controls.Add(tabContainerPanel);
         }
 
-        //this is the original way that I was managing data, but I have moved to using my helpers for clarity + to prevent my controller classes from getting too large
+        //this is the original way that I was managing data, but I want to start using my helpers for clarity + to prevent my controller classes from getting too large
         private async void LitterPanel_Load(object sender, EventArgs e)
         {
             await LoadInitialDataAsync();
