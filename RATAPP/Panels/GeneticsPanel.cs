@@ -848,64 +848,70 @@ namespace RATAPP.Panels
 
         private async void AddTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory))
-            {
-                if (form.ShowDialog() == DialogResult.OK)
-                {
-                    await RefreshTraitGrid();
-                }
-            }
+            MessageBox.Show("Add Trait Functionality Not Yet Implemented");
+            //using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory))
+            //{
+            //    if (form.ShowDialog() == DialogResult.OK)
+            //    {
+            //        await RefreshTraitGrid();
+            //    }
+            //}
         }
 
+        //TODO
         private void EditTraitButton_Click(object sender, EventArgs e)
         {
-            if (traitRegistryGrid.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Please select a trait to edit.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            MessageBox.Show("Edit Trait Functionality Not Yet Implemented"); 
+            //if (traitRegistryGrid.SelectedRows.Count == 0)
+            //{
+            //    MessageBox.Show("Please select a trait to edit.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
 
-            var selectedTrait = (Trait)traitRegistryGrid.SelectedRows[0].DataBoundItem;
-            using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory)) //FIXME took , selectedTrait out
-            {
-                if (form.ShowDialog() == DialogResult.OK)
-                {
-                    RefreshTraitGrid();
-                }
-            }
+            //var selectedTrait = (Trait)traitRegistryGrid.SelectedRows[0].DataBoundItem;
+            //using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory)) //FIXME took , selectedTrait out
+            //{
+            //    if (form.ShowDialog() == DialogResult.OK)
+            //    {
+            //        RefreshTraitGrid();
+            //    }
+            //}
         }
 
+        //TODO
         private void DeleteTraitButton_Click(object sender, EventArgs e)
         {
-            if (traitRegistryGrid.SelectedRows.Count == 0)
-            {
-                MessageBox.Show("Please select a trait to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            MessageBox.Show("Delete Trait Functionality Not Yet Implemented");
+            //if (traitRegistryGrid.SelectedRows.Count == 0)
+            //{
+            //    MessageBox.Show("Please select a trait to delete.", "No Selection", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            //    return;
+            //}
 
-            var selectedTrait = (Trait)traitRegistryGrid.SelectedRows[0].DataBoundItem;
+            //var selectedTrait = (Trait)traitRegistryGrid.SelectedRows[0].DataBoundItem;
 
-            DialogResult result = MessageBox.Show(
-                $"Are you sure you want to delete the trait '{selectedTrait.CommonName}'?",
-                "Confirm Deletion",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question
-            );
+            //DialogResult result = MessageBox.Show(
+            //    $"Are you sure you want to delete the trait '{selectedTrait.CommonName}'?",
+            //    "Confirm Deletion",
+            //    MessageBoxButtons.YesNo,
+            //    MessageBoxIcon.Question
+            //);
 
-            if (result == DialogResult.Yes)
-            {
-                try
-                {
-                    _traitService.DeleteTraitAsync(selectedTrait.Id);
-                    RefreshTraitGrid();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error deleting trait: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
+            //if (result == DialogResult.Yes)
+            //{
+            //    try
+            //    {
+            //        _traitService.DeleteTraitAsync(selectedTrait.Id);
+            //        RefreshTraitGrid();
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        MessageBox.Show($"Error deleting trait: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    }
+            //}
         }
 
+        //FIXME, form is not showing up correctly 
         private void AssignTraitButton_Click(object sender, EventArgs e)
         {
             using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_contextFactory), _contextFactory))
@@ -1027,60 +1033,62 @@ namespace RATAPP.Panels
             }
         }
 
+        //TODO
         private async void GenerateReportButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                var traits = await _traitService.GetAllTraitsAsync();
-                var traitTypes = await _traitService.GetAllTraitTypesAsync();
+            MessageBox.Show("Generate Report Functionality Not Yet Implemented");
+            //try
+            //{
+            //    var traits = await _traitService.GetAllTraitsAsync();
+            //    var traitTypes = await _traitService.GetAllTraitTypesAsync();
 
-                var report = new StringBuilder();
-                report.AppendLine("Genetics Report");
-                report.AppendLine("==============");
-                report.AppendLine($"Generated: {DateTime.Now}");
-                report.AppendLine();
+            //    var report = new StringBuilder();
+            //    report.AppendLine("Genetics Report");
+            //    report.AppendLine("==============");
+            //    report.AppendLine($"Generated: {DateTime.Now}");
+            //    report.AppendLine();
 
-                // Trait Type Summary
-                report.AppendLine("Trait Types Summary");
-                report.AppendLine("-----------------");
-                foreach (var traitType in traitTypes)
-                {
-                    var typeTraits = traits.Where(t => t.TraitTypeId == traitType.Id).ToList();
-                    report.AppendLine($"{traitType.Name}: {typeTraits.Count} traits");
-                }
-                report.AppendLine();
+            //    // Trait Type Summary
+            //    report.AppendLine("Trait Types Summary");
+            //    report.AppendLine("-----------------");
+            //    foreach (var traitType in traitTypes)
+            //    {
+            //        var typeTraits = traits.Where(t => t.TraitTypeId == traitType.Id).ToList();
+            //        report.AppendLine($"{traitType.Name}: {typeTraits.Count} traits");
+            //    }
+            //    report.AppendLine();
 
-                // Trait Details
-                report.AppendLine("Trait Details");
-                report.AppendLine("-------------");
-                foreach (var trait in traits)
-                {
-                    report.AppendLine($"Name: {trait.CommonName}");
-                    report.AppendLine($"Type: {trait.TraitType?.Name ?? "Unknown"}");
-                    report.AppendLine($"Genotype: {trait.Genotype ?? "Not specified"}");
-                    report.AppendLine($"Description: {trait.TraitType.Name ?? "None"}"); //FIXME
-                    report.AppendLine();
-                }
+            //    // Trait Details
+            //    report.AppendLine("Trait Details");
+            //    report.AppendLine("-------------");
+            //    foreach (var trait in traits)
+            //    {
+            //        report.AppendLine($"Name: {trait.CommonName}");
+            //        report.AppendLine($"Type: {trait.TraitType?.Name ?? "Unknown"}");
+            //        report.AppendLine($"Genotype: {trait.Genotype ?? "Not specified"}");
+            //        report.AppendLine($"Description: {trait.TraitType.Name ?? "None"}"); //FIXME
+            //        report.AppendLine();
+            //    }
 
-                // Save report
-                using (var saveDialog = new SaveFileDialog())
-                {
-                    saveDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                    saveDialog.FilterIndex = 1;
-                    saveDialog.DefaultExt = "txt";
-                    saveDialog.FileName = $"GeneticsReport_{DateTime.Now:yyyyMMdd}";
+            //    // Save report
+            //    using (var saveDialog = new SaveFileDialog())
+            //    {
+            //        saveDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+            //        saveDialog.FilterIndex = 1;
+            //        saveDialog.DefaultExt = "txt";
+            //        saveDialog.FileName = $"GeneticsReport_{DateTime.Now:yyyyMMdd}";
 
-                    if (saveDialog.ShowDialog() == DialogResult.OK)
-                    {
-                        await File.WriteAllTextAsync(saveDialog.FileName, report.ToString());
-                        MessageBox.Show("Report generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            //        if (saveDialog.ShowDialog() == DialogResult.OK)
+            //        {
+            //            await File.WriteAllTextAsync(saveDialog.FileName, report.ToString());
+            //            MessageBox.Show("Report generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //        }
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //}
         }
 
         private void ViewPedigreeButton_Click(object sender, EventArgs e)
@@ -1137,11 +1145,6 @@ namespace RATAPP.Panels
         }
     }
 }
-
-
-
-
-
 
 //using System;
 //using System.Drawing;

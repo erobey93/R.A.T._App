@@ -79,6 +79,8 @@ namespace RATAPP.Panels
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
 
+        private string searchState = "all"; //use this variable to decide which data to get for now. Really I should be caching the data and then filtering the cached data vs. going to the db each time, but that's for a future iteration 
+
         public PairingsAndLittersPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory)
         {
             _parentForm = parentForm;
@@ -198,7 +200,7 @@ namespace RATAPP.Panels
             InitializeCommonControls();
         }
 
-        private async Task GetBreedingData()
+        private async Task GetAllBreedingData()
         {
             //get all litters
             //if no litters, initialize litters array with empty object 
@@ -211,6 +213,42 @@ namespace RATAPP.Panels
 
             //get lines TODO...maybe? 
             var getLines = await _lineService.GetAllLinesAsync();
+            _lines = getLines.ToArray();
+
+            //get projects TODO
+        }
+
+        private async Task GetCurrentBreedingData()
+        {
+            //get all litters
+            //if no litters, initialize litters array with empty object 
+            var getLitters = await _breedingService.GetAllLittersAsync(); //TODO I don't think I have a "current" litters option maybe do something like if the litter is between 0 days and 8 weeks they are current, else they are past? 
+            _litters = getLitters.ToArray();
+
+            //get pairings
+            var getPairings = await _breedingService.GetAllActivePairingsAsync();
+            _pairings = getPairings.ToArray();
+
+            //get lines TODO...maybe? 
+            var getLines = await _lineService.GetAllLinesAsync(); //TODO I don't think that I have a "current" line option because that doesn't make sense in this context 
+            _lines = getLines.ToArray();
+
+            //get projects TODO
+        }
+
+        private async Task GetPastBreedingData()
+        {
+            //get all litters
+            //if no litters, initialize litters array with empty object 
+            var getLitters = await _breedingService.GetAllLittersAsync(); //TODO I don't think I have a "current" litters option
+            _litters = getLitters.ToArray();
+
+            //get pairings
+            var getPairings = await _breedingService.GetAllPastPairingsAsync();
+            _pairings = getPairings.ToArray();
+
+            //get lines TODO...maybe? 
+            var getLines = await _lineService.GetAllLinesAsync(); //TODO I don't think that I have a "current" line option 
             _lines = getLines.ToArray();
 
             //get projects TODO
@@ -254,7 +292,8 @@ namespace RATAPP.Panels
             try
             {
                 ShowLoadingIndicator();
-                await GetBreedingData();
+                await GetAllBreedingData(); 
+                
 
                 // Update visibility
                 pairingsGridView.Visible = tabIndex == 0;
@@ -368,10 +407,49 @@ namespace RATAPP.Panels
             return button;
         }
 
-        private void SearchButton_Click(object sender, EventArgs e)
+        private async void SearchButton_Click(object sender, EventArgs e)
         {
             // Implement search functionality
-            MessageBox.Show($"Searching for: {searchBox.Text}\nFilter: {filterComboBox.SelectedItem}");
+            //MessageBox.Show($"Searching for: {searchBox.Text}\nFilter: {filterComboBox.SelectedItem}");
+
+            string filter = filterComboBox.SelectedItem.ToString();
+            string searchTerm = searchBox.Text.ToLower();
+
+            //if pairs tab
+            //if(tabControl.SelectedIndex == 0)
+            //{
+                if(filter == "Current") //get all current pairings 
+                {
+                    searchState = "current";
+                    PopulatePairingDataDisplayArea(); 
+                    
+                }
+                else if(filter == "Past")
+            {
+                searchState = "past";
+                PopulatePairingDataDisplayArea();
+            }else if(filter == "All"){
+                searchState = "all";
+                PopulatePairingDataDisplayArea();
+            }
+            //}
+            //get pairs based on filter first
+            //then get based on search term
+            //if litters tab
+            //if lines tab 
+
+
+            //var filteredLitters = _animals.Where(animal =>
+            //    (speciesFilter == "All Species" || animal.species == speciesFilter) &&
+            //    (sexFilter == "All Sexes" || animal.sex == sexFilter) &&
+            //    (animal.name.ToLower().Contains(searchTerm) || animal.Id.ToString().Contains(searchTerm))
+            //);
+
+            //DataGridView(sender).Rows.Clear();
+            //foreach (var animal in filteredAnimals)
+            //{
+            //    dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
+            //}
         }
 
         //TODO 
@@ -386,7 +464,7 @@ namespace RATAPP.Panels
             {
                 if (currentTab == "Pairings")
                 {
-                    AddPairingForm addPairing = new AddPairingForm(_contextFactory);
+                    AddPairingForm addPairing = await AddPairingForm.CreateAsync(_contextFactory);
                     addPairing.ShowDialog();
                     await LoadTabDataAsync(tabControl.SelectedIndex);
                 }
@@ -438,8 +516,9 @@ namespace RATAPP.Panels
 
         public async Task RefreshDataAsync()
         {
+            searchState = "all"; //TODO probably need to clear out the search box/filter drop down as well 
             // Implement data refresh logic TODO
-            await GetBreedingData();
+            await GetAllBreedingData();
             //return Task.CompletedTask;
         }
 
@@ -477,10 +556,22 @@ namespace RATAPP.Panels
 
         private async void PopulatePairingDataDisplayArea()
         {
+            if (searchState == "all")
+            {
+                await GetAllBreedingData();
+            }
+            else if (searchState == "current")
+            {
+                await GetCurrentBreedingData();
+            }
+            else if (searchState == "past")
+            {
+                await GetPastBreedingData();
+            }
+
             string dam = "Unknown";
             string sire = "Unknown";
             string projName = "Unknown"; //TODO there should always be a project, dam and sire name....
-            await GetBreedingData();
 
             pairingsGridView.Rows.Clear();
             if (_pairings != null)
@@ -540,7 +631,19 @@ namespace RATAPP.Panels
 
         private async void PopulateLittersDataDisplayArea()
         {
-            await GetBreedingData();
+            if (searchState == "all")
+            {
+                await GetAllBreedingData();
+            }
+            else if (searchState == "current")
+            {
+                await GetCurrentBreedingData();
+            }
+            else if (searchState == "past")
+            {
+                await GetPastBreedingData();
+            }
+
             littersGridView.Rows.Clear();
             if (_litters != null)
             {
@@ -591,7 +694,18 @@ namespace RATAPP.Panels
         //for now, we are assuming rats and mice only, in the future, it will be any species 
         private async void PopulateLineDataDisplayArea()
         {
-            await GetBreedingData();
+            if (searchState == "all")
+            {
+                await GetAllBreedingData();
+            }
+            else if (searchState == "current")
+            {
+                await GetCurrentBreedingData();
+            }
+            else if (searchState == "past")
+            {
+                await GetPastBreedingData();
+            }
 
             linesGridView.Rows.Clear();
 
