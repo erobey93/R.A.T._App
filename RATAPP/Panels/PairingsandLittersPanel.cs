@@ -86,8 +86,6 @@ namespace RATAPP.Panels
         private string currentLineFilter = "All";
         private string currentProjectFilter = "All";
 
-2.
-
         public PairingsAndLittersPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory)
         {
             _parentForm = parentForm;

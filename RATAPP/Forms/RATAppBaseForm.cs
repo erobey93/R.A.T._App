@@ -254,10 +254,11 @@ namespace RATAPP.Forms
 
         private void AdopterButton_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("The adopter management page will be here", "Adopter Management Page Not Yet Implemented", MessageBoxButtons.OK);
             // Handle Adopter Management button click
-            var adopterPanel = new AdopterManagementPanel(this, _contextFactory); // Create a new instance of the ReportsPanel
-            _activePanel = adopterPanel;
-            ShowPanel(adopterPanel);
+            //var adopterPanel = new AdopterManagementPanel(this, _contextFactory); // Create a new instance of the ReportsPanel
+            //_activePanel = adopterPanel;
+            //ShowPanel(adopterPanel);
         }
 
         //TODO - not yet implemented

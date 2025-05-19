@@ -97,7 +97,7 @@ namespace RATAPP.Forms
             // Set form properties
             this.Text = "Change Password";
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(600, 650);
+            this.Size = new Size(600, 700);
             this.BackColor = Color.FromArgb(240, 240, 240);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;

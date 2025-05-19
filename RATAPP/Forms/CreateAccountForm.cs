@@ -36,26 +36,26 @@ namespace RATAPP.Forms
 
         private void CreateAcctForm()
         {
-            // Set form properties to match login form style
+            // Set form properties
             this.Text = "RAT App - Create Account";
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(600, 650);
+            this.Size = new Size(650, 900);
             this.BackColor = Color.FromArgb(240, 240, 240);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
 
-            // Calculate center position
+            // Center position calculation
             int centerX = this.ClientSize.Width / 2;
 
             // Add logo at the top
             var logo = new PictureBox
             {
                 Name = "logo",
-                Size = new Size(220, 220),
+                Size = new Size(200, 200),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"),
-                Location = new Point(centerX - 110, 20)
             };
+            logo.Location = new Point((this.ClientSize.Width - logo.Width) / 2, 20);
             this.Controls.Add(logo);
 
             // Create title label
@@ -67,57 +67,47 @@ namespace RATAPP.Forms
                 ForeColor = PRIMARY_COLOR,
                 AutoSize = true
             };
-            lblTitle.Location = new Point(centerX - (lblTitle.Width / 2), 210);
             this.Controls.Add(lblTitle);
 
-            // Create personal information section
-            int startY = 260;
+            // Adjust title position after adding to the form
+            lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, logo.Bottom + 10);
+
+            // Initialize layout variables
+            int currentY = lblTitle.Bottom + 20;
             int fieldSpacing = 50;
-            int currentY = startY;
             int fieldWidth = 300;
 
-            // First Name
-            var txtFirstName = CreateTextBox("txtFirstName", "First Name", currentY, fieldWidth);
-            this.Controls.Add(txtFirstName);
+            // Helper function for creating centered textboxes
+            TextBox CreateCenteredTextBox(string name, string placeholder, int y)
+            {
+                var textBox = CreateTextBox(name, placeholder, y, fieldWidth);
+                textBox.Location = new Point(centerX - (fieldWidth / 2), y);
+                return textBox;
+            }
+
+            // Create textboxes
+            this.Controls.Add(CreateCenteredTextBox("txtFirstName", "First Name", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtLastName", "Last Name", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtPhone", "Phone Number", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtEmail", "Email Address", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtCity", "City", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtState", "State", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtUsername", "Username", currentY));
             currentY += fieldSpacing;
 
-            // Last Name
-            var txtLastName = CreateTextBox("txtLastName", "Last Name", currentY, fieldWidth);
-            this.Controls.Add(txtLastName);
-            currentY += fieldSpacing;
-
-            // Phone
-            var txtPhone = CreateTextBox("txtPhone", "Phone Number", currentY, fieldWidth);
-            this.Controls.Add(txtPhone);
-            currentY += fieldSpacing;
-
-            // Email
-            var txtEmail = CreateTextBox("txtEmail", "Email Address", currentY, fieldWidth);
-            this.Controls.Add(txtEmail);
-            currentY += fieldSpacing;
-
-            // City
-            var txtCity = CreateTextBox("txtCity", "City", currentY, fieldWidth);
-            this.Controls.Add(txtCity);
-            currentY += fieldSpacing;
-
-            // State
-            var txtState = CreateTextBox("txtState", "State", currentY, fieldWidth);
-            this.Controls.Add(txtState);
-            currentY += fieldSpacing;
-
-            // Username
-            var txtUsername = CreateTextBox("txtUsername", "Username", currentY, fieldWidth);
-            this.Controls.Add(txtUsername);
-            currentY += fieldSpacing;
-
-            // Password
-            var txtPassword = CreateTextBox("txtPassword", "Password", currentY, fieldWidth);
+            // Password field
+            var txtPassword = CreateCenteredTextBox("txtPassword", "Password", currentY);
             txtPassword.PasswordChar = '•';
             this.Controls.Add(txtPassword);
             currentY += fieldSpacing;
 
-            // Account Type
+            // Account Type dropdown
             var cmbAccountType = new ComboBox
             {
                 Name = "cmbAccountType",
@@ -128,42 +118,20 @@ namespace RATAPP.Forms
                 BackColor = Color.White
             };
             cmbAccountType.Items.AddRange(new string[] { "Admin", "User", "Guest" });
-            cmbAccountType.SelectedIndex = 1; // Default to "User"
-
-            // Add placeholder text effect for ComboBox
-            var accountTypePlaceholder = new Label
-            {
-                Name = "accountTypePlaceholder",
-                Text = "Account Type",
-                Font = INPUT_FONT,
-                ForeColor = Color.Gray,
-                AutoSize = true,
-                Location = new Point(cmbAccountType.Left + 10, cmbAccountType.Top + 3),
-                BackColor = Color.Transparent
-            };
-
-            cmbAccountType.DropDown += (s, e) => { accountTypePlaceholder.Visible = false; };
-            cmbAccountType.DropDownClosed += (s, e) =>
-            {
-                if (cmbAccountType.SelectedIndex == -1)
-                    accountTypePlaceholder.Visible = true;
-                else
-                    accountTypePlaceholder.Visible = false;
-            };
-
+            cmbAccountType.SelectedIndex = 1;
             this.Controls.Add(cmbAccountType);
-            this.Controls.Add(accountTypePlaceholder);
 
             currentY += fieldSpacing;
 
-            // Submit button (Create Account)
+            // Submit button
             var btnSubmit = CreateButton("btnSubmit", "Create Account", currentY, fieldWidth, PRIMARY_COLOR);
+            btnSubmit.Location = new Point(centerX - (fieldWidth / 2), currentY);
             btnSubmit.Click += BtnCreateAccount_Click;
             this.Controls.Add(btnSubmit);
-            currentY += 60;
 
-            // Cancel button
-            var btnCancel = CreateButton("btnCancel", "Cancel", currentY, fieldWidth, NEUTRAL_COLOR);
+            // Cancel button below the Submit button
+            var btnCancel = CreateButton("btnCancel", "Cancel", currentY + 60, fieldWidth, NEUTRAL_COLOR);
+            btnCancel.Location = new Point(centerX - (fieldWidth / 2), currentY + 60);
             btnCancel.Click += BtnCancel_Click;
             this.Controls.Add(btnCancel);
         }
