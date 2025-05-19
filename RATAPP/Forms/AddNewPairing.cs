@@ -43,6 +43,7 @@ namespace RATAPP.Forms
 
         //state
         bool speciesSelected = false;
+        bool projectSelected = false; 
 
 
         private AddPairingForm(RatAppDbContextFactory contextFactory)
@@ -532,19 +533,20 @@ namespace RATAPP.Forms
         private void InitializeEventHandlers()
         {
             cancelButton.Click += (s, e) => HandleCancelClick(this);
+
             addButton.Click += (s, e) => AddPairingClick(
             pairingIdTextBox.Text,
             projectComboBox.SelectedIndex + 1,
-            sireComboBox.SelectedItem as AnimalDto,
-            damComboBox.SelectedItem as AnimalDto,
-            pairingDatePicker.Value,
-            speciesComboBox.SelectedItem as Species
-            
+            sireComboBox,
+            damComboBox,
+            pairingDatePicker.Value          
             );
+
+            projectComboBox.SelectedIndexChanged += (s, e) => HandleProjectSelectedIndexChanged(this);
         }
 
         public async Task AddPairingClick(string pairingId, int projectId,
-        AnimalDto sire, AnimalDto dam, DateTime pairingDate, Species species) //FIXME some categories missing I believe 
+        ComboBox sire, ComboBox dam, DateTime pairingDate) //FIXME some categories missing I believe 
         {
             try
             {
@@ -558,11 +560,14 @@ namespace RATAPP.Forms
                     return;
                 }
 
+                Animal damSelected = dam.SelectedItem as Animal;
+                Animal sireSelected = sire.SelectedItem as Animal;
+
                 var pairing = new Pairing
                 {
                     pairingId = pairingId,
-                    SireId = sire.Id,
-                    DamId = dam.Id,
+                    SireId = sireSelected.Id,
+                    DamId = damSelected.Id,
                     ProjectId = projectId, 
                     PairingStartDate = pairingDate,
                     PairingEndDate = null,  //skip end date for now but I should allow users to enter this 
@@ -570,17 +575,17 @@ namespace RATAPP.Forms
                     LastUpdated = DateTime.Now,
                 };
 
-                bool pairingCreated = await _breedingService.CreatePairingAsync(pairing);
+                (bool, string) pairingCreated = await _breedingService.CreatePairingAsync(pairing);
 
-                if (pairingCreated)
+                if (pairingCreated.Item1 == true)
                 {
                     MessageBox.Show("Pairing added successfully!", "Success",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else
                 {
-                    MessageBox.Show("An error occurred. Pairing not created!", "Failure", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show($"An error occurred: {pairingCreated.Item2}. Pairing not created!", "Add Pairing Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             finally
@@ -598,6 +603,55 @@ namespace RATAPP.Forms
                 form.Close();
             }
         }
+
+        public void HandleProjectSelectedIndexChanged(Form form)
+        {
+            //get project id 
+            Project proj = projectComboBox.SelectedItem as Project;
+            if (proj != null)
+            {
+                Species species = proj.Line.Stock.Species;
+                speciesComboBox.Items.Clear();
+                speciesComboBox.Items.Add(species);
+                speciesComboBox.DisplayMember = "CommonName";
+                speciesComboBox.ValueMember = "Id";
+                speciesComboBox.SelectedIndex = 0; 
+
+                Animal[] animalsInLine = proj.Line.Animals.ToArray();
+                sireComboBox.Items.Clear();
+                damComboBox.Items.Clear();
+                foreach (var animal in animalsInLine)
+                {
+                    if(animal.Sex == "Male")
+                    {
+                        //add to male combo box
+                        sireComboBox.Items.Add(animal);
+                        sireComboBox.DisplayMember = "Name";
+                        speciesComboBox.ValueMember = "Id";
+                    }
+                    else
+                    {
+                        //add to female combo box 
+                        damComboBox.Items.Add(animal);
+                        sireComboBox.DisplayMember = "Name";
+                        speciesComboBox.ValueMember = "Id";
+                    }
+                }
+
+            }
+           
+            //get all animals with line id
+            //set dam and sire combo boxes based on male and female of these animals 
+        }
+
+        public void HandleSpeciesSelectedIndexChanged(Form form)
+        {
+            //get species id
+            //find all projects from associated species
+            //populate project id drop down with these projects 
+            
+        }
+       
         #endregion
 
         //new design logic below but I am going to wait until core functionality is complete and I have feedback to re-factor 

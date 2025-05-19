@@ -208,19 +208,20 @@ namespace RATAPPLibrary.Services
         }
 
         //add new pairing with pairing object
-        public async Task<bool> CreatePairingAsync(Pairing pair)
+        //TODO go through and fix error handling through to return tuples like so that users have more information about what happened
+        public async Task<(bool isSuccess, string error)> CreatePairingAsync(Pairing pair)
         {
             return await ExecuteInTransactionAsync(async context =>
             {
                 var existingPairing = await context.Pairing.FirstOrDefaultAsync(p => p.pairingId == pair.pairingId);
                 if (existingPairing != null)
                 {
-                    throw new InvalidOperationException($"Pairing with ID {pair.pairingId} already exists.");
+                    return (false, $"Pairing with ID {pair.pairingId} already exists.");
                 }
 
                 context.Pairing.Add(pair);
                 await context.SaveChangesAsync();
-                return true;
+                return (true, null);
             });
         }
 

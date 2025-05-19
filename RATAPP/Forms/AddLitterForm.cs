@@ -820,17 +820,18 @@ namespace RATAPP.Forms
                             speciesComboBox.DisplayMember = "CommonName";
                         }
                         //TODO why is line and stock coming back as empty when the data does exist? 
-                        //int stockId = project.Line.StockId; FIXME just patching this to work until I figure out what's wrong with line and other objects that are supposed to exist  this was working before the re-factor
+                        //int stockId = project.Line.StockId; //FIXME just patching this to work until I figure out what's wrong with line and other objects that are supposed to exist  this was working before the re-factor
                         //var _stockService = new StockService(_contextFactory);
                         //var stockObj = await _stockService.GetStockAsync_ById(stockId);
-                        //var stock = stockObj.Species; 
-                        //if (stock != null) {
+                        //var stock = stockObj.Species;
+                        //if (stock != null)
+                        //{
                         //    speciesComboBox.Items.Add(stock);
                         //    speciesComboBox.SelectedIndex = 0;
                         //    speciesComboBox.ValueMember = "Id";
                         //    speciesComboBox.DisplayMember = "CommonName";
                         //}
-                        //if (dam.Line.Stock != null) FIXME have to figure out why the Stock object is always null here but putting a bandaid fix for now since I do have stockID
+                        //if (dam.Line.Stock != null) //FIXME have to figure out why the Stock object is always null here but putting a bandaid fix for now since I do have stockID
                         //{
                         //    if (dam.Line.Stock.Species != null)
                         //    {
