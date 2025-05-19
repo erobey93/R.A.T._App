@@ -29,7 +29,6 @@ namespace RATAPP.Forms
         private ComboBox damComboBox;
         private ComboBox sireComboBox;
         private ComboBox speciesComboBox;
-        private ComboBox pairingComboBox; //FIXME remove, not needed but I need to make a new method to handle this
         private TextBox pairingIdTextBox;
         private ComboBox projectComboBox;
         private DateTimePicker pairingDatePicker;
@@ -44,6 +43,7 @@ namespace RATAPP.Forms
 
         //state
         bool speciesSelected = false;
+        bool projectSelected = false; 
 
 
         private AddPairingForm(RatAppDbContextFactory contextFactory)
@@ -162,6 +162,7 @@ namespace RATAPP.Forms
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
 
             // Create two columns for better organization
+            // Create two columns for better organization
             var leftColumn = new Panel
             {
                 Dock = DockStyle.Left,
@@ -171,13 +172,14 @@ namespace RATAPP.Forms
 
             var rightColumn = new Panel
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Right,
+                Width = 550,
                 Padding = new Padding(10, 0, 0, 0)
             };
 
             // Create groups for related fields
             var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
-            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250); //FIXME breeding info group not showing up 
+            var breedingInfoGroup = FormComponentFactory.CreateFormSection("Pairing Information", DockStyle.Top, 250); //FIXME breeding info group not showing up 
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
@@ -379,7 +381,6 @@ namespace RATAPP.Forms
             }
         }
 
-
         private void InitializeMultiplePairingsTab(TabPage tab)
         {
             var mainPanel = new Panel { Dock = DockStyle.Fill, Padding = new Padding(20) };
@@ -532,60 +533,66 @@ namespace RATAPP.Forms
         private void InitializeEventHandlers()
         {
             cancelButton.Click += (s, e) => HandleCancelClick(this);
+
+            addButton.Click += (s, e) => AddPairingClick(
+            pairingIdTextBox.Text,
+            projectComboBox.SelectedIndex + 1,
+            sireComboBox,
+            damComboBox,
+            pairingDatePicker.Value          
+            );
+
+            projectComboBox.SelectedIndexChanged += (s, e) => HandleProjectSelectedIndexChanged(this);
         }
 
-        //cancel = close form 
-        //public void HandleCancelClick(Form form)
-        //{
-        //    if (MessageBox.Show("Are you sure you want to cancel? Any unsaved data will be lost.",
-        //        "Confirm Cancel", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-        //    {
-        //        form.Close();
-        //    }
-        //}
+        public async Task AddPairingClick(string pairingId, int projectId,
+        ComboBox sire, ComboBox dam, DateTime pairingDate) //FIXME some categories missing I believe 
+        {
+            try
+            {
+                _spinner.Show();
 
-        //public async Task AddPairingClick(string pairingId, string litterName, int projectId,
-        // DateTimePicker datePicker, AnimalDto dam, AnimalDto sire)
-        //{
-        //    try
-        //    {
-        //        _spinner.Show();
+                // Validate inputs
+                if (string.IsNullOrWhiteSpace(pairingId)) //|| string.IsNullOrWhiteSpace(projectId)
+                {
+                    MessageBox.Show("Please fill in all required fields", "Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-        //        // Validate inputs
-        //        if (string.IsNullOrWhiteSpace(pairingId) || string.IsNullOrWhiteSpace(projectId))
-        //        {
-        //            //MessageBox.Show("Please fill in all required fields", "Validation Error",
-        //            //    MessageBoxButtons.OK, MessageBoxIcon.Error);
-        //            return;
-        //        }
+                Animal damSelected = dam.SelectedItem as Animal;
+                Animal sireSelected = sire.SelectedItem as Animal;
 
-        //        var pairing = new Pairing
-        //        {
+                var pairing = new Pairing
+                {
+                    pairingId = pairingId,
+                    SireId = sireSelected.Id,
+                    DamId = damSelected.Id,
+                    ProjectId = projectId, 
+                    PairingStartDate = pairingDate,
+                    PairingEndDate = null,  //skip end date for now but I should allow users to enter this 
+                    CreatedOn = DateTime.Now,
+                    LastUpdated = DateTime.Now,
+                };
 
-        //            CreatedOn = DateTime.Now,
-        //            LastUpdated = DateTime.Now
-        //        };
+                (bool, string) pairingCreated = await _breedingService.CreatePairingAsync(pairing);
 
-        //        bool litterCreated = await _breedingService.CreateLitterAsync(litter);
-
-        //        if (litterCreated)
-        //        {
-        //            MessageBox.Show("Litter added successfully!", "Success",
-        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //        }
-        //        else
-        //        {
-        //            MessageBox.Show("An error occurred. Litter not created!", "Failure",
-        //            MessageBoxButtons.OK, MessageBoxIcon.Information);
-        //        }
-
-
-        //    }
-        //    finally
-        //    {
-        //        _spinner.Hide();
-        //    }
-        //}
+                if (pairingCreated.Item1 == true)
+                {
+                    MessageBox.Show("Pairing added successfully!", "Success",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show($"An error occurred: {pairingCreated.Item2}. Pairing not created!", "Add Pairing Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            finally
+            {
+                _spinner.Hide();
+            }
+        }
 
         //cancel = close form 
         public void HandleCancelClick(Form form)
@@ -596,6 +603,55 @@ namespace RATAPP.Forms
                 form.Close();
             }
         }
+
+        public void HandleProjectSelectedIndexChanged(Form form)
+        {
+            //get project id 
+            Project proj = projectComboBox.SelectedItem as Project;
+            if (proj != null)
+            {
+                Species species = proj.Line.Stock.Species;
+                speciesComboBox.Items.Clear();
+                speciesComboBox.Items.Add(species);
+                speciesComboBox.DisplayMember = "CommonName";
+                speciesComboBox.ValueMember = "Id";
+                speciesComboBox.SelectedIndex = 0; 
+
+                Animal[] animalsInLine = proj.Line.Animals.ToArray();
+                sireComboBox.Items.Clear();
+                damComboBox.Items.Clear();
+                foreach (var animal in animalsInLine)
+                {
+                    if(animal.Sex == "Male")
+                    {
+                        //add to male combo box
+                        sireComboBox.Items.Add(animal);
+                        sireComboBox.DisplayMember = "Name";
+                        speciesComboBox.ValueMember = "Id";
+                    }
+                    else
+                    {
+                        //add to female combo box 
+                        damComboBox.Items.Add(animal);
+                        sireComboBox.DisplayMember = "Name";
+                        speciesComboBox.ValueMember = "Id";
+                    }
+                }
+
+            }
+           
+            //get all animals with line id
+            //set dam and sire combo boxes based on male and female of these animals 
+        }
+
+        public void HandleSpeciesSelectedIndexChanged(Form form)
+        {
+            //get species id
+            //find all projects from associated species
+            //populate project id drop down with these projects 
+            
+        }
+       
         #endregion
 
         //new design logic below but I am going to wait until core functionality is complete and I have feedback to re-factor 

@@ -53,12 +53,14 @@ namespace RATAPP.Panels
         private TabPage pairingsTab;
         private TabPage littersTab;
         private TabPage linesTab;
+        private TabPage projectsTab;
         private TextBox searchBox;
         private ComboBox filterComboBox;
         private Button searchButton;
         private DataGridView pairingsGridView;
         private DataGridView littersGridView;
         private DataGridView linesGridView;
+        private DataGridView projectGridView;
         private Button addButton;
         private Button updateButton;
         private Button deleteButton;
@@ -67,14 +69,14 @@ namespace RATAPP.Panels
         private Pairing[] _pairings;
         private Litter[] _litters;
         private Line[] _lines;
-        private bool _littersGridView;
-        private bool _linesGridView;
+        private Project[] _projects; 
 
         private RATAppBaseForm _parentForm;
         private BreedingService _breedingService;
         private AnimalService _animalService;
         private LineService _lineService;
         private StockService _stockService;
+        private ProjectService _projectService;
 
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
@@ -89,9 +91,7 @@ namespace RATAPP.Panels
             _breedingService = new BreedingService(contextFactory);
             _lineService = new LineService(contextFactory);
             _stockService = new StockService(contextFactory);
-
-            _littersGridView = false;
-            _linesGridView = false;
+            _projectService = new ProjectService(contextFactory);
 
             InitializeComponents();
             InitializeLoadingSpinner();
@@ -175,6 +175,7 @@ namespace RATAPP.Panels
             pairingsGridView = new DataGridView();
             littersGridView = new DataGridView(); //TODO need to better organize everything, i.e. come up with a common schema for how I initialize and pass around all controls 
             linesGridView = new DataGridView();
+            projectGridView = new DataGridView(); 
 
             // Initialize Pairings Tab
             pairingsTab = new TabPage("Pairings");
@@ -188,9 +189,14 @@ namespace RATAPP.Panels
             linesTab = new TabPage("Line Management");
             InitializeLineDataGridView();
 
+            // Initialize Project management tab (may change the name, but fine for now)
+            projectsTab = new TabPage("Project Management");
+            InitializeProjectDataGridView(); //need to make InitializeProjectDataGridView
+
             tabControl.TabPages.Add(pairingsTab);
             tabControl.TabPages.Add(littersTab);
             tabControl.TabPages.Add(linesTab);
+            tabControl.TabPages.Add(projectsTab);
 
             tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
 
@@ -211,11 +217,13 @@ namespace RATAPP.Panels
             var getPairings = await _breedingService.GetAllPairingsAsync();
             _pairings = getPairings.ToArray();
 
-            //get lines TODO...maybe? 
+            //get lines 
             var getLines = await _lineService.GetAllLinesAsync();
             _lines = getLines.ToArray();
 
-            //get projects TODO
+            //get projects TODO 
+            var getProjects = await _projectService.GetAllProjectsAsync();
+            _projects = getProjects.ToArray();
         }
 
         private async Task GetCurrentBreedingData()
@@ -234,6 +242,8 @@ namespace RATAPP.Panels
             _lines = getLines.ToArray();
 
             //get projects TODO
+            var getProjects = await _projectService.GetAllProjectsAsync();
+            _projects = getProjects.ToArray();
         }
 
         private async Task GetPastBreedingData()
@@ -252,6 +262,8 @@ namespace RATAPP.Panels
             _lines = getLines.ToArray();
 
             //get projects TODO
+            var getProjects = await _projectService.GetAllProjectsAsync();
+            _projects = getProjects.ToArray();
         }
 
         private async void TabControl_SelectedIndexChanged(object sender, EventArgs e)
@@ -299,21 +311,22 @@ namespace RATAPP.Panels
                 pairingsGridView.Visible = tabIndex == 0;
                 littersGridView.Visible = tabIndex == 1;
                 linesGridView.Visible = tabIndex == 2;
+                projectGridView.Visible = tabIndex == 3; 
 
                 // Load data based on selected tab
                 switch (tabIndex)
                 {
                     case 0:
-                        //await GetBreedingData();
                         PopulatePairingDataDisplayArea();
                         break;
                     case 1:
-                        //await GetBreedingData();
                         PopulateLittersDataDisplayArea();
                         break;
                     case 2:
-                        //await GetBreedingData();
                         PopulateLineDataDisplayArea();
+                        break;
+                    case 3:
+                        PopulateProjectDataDisplayArea();
                         break;
                 }
             }
@@ -480,11 +493,19 @@ namespace RATAPP.Panels
                     addLine.ShowDialog();
                     await LoadTabDataAsync(tabControl.SelectedIndex);
                 }
+                else if(currentTab == "Project Management")
+                {
+                    MessageBox.Show("Add Project Form Will Be Here"); 
+                    //AddProjectForm addProject = await AddProjectForm.CreateAsync(_contextFactory); 
+                    //addProject.ShowDialog()
+                    //await LoadTabDataAsync(tabControl.SelectedIndex)
+                }
             }
             else if (clickedButton.Text == "Update")
             {
                 if (currentTab == "Pairings")
                 {
+                    MessageBox.Show("Update Pairing Form Will Be Here");
                     //TODO update is the same as add except for the data is filled in 
                     //UpdatePairingForm updatePairing = new UpdatePairingForm(_contextFactory);
                     //updatePairing.ShowDialog();
@@ -492,6 +513,7 @@ namespace RATAPP.Panels
                 }
                 else if (currentTab == "Litters")
                 {
+                    MessageBox.Show("Update Litters Form Will Be Here");
                     //TODO update is the same as add except for the data is filled in 
                     //UpdateLitterForm updateLitter = await UpdateLitterForm.CreateAsync(_contextFactory);
                     //updateLitter.ShowDialog();
@@ -499,6 +521,15 @@ namespace RATAPP.Panels
                 }
                 else if (currentTab == "Line Management")
                 {
+                    MessageBox.Show("Update Line Form Will Be Here");
+                    //TODO
+                    //AddLineForm addLine = new AddLineForm(_contextFactory);
+                    //addLine.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                }
+                else if (currentTab == "Project Management")
+                {
+                    MessageBox.Show("Update Project Form Will Be Here");
                     //TODO
                     //AddLineForm addLine = new AddLineForm(_contextFactory);
                     //addLine.ShowDialog();
@@ -519,16 +550,14 @@ namespace RATAPP.Panels
             searchState = "all"; //TODO probably need to clear out the search box/filter drop down as well 
             // Implement data refresh logic TODO
             await GetAllBreedingData();
-            //return Task.CompletedTask;
         }
 
-        private async void InitializePairingDataGridView()
+        private void InitializePairingDataGridView()
         {
             int topPanelHeight = 90;
 
-            //get all pairings and litters from db 
+            //get all pairings from db 
             //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
-            //await GetBreedingData();
 
             pairingsGridView.Location = new Point(0, topPanelHeight);
             pairingsGridView.Width = 1000;
@@ -537,6 +566,7 @@ namespace RATAPP.Panels
             pairingsGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             pairingsGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             pairingsGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+            pairingsGridView.ReadOnly = true;
 
             pairingsGridView.Columns.AddRange(new DataGridViewColumn[]
             {
@@ -599,7 +629,70 @@ namespace RATAPP.Panels
             }
         }
 
-        private async void InitializeLitterDataGridView()
+        private void InitializeProjectDataGridView()
+        {
+            int topPanelHeight = 90;
+
+            //get all projects from db 
+            //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
+
+            projectGridView.Location = new Point(0, topPanelHeight);
+            projectGridView.Width = 1000;
+            projectGridView.Height = 400;
+            projectGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            projectGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            projectGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+            projectGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+            projectGridView.ReadOnly = true;
+
+            projectGridView.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "Project ID" },
+                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Project Name" },
+                new DataGridViewTextBoxColumn { Name = "LineId", HeaderText = "LineId" },
+                //new DataGridViewTextBoxColumn { Name = "LineName", HeaderText = "LineId" }, TODO would be nice to have Line name but need to add new variable for this 
+                new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description" },
+                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes" },
+                new DataGridViewTextBoxColumn { Name = "CreatedOn", HeaderText = "Created On" },
+                new DataGridViewTextBoxColumn { Name = "LastUpdated", HeaderText = "Last Updated" },
+                new DataGridViewButtonColumn { Name = "ProjectPage", HeaderText = "Project Page", Text = "Go", UseColumnTextForButtonValue = true }
+            });
+
+            PopulateProjectDataDisplayArea();
+
+            this.Controls.Add(projectGridView);
+        }
+
+        private async void PopulateProjectDataDisplayArea()
+        {
+            if (searchState == "all")
+            {
+                await GetAllBreedingData();
+            }
+            else if (searchState == "current")
+            {
+                await GetCurrentBreedingData();
+            }
+            else if (searchState == "past")
+            {
+                await GetPastBreedingData();
+            }
+
+            projectGridView.Rows.Clear();
+            if (_projects != null)
+            {
+                foreach (var project in _projects)
+                {
+                    projectGridView.Rows.Add(project.Id, project.Name, project.LineId, project.Description, project.Notes, project.CreatedOn, project.LastUpdated);
+                }
+            }
+            else
+            {
+                MessageBox.Show("There are no pairings in your database.");
+            }
+        }
+
+        private void InitializeLitterDataGridView()
         {
             int topPanelHeight = 90;
 
@@ -610,6 +703,7 @@ namespace RATAPP.Panels
             littersGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             littersGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
             littersGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+            littersGridView.ReadOnly = true;    
 
             littersGridView.Columns.AddRange(new DataGridViewColumn[]
             {
@@ -670,6 +764,7 @@ namespace RATAPP.Panels
             linesGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize; // Changed to linesGridView
             linesGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single; // Changed to linesGridView
             linesGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders; // Changed to linesGridView
+            linesGridView.ReadOnly = true;
 
             linesGridView.Columns.Clear(); // Clear existing columns before adding new ones // Changed to linesGridView
 

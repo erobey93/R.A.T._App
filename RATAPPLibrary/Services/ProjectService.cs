@@ -123,6 +123,7 @@ namespace RATAPPLibrary.Services
             {
                 var project = await _context.Project
                 .Include(p => p.Line)
+                .Include(p => p.Line.Stock)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (project == null)
@@ -143,6 +144,9 @@ namespace RATAPPLibrary.Services
             {
                 return await _context.Project
                 .Include(p => p.Line)
+                .Include(p => p.Line.Stock)
+                .Include(p => p.Line.Animals)
+                .Include(p => p.Line.Stock.Species)
                 .OrderByDescending(p => p.LastUpdated)
                 .ToListAsync();
             });
@@ -157,6 +161,9 @@ namespace RATAPPLibrary.Services
             {
                 return await _context.Project
                 .Include(p => p.Line)
+                .Include(p => p.Line.Stock)
+                .Include(p => p.Line.Animals)
+                 .Include(p => p.Line.Stock.Species)
                 .Where(p => p.LineId == lineId)
                 .OrderByDescending(p => p.LastUpdated)
                 .ToListAsync();

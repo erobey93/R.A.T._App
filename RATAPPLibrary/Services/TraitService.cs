@@ -200,7 +200,7 @@ namespace RATAPPLibrary.Services
         }
 
         //create a new trait type i.e. each trait has a type (e.g. color, pattern, etc.) so this is not species specific
-        public async Task<TraitType> CreateTraitTypeAsync(string name, string? description = null)
+        public async Task<TraitType> CreateTraitTypeAsync(string type, string name, string? description = null)
         {
             return await ExecuteInTransactionAsync(async _context =>
             {
@@ -214,6 +214,7 @@ namespace RATAPPLibrary.Services
                 // Create the new trait type
                 var newTraitType = new TraitType
                 {
+                    Type = type,
                     Name = name,
                     Description = description
                 };

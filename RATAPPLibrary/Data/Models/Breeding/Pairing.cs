@@ -20,5 +20,11 @@
         public Animal? Sire { get; set; } // Navigation property for the sire
         public Animal? Dam { get; set; } // Navigation property for the dam
         public Project? Project { get; set; } // Navigation property for the project
+
+        //Append dam + sire + pairing start date to make which pairing we're dealing with more clear to the user 
+        public string DisplayText
+        {
+            get => $"{Dam.Name} + {Sire.Name} ({PairingStartDate:yyyy-MM-dd})";
+        }
     }
 }

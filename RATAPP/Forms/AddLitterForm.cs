@@ -22,7 +22,7 @@ namespace RATAPP.Forms
     ///   * Pup count tracking
     ///   * Notes and details
     /// 
-    /// - Multiple Litter Entry:
+    /// - Multiple Litter Entry: TODO
     ///   * Batch creation interface
     ///   * Data grid for review
     ///   * Bulk save operations
@@ -49,6 +49,7 @@ namespace RATAPP.Forms
     /// - BreedingService
     /// - AnimalService
     /// - ProjectService
+    /// - SpeciesService
     /// - Form helper classes
     /// </summary>
     public partial class AddLitterForm : Form
@@ -67,6 +68,7 @@ namespace RATAPP.Forms
         private TextBox litterIdTextBox;
         private TextBox litterNameTextBox;
         private TextBox numPups;
+        private TextBox numLivePups;
         private TextBox numMales;
         private TextBox numFemales;
         private TextBox litterNotes;
@@ -319,6 +321,7 @@ namespace RATAPP.Forms
 
                 pairComboBox.Items.Clear();
                 pairComboBox.Items.Add("All Pairings");
+                pairComboBox.Items.Add("Add New Pairing"); 
 
                 foreach (var p in pairs)
                 {
@@ -326,7 +329,7 @@ namespace RATAPP.Forms
                 }
 
                 pairComboBox.SelectedIndex = 0;
-                pairComboBox.DisplayMember = "pairingId"; //FIXME I may need a way to make it easier for user to distinguish pairs i.e. dam+sire+date? 
+                pairComboBox.DisplayMember = "DisplayText"; //FIXME I may need a way to make it easier for user to distinguish pairs i.e. dam+sire+date? 
                 pairComboBox.ValueMember = "pairingId";
             }
             catch (Exception ex)
@@ -373,14 +376,15 @@ namespace RATAPP.Forms
 
             var rightColumn = new Panel
             {
-                Dock = DockStyle.Fill,
+                Dock = DockStyle.Right,
+                Width = 550,
                 Padding = new Padding(10, 0, 0, 0)
             };
 
             // Create groups for related fields
             var basicInfoGroup = FormComponentFactory.CreateFormSection("Basic Information", DockStyle.Top, 250);
             var breedingInfoGroup = FormComponentFactory.CreateFormSection("Breeding Information", DockStyle.Top, 250);
-            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 350); //FIXME litter details not showing up 
+            var litterDetailsGroup = FormComponentFactory.CreateFormSection("Litter Details", DockStyle.Top, 250); 
 
             // Create and configure form fields with validation indicators
             speciesComboBox = new ComboBox();
@@ -419,6 +423,11 @@ namespace RATAPP.Forms
             numPups.KeyPress += (s, e) => ValidateNumericInput(e);
             var numPupsField = CreateRequiredFormField("Number of Pups:", numPups);
 
+            numLivePups = new TextBox();
+            FormStyleHelper.ApplyTextBoxStyle(numLivePups);
+            numLivePups.KeyPress += (s, e) => ValidateNumericInput(e);
+            var numLivePupsField = CreateRequiredFormField("Number of Live Pups:", numLivePups);
+
             numMales = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(numMales);
             numMales.KeyPress += (s, e) => ValidateNumericInput(e);
@@ -448,7 +457,7 @@ namespace RATAPP.Forms
 
             var litterDetailsPanel = new Panel { Dock = DockStyle.Fill };
             litterDetailsPanel.Controls.AddRange(new Control[] {
-        numPupsField, numMalesField, numFemalesField, notesField
+        numPupsField, numLivePupsField, numMalesField, numFemalesField, notesField
     });
             litterDetailsGroup.Controls.Add(litterDetailsPanel);
 
@@ -465,7 +474,7 @@ namespace RATAPP.Forms
             buttonPanel.Dock = DockStyle.Bottom; // Dock the button panel to the bottom
 
             // Organize panels
-            leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup });
+            leftColumn.Controls.AddRange(new Control[] { basicInfoGroup, breedingInfoGroup});
             rightColumn.Controls.AddRange(new Control[] { litterDetailsGroup });
 
             mainPanel.Controls.AddRange(new Control[] { leftColumn, rightColumn });
@@ -681,8 +690,8 @@ namespace RATAPP.Forms
             finally
             {
                 pairComboBox.SelectedIndex = 0;
-                pairComboBox.DisplayMember = "pairId"; //display member is what the user sees 
-                pairComboBox.ValueMember = "pairId"; //value member is what we use when we're trying to work with the obect i.e. how the backend identifies the object 
+                //pairComboBox.DisplayMember = "pairId"; //display member is what the user sees 
+                //pairComboBox.ValueMember = "pairId"; //value member is what we use when we're trying to work with the obect i.e. how the backend identifies the object 
                 _spinner.Hide();
             }
         }
@@ -736,8 +745,33 @@ namespace RATAPP.Forms
         public async Task HandlePairSelectionChangedAsync()
         {
             var selectedPair = pairComboBox.SelectedItem as Pairing;
-            if (selectedPair == null) return; //when first loaded, the object will be null
-            if (pairComboBox.SelectedItem == null) return; //but the initial value will not be 
+            var selectedText = pairComboBox.Text;
+            //if (selectedText == "All Pairings") //FIXME this should be a switch statement 
+            //{
+            //    //reload all of the data again
+            //    await LoadInitialDataAsync();
+            //    return;
+            //}
+            if (selectedText == "Add New Pairing")
+            {
+                //reload all of the data again
+                //await LoadInitialDataAsync();
+                //open add new pairing form
+                AddPairingForm addPairing = await AddPairingForm.CreateAsync(_contextFactory);
+                addPairing.ShowDialog();
+                return; 
+            }
+            else if (selectedPair == null && pairSelected == true) 
+            {
+                //get data again
+                LoadInitialDataAsync();
+                //set pairSelected to false
+                pairSelected = false; 
+                return; 
+            } //not initial load event, but user re-selected all pairings 
+            else if (selectedPair == null) return; //when first loaded, the object will be null TODO really should re-populate if 
+            else if (pairComboBox.SelectedItem == null) return; //but the initial value will not be 
+ 
 
             try
             {
@@ -786,17 +820,18 @@ namespace RATAPP.Forms
                             speciesComboBox.DisplayMember = "CommonName";
                         }
                         //TODO why is line and stock coming back as empty when the data does exist? 
-                        //int stockId = project.Line.StockId; FIXME just patching this to work until I figure out what's wrong with line and other objects that are supposed to exist  this was working before the re-factor
+                        //int stockId = project.Line.StockId; //FIXME just patching this to work until I figure out what's wrong with line and other objects that are supposed to exist  this was working before the re-factor
                         //var _stockService = new StockService(_contextFactory);
                         //var stockObj = await _stockService.GetStockAsync_ById(stockId);
-                        //var stock = stockObj.Species; 
-                        //if (stock != null) {
+                        //var stock = stockObj.Species;
+                        //if (stock != null)
+                        //{
                         //    speciesComboBox.Items.Add(stock);
                         //    speciesComboBox.SelectedIndex = 0;
                         //    speciesComboBox.ValueMember = "Id";
                         //    speciesComboBox.DisplayMember = "CommonName";
                         //}
-                        //if (dam.Line.Stock != null) FIXME have to figure out why the Stock object is always null here but putting a bandaid fix for now since I do have stockID
+                        //if (dam.Line.Stock != null) //FIXME have to figure out why the Stock object is always null here but putting a bandaid fix for now since I do have stockID
                         //{
                         //    if (dam.Line.Stock.Species != null)
                         //    {
@@ -834,8 +869,8 @@ namespace RATAPP.Forms
                 // Validate inputs
                 if (string.IsNullOrWhiteSpace(litterId) || string.IsNullOrWhiteSpace(litterName))
                 {
-                    //MessageBox.Show("Please fill in all required fields", "Validation Error",
-                    //    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Please fill in all required fields", "Validation Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 

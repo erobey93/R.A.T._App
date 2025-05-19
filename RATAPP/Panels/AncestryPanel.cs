@@ -1,4 +1,7 @@
-﻿using RATAPP.Forms;
+﻿using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using RATAPP.Forms;
+using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using System;
 using System.Collections.Generic;
@@ -20,16 +23,19 @@ namespace RATAPP.Panels
         private RATAppBaseForm _parentForm;
         //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
+        private RATAPPLibrary.Services.LineageService _lineageService;
         private AnimalDto[] _animals;
+        private RatAppDbContextFactory _contextFactory;
 
         // The currently selected rodent
-        private Rodent selectedRodent;
+        private AnimalDto selectedRodent;
 
-        public AncestryPanel(RATAppBaseForm parentForm, RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
+        public AncestryPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
         {
             _parentForm = parentForm;
             //_context = context;
             _animalService = new RATAPPLibrary.Services.AnimalService(contextFactory);
+            _lineageService = new RATAPPLibrary.Services.LineageService(contextFactory);
 
             InitializeComponent();
             InitializeCustomComponents();
@@ -129,7 +135,7 @@ namespace RATAPP.Panels
             // Add default info to the panel
             Label defaultInfoLabel = new Label
             {
-                Text = "Select a rodent to view details",
+                Text = "Select an animal to view details",
                 Location = new Point(10, 10),
                 Size = new Size(260, 20),
                 TextAlign = ContentAlignment.MiddleCenter
@@ -138,23 +144,23 @@ namespace RATAPP.Panels
         }
 
         // Load ancestry data for a specific rodent
-        public void LoadRodentAncestry(Rodent rodent)
+        public void LoadRodentAncestry(AnimalDto animal)
         {
-            if (rodent == null) return;
+            if (animal == null) return;
 
-            selectedRodent = rodent;
-            titleLabel.Text = $"Ancestry Tree: {rodent.Name} (ID: {rodent.ID})";
+            selectedRodent = animal;
+            titleLabel.Text = $"Ancestry Tree: {animal.name} (ID: {animal.Id})";
 
             // Clear existing tree
             ancestryTree.Nodes.Clear();
 
             // Create root node for the selected rodent
-            TreeNode rootNode = CreateRodentNode(rodent);
+            TreeNode rootNode = CreateRodentNode(animal);
             ancestryTree.Nodes.Add(rootNode);
 
             // Load parents based on the selected number of generations
             int generations = int.Parse(generationsComboBox.SelectedItem.ToString());
-            LoadParents(rootNode, rodent, 1, generations);
+            LoadParents(rootNode, animal, 1, generations);
 
             // Expand the tree
             ancestryTree.ExpandAll();
@@ -163,16 +169,25 @@ namespace RATAPP.Panels
             ancestryTree.SelectedNode = rootNode;
         }
 
-        private void LoadParents(TreeNode parentNode, Rodent rodent, int currentGeneration, int maxGenerations)
+        private async void LoadParents(TreeNode parentNode, AnimalDto animal, int currentGeneration, int maxGenerations)
         {
-            if (currentGeneration >= maxGenerations || rodent == null) return;
+            if (currentGeneration >= maxGenerations || animal == null) return;
+
+            //get the animal's dam and sire FIXME library should return objects for this, just getting working for now 
+
+            Animal dam = await _lineageService.GetDamByAnimalId(animal.Id);
+            Animal sire = await _lineageService.GetSireByAnimalId(animal.Id);
+
+            AnimalDto damDto = await _animalService.MapSingleAnimaltoDto(dam);
+            AnimalDto sireDto = await _animalService.MapSingleAnimaltoDto(sire);
 
             // Add father if available
-            if (rodent.Father != null)
+            if (animal.sireId != null)
             {
-                TreeNode fatherNode = CreateRodentNode(rodent.Father);
+                
+                TreeNode fatherNode = CreateRodentNode(sireDto);
                 parentNode.Nodes.Add(fatherNode);
-                LoadParents(fatherNode, rodent.Father, currentGeneration + 1, maxGenerations);
+                LoadParents(fatherNode,sireDto, currentGeneration + 1, maxGenerations);
             }
             else
             {
@@ -181,12 +196,12 @@ namespace RATAPP.Panels
                 parentNode.Nodes.Add(unknownNode);
             }
 
-            // Add mother if available
-            if (rodent.Mother != null)
+            // Add dam if available
+            if (dam != null)
             {
-                TreeNode motherNode = CreateRodentNode(rodent.Mother);
+                TreeNode motherNode = CreateRodentNode(damDto);
                 parentNode.Nodes.Add(motherNode);
-                LoadParents(motherNode, rodent.Mother, currentGeneration + 1, maxGenerations);
+                LoadParents(motherNode, damDto, currentGeneration + 1, maxGenerations);
             }
             else
             {
@@ -196,45 +211,47 @@ namespace RATAPP.Panels
             }
         }
 
-        private TreeNode CreateRodentNode(Rodent rodent)
+        private TreeNode CreateRodentNode(AnimalDto animal)
         {
-            TreeNode node = new TreeNode($"{rodent.Name} (ID: {rodent.ID})");
+            TreeNode node = new TreeNode($"{animal.name} (ID: {animal.Id})");
 
             // Set node color based on gender
-            if (rodent.Gender == Gender.Male)
+            if (animal.sex == "Male")
             {
                 node.ForeColor = Color.Blue;
             }
-            else if (rodent.Gender == Gender.Female)
+            else if (animal.sex == "Female")
             {
                 node.ForeColor = Color.DeepPink;
             }
 
+            var getTraits = _animalService.GetAnimalTraits(animal.Id); //FIXME this should come from the animal.Traits object but the data isn't available TODO
+            
             // Set tooltip with additional information
-            node.ToolTipText = $"Name: {rodent.Name}\n" +
-                              $"ID: {rodent.ID}\n" +
-                              $"Gender: {rodent.Gender}\n" +
-                              $"DOB: {rodent.DateOfBirth.ToShortDateString()}\n" +
-                              $"Coat: {rodent.CoatColor}";
+            node.ToolTipText = $"Name: {animal.name}\n" +
+                              $"ID: {animal.Id}\n" +
+                              $"Gender: {animal.sex}\n" +
+                              $"DOB: {animal.DateOfBirth.ToShortDateString()}\n" +
+                              $"Coat: {animal.color}";
 
             // Store the rodent object in the tag for later reference
-            node.Tag = rodent;
+            node.Tag = animal;
 
             return node;
         }
 
-        private void DisplayRodentInfo(Rodent rodent)
+        private void DisplayRodentInfo(AnimalDto animal)
         {
             // Clear the info panel
             infoPanel.Controls.Clear();
 
-            if (rodent == null) return;
+            if (animal == null) return;
 
             // Create labels for rodent information
             int yPos = 10;
 
             // Add photo if available
-            if (rodent.PhotoPath != null && System.IO.File.Exists(rodent.PhotoPath))
+            if (animal.imageUrl != null && File.Exists(animal.imageUrl))
             {
                 try
                 {
@@ -243,7 +260,7 @@ namespace RATAPP.Panels
                         Location = new Point(90, yPos),
                         Size = new Size(100, 100),
                         SizeMode = PictureBoxSizeMode.Zoom,
-                        Image = Image.FromFile(rodent.PhotoPath),
+                        Image = Image.FromFile(animal.imageUrl),
                         BorderStyle = BorderStyle.FixedSingle
                     };
                     infoPanel.Controls.Add(pictureBox);
@@ -279,13 +296,13 @@ namespace RATAPP.Panels
             }
 
             // Add basic information
-            AddInfoLabel("Name:", rodent.Name, yPos); yPos += 25;
-            AddInfoLabel("ID:", rodent.ID, yPos); yPos += 25;
-            AddInfoLabel("Gender:", rodent.Gender.ToString(), yPos); yPos += 25;
-            AddInfoLabel("Date of Birth:", rodent.DateOfBirth.ToShortDateString(), yPos); yPos += 25;
-            AddInfoLabel("Age:", CalculateAge(rodent.DateOfBirth), yPos); yPos += 25;
-            AddInfoLabel("Coat Color:", rodent.CoatColor, yPos); yPos += 25;
-            AddInfoLabel("Weight:", $"{rodent.Weight}g", yPos); yPos += 25;
+            AddInfoLabel("Name:", animal.name, yPos); yPos += 25;
+            AddInfoLabel("ID:", animal.Id.ToString(), yPos); yPos += 25;
+            AddInfoLabel("Gender:", animal.sex, yPos); yPos += 25;
+            AddInfoLabel("Date of Birth:", animal.DateOfBirth.ToShortDateString(), yPos); yPos += 25;
+            AddInfoLabel("Age:", CalculateAge(animal.DateOfBirth), yPos); yPos += 25;
+            AddInfoLabel("Coat Color:", animal.color, yPos); yPos += 25;
+            //AddInfoLabel("Weight:", $"{animal.Weight}g", yPos); yPos += 25;
 
             // Add separator
             Panel separator = new Panel
@@ -298,11 +315,12 @@ namespace RATAPP.Panels
             yPos += 10;
 
             // Add breeding information if available
-            if (rodent.LitterCount > 0)
-            {
-                AddInfoLabel("Litter Count:", rodent.LitterCount.ToString(), yPos); yPos += 25;
-                AddInfoLabel("Last Litter:", rodent.LastLitterDate?.ToShortDateString() ?? "N/A", yPos); yPos += 25;
-            }
+            //TODO 
+            //if (animal.LitterCount > 0)
+            //{
+            //    AddInfoLabel("Litter Count:", animal.LitterCount.ToString(), yPos); yPos += 25;
+            //    AddInfoLabel("Last Litter:", animal.LastLitterDate?.ToShortDateString() ?? "N/A", yPos); yPos += 25;
+            //}
 
             // Add view details button
             Button viewDetailsButton = new Button
@@ -312,7 +330,7 @@ namespace RATAPP.Panels
                 Size = new Size(140, 30),
                 BackColor = SystemColors.Control
             };
-            viewDetailsButton.Click += (sender, e) => ViewFullDetails(rodent);
+            viewDetailsButton.Click += (sender, e) => ViewFullDetails(animal);
             infoPanel.Controls.Add(viewDetailsButton);
         }
 
@@ -361,21 +379,23 @@ namespace RATAPP.Panels
             }
         }
 
-        private void ViewFullDetails(Rodent rodent)
+        private async void ViewFullDetails(AnimalDto animal)
         {
             // This would open the full details form for the selected rodent
-            MessageBox.Show($"Opening full details for {rodent.Name}", "View Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //MessageBox.Show($"Opening full details for {rodent.Name}", "View Details", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
+            //FIXME this shouldn't be here but just getting this to work 
+            AnimalDto[] allAnimals = await _animalService.GetAllAnimalsAsync();
             // In a real implementation, you would open the rodent details form here
-            // RodentDetailsForm detailsForm = new RodentDetailsForm(rodent);
-            // detailsForm.Show();
+            AnimalPanel indAnimalPanel = new AnimalPanel(this._parentForm, _contextFactory, allAnimals, animal);
+            indAnimalPanel.Show();
         }
 
         #region Event Handlers
 
         private void AncestryTree_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            if (e.Node.Tag is Rodent selectedRodent)
+            if (e.Node.Tag is AnimalDto selectedRodent)
             {
                 DisplayRodentInfo(selectedRodent);
             }
@@ -437,46 +457,47 @@ namespace RATAPP.Panels
 
         #endregion
     }
+}
 
     //mock data below this will come from the library 
 
-    public enum Gender
-    {
-        Male,
-        Female,
-        Unknown
-    }
+//    public enum Gender
+//    {
+//        Male,
+//        Female,
+//        Unknown
+//    }
 
-    public class Rodent
-    {
-        public string ID { get; set; }
-        public string Name { get; set; }
-        public Gender Gender { get; set; }
-        public DateTime DateOfBirth { get; set; }
-        public string CoatColor { get; set; }
-        public double Weight { get; set; }
-        public string PhotoPath { get; set; }
-        public int LitterCount { get; set; }
-        public DateTime? LastLitterDate { get; set; }
+//    public class AnimalDto
+//    {
+//        public string ID { get; set; }
+//        public string Name { get; set; }
+//        public Gender Gender { get; set; }
+//        public DateTime DateOfBirth { get; set; }
+//        public string CoatColor { get; set; }
+//        public double Weight { get; set; }
+//        public string PhotoPath { get; set; }
+//        public int LitterCount { get; set; }
+//        public DateTime? LastLitterDate { get; set; }
 
-        // Ancestry
-        public Rodent Father { get; set; }
-        public Rodent Mother { get; set; }
+//        // Ancestry
+//        public AnimalDto Father { get; set; }
+//        public AnimalDto Mother { get; set; }
 
-        public Rodent()
-        {
-            ID = "";
-            Name = "";
-            Gender = Gender.Unknown;
-            DateOfBirth = DateTime.Now;
-            CoatColor = "";
-            Weight = 0;
-            PhotoPath = null;
-            LitterCount = 0;
-            LastLitterDate = null;
-        }
-    }
-}
+//        public AnimalDto()
+//        {
+//            ID = "";
+//            Name = "";
+//            Gender = Gender.Unknown;
+//            DateOfBirth = DateTime.Now;
+//            CoatColor = "";
+//            Weight = 0;
+//            PhotoPath = null;
+//            LitterCount = 0;
+//            LastLitterDate = null;
+//        }
+//    }
+//}
 
 
 

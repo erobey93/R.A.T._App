@@ -302,6 +302,9 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int?>("NumFemale")
                         .HasColumnType("int");
 
+                    b.Property<int?>("NumLivePups")
+                        .HasColumnType("int");
+
                     b.Property<int?>("NumMale")
                         .HasColumnType("int");
 
@@ -788,6 +791,10 @@ namespace RATAPPLibrary.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

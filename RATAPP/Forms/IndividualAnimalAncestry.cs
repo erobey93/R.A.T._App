@@ -10,7 +10,7 @@ namespace RATAPP.Forms
 {
     public class IndividualAnimalAncestryForm : Form
     {
-        private RatAppDbContext _context;
+        private static RatAppDbContextFactory _context;
         private AnimalDto _currentAnimal; // Assuming Rat is your animal model
         private RATAppBaseForm _baseForm;
 
@@ -27,6 +27,7 @@ namespace RATAPP.Forms
 
         public static IndividualAnimalAncestryForm Create(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
+            _context = contextFactory;
             return new IndividualAnimalAncestryForm(baseForm, contextFactory, animal);
         }
 
@@ -98,6 +99,10 @@ namespace RATAPP.Forms
             // View Pedigree Button
             viewPedigreeButton = CreateButton("View Pedigree", 340, 220, 150, Color.FromArgb(255, 152, 0));
             viewPedigreeButton.Click += ViewPedigreeButton_Click;
+
+            // Birth Certificate Button
+            var birthCertButton = CreateButton("Birth Certificate", 340, 260, 150, Color.FromArgb(0, 150, 136));
+            birthCertButton.Click += BirthCertButton_Click;
 
             // Family Tree Panel (Placeholder)
             familyTreePanel = new Panel
@@ -174,12 +179,14 @@ namespace RATAPP.Forms
 
         private void ViewPedigreeButton_Click(object sender, EventArgs e)
         {
-            // TODO: Implement logic to display the pedigree
-            MessageBox.Show("View Pedigree functionality to be implemented.");
-            pedigreeTextBox.Visible = true;
-            familyTreePanel.Visible = false;
-            // Generate and display the pedigree text in pedigreeTextBox
-            pedigreeTextBox.Text = "Placeholder Pedigree Text...";
+            var pedigreeForm = PedigreeForm.Create(_context, _currentAnimal);
+            pedigreeForm.ShowDialog();
+        }
+
+        private void BirthCertButton_Click(object sender, EventArgs e)
+        {
+            var birthCertForm = BirthCertificateForm.CreateForAnimal(_context, _currentAnimal);
+            birthCertForm.ShowDialog();
         }
     }
 }
