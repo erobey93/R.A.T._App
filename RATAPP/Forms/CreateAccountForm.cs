@@ -15,22 +15,12 @@ namespace RATAPP.Forms
         private PasswordHashing _passwordHashing;
         private RATAPPLibrary.Services.AccountService _accountService;
 
-        // Store screen dimensions for responsive sizing
-        private int screenWidth;
-        private int screenHeight;
-
-        // Define form size as percentage of screen
-        private const double FORM_WIDTH_PERCENT = 0.5; // 50% of screen width
-        private const double FORM_HEIGHT_PERCENT = 0.8; // 80% of screen height
-
         // UI Constants
         private readonly Color PRIMARY_COLOR = Color.FromArgb(0, 120, 215);
         private readonly Color SECONDARY_COLOR = Color.FromArgb(0, 150, 136);
         private readonly Color NEUTRAL_COLOR = Color.FromArgb(158, 158, 158);
-        private readonly Color BACKGROUND_COLOR = Color.FromArgb(240, 240, 240);
         private readonly Font TITLE_FONT = new Font("Segoe UI", 16, FontStyle.Bold);
         private readonly Font INPUT_FONT = new Font("Segoe UI", 12);
-        private readonly Font BUTTON_FONT = new Font("Segoe UI", 12);
 
         public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
@@ -40,80 +30,19 @@ namespace RATAPP.Forms
             _passwordHashing = passwordHashing;
             _accountService = new AccountService(contextFactory, _configuration, _passwordHashing);
 
-            // Get screen dimensions
-            screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-            screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
-
             CreateAcctForm();
-
-            // Handle resize events to maintain proportions
-            this.Resize += CreateAccountForm_Resize;
         }
 
-        private void CreateAccountForm_Resize(object sender, EventArgs e)
-        {
-            // Recalculate and reposition controls when form is resized
-            RepositionControls();
-        }
-
-        private void RepositionControls()
-        {
-            // Calculate center positions
-            int centerX = this.ClientSize.Width / 2;
-
-            // Reposition logo
-            if (this.Controls["logo"] != null)
-            {
-                var logo = (PictureBox)this.Controls["logo"];
-                logo.Location = new Point(centerX - (logo.Width / 2), 20);
-            }
-
-            // Reposition title
-            if (this.Controls["lblTitle"] != null)
-            {
-                var lblTitle = (Label)this.Controls["lblTitle"];
-                lblTitle.Location = new Point(centerX - (lblTitle.Width / 2), 210);
-            }
-
-            // Reposition all text boxes and the combo box
-            string[] controlNames = {
-                "txtFirstName", "txtLastName", "txtPhone", "txtEmail",
-                "txtCity", "txtState", "txtUsername", "txtPassword",
-                "cmbAccountType", "btnSubmit", "btnCancel"
-            };
-
-            foreach (string name in controlNames)
-            {
-                if (this.Controls[name] != null)
-                {
-                    var control = this.Controls[name];
-                    control.Location = new Point(centerX - (control.Width / 2), control.Location.Y);
-                }
-            }
-
-            // Reposition placeholder for combo box
-            if (this.Controls["accountTypePlaceholder"] != null && this.Controls["cmbAccountType"] != null)
-            {
-                var placeholder = (Label)this.Controls["accountTypePlaceholder"];
-                var comboBox = this.Controls["cmbAccountType"];
-                placeholder.Location = new Point(comboBox.Left + 10, comboBox.Top + 3);
-            }
-        }
 
         private void CreateAcctForm()
         {
-            // Calculate form size based on screen dimensions
-            int formWidth = (int)(screenWidth * FORM_WIDTH_PERCENT);
-            int formHeight = (int)(screenHeight * FORM_HEIGHT_PERCENT);
-
             // Set form properties to match login form style
             this.Text = "RAT App - Create Account";
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(formWidth, formHeight);
-            this.MinimumSize = new Size(500, 650); // Set minimum size to ensure controls fit
-            this.BackColor = BACKGROUND_COLOR;
-            this.FormBorderStyle = FormBorderStyle.Sizable; // Allow resizing
-            this.MaximizeBox = true;
+            this.Size = new Size(600, 650);
+            this.BackColor = Color.FromArgb(240, 240, 240);
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
 
             // Calculate center position
             int centerX = this.ClientSize.Width / 2;
@@ -122,10 +51,10 @@ namespace RATAPP.Forms
             var logo = new PictureBox
             {
                 Name = "logo",
-                Size = new Size(180, 180),
+                Size = new Size(220, 220),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"),
-                Location = new Point(centerX - 90, 20)
+                Location = new Point(centerX - 110, 20)
             };
             this.Controls.Add(logo);
 
@@ -281,13 +210,12 @@ namespace RATAPP.Forms
             {
                 Name = name,
                 Text = text,
-                Font = BUTTON_FONT,
-                Size = new Size(width, 40),
+                Font = new Font("Segoe UI", 12),
+                Size = new Size(width, 50),
                 Location = new Point((this.ClientSize.Width - width) / 2, y),
                 BackColor = color,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
         }
