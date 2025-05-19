@@ -24,121 +24,123 @@ namespace RATAPP.Forms
 
         public UpdateCredentialsForm(RatAppDbContextFactory contextFactory)
         {
-            //_context = context;
             _contextFactory = contextFactory;
             InitializeComponent();
             CreateUpdateCredentialsForm();
+
+            // Add form closing confirmation
+            this.FormClosing += (s, e) =>
+            {
+                if (e.CloseReason == CloseReason.UserClosing)
+                {
+                    DialogResult result = MessageBox.Show(
+                        "Are you sure you want to cancel changing your password?",
+                        "Confirm Exit",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question
+                    );
+
+                    if (result == DialogResult.No)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+            };
+        }
+
+        private Label CreateLabel(string text, int y)
+        {
+            return new Label
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 10),
+                Location = new Point((this.ClientSize.Width - 100) / 2, y),
+                AutoSize = true
+            };
+        }
+
+        private TextBox CreateTextBox(string name, string placeholder, int y)
+        {
+            var textBox = new TextBox
+            {
+                Name = name,
+                Font = new Font("Segoe UI", 12),
+                Size = new Size(300, 30),
+                Location = new Point((this.ClientSize.Width - 300) / 2, y)
+            };
+
+            textBox.Enter += (s, e) => { if (textBox.Text == placeholder) { textBox.Text = ""; textBox.ForeColor = Color.Black; } };
+            textBox.Leave += (s, e) => { if (string.IsNullOrWhiteSpace(textBox.Text)) { textBox.Text = placeholder; textBox.ForeColor = Color.Gray; } };
+            textBox.Text = placeholder;
+            textBox.ForeColor = Color.Gray;
+
+            return textBox;
+        }
+
+        private Button CreateButton(string text, int y, Color color)
+        {
+            return new Button
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 12),
+                Size = new Size(300, 50),
+                Location = new Point((this.ClientSize.Width - 300) / 2, y),
+                BackColor = color,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand
+            };
         }
 
         private void CreateUpdateCredentialsForm()
         {
             // Set form properties
             this.Text = "Change Password";
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.Size = new Size(400, 300);
-            this.BackColor = Color.WhiteSmoke;
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.Size = new Size(600, 650);
+            this.BackColor = Color.FromArgb(240, 240, 240);
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
 
-            Label lblCurrentUsername = new Label
+            var logo = new PictureBox
             {
-                Text = "Current Username:",
-                Location = new Point(50, 50),
-                AutoSize = true,
-                Font = new Font("Segoe UI", 10)
+                Size = new Size(220, 220),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"),
+                Location = new Point((this.ClientSize.Width - 220) / 2, 20)
             };
 
-            TextBox txtCurrentUsername = new TextBox
-            {
-                Name = "txtCurrentUsername",
-                Location = new Point(200, 50),
-                Width = 150,
-                Font = new Font("Segoe UI", 10)
-            };
+            // Create labels
+            var lblCurrentUsername = CreateLabel("Current Username", 300);
+            var lblCurrentPassword = CreateLabel("Current Password", 370);
+            var lblNewPassword = CreateLabel("New Password", 440);
+            var lblConfirmPassword = CreateLabel("Confirm New Password", 510);
 
-            // Create and configure labels and textboxes
-            Label lblCurrentPassword = new Label
-            {
-                Text = "Current Password:",
-                Location = new Point(50, 100),
-                AutoSize = true,
-                Font = new Font("Segoe UI", 10)
-            };
+            // Create textboxes
+            var txtCurrentUsername = CreateTextBox("txtCurrentUsername", "Current Username", 260);
+            var txtCurrentPassword = CreateTextBox("txtCurrentPassword", "Current Password", 330);
+            txtCurrentPassword.PasswordChar = '•';
+            var txtNewPassword = CreateTextBox("txtNewPassword", "New Password", 400);
+            txtNewPassword.PasswordChar = '•';
+            var txtConfirmPassword = CreateTextBox("txtConfirmPassword", "Confirm New Password", 470);
+            txtConfirmPassword.PasswordChar = '•';
 
-            TextBox txtCurrentPassword = new TextBox
-            {
-                Name = "txtCurrentPassword",
-                Location = new Point(200, 100),
-                Width = 150,
-                PasswordChar = '*',
-                Font = new Font("Segoe UI", 10)
-            };
-
-            Label lblNewPassword = new Label
-            {
-                Text = "New Password:",
-                Location = new Point(50, 150),
-                AutoSize = true,
-                Font = new Font("Segoe UI", 10)
-            };
-
-            TextBox txtNewPassword = new TextBox
-            {
-                Name = "txtNewPassword",
-                Location = new Point(200, 150),
-                Width = 150,
-                PasswordChar = '*',
-                Font = new Font("Segoe UI", 10)
-            };
-
-            Label lblConfirmPassword = new Label
-            {
-                Text = "Confirm New Password:",
-                Location = new Point(50, 200),
-                AutoSize = true,
-                Font = new Font("Segoe UI", 10)
-            };
-
-            TextBox txtConfirmPassword = new TextBox
-            {
-                Name = "txtConfirmPassword",
-                Location = new Point(200, 200),
-                Width = 150,
-                PasswordChar = '*',
-                Font = new Font("Segoe UI", 10)
-            };
-
-            // Create Save button
-            Button btnSave = new Button
-            {
-                Text = "Save",
-                Location = new Point(200, 250),
-                Width = 80,
-                Height = 30,
-                Font = new Font("Segoe UI", 9)
-            };
+            // Create buttons
+            var btnSave = CreateButton("Save Changes", 540, Color.FromArgb(0, 120, 215));
             btnSave.Click += (sender, e) => SaveChanges(txtCurrentUsername.Text, txtCurrentPassword.Text, txtNewPassword.Text, txtConfirmPassword.Text);
 
-            // Create Cancel button
-            Button btnCancel = new Button
-            {
-                Text = "Cancel",
-                Location = new Point(300, 250),
-                Width = 80,
-                Height = 30,
-                Font = new Font("Segoe UI", 9)
-            };
+            var btnCancel = CreateButton("Cancel", 590, Color.FromArgb(158, 158, 158));
             btnCancel.Click += (sender, e) => this.Close();
 
             // Add controls to the form
-            this.Controls.Add(lblCurrentUsername);
-            this.Controls.Add(txtCurrentUsername);
-            this.Controls.Add(lblCurrentPassword);
-            this.Controls.Add(txtCurrentPassword);
-            this.Controls.Add(lblNewPassword);
-            this.Controls.Add(txtNewPassword);
-            this.Controls.Add(lblConfirmPassword);
-            this.Controls.Add(txtConfirmPassword);
-            this.Controls.Add(btnSave);
-            this.Controls.Add(btnCancel);
+            this.Controls.AddRange(new Control[] { 
+                logo,
+                lblCurrentUsername, txtCurrentUsername,
+                lblCurrentPassword, txtCurrentPassword,
+                lblNewPassword, txtNewPassword,
+                lblConfirmPassword, txtConfirmPassword,
+                btnSave, btnCancel
+            });
         }
 
         private async void SaveChanges(string username, string currentPassword, string newPassword, string confirmPassword)
