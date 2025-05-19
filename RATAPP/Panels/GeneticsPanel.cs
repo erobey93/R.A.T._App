@@ -74,7 +74,6 @@ namespace RATAPP.Panels
             _geneService = geneService;
             _breedingService = breedingService;
             _animalService = new AnimalService(contextFactory); //TODO look at the difference between this implementation and how I've been implementing the service 
-            //_context = context;
             _contextFactory = contextFactory;
 
             InitializeComponents();
