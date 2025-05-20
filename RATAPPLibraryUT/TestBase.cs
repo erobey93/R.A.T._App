@@ -71,6 +71,29 @@ namespace RATAPPLibraryUT
 
             context.Animal.AddRange(dam1, dam2, sire1, sire2);
 
+            // Add test lineage records
+            var lineage1 = new Lineage
+            {
+                Id = 1,
+                AnimalId = dam1.Id,
+                AncestorId = sire1.Id,
+                Generation = 1,
+                Sequence = 2,
+                RelationshipType = "Paternal",
+                RecordedAt = DateTime.UtcNow
+            };
+            var lineage2 = new Lineage
+            {
+                Id = 2,
+                AnimalId = dam1.Id,
+                AncestorId = dam2.Id,
+                Generation = 1,
+                Sequence = 1,
+                RelationshipType = "Maternal",
+                RecordedAt = DateTime.UtcNow
+            };
+            context.Lineages.AddRange(lineage1, lineage2);
+
             // Add test pairings
             var pairing1 = new Pairing
             {
