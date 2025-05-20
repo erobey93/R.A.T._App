@@ -1,16 +1,29 @@
 # Lineage and Line Ancestry Relationships
 
-This diagram shows how Animal, Lineage, and LineLineage work together to track both individual animal ancestry and line ancestry in the R.A.T. App.
+This diagram shows how Animal and Lineage work together to track ancestry relationships in the R.A.T. App.
 
 ```mermaid
 classDiagram
     class Animal {
         +int Id
-        +string Name
+        +string? registrationNumber
         +int LineId
-        +Line Line
-        +ICollection~Lineage~ Ancestors
-        +ICollection~Lineage~ Descendants
+        +string Sex
+        +DateTime DateOfBirth
+        +DateTime? DateOfDeath
+        +int Age
+        +string Name
+        +int StockId
+        +string? imageUrl
+        +string? comment
+        +int? weight
+        +Line? Line
+        +ICollection~Litter~ Litters
+        +ICollection~AnimalTrait~ Traits
+        +ICollection~Genotype~ Genotypes
+        +int? AgeInMonths
+        +string? AgeAsString
+        +string DisplayName
     }
 
     class Lineage {
@@ -19,10 +32,10 @@ classDiagram
         +int AncestorId
         +int Generation
         +int Sequence
-        +string? RelationshipType
         +DateTime RecordedAt
-        +Animal Animal
-        +Animal Ancestor
+        +string? RelationshipType
+        +Animal? Animal
+        +Animal? Ancestor
     }
 
     class Line {
@@ -31,46 +44,51 @@ classDiagram
         +int StockId
         +Stock Stock
         +ICollection~Animal~ Animals
-        +ICollection~LineLineage~ NewLineages
-        +ICollection~LineLineage~ ParentLineages1
-        +ICollection~LineLineage~ ParentLineages2
     }
 
-    class LineLineage {
-        +int LineageId
-        +int NewLineId
-        +int ParentLine1Id
-        +int? ParentLine2Id
-        +DateTime CrossDate
-        +string? Notes
-        +Line NewLine
-        +Line ParentLine1
-        +Line ParentLine2
+    class Stock {
+        +int Id
+        +int BreederId
+        +int SpeciesId
+        +Breeder Breeder
+        +Species Species
+        +ICollection~Line~ Lines
     }
 
-    Animal "1" -- "*" Lineage : has ancestors
-    Animal "1" -- "*" Lineage : is ancestor of
+    class Species {
+        +int Id
+        +string CommonName
+        +string ScientificName
+    }
+
+    Animal "1" -- "*" Lineage : appears as descendant in
+    Animal "1" -- "*" Lineage : appears as ancestor in
     Animal "*" -- "1" Line : belongs to
-    Line "1" -- "*" LineLineage : new line
-    Line "1" -- "*" LineLineage : parent line 1
-    Line "1" -- "*" LineLineage : parent line 2
+    Line "*" -- "1" Stock : belongs to
+    Stock "*" -- "1" Species : belongs to
 ```
 
 ## Key Components
 
-1. Individual Animal Ancestry (Animal-Lineage):
-- Each Animal can have multiple Lineage records as both a descendant and ancestor
-- Lineage tracks generation and sequence numbers for precise relationship mapping
-- RelationshipType distinguishes between maternal and paternal lines
+1. Animal-Lineage Relationships:
+   - Each Animal can appear in multiple Lineage records as either:
+     * A descendant (via AnimalId)
+     * An ancestor (via AncestorId)
+   - Lineage records store:
+     * Generation number (1 for parents, 2 for grandparents, etc.)
+     * Sequence number (1=dam side, 2=sire side)
+     * RelationshipType ("Maternal" or "Paternal")
+     * Timestamp of when the relationship was recorded
 
-2. Line Ancestry (Line-LineLineage):
-- Lines can be created from crossing other lines
-- LineLineage tracks the creation of new lines from parent lines
-- Supports both single-parent and two-parent line creation
-- Records the date of line creation and optional notes
+2. Animal-Line-Stock Hierarchy:
+   - Animals belong to Lines
+   - Lines belong to Stocks
+   - Stocks belong to Species
+   - This hierarchy helps organize breeding programs and track varieties
 
-The connection between these systems:
-- Animals belong to Lines
-- When new lines are created through breeding, the LineLineage system tracks the line relationships
-- Individual animal ancestry is tracked separately through the Lineage system
-- This allows tracking both individual animal pedigrees and the broader line development history
+3. Navigation Properties:
+   - Lineage.Animal: The descendant animal in the relationship
+   - Lineage.Ancestor: The ancestor animal in the relationship
+   - Animal.Line: The line this animal belongs to
+   - Line.Stock: The stock this line belongs to
+   - Stock.Species: The species this stock represents
