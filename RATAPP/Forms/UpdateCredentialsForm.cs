@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models.Requests;
 using RATAPPLibrary.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -16,22 +18,24 @@ namespace RATAPP.Forms
 {
     public partial class UpdateCredentialsForm : Form
     {
-        // Declare the fields to store the dependencies
-        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private Microsoft.Extensions.Configuration.IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
         private RatAppDbContextFactory _contextFactory;
 
-        public UpdateCredentialsForm(RatAppDbContextFactory contextFactory)
+        bool _passwordChanged = false; 
+
+        public UpdateCredentialsForm(RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
             _contextFactory = contextFactory;
+            _configuration = configuration;
+            _passwordHashing = passwordHashing;
             InitializeComponent();
             CreateUpdateCredentialsForm();
 
             // Add form closing confirmation
             this.FormClosing += (s, e) =>
             {
-                if (e.CloseReason == CloseReason.UserClosing)
+                if (e.CloseReason == CloseReason.UserClosing && _passwordChanged == false)
                 {
                     DialogResult result = MessageBox.Show(
                         "Are you sure you want to cancel changing your password?",
@@ -46,6 +50,13 @@ namespace RATAPP.Forms
                     }
                 }
             };
+        }
+
+        private void BackToLogin()
+        {
+            // Navigate back to the login form
+            var loginForm = new LoginForm(_contextFactory, _configuration, _passwordHashing);
+            loginForm.Show();
         }
 
         private Label CreateLabel(string text, int y)
@@ -166,7 +177,9 @@ namespace RATAPP.Forms
             if (success)
             {
                 MessageBox.Show("Password updated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                _passwordChanged = true;
                 this.Close();
+                BackToLogin();
             }
             else
             {
