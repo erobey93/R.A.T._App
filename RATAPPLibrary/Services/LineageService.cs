@@ -192,6 +192,72 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        /// <summary>
+        /// Retrieves all descendants of a specified animal.
+        /// 
+        /// Process:
+        /// 1. Searches lineage records where the specified animal is the ancestor
+        /// 2. Returns all animals that are descendants
+        /// 
+        /// Note: Returns empty list if no descendants found or on error
+        /// </summary>
+        /// <param name="animalId">ID of the animal to find descendants for</param>
+        /// <returns>List of Animal objects representing the descendants, or empty list if none found</returns>
+        public async Task<IEnumerable<Lineage>> GetDescendantsByAnimalId(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                try
+                {
+                    var descendants = await _context.Lineages
+                        .Include(l => l.Animal)
+                        .Where(l => l.AncestorId == animalId)
+                        .ToListAsync();
+
+                    return descendants ?? new List<Lineage>();
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (logging, etc.)
+                    Console.WriteLine($"Error in GetDescendantsByAnimalId: {ex.Message}");
+                    return new List<Lineage>();
+                }
+            });
+        }
+
+        /// <summary>
+        /// Retrieves all ancestors of a specified animal.
+        /// 
+        /// Process:
+        /// 1. Searches lineage records where the specified animal is the descendant
+        /// 2. Returns all lineage records with their ancestor animals
+        /// 
+        /// Note: Returns empty list if no ancestors found or on error
+        /// </summary>
+        /// <param name="animalId">ID of the animal to find ancestors for</param>
+        /// <returns>List of Lineage objects with their Ancestor animals included</returns>
+        public async Task<IEnumerable<Lineage>> GetAncestorsByAnimalId(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                try
+                {
+                    var ancestors = await _context.Lineages
+                        .Include(l => l.Ancestor)
+                        .Where(l => l.AnimalId == animalId)
+                        .ToListAsync();
+
+                    return ancestors ?? new List<Lineage>();
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (logging, etc.)
+                    Console.WriteLine($"Error in GetAncestorsByAnimalId: {ex.Message}");
+                    return new List<Lineage>();
+                }
+            });
+        }
+
         //get x seq by animal id, or return 0 if none? 
         //this would allow me to create a family tree relatively easily 
         //just pop the animal id and make a neat document with them for now, more interesting in the future
