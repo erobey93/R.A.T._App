@@ -21,7 +21,6 @@ namespace RATAPP.Panels
         private Label generationsLabel;
 
         private RATAppBaseForm _parentForm;
-        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private RATAPPLibrary.Services.AnimalService _animalService;
         private RATAPPLibrary.Services.LineageService _lineageService;
         private AnimalDto[] _animals;
@@ -33,7 +32,7 @@ namespace RATAPP.Panels
         public AncestryPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
         {
             _parentForm = parentForm;
-            //_context = context;
+            _contextFactory = contextFactory;
             _animalService = new RATAPPLibrary.Services.AnimalService(contextFactory);
             _lineageService = new RATAPPLibrary.Services.LineageService(contextFactory);
 

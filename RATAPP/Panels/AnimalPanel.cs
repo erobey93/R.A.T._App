@@ -4,10 +4,6 @@ using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 
 namespace RATAPP.Panels
 {
@@ -1844,7 +1840,5 @@ namespace RATAPP.Panels
             cancelButton.Visible = isEditMode; //if edit mode is true, show the cancel button
             updateButton.Visible = !isEditMode; //if edit mode is false, show the update button
         }
-
-
     }
 }
