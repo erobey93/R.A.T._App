@@ -2,6 +2,7 @@
 using PdfSharp.Pdf;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Breeding;
+using System.Collections;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace RATAPPLibrary.Services
@@ -26,6 +27,12 @@ namespace RATAPPLibrary.Services
         public void GenerateBirthCertificateForAnimal(string outputPath, AnimalDto animal)
         {
             var template = _templateRepository.GetTemplate("BirthCertificateAnimal");
+            GeneratePdfFromTemplate(outputPath, template, animal);
+        }
+
+        public void GeneratePedigreeForAnimal(string outputPath, AnimalDto animal)
+        {
+            var template = _templateRepository.GetTemplate("PedigreeCertificate");
             GeneratePdfFromTemplate(outputPath, template, animal);
         }
 
@@ -120,19 +127,48 @@ namespace RATAPPLibrary.Services
                 return defaultValue;
             }
 
-            // Use reflection to get value from data object
-            var property = data.GetType().GetProperty(dataField);
-            if (property != null)
+            // Handle nested properties (e.g., "Animal.Name")
+            var parts = dataField.Split('.');
+            object current = data;
+
+            foreach (var part in parts)
             {
-                var value = property.GetValue(data);
-                if (value is DateTime dateValue)
+                if (current == null) return string.Empty;
+
+                // Handle dictionary access (e.g., "Ancestors.Dam.ancestor.Name")
+                if (current is IDictionary dictionary)
                 {
-                    return dateValue.ToString("MM-dd-yy");
+                    if (dictionary.Contains(part))
+                    {
+                        current = dictionary[part];
+                    }
+                    else
+                    {
+                        return string.Empty;
+                    }
                 }
-                return value?.ToString() ?? string.Empty;
+                else
+                {
+                    var property = current.GetType().GetProperty(part);
+                    if (property == null) return string.Empty;
+
+                    current = property.GetValue(current);
+                }
             }
 
-            return string.Empty;
+            // Special handling for traits
+            if (current is Dictionary<string, List<string>> traits)
+            {
+                return FormatTraitsForPdf(traits);
+            }
+
+            // Format dates
+            if (current is DateTime dateValue)
+            {
+                return dateValue.ToString("MM-dd-yy");
+            }
+
+            return current?.ToString() ?? string.Empty;
         }
         //public void GenerateBirthCertificateForAnimal(string outputPath, AnimalDto animal)
         //{
@@ -265,66 +301,83 @@ namespace RATAPPLibrary.Services
 
         public void GeneratePedigreeCertificate(string outputPath, AnimalDto animal, Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> ancestors)
         {
-            // Create a new PDF document
-            PdfDocument document = new PdfDocument();
-            PdfPage page = document.AddPage();
-            page.Size = PdfSharp.PageSize.A4;
-
-            using (var gfx = XGraphics.FromPdfPage(page))
+            // Create a data transfer object that combines all needed data
+            var pdfData = new
             {
-                // Draw border
-                var borderPen = new XPen(XColor.FromArgb(100, 149, 237), 2);
-                gfx.DrawRectangle(borderPen, 20, 20, page.Width - 40, page.Height - 40);
+                Animal = animal,
+                Ancestors = ancestors,
+                GenerationDate = DateTime.Now.ToString("MM/dd/yyyy")
+            };
 
-                // Draw title
-                var titleFont = new XFont("Times New Roman", 24); //FIXME BOLD issue
-                var normalFont = new XFont("Times New Roman", 12);
-                var smallFont = new XFont("Times New Roman", 10);
+            // Get the template
+            var template = _templateRepository.GetTemplate("PedigreeCertificate");
 
-                gfx.DrawString("Certified Pedigree", titleFont, XBrushes.Navy,
-                    new XRect(0, 40, page.Width, 30), XStringFormats.Center);
-
-                // Draw breeder name
-                gfx.DrawString("TLDR", new XFont("Times New Roman", 16), //FIXME BOLD issue 
-                    XBrushes.Black, new XPoint(40, 80));
-
-                // Draw animal details
-                gfx.DrawString($"Name: {animal.name}", normalFont, XBrushes.Black, new XPoint(40, 120));
-                gfx.DrawString($"Registration: {animal.regNum}", normalFont, XBrushes.Black, new XPoint(40, 140));
-
-                // Draw logo if available
-                try
-                {
-                    XImage logo = XImage.FromFile("RATAPP/Resources/RATAPPLogo.png");
-                    gfx.DrawImage(logo, page.Width - 120, 40, 80, 80);
-                }
-                catch
-                {
-                    // Logo not found - continue without it
-                }
-
-                // Draw ancestors
-                int startY = 180;
-                foreach (var entry in ancestors)
-                {
-                    var (ancestor, traits) = entry.Value;
-                    if (ancestor != null)
-                    {
-                        string phenotype = FormatTraitsForPdf(traits);
-                        gfx.DrawString($"{entry.Key}: {ancestor.Name}", normalFont, XBrushes.Black, new XPoint(40, startY));
-                        gfx.DrawString(phenotype, smallFont, XBrushes.Black, new XPoint(40, startY + 20));
-                        startY += 50;
-                    }
-                }
-
-                // Draw footer
-                var footerText = $"Generated by R.A.T. App on {DateTime.Now:MM/dd/yyyy}";
-                gfx.DrawString(footerText, smallFont, XBrushes.Gray,
-                    new XRect(0, page.Height - 50, page.Width, 20), XStringFormats.Center);
-            }
-
-            document.Save(outputPath);
+            // Generate the PDF using the template system
+            GeneratePdfFromTemplate(outputPath, template, pdfData);
         }
+
+        //public void GeneratePedigreeCertificate(string outputPath, AnimalDto animal, Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> ancestors)
+        //{
+        //    // Create a new PDF document
+        //    PdfDocument document = new PdfDocument();
+        //    PdfPage page = document.AddPage();
+        //    page.Size = PdfSharp.PageSize.A4;
+
+        //    using (var gfx = XGraphics.FromPdfPage(page))
+        //    {
+        //        // Draw border
+        //        var borderPen = new XPen(XColor.FromArgb(100, 149, 237), 2);
+        //        gfx.DrawRectangle(borderPen, 20, 20, page.Width - 40, page.Height - 40);
+
+        //        // Draw title
+        //        var titleFont = new XFont("Times New Roman", 24); //FIXME BOLD issue
+        //        var normalFont = new XFont("Times New Roman", 12);
+        //        var smallFont = new XFont("Times New Roman", 10);
+
+        //        gfx.DrawString("Certified Pedigree", titleFont, XBrushes.Navy,
+        //            new XRect(0, 40, page.Width, 30), XStringFormats.Center);
+
+        //        // Draw breeder name
+        //        gfx.DrawString("TLDR", new XFont("Times New Roman", 16), //FIXME BOLD issue 
+        //            XBrushes.Black, new XPoint(40, 80));
+
+        //        // Draw animal details
+        //        gfx.DrawString($"Name: {animal.name}", normalFont, XBrushes.Black, new XPoint(40, 120));
+        //        gfx.DrawString($"Registration: {animal.regNum}", normalFont, XBrushes.Black, new XPoint(40, 140));
+
+        //        // Draw logo if available
+        //        try
+        //        {
+        //            XImage logo = XImage.FromFile("RATAPP/Resources/RATAPPLogo.png");
+        //            gfx.DrawImage(logo, page.Width - 120, 40, 80, 80);
+        //        }
+        //        catch
+        //        {
+        //            // Logo not found - continue without it
+        //        }
+
+        //        // Draw ancestors
+        //        int startY = 180;
+        //        foreach (var entry in ancestors)
+        //        {
+        //            var (ancestor, traits) = entry.Value;
+        //            if (ancestor != null)
+        //            {
+        //                string phenotype = FormatTraitsForPdf(traits);
+        //                gfx.DrawString($"{entry.Key}: {ancestor.Name}", normalFont, XBrushes.Black, new XPoint(40, startY));
+        //                gfx.DrawString(phenotype, smallFont, XBrushes.Black, new XPoint(40, startY + 20));
+        //                startY += 50;
+        //            }
+        //        }
+
+        //        // Draw footer
+        //        var footerText = $"Generated by R.A.T. App on {DateTime.Now:MM/dd/yyyy}";
+        //        gfx.DrawString(footerText, smallFont, XBrushes.Gray,
+        //            new XRect(0, page.Height - 50, page.Width, 20), XStringFormats.Center);
+        //    }
+
+        //    document.Save(outputPath);
+        //}
 
         private string FormatTraitsForPdf(Dictionary<string, List<string>> traits)
         {
