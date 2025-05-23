@@ -29,11 +29,11 @@ namespace RATAPPLibrary.Services
     /// </summary>
     public class LineageService : BaseService
     {
-        //private readonly RatAppDbContext _context;
+        private readonly RatAppDbContextFactory _contextFactory;
 
         public LineageService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            //_context = context;
+            _contextFactory = contextFactory; 
         }
 
         /// <summary>

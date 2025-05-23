@@ -1,14 +1,7 @@
 ﻿using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
-using RATAPPLibrary.Data.Models.Breeding;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Data;
-using System.Drawing;
-using Microsoft.Identity.Client;
-using PdfSharp.Charting;
-using RATAPPLibrary.Data.Models.Genetics;
-using System.Reflection.Metadata.Ecma335;
 
 namespace RATAPPLibrary.Services
 {
@@ -823,5 +816,53 @@ namespace RATAPPLibrary.Services
                 return await MapSingleAnimaltoDto(animal);
             });
         }
+
+        //update animal main image FIXME 
+        public async Task<bool> UpdateAnimalImageByRegAsync(string regNum, string newImageUrl)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                // Find the animal in the database by registration number
+                var animal = await _context.Animal
+                    .FirstOrDefaultAsync(a => a.registrationNumber == regNum);
+
+                // Check if the animal was found
+                if (animal == null)
+                {
+                    throw new KeyNotFoundException($"Animal with Registration Number {regNum} not found.");
+                }
+
+                // Update the image URL
+                animal.imageUrl = newImageUrl;
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+
+                return true;
+            });
+        }
+
+        //update animal carousal FIXME 
+
+        //public async Task<bool> UpdateAnimalAdditionalImagesByRegAsync(string regNum, string[] newImageUrl)
+        //{
+        //    return await ExecuteInContextAsync(async _context =>
+        //    {
+        //        // Update the image URL
+        //        foreach(var image in newImageUrl)
+        //        {
+        //            //look for the image + reg number pair
+        //            //var image = await _context.AnimalImage; 
+        //            // .FirstOrDefaultAsync(a => a.registrationNumber == regNum);
+        //            //if it doesn't exist, add it
+        //            //if it does exist, don't add it
+        //        }
+
+        //        // Save changes to the database
+        //        await _context.SaveChangesAsync();
+
+        //        return true;
+        //    });
+        //}
     }
 }

@@ -7,6 +7,7 @@ using RATAPPLibrary.Data.Models.Ancestry;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Identity.Data;
 using RATAPPLibrary.Data.Models.Requests;
+using RATAPPLibrary.Data.Models.Animal_Management;
 
 namespace RATAPPLibrary.Data.DbContexts
 {
@@ -117,6 +118,37 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureGenotype(modelBuilder);
             ConfigureBreedingCalculation(modelBuilder);
             ConfigurePossibleOffspring(modelBuilder);
+
+            ConfigureAnimalImage(modelBuilder);
+        }
+        private void ConfigureAnimalImage(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AnimalImage>(entity =>
+            {
+                // Primary key configuration
+                entity.HasKey(ai => ai.Id);
+
+                // Relationship configuration: AnimalImage -> Animal
+                entity.HasOne(ai => ai.Animal)
+                      .WithMany(a => a.AdditionalImages) // Assuming Animal has a collection of AnimalImages
+                      .HasForeignKey(ai => ai.AnimalId)
+                      .OnDelete(DeleteBehavior.Cascade); // Adjust behavior as needed
+
+                // Unique constraint: SpeciesId and Number
+                entity.HasIndex(ai => new { ai.AnimalId, ai.CreatedOn })
+                      .IsUnique();
+
+                // Property configurations
+                entity.Property(ai => ai.ImageUrl)
+                      .IsRequired()
+                      .HasMaxLength(2048); // Assuming URL maximum length
+
+                entity.Property(ai => ai.CreatedOn)
+                      .IsRequired();
+
+                entity.Property(ai => ai.LastUpdated)
+                      .IsRequired();
+            });
         }
 
         private void ConfigureChromosome(ModelBuilder modelBuilder)
