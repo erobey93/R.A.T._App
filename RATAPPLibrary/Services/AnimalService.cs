@@ -640,59 +640,66 @@ namespace RATAPPLibrary.Services
         {
             return await ExecuteInTransactionAsync(async _context =>
             {
-                int lineId = a.LineId;
-
-                var lineObj = await _lineService.GetLineAsync_ById(lineId); //pick back up here debug and figure out why it isn't working i.e. why is the object "null" 
-
-                var stockId = a.StockId;
-
-                var speciesObj = await _context.Species.FirstOrDefaultAsync(s => s.Id == stockId); //FIXME this is a placeholder until I fix/implement species logic
-                string species = speciesObj.CommonName;
-
-                int breederId = 5; //FIXME this is a placeholder until I fix/implement breeder logic 
-
-                var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
-
-                //TODO can do above logic for all traits and then just loop through them to get
-
-                //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
-                //int sireId = getSire.sire.;
-                var getDam = await _lineageService.GetDamByAnimalId(a.Id);
-                int damId = 0;
-                if (getDam != null)
+                if (a != null)
                 {
-                    damId = getDam.Id;
+                    int lineId = a.LineId;
+
+                    var lineObj = await _lineService.GetLineAsync_ById(lineId); //pick back up here debug and figure out why it isn't working i.e. why is the object "null" 
+
+                    var stockId = a.StockId;
+
+                    var speciesObj = await _context.Species.FirstOrDefaultAsync(s => s.Id == stockId); //FIXME this is a placeholder until I fix/implement species logic
+                    string species = speciesObj.CommonName;
+
+                    int breederId = 5; //FIXME this is a placeholder until I fix/implement breeder logic 
+
+                    var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
+
+                    //TODO can do above logic for all traits and then just loop through them to get
+
+                    //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
+                    //int sireId = getSire.sire.;
+                    var getDam = await _lineageService.GetDamByAnimalId(a.Id);
+                    int damId = 0;
+                    if (getDam != null)
+                    {
+                        damId = getDam.Id;
+                    }
+
+                    var getSire = await _lineageService.GetSireByAnimalId(a.Id);
+                    int sireId = 0;
+                    if (getSire != null)
+                    {
+                        sireId = getSire.Id;
+                    }
+
+                    // Map the animals to include string values for the related entities
+                    var result = new AnimalDto
+                    {
+                        Id = a.Id,
+                        regNum = a.registrationNumber,
+                        name = a.Name,
+                        DateOfBirth = a.DateOfBirth,
+                        sex = a.Sex,
+                        Line = lineId.ToString(),
+                        comment = a.comment,
+                        breeder = "TLDR", // TODO: Implement breeder lookup
+                        species = speciesObj.CommonName,
+                        imageUrl = a.imageUrl,
+                        color = animalTraits.ContainsKey("Color") ? animalTraits["Color"].LastOrDefault() : null,
+                        markings = animalTraits.ContainsKey("Marking") ? animalTraits["Marking"].LastOrDefault() : null,
+                        earType = animalTraits.ContainsKey("Ear Type") ? animalTraits["Ear Type"].LastOrDefault() : null,
+                        variety = animalTraits.ContainsKey("Coat Type") ? animalTraits["Coat Type"].LastOrDefault() : null,
+                        damId = damId != 0 ? damId : (int?)null,
+                        sireId = sireId != 0 ? sireId : (int?)null,
+                    };
+
+                    return result;
                 }
-
-                var getSire = await _lineageService.GetSireByAnimalId(a.Id);
-                int sireId = 0;
-                if (getSire != null)
+                else
                 {
-                    sireId = getSire.Id;
+                    return null;
                 }
-
-                // Map the animals to include string values for the related entities
-                var result = new AnimalDto
-                {
-                    Id = a.Id,
-                    regNum = a.registrationNumber,
-                    name = a.Name,
-                    DateOfBirth = a.DateOfBirth,
-                    sex = a.Sex,
-                    Line = lineId.ToString(),
-                    comment = a.comment,
-                    breeder = "TLDR", // TODO: Implement breeder lookup
-                    species = speciesObj.CommonName,
-                    imageUrl = a.imageUrl,
-                    color = animalTraits.ContainsKey("Color") ? animalTraits["Color"].LastOrDefault() : null,
-                    markings = animalTraits.ContainsKey("Marking") ? animalTraits["Marking"].LastOrDefault() : null,
-                    earType = animalTraits.ContainsKey("Ear Type") ? animalTraits["Ear Type"].LastOrDefault() : null,
-                    variety = animalTraits.ContainsKey("Coat Type") ? animalTraits["Coat Type"].LastOrDefault() : null,
-                    damId = damId != 0 ? damId : (int?)null,
-                    sireId = sireId != 0 ? sireId : (int?)null,
-                };
-
-                return result;
             });
         }
 
