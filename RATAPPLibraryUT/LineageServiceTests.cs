@@ -14,7 +14,7 @@ namespace RATAPPLibraryUT
 
         public LineageServiceTests()
         {
-            _contextFactory = new RatAppDbContextFactory();
+            //_contextFactory = new RatAppDbContextFactory();
             _lineageService = new LineageService(_contextFactory);
         }
 

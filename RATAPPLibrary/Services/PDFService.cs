@@ -2,7 +2,6 @@
 using PdfSharp.Pdf;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Breeding;
-using System.Collections;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace RATAPPLibrary.Services
@@ -127,48 +126,19 @@ namespace RATAPPLibrary.Services
                 return defaultValue;
             }
 
-            // Handle nested properties (e.g., "Animal.Name")
-            var parts = dataField.Split('.');
-            object current = data;
-
-            foreach (var part in parts)
+            // Use reflection to get value from data object
+            var property = data.GetType().GetProperty(dataField);
+            if (property != null)
             {
-                if (current == null) return string.Empty;
-
-                // Handle dictionary access (e.g., "Ancestors.Dam.ancestor.Name")
-                if (current is IDictionary dictionary)
+                var value = property.GetValue(data);
+                if (value is DateTime dateValue)
                 {
-                    if (dictionary.Contains(part))
-                    {
-                        current = dictionary[part];
-                    }
-                    else
-                    {
-                        return string.Empty;
-                    }
+                    return dateValue.ToString("MM-dd-yy");
                 }
-                else
-                {
-                    var property = current.GetType().GetProperty(part);
-                    if (property == null) return string.Empty;
-
-                    current = property.GetValue(current);
-                }
+                return value?.ToString() ?? string.Empty;
             }
 
-            // Special handling for traits
-            if (current is Dictionary<string, List<string>> traits)
-            {
-                return FormatTraitsForPdf(traits);
-            }
-
-            // Format dates
-            if (current is DateTime dateValue)
-            {
-                return dateValue.ToString("MM-dd-yy");
-            }
-
-            return current?.ToString() ?? string.Empty;
+            return string.Empty;
         }
         //public void GenerateBirthCertificateForAnimal(string outputPath, AnimalDto animal)
         //{
