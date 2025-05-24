@@ -1,3 +1,11 @@
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+using System.Text;
+using System.Linq;
+using System.IO;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Data.Models;
@@ -924,8 +932,8 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var dam = (AnimalDto)dam1Combo.SelectedItem;
-            var sire = (AnimalDto)sire1Combo.SelectedItem;
+            var dam = (RATAPPLibrary.Data.Models.AnimalDto)dam1Combo.SelectedItem;
+            var sire = (RATAPPLibrary.Data.Models.AnimalDto)sire1Combo.SelectedItem;
 
             // Clear previous results
             resultPanel.Controls.Clear();
@@ -1095,35 +1103,24 @@ namespace RATAPP.Panels
             // Clear previous pedigree
             pedigreeDisplayPanel.Controls.Clear();
 
-            var animal = selectedAnimal as AnimalDto;
-            string name; 
-            if (animal != null)
-            {
-                name = animal.name;
-            }
-            else
-            {
-                name = "Error fetching name, but data found";
-            }
             Label pedigreeTitle = new Label
             {
-                Text = $"Pedigree for {name}",
+                Text = $"Pedigree for {selectedAnimal}",
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 AutoSize = true,
                 Location = new Point(10, 10)
-            }; 
+            };
             pedigreeDisplayPanel.Controls.Add(pedigreeTitle);
 
             try
             {
                 //var animal = _animalService.MapSingleAnimaltoDto(selectedAnimal);
                 //var animalResult = animal.Result;
-                var animalChosen = animalSelector.SelectedItem as AnimalDto; 
+                var animal = animalSelector.SelectedItem as RATAPPLibrary.Data.Models.AnimalDto; 
 
                 // Create a new form to display the pedigree in a larger view
-                //all I want here is my pedigree form, not the whole ancestry form 
-                //var pedigreeForm = IndividualAnimalAncestryForm.Create(_baseForm, _contextFactory, animalChosen);
-                var pedigreeForm = PedigreeForm.Create(_contextFactory, animalChosen);
+                var pedigreeForm = PedigreeForm.Create( _contextFactory, animal);
+
                 // Add the form to the pedigree panel
                 pedigreeForm.TopLevel = false;
                 pedigreeForm.FormBorderStyle = FormBorderStyle.None;
