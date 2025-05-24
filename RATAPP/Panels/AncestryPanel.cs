@@ -82,7 +82,7 @@ namespace RATAPP.Panels
                 Size = new Size(60, 25),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            generationsComboBox.Items.AddRange(new object[] { "1", "2", "3", "4", "5" });
+            generationsComboBox.Items.AddRange(new object[] { "1", "2", "3" }); //FIXME add back "4", "5" but for demo just 3
             generationsComboBox.SelectedIndex = 2; // Default to 3 generations
             generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
             this.Controls.Add(generationsComboBox);

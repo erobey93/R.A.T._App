@@ -756,22 +756,5 @@ namespace RATAPPLibrary.Services
             }
             throw new KeyNotFoundException($"Template '{templateName}' not found.");
         }
-
-        private void RenderImageElement(XGraphics gfx, ImageElement element, object data)
-        {
-            try
-            {
-                string imagePath = element.ImagePath;
-                if (File.Exists(imagePath))
-                {
-                    XImage logo = XImage.FromFile(imagePath);
-                    gfx.DrawImage(logo, element.X, element.Y, element.Width, element.Height);
-                }
-            }
-            catch
-            {
-                // Skip if logo not found
-            }
-        }
     }
 }
