@@ -65,6 +65,7 @@ namespace RATAPP.Panels
         private Button updateButton;
         private Button deleteButton;
         private PictureBox loadingSpinner;
+        private Panel headerPanel; 
 
         private Pairing[] _pairings;
         private Litter[] _litters;
@@ -98,6 +99,40 @@ namespace RATAPP.Panels
 
             InitializeComponents();
             InitializeLoadingSpinner();
+            InitializeHeaderPanel(); 
+        }
+
+
+        private void InitializeHeaderPanel()
+        {
+            headerPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 70,
+                BackColor = Color.FromArgb(0, 120, 212)
+            };
+
+            Label titleLabel = new Label
+            {
+                Text = "Breeding Management",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 18, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(25, 10)
+            };
+
+            Label descriptionLabel = new Label
+            {
+                Text = "View family trees and create pedigrees",
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 10),
+                AutoSize = true,
+                Location = new Point(25, 40)
+            };
+
+            headerPanel.Controls.Add(titleLabel);
+            headerPanel.Controls.Add(descriptionLabel);
+            this.Controls.Add(headerPanel);
         }
 
         private void InitializeLoadingSpinner()
@@ -111,6 +146,54 @@ namespace RATAPP.Panels
             };
             this.Controls.Add(loadingSpinner);
             this.Resize += (s, e) => CenterLoadingSpinner();
+        }
+
+        private Button CreateButton(string text, int x)
+        {
+            Button button = new Button
+            {
+                Text = text,
+                Font = new Font("Segoe UI", 10),
+                Location = new Point(x, 0),
+                Width = 100,
+                Height = 30,
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            button.FlatAppearance.BorderSize = 0;
+            return button;
+        }
+
+        private Panel CreateInfoPanel(string title, string content)
+        {
+            Panel panel = new Panel
+            {
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.FromArgb(240, 240, 240),
+                Padding = new Padding(10)
+            };
+
+            Label titleLabel = new Label
+            {
+                Text = title,
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(10, 10)
+            };
+
+            Label contentLabel = new Label
+            {
+                Text = content,
+                Font = new Font("Segoe UI", 9),
+                AutoSize = true,
+                Location = new Point(10, 35),
+                MaximumSize = new Size(800, 0)
+            };
+
+            panel.Controls.Add(titleLabel);
+            panel.Controls.Add(contentLabel);
+            return panel;
         }
 
         private void CenterLoadingSpinner()

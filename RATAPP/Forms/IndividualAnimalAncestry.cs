@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RATAPP.Forms;
+using RATAPP.Panels;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 
@@ -14,6 +15,8 @@ namespace RATAPP.Forms
         private AnimalDto _currentAnimal; // Assuming Rat is your animal model
         private RATAppBaseForm _baseForm;
 
+        private AncestryPanel _ancestryPanel; // Replace the familyTreePanel with this
+
         // UI Components
         private Label titleLabel;
         private Label animalIdLabel;
@@ -22,7 +25,7 @@ namespace RATAPP.Forms
         private Button addParentButton;
         private Button viewFamilyTreeButton;
         private Button viewPedigreeButton;
-        private Panel familyTreePanel; // Placeholder for family tree display
+        //private Panel familyTreePanel; // Placeholder for family tree display
         private RichTextBox pedigreeTextBox; // Placeholder for pedigree display
 
         public static IndividualAnimalAncestryForm Create(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
@@ -103,12 +106,20 @@ namespace RATAPP.Forms
             var birthCertButton = CreateButton("Birth Certificate", 340, 260, 150, Color.FromArgb(0, 150, 136));
             birthCertButton.Click += BirthCertButton_Click;
 
-            // Family Tree Panel (Placeholder)
-            familyTreePanel = new Panel
+            //// Family Tree Panel (Placeholder)
+            //familyTreePanel = new Panel
+            //{
+            //    Location = new Point(340, 260),
+            //    Size = new Size(440, 300),
+            //    BorderStyle = BorderStyle.FixedSingle,
+            //    Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
+            //    Visible = false
+            //};
+            // Replace the familyTreePanel with AncestryPanel
+            _ancestryPanel = new AncestryPanel(_baseForm, _context, _currentAnimal)
             {
                 Location = new Point(340, 260),
                 Size = new Size(440, 300),
-                BorderStyle = BorderStyle.FixedSingle,
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
                 Visible = false
             };
@@ -132,7 +143,8 @@ namespace RATAPP.Forms
             this.Controls.Add(addParentButton);
             this.Controls.Add(viewFamilyTreeButton);
             this.Controls.Add(viewPedigreeButton);
-            this.Controls.Add(familyTreePanel);
+            //this.Controls.Add(familyTreePanel);
+            this.Controls.Add(_ancestryPanel);
             this.Controls.Add(pedigreeTextBox);
         }
 
@@ -167,13 +179,26 @@ namespace RATAPP.Forms
             // Open a new form or dialog to select/create a parent animal
         }
 
-        private void ViewFamilyTreeButton_Click(object sender, EventArgs e)
+        //private void ViewFamilyTreeButton_Click(object sender, EventArgs e)
+        //{
+        //    // TODO: Implement logic to display the family tree
+        //    MessageBox.Show("View Family Tree functionality to be implemented.");
+        //    familyTreePanel.Visible = true;
+        //    pedigreeTextBox.Visible = false;
+        //    // Use a graphical library or custom drawing to display the tree in familyTreePanel
+        //}
+
+        private async void ViewFamilyTreeButton_Click(object sender, EventArgs e)
         {
-            // TODO: Implement logic to display the family tree
-            MessageBox.Show("View Family Tree functionality to be implemented.");
-            familyTreePanel.Visible = true;
+            // Toggle visibility
+            _ancestryPanel.Visible = !_ancestryPanel.Visible;
             pedigreeTextBox.Visible = false;
-            // Use a graphical library or custom drawing to display the tree in familyTreePanel
+
+            // If you need to refresh the ancestry data when showing:
+            if (_ancestryPanel.Visible)
+            {
+                await _ancestryPanel.RefreshDataAsync(); // Assuming you have such a method in AncestryPanel
+            }
         }
 
         private void ViewPedigreeButton_Click(object sender, EventArgs e)
@@ -189,83 +214,3 @@ namespace RATAPP.Forms
         }
     }
 }
-//namespace RATAPP.Panels
-//{
-//    public partial class IndividualAncestryPanel : Form, INavigable
-//    {
-//        private RATAppBaseForm _baseForm;
-//        private RatAppDbContext _context;
-//        private TabControl _tabControl;
-//        private Panel _pedigreePanel;
-//        private Panel _familyTreePanel;
-
-//        public IndividualAncestryPanel(RATAppBaseForm baseForm, RatAppDbContext context)
-//        {
-//            _baseForm = baseForm;
-//            _context = context;
-//            InitializeComponent();
-//            InitializeAncestryPanel();
-//        }
-
-//        private void InitializeComponent()
-//        {
-//            SuspendLayout();
-//            // 
-//            // IndividualAncestryPanel
-//            // 
-//            ClientSize = new Size(3239, 1309);
-//            Name = "IndividualAncestryPanel";
-//            ResumeLayout(false);
-//        }
-
-//        private void InitializeAncestryPanel()
-//        {
-//            _tabControl = new TabControl
-//            {
-//                Dock = DockStyle.Fill
-//            };
-//            _pedigreePanel = new Panel
-//            {
-//                Dock = DockStyle.Fill
-//            };
-//            _familyTreePanel = new Panel
-//            {
-//                Dock = DockStyle.Fill
-//            };
-
-//            _tabControl.TabPages.Add(new TabPage("Pedigree") { Controls = { _pedigreePanel } });
-//            _tabControl.TabPages.Add(new TabPage("Family Tree") { Controls = { _familyTreePanel } });
-
-//            this.Controls.Add(_tabControl);
-
-//            // Placeholder content - replace with your actual pedigree and family tree logic
-//            Label pedigreeLabel = new Label
-//            {
-//                Text = "Pedigree content goes here.",
-//                Dock = DockStyle.Fill,
-//                TextAlign = ContentAlignment.MiddleCenter
-//            };
-//            _pedigreePanel.Controls.Add(pedigreeLabel);
-
-//            Label familyTreeLabel = new Label
-//            {
-//                Text = "Family Tree content goes here.",
-//                Dock = DockStyle.Fill,
-//                TextAlign = ContentAlignment.MiddleCenter
-//            };
-//            _familyTreePanel.Controls.Add(familyTreeLabel);
-//        }
-
-//        public async Task RefreshDataAsync()
-//        {
-//            // Implement logic to refresh data for pedigree and family tree
-//            // This could involve fetching data from the database and updating the UI
-//            // Example:
-//            // _pedigreePanel.Controls.Clear();
-//            // _familyTreePanel.Controls.Clear();
-//            // InitializeAncestryPanel(); // Or update the existing panels with new data
-
-//            await Task.CompletedTask; // Placeholder for async operation
-//        }
-//    }
-//}
