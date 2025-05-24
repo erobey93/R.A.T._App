@@ -53,15 +53,46 @@ namespace RATAPP.Forms
             this.Text = "Pedigree View";
             this.BackColor = Color.White;
 
-            // Main container with scrolling
+            // First add the buttons to the form (so they stay on top)
+            // Generate PDF Button
+            generatePdfButton = new Button
+            {
+                Text = "Generate PDF Certificate",
+                Location = new Point(950, 550),  // Adjusted Y position
+                Size = new Size(180, 30),
+                BackColor = Color.FromArgb(0, 120, 215),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            generatePdfButton.Click += GeneratePdfButton_Click;
+
+            // Close Button
+            closeButton = new Button
+            {
+                Text = "Close",
+                Location = new Point(800, 550),  // Adjusted Y position and X to be next to PDF button
+                Size = new Size(110, 30),
+                BackColor = Color.FromArgb(200, 200, 200),
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat
+            };
+            closeButton.Click += (s, e) => this.Close();
+
+            // Add buttons first
+            this.Controls.Add(generatePdfButton);
+            this.Controls.Add(closeButton);
+
+            // Then add the main panel
             certificatePanel = new Panel
             {
                 Location = new Point(20, 20),
-                Size = new Size(1160, 800),
+                Size = new Size(1160, 700),  // Reduced height to leave space for buttons
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White,
-                AutoScroll = true
+                AutoScroll = true,
             };
+
+            this.Controls.Add(certificatePanel);
 
             // Animal Information Section
             var animalPanel = new Panel
@@ -132,32 +163,32 @@ namespace RATAPP.Forms
             certificatePanel.Controls.Add(treePanel);
 
             // Generate PDF Button
-            generatePdfButton = new Button
-            {
-                Text = "Generate PDF Certificate",
-                Location = new Point(650, 830),
-                Size = new Size(180, 30),
-                BackColor = Color.FromArgb(0, 120, 215),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            generatePdfButton.Click += GeneratePdfButton_Click;
+            //generatePdfButton = new Button
+            //{
+            //    Text = "Generate PDF Certificate",
+            //    Location = new Point(650, 830),
+            //    Size = new Size(180, 30),
+            //    BackColor = Color.FromArgb(0, 120, 215),
+            //    ForeColor = Color.White,
+            //    FlatStyle = FlatStyle.Flat
+            //};
+            //generatePdfButton.Click += GeneratePdfButton_Click;
 
-            // Close Button
-            closeButton = new Button
-            {
-                Text = "Close",
-                Location = new Point(840, 830),
-                Size = new Size(110, 30),
-                BackColor = Color.FromArgb(200, 200, 200),
-                ForeColor = Color.Black,
-                FlatStyle = FlatStyle.Flat
-            };
-            closeButton.Click += (s, e) => this.Close();
+            //// Close Button
+            //closeButton = new Button
+            //{
+            //    Text = "Close",
+            //    Location = new Point(840, 830),
+            //    Size = new Size(110, 30),
+            //    BackColor = Color.FromArgb(200, 200, 200),
+            //    ForeColor = Color.Black,
+            //    FlatStyle = FlatStyle.Flat
+            //};
+            //closeButton.Click += (s, e) => this.Close();
 
-            this.Controls.Add(certificatePanel);
-            this.Controls.Add(generatePdfButton);
-            this.Controls.Add(closeButton);
+            //this.Controls.Add(certificatePanel);
+            //this.Controls.Add(generatePdfButton);
+            //this.Controls.Add(closeButton);
 
             // Load the pedigree data
             _ = LoadPedigreeData(treePanel);
