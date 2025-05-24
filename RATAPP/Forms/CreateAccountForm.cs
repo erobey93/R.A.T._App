@@ -15,22 +15,12 @@ namespace RATAPP.Forms
         private PasswordHashing _passwordHashing;
         private RATAPPLibrary.Services.AccountService _accountService;
 
-        // Store screen dimensions for responsive sizing
-        private int screenWidth;
-        private int screenHeight;
-
-        // Define form size as percentage of screen
-        private const double FORM_WIDTH_PERCENT = 0.5; // 50% of screen width
-        private const double FORM_HEIGHT_PERCENT = 0.8; // 80% of screen height
-
         // UI Constants
         private readonly Color PRIMARY_COLOR = Color.FromArgb(0, 120, 215);
         private readonly Color SECONDARY_COLOR = Color.FromArgb(0, 150, 136);
         private readonly Color NEUTRAL_COLOR = Color.FromArgb(158, 158, 158);
-        private readonly Color BACKGROUND_COLOR = Color.FromArgb(240, 240, 240);
         private readonly Font TITLE_FONT = new Font("Segoe UI", 16, FontStyle.Bold);
         private readonly Font INPUT_FONT = new Font("Segoe UI", 12);
-        private readonly Font BUTTON_FONT = new Font("Segoe UI", 12);
 
         public CreateAccountForm(RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
@@ -40,93 +30,32 @@ namespace RATAPP.Forms
             _passwordHashing = passwordHashing;
             _accountService = new AccountService(contextFactory, _configuration, _passwordHashing);
 
-            // Get screen dimensions
-            screenWidth = Screen.PrimaryScreen.WorkingArea.Width;
-            screenHeight = Screen.PrimaryScreen.WorkingArea.Height;
-
             CreateAcctForm();
-
-            // Handle resize events to maintain proportions
-            this.Resize += CreateAccountForm_Resize;
         }
 
-        private void CreateAccountForm_Resize(object sender, EventArgs e)
-        {
-            // Recalculate and reposition controls when form is resized
-            RepositionControls();
-        }
-
-        private void RepositionControls()
-        {
-            // Calculate center positions
-            int centerX = this.ClientSize.Width / 2;
-
-            // Reposition logo
-            if (this.Controls["logo"] != null)
-            {
-                var logo = (PictureBox)this.Controls["logo"];
-                logo.Location = new Point(centerX - (logo.Width / 2), 20);
-            }
-
-            // Reposition title
-            if (this.Controls["lblTitle"] != null)
-            {
-                var lblTitle = (Label)this.Controls["lblTitle"];
-                lblTitle.Location = new Point(centerX - (lblTitle.Width / 2), 210);
-            }
-
-            // Reposition all text boxes and the combo box
-            string[] controlNames = {
-                "txtFirstName", "txtLastName", "txtPhone", "txtEmail",
-                "txtCity", "txtState", "txtUsername", "txtPassword",
-                "cmbAccountType", "btnSubmit", "btnCancel"
-            };
-
-            foreach (string name in controlNames)
-            {
-                if (this.Controls[name] != null)
-                {
-                    var control = this.Controls[name];
-                    control.Location = new Point(centerX - (control.Width / 2), control.Location.Y);
-                }
-            }
-
-            // Reposition placeholder for combo box
-            if (this.Controls["accountTypePlaceholder"] != null && this.Controls["cmbAccountType"] != null)
-            {
-                var placeholder = (Label)this.Controls["accountTypePlaceholder"];
-                var comboBox = this.Controls["cmbAccountType"];
-                placeholder.Location = new Point(comboBox.Left + 10, comboBox.Top + 3);
-            }
-        }
 
         private void CreateAcctForm()
         {
-            // Calculate form size based on screen dimensions
-            int formWidth = (int)(screenWidth * FORM_WIDTH_PERCENT);
-            int formHeight = (int)(screenHeight * FORM_HEIGHT_PERCENT);
-
-            // Set form properties to match login form style
+            // Set form properties
             this.Text = "RAT App - Create Account";
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(formWidth, formHeight);
-            this.MinimumSize = new Size(500, 650); // Set minimum size to ensure controls fit
-            this.BackColor = BACKGROUND_COLOR;
-            this.FormBorderStyle = FormBorderStyle.Sizable; // Allow resizing
-            this.MaximizeBox = true;
+            this.Size = new Size(650, 900);
+            this.BackColor = Color.FromArgb(240, 240, 240);
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
 
-            // Calculate center position
+            // Center position calculation
             int centerX = this.ClientSize.Width / 2;
 
             // Add logo at the top
             var logo = new PictureBox
             {
                 Name = "logo",
-                Size = new Size(180, 180),
+                Size = new Size(200, 200),
                 SizeMode = PictureBoxSizeMode.Zoom,
                 Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png"),
-                Location = new Point(centerX - 90, 20)
             };
+            logo.Location = new Point((this.ClientSize.Width - logo.Width) / 2, 20);
             this.Controls.Add(logo);
 
             // Create title label
@@ -138,57 +67,47 @@ namespace RATAPP.Forms
                 ForeColor = PRIMARY_COLOR,
                 AutoSize = true
             };
-            lblTitle.Location = new Point(centerX - (lblTitle.Width / 2), 210);
             this.Controls.Add(lblTitle);
 
-            // Create personal information section
-            int startY = 260;
+            // Adjust title position after adding to the form
+            lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, logo.Bottom + 10);
+
+            // Initialize layout variables
+            int currentY = lblTitle.Bottom + 20;
             int fieldSpacing = 50;
-            int currentY = startY;
             int fieldWidth = 300;
 
-            // First Name
-            var txtFirstName = CreateTextBox("txtFirstName", "First Name", currentY, fieldWidth);
-            this.Controls.Add(txtFirstName);
+            // Helper function for creating centered textboxes
+            TextBox CreateCenteredTextBox(string name, string placeholder, int y)
+            {
+                var textBox = CreateTextBox(name, placeholder, y, fieldWidth);
+                textBox.Location = new Point(centerX - (fieldWidth / 2), y);
+                return textBox;
+            }
+
+            // Create textboxes
+            this.Controls.Add(CreateCenteredTextBox("txtFirstName", "First Name", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtLastName", "Last Name", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtPhone", "Phone Number", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtEmail", "Email Address", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtCity", "City", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtState", "State", currentY));
+            currentY += fieldSpacing;
+            this.Controls.Add(CreateCenteredTextBox("txtUsername", "Username", currentY));
             currentY += fieldSpacing;
 
-            // Last Name
-            var txtLastName = CreateTextBox("txtLastName", "Last Name", currentY, fieldWidth);
-            this.Controls.Add(txtLastName);
-            currentY += fieldSpacing;
-
-            // Phone
-            var txtPhone = CreateTextBox("txtPhone", "Phone Number", currentY, fieldWidth);
-            this.Controls.Add(txtPhone);
-            currentY += fieldSpacing;
-
-            // Email
-            var txtEmail = CreateTextBox("txtEmail", "Email Address", currentY, fieldWidth);
-            this.Controls.Add(txtEmail);
-            currentY += fieldSpacing;
-
-            // City
-            var txtCity = CreateTextBox("txtCity", "City", currentY, fieldWidth);
-            this.Controls.Add(txtCity);
-            currentY += fieldSpacing;
-
-            // State
-            var txtState = CreateTextBox("txtState", "State", currentY, fieldWidth);
-            this.Controls.Add(txtState);
-            currentY += fieldSpacing;
-
-            // Username
-            var txtUsername = CreateTextBox("txtUsername", "Username", currentY, fieldWidth);
-            this.Controls.Add(txtUsername);
-            currentY += fieldSpacing;
-
-            // Password
-            var txtPassword = CreateTextBox("txtPassword", "Password", currentY, fieldWidth);
+            // Password field
+            var txtPassword = CreateCenteredTextBox("txtPassword", "Password", currentY);
             txtPassword.PasswordChar = '•';
             this.Controls.Add(txtPassword);
             currentY += fieldSpacing;
 
-            // Account Type
+            // Account Type dropdown
             var cmbAccountType = new ComboBox
             {
                 Name = "cmbAccountType",
@@ -199,42 +118,20 @@ namespace RATAPP.Forms
                 BackColor = Color.White
             };
             cmbAccountType.Items.AddRange(new string[] { "Admin", "User", "Guest" });
-            cmbAccountType.SelectedIndex = 1; // Default to "User"
-
-            // Add placeholder text effect for ComboBox
-            var accountTypePlaceholder = new Label
-            {
-                Name = "accountTypePlaceholder",
-                Text = "Account Type",
-                Font = INPUT_FONT,
-                ForeColor = Color.Gray,
-                AutoSize = true,
-                Location = new Point(cmbAccountType.Left + 10, cmbAccountType.Top + 3),
-                BackColor = Color.Transparent
-            };
-
-            cmbAccountType.DropDown += (s, e) => { accountTypePlaceholder.Visible = false; };
-            cmbAccountType.DropDownClosed += (s, e) =>
-            {
-                if (cmbAccountType.SelectedIndex == -1)
-                    accountTypePlaceholder.Visible = true;
-                else
-                    accountTypePlaceholder.Visible = false;
-            };
-
+            cmbAccountType.SelectedIndex = 1;
             this.Controls.Add(cmbAccountType);
-            this.Controls.Add(accountTypePlaceholder);
 
             currentY += fieldSpacing;
 
-            // Submit button (Create Account)
+            // Submit button
             var btnSubmit = CreateButton("btnSubmit", "Create Account", currentY, fieldWidth, PRIMARY_COLOR);
+            btnSubmit.Location = new Point(centerX - (fieldWidth / 2), currentY);
             btnSubmit.Click += BtnCreateAccount_Click;
             this.Controls.Add(btnSubmit);
-            currentY += 60;
 
-            // Cancel button
-            var btnCancel = CreateButton("btnCancel", "Cancel", currentY, fieldWidth, NEUTRAL_COLOR);
+            // Cancel button below the Submit button
+            var btnCancel = CreateButton("btnCancel", "Cancel", currentY + 60, fieldWidth, NEUTRAL_COLOR);
+            btnCancel.Location = new Point(centerX - (fieldWidth / 2), currentY + 60);
             btnCancel.Click += BtnCancel_Click;
             this.Controls.Add(btnCancel);
         }
@@ -281,13 +178,12 @@ namespace RATAPP.Forms
             {
                 Name = name,
                 Text = text,
-                Font = BUTTON_FONT,
-                Size = new Size(width, 40),
+                Font = new Font("Segoe UI", 12),
+                Size = new Size(width, 50),
                 Location = new Point((this.ClientSize.Width - width) / 2, y),
                 BackColor = color,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
         }

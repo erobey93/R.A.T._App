@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Services;
+using System.Collections.Generic;
 
 namespace RATAPP.Forms
 {
@@ -62,7 +63,7 @@ namespace RATAPP.Forms
             // Title
             titleLabel = new Label
             {
-                Text = "Certified Pedigree",
+                Text = "Pedigree",
                 Font = new Font("Times New Roman", 24, FontStyle.Bold),
                 ForeColor = Color.Navy,
                 Location = new Point(300, 30),
@@ -153,7 +154,7 @@ namespace RATAPP.Forms
             };
         }
 
-        private Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> _ancestors = 
+        private Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> _ancestors =
             new Dictionary<string, (Animal, Dictionary<string, List<string>>)>();
 
         private async Task LoadPedigreeData()
@@ -284,7 +285,19 @@ namespace RATAPP.Forms
 
                     if (saveDialog.ShowDialog() == DialogResult.OK)
                     {
-                        _pdfService.GeneratePedigreeCertificate(saveDialog.FileName, _currentAnimal, _ancestors);
+                        // Create a data object that combines animal and ancestors
+                        var pdfData = new PedigreePdfData
+                        {
+                            Animal = _currentAnimal,
+                            Ancestors = _ancestors,
+                            GenerationDate = DateTime.Now
+                        };
+
+                        // Generate using the template system
+                        _pdfService.GeneratePedigreeForAnimal(
+                            outputPath: saveDialog.FileName,
+                            animal: _currentAnimal);
+
                         MessageBox.Show("Pedigree certificate has been generated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
@@ -294,5 +307,13 @@ namespace RATAPP.Forms
                 MessageBox.Show($"Error generating PDF: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+    }
+
+    // Data transfer object for pedigree PDF generation
+    public class PedigreePdfData
+    {
+        public AnimalDto Animal { get; set; }
+        public Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> Ancestors { get; set; }
+        public DateTime GenerationDate { get; set; }
     }
 }

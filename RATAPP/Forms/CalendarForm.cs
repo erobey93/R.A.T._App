@@ -10,7 +10,6 @@ namespace RATAPP.Forms
 {
     public partial class CalendarForm : Form
     {
-        //private RATAPPLibrary.Data.DbContexts.RatAppDbContext _context;
         private MonthCalendar calendar;
         private DataGridView alertsGrid;
         private Panel addAlertPanel;
@@ -19,7 +18,6 @@ namespace RATAPP.Forms
 
         public CalendarForm(RatAppDbContextFactory contextFactory)
         {
-            //_context = context;
             InitializeComponents();
             LoadAlerts();
             LoadUpcomingEvents();
@@ -28,7 +26,7 @@ namespace RATAPP.Forms
         private void InitializeComponents()
         {
             this.Text = "RAT APP Calendar";
-            this.Size = new Size(1000, 700);
+            this.Size = new Size(1100, 800);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
 

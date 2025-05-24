@@ -80,8 +80,11 @@ namespace RATAPP.Panels
 
         private readonly RatAppDbContextFactory _contextFactory;
         private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
-
+        //filter states 
         private string searchState = "all"; //use this variable to decide which data to get for now. Really I should be caching the data and then filtering the cached data vs. going to the db each time, but that's for a future iteration 
+        private string currentSpeciesFilter = "All";
+        private string currentLineFilter = "All";
+        private string currentProjectFilter = "All";
 
         public PairingsAndLittersPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory)
         {

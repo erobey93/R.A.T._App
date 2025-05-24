@@ -4,10 +4,6 @@ using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 
 namespace RATAPP.Panels
 {
@@ -62,12 +58,12 @@ namespace RATAPP.Panels
 
         // State
         private bool _isEditMode = false;
-        private RATAPPLibrary.Data.Models.AnimalDto _animal;
-        private RATAPPLibrary.Data.Models.AnimalDto _dam;
-        private RATAPPLibrary.Data.Models.AnimalDto _sire;
-        private RATAPPLibrary.Data.Models.AnimalDto[] _dams;
-        private RATAPPLibrary.Data.Models.AnimalDto[] _sires;
-        private RATAPPLibrary.Data.Models.AnimalDto[] _allAnimals;
+        private AnimalDto _animal;
+        private AnimalDto _dam;
+        private AnimalDto _sire;
+        private AnimalDto[] _dams;
+        private AnimalDto[] _sires;
+        private AnimalDto[] _allAnimals;
         private readonly RATAppBaseForm _parentForm;
 
         // UI Controls
@@ -101,15 +97,15 @@ namespace RATAPP.Panels
         private Panel featureButtonPanel;
 
         // Test image paths (TODO: Move to configuration)
-        //private List<string> imagePaths = new List<string>
-        //{
-        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00S0S_e4sHXNFmkdY_0t20CI_1200x900.jpg",
-        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00v0v_hu4XyatVj1Q_0t20CI_1200x900.jpg",
-        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_0214.JPG",
-        //    "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
-        //};
+        private List<string> imagePaths = new List<string>
+        {
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00S0S_e4sHXNFmkdY_0t20CI_1200x900.jpg",
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00v0v_hu4XyatVj1Q_0t20CI_1200x900.jpg",
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_0214.JPG",
+            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
+        };
 
-        public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, RATAPPLibrary.Data.Models.AnimalDto[] allAnimals, RATAPPLibrary.Data.Models.AnimalDto currAnimal)
+        public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, AnimalDto[] allAnimals,AnimalDto currAnimal)
         {
             _contextFactory = contextFactory;
             _animalService = new AnimalService(contextFactory);
@@ -146,7 +142,7 @@ namespace RATAPP.Panels
         /// - Data loaded from services if animal exists
         /// </summary>
         /// <param name="animal">Animal data to display, or null for new animal</param>
-        private void InitializeComponent(RATAPPLibrary.Data.Models.AnimalDto animal)
+        private void InitializeComponent(AnimalDto animal)
         {
             _animal = animal;
             if (_animal == null)
@@ -295,7 +291,7 @@ namespace RATAPP.Panels
             SetComboBoxes();
         }
 
-        private void AnimalImageClicked(object sender, EventArgs e)
+        private async void AnimalImageClicked(object sender, EventArgs e)
         {
             // Open a file dialog to select an image
             OpenFileDialog dialog = new OpenFileDialog
@@ -333,6 +329,8 @@ namespace RATAPP.Panels
                             // Update the image URL for the animal (using the normalized file path)
                             _animal.imageUrl = normalizedFilePath;
 
+                            //add image to database? FIXME there is something wrong with this flow I need to go through it and re-organize it
+                            bool updateImage = await _animalService.UpdateAnimalImageByRegAsync(_animal.regNum, _animal.imageUrl);
                             // Show a message confirming the image update
                             ShowMessage("Image updated successfully! Image URL: " + _animal.imageUrl);
 
@@ -358,7 +356,7 @@ namespace RATAPP.Panels
         }
 
         // Add image to textbox
-        private void AddImageToAnimalTextbox(RATAPPLibrary.Data.Models.AnimalDto animal)
+        private void AddImageToAnimalTextbox(AnimalDto animal)
         {
             //check that the image url exists 
             if (animal.imageUrl != null)
@@ -374,7 +372,7 @@ namespace RATAPP.Panels
                     MessageBox.Show(e.Message);  //FIXME - for now, show the error but continue with the rest of the logic 
                 }
 
-                if (_isEditMode)
+                if (_isEditMode || !_isEditMode)
                 {
                     animalPhotoBox.Click += AnimalImageClicked;
                 }
@@ -688,7 +686,7 @@ namespace RATAPP.Panels
             }
             int i = 0;
             //_isNavMode = true; //set the navigation mode to true
-            foreach (RATAPPLibrary.Data.Models.AnimalDto animal in _allAnimals)
+            foreach (AnimalDto animal in _allAnimals)
             {
                 //once we get to animal
                 if (animal.Id == _animal.Id && i > 0) //make sure there is a previous if there's not maybe go to the end of the line like a loop? For now, just stop 
@@ -807,7 +805,7 @@ namespace RATAPP.Panels
             //maybe a list would be better here so that I could do next and previous vs. having to find index but not sure yet 
             int i = 0;
             //_isNavMode = true;
-            foreach (RATAPPLibrary.Data.Models.AnimalDto animal in _allAnimals)
+            foreach (AnimalDto animal in _allAnimals)
             {
                 if (i == 1)
                 {
@@ -996,7 +994,7 @@ namespace RATAPP.Panels
             }
         }
 
-        private async Task<RATAPPLibrary.Data.Models.AnimalDto> GetOrCreateDefaultAnimal(int? id)
+        private async Task<AnimalDto> GetOrCreateDefaultAnimal(int? id)
         {
             if (id.HasValue && id.Value != 0)
             {
@@ -1015,7 +1013,7 @@ namespace RATAPP.Panels
                 }
             }
 
-            return new RATAPPLibrary.Data.Models.AnimalDto
+            return new AnimalDto
             {
                 Id = 0,
                 regNum = "0",
@@ -1368,7 +1366,7 @@ namespace RATAPP.Panels
         }
 
         //parse textbox into animal dto object
-        private RATAPPLibrary.Data.Models.AnimalDto ParseAnimalData()
+        private AnimalDto ParseAnimalData()
         {
             //FIXME just for now 
             DateTime dob = DateTime.Now;
@@ -1387,7 +1385,7 @@ namespace RATAPP.Panels
 
             if (_animal != null)
             {
-                RATAPPLibrary.Data.Models.AnimalDto animal = new RATAPPLibrary.Data.Models.AnimalDto
+                AnimalDto animal = new AnimalDto
                 {
                     Id = _animal.Id,
                     regNum = regNumTextBox.Text,
@@ -1414,7 +1412,7 @@ namespace RATAPP.Panels
             }
             else
             {
-                RATAPPLibrary.Data.Models.AnimalDto animal = new RATAPPLibrary.Data.Models.AnimalDto
+                AnimalDto animal = new AnimalDto
                 {
                     //id will have to be created for a new animal 
                     regNum = regNumTextBox.Text,
@@ -1426,7 +1424,7 @@ namespace RATAPP.Panels
                                                //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
                     species = speciesComboBox.Text,
                     comment = commentsTextBox.Text,
-                    imageUrl = null, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
+                    imageUrl = "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png", //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
                     Line = line, // Assuming there's a TextBox for line
                     damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
                     sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
@@ -1468,7 +1466,7 @@ namespace RATAPP.Panels
         /// </summary>
         private async Task SaveButtonClick(object sender, EventArgs e)
         {
-            RATAPPLibrary.Data.Models.AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
+            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
 
             if (animalDto == null) //if the data is invalid, show an error message and return
             {
@@ -1659,7 +1657,7 @@ namespace RATAPP.Panels
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
         //TODO ID should be a string, but leaving it for now as db edits are annoying 
-        private async void InitializeTextBoxes(RATAPPLibrary.Data.Models.AnimalDto animal)
+        private async void InitializeTextBoxes(AnimalDto animal)
         {
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, _animal.regNum);
@@ -1776,7 +1774,7 @@ namespace RATAPP.Panels
         }
 
         // Handle the create new animal process 
-        private async Task HandleCreateNewAsync(RATAPPLibrary.Data.Models.AnimalDto animalDto)
+        private async Task HandleCreateNewAsync(AnimalDto animalDto)
         {
             throw new NotImplementedException();
             try
@@ -1806,7 +1804,7 @@ namespace RATAPP.Panels
         }
 
         // Handle the update process for an existing animal
-        private async Task HandleUpdateAsync(RATAPPLibrary.Data.Models.AnimalDto animalDto)
+        private async Task HandleUpdateAsync(AnimalDto animalDto)
         {
             try
             {
@@ -1822,7 +1820,7 @@ namespace RATAPP.Panels
         }
 
         // Helper methods for handling the high level save process
-        private void CompleteSaveProcess(RATAPPLibrary.Data.Models.AnimalDto animalDto, string successMessage)
+        private void CompleteSaveProcess(AnimalDto animalDto, string successMessage)
         {
             ShowMessage(successMessage);
             ToggleButtons(false);
@@ -1844,7 +1842,5 @@ namespace RATAPP.Panels
             cancelButton.Visible = isEditMode; //if edit mode is true, show the cancel button
             updateButton.Visible = !isEditMode; //if edit mode is false, show the update button
         }
-
-
     }
 }

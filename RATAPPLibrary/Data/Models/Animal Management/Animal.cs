@@ -1,5 +1,6 @@
 ﻿using PdfSharp.Pdf.Filters;
 using RATAPPLibrary.Data.Models.Ancestry;
+using RATAPPLibrary.Data.Models.Animal_Management;
 using RATAPPLibrary.Data.Models.Breeding;
 using RATAPPLibrary.Data.Models.Genetics;
 using System;
@@ -31,6 +32,8 @@ namespace RATAPPLibrary.Data.Models
         public virtual ICollection<AnimalTrait>? Traits { get; set; } // Navigation property for all traits for a specific animal
         public virtual ICollection<Genotype>? Genotypes { get; set; } // Navigation property for genomic data
         //data rules for animal
+
+        public virtual ICollection<AnimalImage>? AdditionalImages { get; set; }
 
         //TODO allow user to set age and then calculate approximate DOB based on that 
         //get age in months and years

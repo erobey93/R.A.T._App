@@ -17,7 +17,6 @@ namespace RATAPP
 
         public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
-            //_context = context;
             _configuration = configuration;
             _passwordHashing = passwordHashing;
             _contextFactory = contextFactory;
@@ -230,7 +229,7 @@ namespace RATAPP
         {
             //if valid credentials, open update form
             //update form is still TODO just getting basic outline there for now 
-            var updateCredentialsForm = new UpdateCredentialsForm(_contextFactory);
+            var updateCredentialsForm = new UpdateCredentialsForm(_contextFactory, _configuration, _passwordHashing);
             updateCredentialsForm.Show();
             this.Hide();
         }

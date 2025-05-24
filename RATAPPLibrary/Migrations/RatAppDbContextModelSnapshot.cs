@@ -186,6 +186,35 @@ namespace RATAPPLibrary.Migrations
                     b.ToTable("AnimalRecord");
                 });
 
+            modelBuilder.Entity("RATAPPLibrary.Data.Models.Animal_Management.AnimalImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnimalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ImageUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimalId", "CreatedOn")
+                        .IsUnique();
+
+                    b.ToTable("AnimalImage");
+                });
+
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Breeder", b =>
                 {
                     b.Property<int>("Id")
@@ -977,6 +1006,17 @@ namespace RATAPPLibrary.Migrations
                     b.Navigation("Animal");
                 });
 
+            modelBuilder.Entity("RATAPPLibrary.Data.Models.Animal_Management.AnimalImage", b =>
+                {
+                    b.HasOne("RATAPPLibrary.Data.Models.Animal", "Animal")
+                        .WithMany("AdditionalImages")
+                        .HasForeignKey("AnimalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Animal");
+                });
+
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Breeding.Breeder", b =>
                 {
                     b.HasOne("RATAPPLibrary.Data.Models.User", "User")
@@ -1252,6 +1292,8 @@ namespace RATAPPLibrary.Migrations
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Animal", b =>
                 {
+                    b.Navigation("AdditionalImages");
+
                     b.Navigation("Genotypes");
 
                     b.Navigation("Traits");

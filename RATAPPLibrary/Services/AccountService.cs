@@ -87,7 +87,7 @@ namespace RATAPPLibrary.Services
                 if (existingUser != null)
                 {
                     // Username already exists
-                    Console.WriteLine("Username already existst");
+                    Console.WriteLine("Username already exists");
                     return false;
                 }
 
@@ -149,7 +149,7 @@ namespace RATAPPLibrary.Services
                     return false;
                 }
             });
-        }
+        } 
 
         /// <summary>
         /// Creates a new breeder profile for an existing user.
@@ -240,7 +240,7 @@ namespace RATAPPLibrary.Services
                 }
 
                 // Verify the old password matches the stored password
-                if (passwordHashing.VerifyPasswordTempFix(user.Credentials.Password, request.CurrentPassword))
+                if (!passwordHashing.VerifyPasswordTempFix(user.Credentials.Password, request.CurrentPassword))
                 {
                     // Old password is incorrect
                     Console.WriteLine("Old password is incorrect");

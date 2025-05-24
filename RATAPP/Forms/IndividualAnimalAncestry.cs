@@ -34,7 +34,6 @@ namespace RATAPP.Forms
         public IndividualAnimalAncestryForm(RATAppBaseForm baseForm, RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
             _baseForm = baseForm;
-            //_context = context;
             _currentAnimal = animal;
 
             this.Dock = DockStyle.Fill;
