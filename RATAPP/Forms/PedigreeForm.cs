@@ -43,7 +43,7 @@ namespace RATAPP.Forms
             _animalService = new AnimalService(contextFactory);
 
             InitializeComponents();
-            LoadPedigreeData();
+            _ = LoadPedigreeData();
         }
 
         private void InitializeComponents()
@@ -53,15 +53,46 @@ namespace RATAPP.Forms
             this.Text = "Pedigree View";
             this.BackColor = Color.White;
 
-            // Main container with scrolling
+            // First add the buttons to the form (so they stay on top)
+            // Generate PDF Button
+            generatePdfButton = new Button
+            {
+                Text = "Generate PDF Certificate",
+                Location = new Point(950, 550),  // Adjusted Y position
+                Size = new Size(180, 30),
+                BackColor = Color.FromArgb(0, 120, 215),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            generatePdfButton.Click += GeneratePdfButton_Click;
+
+            // Close Button
+            closeButton = new Button
+            {
+                Text = "Close",
+                Location = new Point(800, 550),  // Adjusted Y position and X to be next to PDF button
+                Size = new Size(110, 30),
+                BackColor = Color.FromArgb(200, 200, 200),
+                ForeColor = Color.Black,
+                FlatStyle = FlatStyle.Flat
+            };
+            closeButton.Click += (s, e) => this.Close();
+
+            // Add buttons first
+            this.Controls.Add(generatePdfButton);
+            this.Controls.Add(closeButton);
+
+            // Then add the main panel
             certificatePanel = new Panel
             {
                 Location = new Point(20, 20),
-                Size = new Size(1160, 800),
+                Size = new Size(1160, 700),  // Reduced height to leave space for buttons
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White,
-                AutoScroll = true
+                AutoScroll = true,
             };
+
+            this.Controls.Add(certificatePanel);
 
             // Animal Information Section
             var animalPanel = new Panel
@@ -130,34 +161,6 @@ namespace RATAPP.Forms
 
             certificatePanel.Controls.Add(animalPanel);
             certificatePanel.Controls.Add(treePanel);
-
-            // Generate PDF Button
-            generatePdfButton = new Button
-            {
-                Text = "Generate PDF Certificate",
-                Location = new Point(650, 830),
-                Size = new Size(180, 30),
-                BackColor = Color.FromArgb(0, 120, 215),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            generatePdfButton.Click += GeneratePdfButton_Click;
-
-            // Close Button
-            closeButton = new Button
-            {
-                Text = "Close",
-                Location = new Point(840, 830),
-                Size = new Size(110, 30),
-                BackColor = Color.FromArgb(200, 200, 200),
-                ForeColor = Color.Black,
-                FlatStyle = FlatStyle.Flat
-            };
-            closeButton.Click += (s, e) => this.Close();
-
-            this.Controls.Add(certificatePanel);
-            this.Controls.Add(generatePdfButton);
-            this.Controls.Add(closeButton);
 
             // Load the pedigree data
             _ = LoadPedigreeData(treePanel);
@@ -328,155 +331,6 @@ namespace RATAPP.Forms
                 }
             }
         }
-        //private void InitializeComponents()
-        //{
-        //    this.Size = new Size(2000, 1800);
-        //    this.StartPosition = FormStartPosition.CenterScreen;
-        //    this.Text = "Pedigree Certificate";
-        //    this.BackColor = Color.White;
-
-        //    // Certificate Panel (main display area)
-        //    certificatePanel = new Panel
-        //    {
-        //        Location = new Point(20, 20),
-        //        Size = new Size(860, 600),
-        //        BorderStyle = BorderStyle.FixedSingle,
-        //        BackColor = Color.White,
-        //        AutoScroll = true  // Add scrolling for longer pedigrees
-        //    };
-
-        //    // Animal Details Section
-        //    // Name
-        //    var nameTitleLabel = new Label
-        //    {
-        //        Text = "Name:",
-        //        Font = new Font("Times New Roman", 12, FontStyle.Bold),
-        //        Location = new Point(50, certificatePanel.Bottom + 30),
-        //        Size = new Size(60, 20)
-        //    };
-
-        //    animalNameLabel = new Label
-        //    {
-        //        Text = _currentAnimal.name,
-        //        Font = new Font("Times New Roman", 12),
-        //        Location = new Point(110, nameTitleLabel.Top),
-        //        Size = new Size(300, 20)
-        //    };
-
-        //    // Registration
-        //    var regTitleLabel = new Label
-        //    {
-        //        Text = "Registration:",
-        //        Font = new Font("Times New Roman", 12, FontStyle.Bold),
-        //        Location = new Point(50, nameTitleLabel.Bottom + 30),
-        //        Size = new Size(100, 20)
-        //    };
-
-        //    registrationLabel = new Label
-        //    {
-        //        Text = _currentAnimal.regNum,
-        //        Font = new Font("Times New Roman", 12),
-        //        Location = new Point(150, regTitleLabel.Top),
-        //        Size = new Size(300, 20)
-        //    };
-
-        //    // Date of Birth
-        //    var dobTitleLabel = new Label
-        //    {
-        //        Text = "Date of Birth:",
-        //        Font = new Font("Times New Roman", 12, FontStyle.Bold),
-        //        Location = new Point(50, regTitleLabel.Bottom + 30),
-        //        Size = new Size(100, 20)
-        //    };
-
-        //    var dobLabel = new Label
-        //    {
-        //        Text = _currentAnimal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown",
-        //        Font = new Font("Times New Roman", 12),
-        //        Location = new Point(150, dobTitleLabel.Top),
-        //        Size = new Size(150, 20)
-        //    };
-
-        //    // Variety
-        //    var varietyTitleLabel = new Label
-        //    {
-        //        Text = "Variety:",
-        //        Font = new Font("Times New Roman", 12, FontStyle.Bold),
-        //        Location = new Point(350, dobTitleLabel.Top),
-        //        Size = new Size(60, 20)
-        //    };
-
-        //    var varietyLabel = new Label
-        //    {
-        //        Text = _currentAnimal.variety ?? "Unknown",
-        //        Font = new Font("Times New Roman", 12),
-        //        Location = new Point(410, varietyTitleLabel.Top),
-        //        Size = new Size(150, 20)
-        //    };
-
-        //    // Pedigree Sections
-        //    // Parents Header
-        //    var parentsHeader = new Label
-        //    {
-        //        Text = "PARENTS",
-        //        Font = new Font("Times New Roman", 14, FontStyle.Bold),
-        //        Location = new Point(50, dobTitleLabel.Bottom + 40),
-        //        Size = new Size(200, 25)
-        //    };
-
-        //    // Grandparents Header
-        //    var grandparentsHeader = new Label
-        //    {
-        //        Text = "GRANDPARENTS",
-        //        Font = new Font("Times New Roman", 14, FontStyle.Bold),
-        //        Location = new Point(300, parentsHeader.Top),
-        //        Size = new Size(200, 25)
-        //    };
-
-        //    // Add all controls to certificate panel
-        //    certificatePanel.Controls.Add(logoPictureBox);
-        //    certificatePanel.Controls.Add(titleLabel);
-        //    certificatePanel.Controls.Add(breederLabel);
-        //    certificatePanel.Controls.Add(nameTitleLabel);
-        //    certificatePanel.Controls.Add(animalNameLabel);
-        //    certificatePanel.Controls.Add(regTitleLabel);
-        //    certificatePanel.Controls.Add(registrationLabel);
-        //    certificatePanel.Controls.Add(dobTitleLabel);
-        //    certificatePanel.Controls.Add(dobLabel);
-        //    certificatePanel.Controls.Add(varietyTitleLabel);
-        //    certificatePanel.Controls.Add(varietyLabel);
-        //    certificatePanel.Controls.Add(parentsHeader);
-        //    certificatePanel.Controls.Add(grandparentsHeader);
-
-        //    // Generate PDF Button
-        //    generatePdfButton = new Button
-        //    {
-        //        Text = "Generate PDF",
-        //        Location = new Point(650, 630),
-        //        Size = new Size(110, 30),
-        //        BackColor = Color.FromArgb(0, 120, 215),
-        //        ForeColor = Color.White,
-        //        FlatStyle = FlatStyle.Flat
-        //    };
-        //    generatePdfButton.Click += GeneratePdfButton_Click;
-
-        //    // Close Button
-        //    closeButton = new Button
-        //    {
-        //        Text = "Close",
-        //        Location = new Point(770, 630),
-        //        Size = new Size(110, 30),
-        //        BackColor = Color.FromArgb(200, 200, 200),
-        //        ForeColor = Color.Black,
-        //        FlatStyle = FlatStyle.Flat
-        //    };
-        //    closeButton.Click += (s, e) => this.Close();
-
-        //    // Add controls to form
-        //    this.Controls.Add(certificatePanel);
-        //    this.Controls.Add(generatePdfButton);
-        //    this.Controls.Add(closeButton);
-        //}
 
         private Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> _ancestors =
             new Dictionary<string, (Animal, Dictionary<string, List<string>>)>();
@@ -485,6 +339,14 @@ namespace RATAPP.Forms
         {
             try
             {
+                //FIXME - move this logic into my templateRepository and I should be grabbing ancestors instead of individual animals for dam and sire
+                //TODO
+                var animal = _currentAnimal as AnimalDto; 
+                if (animal == null)
+                {
+                    //_ancestors = await _lineageService.GetAncestorsByAnimalId(animal.Id);
+                }
+                
                 // First Generation - Parents
                 var dam = await _lineageService.GetDamByAnimalId(_currentAnimal.Id);
                 var sire = await _lineageService.GetSireByAnimalId(_currentAnimal.Id);
@@ -601,7 +463,42 @@ namespace RATAPP.Forms
             return phenotype.TrimStart(',', ' ');
         }
 
-        private async void GeneratePdfButton_Click(object sender, EventArgs e)
+        //    private async void GeneratePdfButton_Click(object sender, EventArgs e)
+        //    {
+        //        try
+        //        {
+        //            using (var saveDialog = new SaveFileDialog())
+        //            {
+        //                saveDialog.Filter = "PDF files (*.pdf)|*.pdf";
+        //                saveDialog.FileName = $"Pedigree_{_currentAnimal.regNum}.pdf";
+
+        //                if (saveDialog.ShowDialog() == DialogResult.OK)
+        //                {
+        //                    // Create a data object that combines animal and ancestors
+        //                    var pdfData = new PedigreePdfData
+        //                    {
+        //                        Animal = _currentAnimal,
+        //                        Ancestors = _ancestors,
+        //                        GenerationDate = DateTime.Now
+        //                    };
+
+        //                    // Generate using the template system
+        //                    _pdfService.GeneratePedigreeForAnimal(
+        //                        outputPath: saveDialog.FileName,
+        //                        animal: _currentAnimal);
+
+        //                    MessageBox.Show("Pedigree certificate has been generated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        //                }
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            MessageBox.Show($"Error generating PDF: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //        }
+        //    }
+        //}
+
+        private void GeneratePdfButton_Click(object sender, EventArgs e)
         {
             try
             {
@@ -612,35 +509,30 @@ namespace RATAPP.Forms
 
                     if (saveDialog.ShowDialog() == DialogResult.OK)
                     {
-                        // Create a data object that combines animal and ancestors
-                        var pdfData = new PedigreePdfData
-                        {
-                            Animal = _currentAnimal,
-                            Ancestors = _ancestors,
-                            GenerationDate = DateTime.Now
-                        };
-
-                        // Generate using the template system
+                        // Generate PDF synchronously (since it's not async)
                         _pdfService.GeneratePedigreeForAnimal(
                             outputPath: saveDialog.FileName,
+                            ancestors: _ancestors,
                             animal: _currentAnimal);
 
-                        MessageBox.Show("Pedigree certificate has been generated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Pedigree generated successfully.", "Success",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error generating PDF: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error generating PDF: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-    }
 
-    // Data transfer object for pedigree PDF generation
-    public class PedigreePdfData
-    {
-        public AnimalDto Animal { get; set; }
-        public Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> Ancestors { get; set; }
-        public DateTime GenerationDate { get; set; }
+        // Data transfer object for pedigree PDF generation
+        public class PedigreePdfData
+        {
+            public AnimalDto Animal { get; set; }
+            public Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> Ancestors { get; set; }
+            public DateTime GenerationDate { get; set; }
+        }
     }
 }

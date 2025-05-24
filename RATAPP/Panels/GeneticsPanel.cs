@@ -1098,14 +1098,15 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var selectedAnimal = animalSelector.SelectedItem;
+            var selectedAnimal = animalSelector.SelectedItem as AnimalDto;
+           
 
             // Clear previous pedigree
             pedigreeDisplayPanel.Controls.Clear();
 
             Label pedigreeTitle = new Label
             {
-                Text = $"Pedigree for {selectedAnimal}",
+                Text = $"Pedigree for {selectedAnimal.name}",
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 AutoSize = true,
                 Location = new Point(10, 10)
