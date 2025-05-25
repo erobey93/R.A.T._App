@@ -280,6 +280,9 @@ namespace RATAPP.Forms
             breederLabel.Text = "Breeder's Name: Emily Robey - TLDR";
         }
 
+        private Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> _ancestors =
+          new Dictionary<string, (Animal, Dictionary<string, List<string>>)>();
+
         private async void GeneratePdfButton_Click(object sender, EventArgs e)
         {
             try
@@ -297,7 +300,7 @@ namespace RATAPP.Forms
                         if (_isLitterCertificate)
                             _pdfService.GenerateBirthCertificateForLitter(saveDialog.FileName, _litter);
                         else
-                            _pdfService.GenerateBirthCertificateForAnimal(saveDialog.FileName, _animal);
+                            _pdfService.GenerateBirthCertificateForAnimal(saveDialog.FileName, _animal, _ancestors);
 
                         MessageBox.Show("Birth certificate has been generated successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }

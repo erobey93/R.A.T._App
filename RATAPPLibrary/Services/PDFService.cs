@@ -3,6 +3,7 @@ using PdfSharp.Pdf;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Breeding;
 using static System.Net.Mime.MediaTypeNames;
+using System.Drawing; 
 
 namespace RATAPPLibrary.Services
 {
@@ -23,16 +24,24 @@ namespace RATAPPLibrary.Services
             _templateRepository = new PdfTemplateRepository();
         }
 
-        public void GenerateBirthCertificateForAnimal(string outputPath, AnimalDto animal)
+        public void GenerateBirthCertificateForAnimal(string outputPath, AnimalDto animal, Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> ancestors)
         {
             var template = _templateRepository.GetTemplate("BirthCertificateAnimal");
             GeneratePdfFromTemplate(outputPath, template, animal);
         }
 
-        public void GeneratePedigreeForAnimal(string outputPath, AnimalDto animal)
+        public void GeneratePedigreeForAnimal(string outputPath, AnimalDto animal, Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> ancestors)
         {
+            // Ensure all data is loaded before generating the PDF
+            var data = new PedigreePdfData
+            {
+                Animal = animal,
+                Ancestors = ancestors, // Make sure this is populated
+                GenerationDate = DateTime.Now
+            };
+
             var template = _templateRepository.GetTemplate("PedigreeCertificate");
-            GeneratePdfFromTemplate(outputPath, template, animal);
+            GeneratePdfFromTemplate(outputPath, template, data); // Pass the full data object
         }
 
         public void GeneratePdfFromTemplate(string outputPath, PdfTemplate template, object data)
@@ -56,7 +65,7 @@ namespace RATAPPLibrary.Services
                     switch (element)
                     {
                         case TextElement textElement:
-                            RenderTextElement(gfx, textElement, data, template);
+                            RenderTextElement(gfx, textElement, data);
                             break;
                         case ImageElement imageElement:
                             RenderImageElement(gfx, imageElement, data);
@@ -68,32 +77,85 @@ namespace RATAPPLibrary.Services
             document.Save(outputPath);
         }
 
-        private void RenderTextElement(XGraphics gfx, TextElement element, object data, PdfTemplate template)
-        {
-            var fontStyle = element.IsBold ? XFontStyleEx.Bold : XFontStyleEx.Regular;
-            var font = new XFont(element.FontFamily, element.FontSize, fontStyle);
-            var brush = XBrushes.Black; // Could parse from element.Color
+        //private void RenderTextElement(XGraphics gfx, TextElement element, object data, PdfTemplate template)
+        //{
+        //    var fontStyle = element.IsBold ? XFontStyleEx.Bold : XFontStyleEx.Regular;
+        //    var font = new XFont(element.FontFamily, element.FontSize, fontStyle);
+        //    var brush = XBrushes.Black; // Could parse from element.Color
 
-            string text = element.Text;
+        //    string text = element.Text;
+        //    if (!string.IsNullOrEmpty(element.DataField))
+        //    {
+        //        text = GetValueFromData(element.DataField, data, template);
+        //    }
+
+        //    var rect = new XRect(element.X, element.Y, element.Width, element.Height);
+        //    var format = XStringFormats.TopLeft;
+
+        //    switch (element.HorizontalAlignment)
+        //    {
+        //        case HorizontalAlignment.Center:
+        //            format = XStringFormats.TopCenter;
+        //            break;
+        //        case HorizontalAlignment.Right:
+        //            format = XStringFormats.TopRight;
+        //            break;
+        //    }
+
+        //    gfx.DrawString(text, font, brush, rect, format);
+        //}
+
+        private void RenderTextElement(XGraphics gfx, TextElement element, object data)
+        {
+            string textToRender = element.Text; // Default value
+
+            // Dynamic data binding
             if (!string.IsNullOrEmpty(element.DataField))
             {
-                text = GetValueFromData(element.DataField, data, template);
+                textToRender = GetPropertyValue(data, element.DataField)?.ToString() ?? element.Text;
             }
 
-            var rect = new XRect(element.X, element.Y, element.Width, element.Height);
-            var format = XStringFormats.TopLeft;
+            // Font setup
+            var fontStyle = element.IsBold ? XFontStyleEx.Bold : XFontStyleEx.Regular;
+            var font = new XFont(element.FontFamily, element.FontSize, fontStyle);
 
+            // Color setup
+            var brush = string.IsNullOrEmpty(element.Color)
+                ? XBrushes.Black
+                : new XSolidBrush(XColor.FromArgb(Convert.ToInt32(element.Color, 16)));
+
+            // Alignment setup
+            var format = new XStringFormat();
             switch (element.HorizontalAlignment)
             {
+                case HorizontalAlignment.Left:
+                    format.Alignment = XStringAlignment.Near;
+                    break;
                 case HorizontalAlignment.Center:
-                    format = XStringFormats.TopCenter;
+                    format.Alignment = XStringAlignment.Center;
                     break;
                 case HorizontalAlignment.Right:
-                    format = XStringFormats.TopRight;
+                    format.Alignment = XStringAlignment.Far;
                     break;
             }
 
-            gfx.DrawString(text, font, brush, rect, format);
+            // Draw text
+            var rect = new XRect(element.X, element.Y, element.Width, element.Height);
+            gfx.DrawString(textToRender, font, brush, rect, format);
+        }
+
+        // Helper method to resolve nested properties (e.g., "Animal.name")
+        private object GetPropertyValue(object source, string propertyPath)
+        {
+            object current = source;
+            foreach (var part in propertyPath.Split('.'))
+            {
+                if (current == null) return null;
+                var prop = current.GetType().GetProperty(part);
+                if (prop == null) return null;
+                current = prop.GetValue(current);
+            }
+            return current;
         }
 
         private void RenderImageElement(XGraphics gfx, ImageElement element, object data)
@@ -368,38 +430,46 @@ namespace RATAPPLibrary.Services
             return phenotype.TrimStart(',', ' ');
         }
 
-    /// <summary>
-    /// Service for generating PDF documents in the R.A.T. App.
-    /// Handles the creation of PDF files from templates with dynamic content.
-    ///
-    /// Key Features:
-    /// - Template-based PDF generation
-    /// - Image and text integration
-    /// - Custom document formatting
-    ///
-    /// Current Capabilities:
-    /// - Background image support
-    /// - Basic text placement
-    /// - Single page documents
-    ///
-    /// Known Limitations:
-    /// - Fixed text positioning
-    /// - Limited formatting options
-    /// - No multi-page support
-    /// - Basic error handling
-    ///
-    /// Planned Improvements:
-    /// - Implement BaseService pattern
-    /// - Add dynamic text positioning
-    /// - Support multiple pages
-    /// - Enhanced template system
-    /// - Better error handling
-    ///
-    /// Dependencies:
-    /// - PdfSharp: For PDF generation
-    /// - System.IO: For file operations
-    /// </summary>
-    
+        // Data transfer object for pedigree PDF generation
+        public class PedigreePdfData
+        {
+            public AnimalDto Animal { get; set; }
+            public Dictionary<string, (Animal ancestor, Dictionary<string, List<string>> traits)> Ancestors { get; set; }
+            public DateTime GenerationDate { get; set; }
+        }
+
+        /// <summary>
+        /// Service for generating PDF documents in the R.A.T. App.
+        /// Handles the creation of PDF files from templates with dynamic content.
+        ///
+        /// Key Features:
+        /// - Template-based PDF generation
+        /// - Image and text integration
+        /// - Custom document formatting
+        ///
+        /// Current Capabilities:
+        /// - Background image support
+        /// - Basic text placement
+        /// - Single page documents
+        ///
+        /// Known Limitations:
+        /// - Fixed text positioning
+        /// - Limited formatting options
+        /// - No multi-page support
+        /// - Basic error handling
+        ///
+        /// Planned Improvements:
+        /// - Implement BaseService pattern
+        /// - Add dynamic text positioning
+        /// - Support multiple pages
+        /// - Enhanced template system
+        /// - Better error handling
+        ///
+        /// Dependencies:
+        /// - PdfSharp: For PDF generation
+        /// - System.IO: For file operations
+        /// </summary>
+
         /// <summary>
         /// Generates a PDF document using a template image and custom text.
         ///
