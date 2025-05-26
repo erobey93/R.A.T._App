@@ -87,6 +87,8 @@ namespace RATAPP.Panels
         private string currentLineFilter = "All";
         private string currentProjectFilter = "All";
 
+        int topPanelHeight = 160; 
+
         public PairingsAndLittersPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory)
         {
             _parentForm = parentForm;
@@ -640,8 +642,6 @@ namespace RATAPP.Panels
 
         private void InitializePairingDataGridView()
         {
-            int topPanelHeight = 90;
-
             //get all pairings from db 
             //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
 
@@ -717,7 +717,7 @@ namespace RATAPP.Panels
 
         private void InitializeProjectDataGridView()
         {
-            int topPanelHeight = 90;
+            //int topPanelHeight = 90;
 
             //get all projects from db 
             //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
@@ -780,7 +780,7 @@ namespace RATAPP.Panels
 
         private void InitializeLitterDataGridView()
         {
-            int topPanelHeight = 90;
+            //int topPanelHeight = 90;
 
             littersGridView.Location = new Point(0, topPanelHeight);
             littersGridView.Width = 1000;
@@ -841,8 +841,6 @@ namespace RATAPP.Panels
         //show all data related to lines 
         private async void InitializeLineDataGridView()
         {
-            int topPanelHeight = 90;
-
             linesGridView.Location = new Point(0, topPanelHeight); // Changed to linesGridView
             linesGridView.Width = 1000; // Changed to linesGridView
             linesGridView.Height = 400; // Changed to linesGridView
