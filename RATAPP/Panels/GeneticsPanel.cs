@@ -739,7 +739,7 @@ namespace RATAPP.Panels
 
                 foreach (var s in species)
                 {
-                    speciesFilter.Items.Add(s);
+                    speciesFilter.Items.Add(s.CommonName);
                 }
 
                 speciesFilter.SelectedIndex = 0;
