@@ -6,6 +6,7 @@ using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Services;
 using System.Collections.Generic;
+using RATAPPLibrary.Services.Genetics;
 
 namespace RATAPP.Forms
 {
@@ -17,16 +18,20 @@ namespace RATAPP.Forms
         private readonly TraitService _traitService;
         private readonly PdfService _pdfService;
         private readonly AnimalService _animalService;
+        private readonly BreedingCalculationService _breedingCalculationService; 
 
         // UI Components
         private Panel certificatePanel;
         //private Label titleLabel;
         //private Label breederLabel;
+        private Label inbredCoLabel; 
         private Label animalNameLabel;
         private Label registrationLabel;
         //private PictureBox logoPictureBox;
         private Button generatePdfButton;
         private Button closeButton;
+
+        private string inbred; 
 
         public static PedigreeForm Create(RatAppDbContextFactory contextFactory, AnimalDto animal)
         {
@@ -41,12 +46,13 @@ namespace RATAPP.Forms
             _traitService = new TraitService(contextFactory);
             _pdfService = new PdfService();
             _animalService = new AnimalService(contextFactory);
+            _breedingCalculationService = new BreedingCalculationService(contextFactory);
 
             InitializeComponents();
             _ = LoadPedigreeData();
         }
 
-        private void InitializeComponents()
+        private async void InitializeComponents()
         {
             this.Size = new Size(1200, 900);
             this.StartPosition = FormStartPosition.CenterScreen;
@@ -106,7 +112,7 @@ namespace RATAPP.Forms
             // Current Animal Info
             var animalTitle = new Label
             {
-                Text = "Subject Animal",
+                Text = "Selected Animal",
                 Font = new Font("Times New Roman", 12, FontStyle.Bold),
                 Location = new Point(10, 10),
                 Size = new Size(150, 20)
@@ -117,22 +123,30 @@ namespace RATAPP.Forms
                 Text = $"Name: {_currentAnimal.name}",
                 Font = new Font("Times New Roman", 11),
                 Location = new Point(10, 35),
-                Size = new Size(300, 20)
+                Size = new Size(200, 20)
             };
 
             registrationLabel = new Label
             {
                 Text = $"Registration: {_currentAnimal.regNum}",
                 Font = new Font("Times New Roman", 11),
-                Location = new Point(320, 35),
-                Size = new Size(300, 20)
+                Location = new Point(220, 35),
+                Size = new Size(200, 20)
             };
 
             var dobLabel = new Label
             {
                 Text = $"DOB: {_currentAnimal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
                 Font = new Font("Times New Roman", 11),
-                Location = new Point(630, 35),
+                Location = new Point(440, 35),
+                Size = new Size(200, 20)
+            };
+
+            inbredCoLabel = new Label
+            {
+                Text = $"% Inbred: {inbred}",
+                Font = new Font("Times New Roman", 11),
+                Location = new Point(660, 35),
                 Size = new Size(200, 20)
             };
 
@@ -140,7 +154,7 @@ namespace RATAPP.Forms
             {
                 Text = $"Variety: {_currentAnimal.variety ?? "Unknown"}",
                 Font = new Font("Times New Roman", 11),
-                Location = new Point(840, 35),
+                Location = new Point(780, 35),
                 Size = new Size(200, 20)
             };
 
@@ -149,6 +163,7 @@ namespace RATAPP.Forms
             animalPanel.Controls.Add(registrationLabel);
             animalPanel.Controls.Add(dobLabel);
             animalPanel.Controls.Add(varietyLabel);
+            animalPanel.Controls.Add(inbredCoLabel);
 
             // Tree Structure Panel
             var treePanel = new Panel
@@ -164,6 +179,19 @@ namespace RATAPP.Forms
 
             // Load the pedigree data
             _ = LoadPedigreeData(treePanel);
+
+            //Get inbred co
+            await GetInbredCoEfficient(); 
+        }
+
+        private async Task GetInbredCoEfficient()
+        {
+            // Logic to calculate inbreeding coefficient
+            double inbredCo = await _breedingCalculationService.CalculateInbreedingCoefficientAsync(_currentAnimal.Id, _currentAnimal.Id);
+            string toString = inbredCo.ToString();
+
+            inbredCoLabel.Text = $"% Inbred: {toString}";
+            this.Refresh(); 
         }
 
         private async Task LoadPedigreeData(Panel treePanel)
@@ -280,10 +308,51 @@ namespace RATAPP.Forms
                 Size = new Size(190, 15)
             };
 
+            var inbredLabel = new Label
+            {
+                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Font = new Font("Times New Roman", 9),
+                Location = new Point(5, 60),
+                Size = new Size(190, 15)
+            };
+
+            var variety = new Label
+            {
+                Text = $"Variety: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Font = new Font("Times New Roman", 9),
+                Location = new Point(5, 60),
+                Size = new Size(190, 15)
+            };
+
+            var color = new Label
+            {
+                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Font = new Font("Times New Roman", 9),
+                Location = new Point(5, 60),
+                Size = new Size(190, 15)
+            };
+
+            var markings = new Label
+            {
+                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Font = new Font("Times New Roman", 9),
+                Location = new Point(5, 60),
+                Size = new Size(190, 15)
+            };
+
+            var genotype = new Label
+            {
+                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Font = new Font("Times New Roman", 9),
+                Location = new Point(5, 60),
+                Size = new Size(190, 15)
+            };
+
             panel.Controls.Add(relationLabel);
             panel.Controls.Add(nameLabel);
             panel.Controls.Add(regLabel);
             panel.Controls.Add(dobLabel);
+            panel.Controls.Add(inbredLabel);
 
             return panel;
         }

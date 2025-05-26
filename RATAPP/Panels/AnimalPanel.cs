@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Azure.Amqp.Framing;
+using Microsoft.EntityFrameworkCore;
 using RATAPP.Forms;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services;
+using RATAPPLibrary.Services.Genetics;
 
 namespace RATAPP.Panels
 {
@@ -54,6 +56,7 @@ namespace RATAPP.Panels
         private readonly LineageService _lineageService;
         private readonly TraitService _traitService;
         private readonly SpeciesService _speciesService;
+        private readonly BreedingCalculationService _geneticsService; 
         private readonly SemaphoreSlim _loadingSemaphore = new SemaphoreSlim(1, 1);
 
         // State
@@ -112,6 +115,7 @@ namespace RATAPP.Panels
             _traitService = new TraitService(contextFactory);
             _speciesService = new SpeciesService(contextFactory);
             _lineageService = new LineageService(contextFactory);
+            _geneticsService = new BreedingCalculationService(contextFactory);
 
             parentForm.SetActivePanel(this);
             _parentForm = parentForm;
@@ -1205,14 +1209,18 @@ namespace RATAPP.Panels
                 FlatAppearance = { BorderSize = 0 },
                 Cursor = Cursors.Hand
             };
-            //this should be a call to the library to calculate the % inbred
-            inbredButton.Click += (sender, e) =>
+            inbredButton.Click += async (sender, e) =>
             {
-                // Logic to calculate % inbred
-                //TODO get the values from the database just for testing right now FIXME
-                string TODO = "TODO - should come from db"; //FIXME
-                inbredTextBox.Text = TODO;
+                await GetInbredCoEfficient();
+                MessageBox.Show("Inbreeding Coefficient Updated"); 
             };
+        }
+
+        private async Task GetInbredCoEfficient()
+        {
+            // Logic to calculate inbreeding coefficient
+            double inbredCo = await _geneticsService.CalculateInbreedingCoefficientAsync(_dam.Id, _sire.Id);
+            inbredTextBox.Text = inbredCo.ToString();
         }
 
         private void SaveButton()
@@ -1558,8 +1566,10 @@ namespace RATAPP.Panels
             healthButton = CreateFeatureButton("Health");
             healthButton.Click += (sender, e) =>
             {
-                var healthForm = new HealthRecordForm(_parentForm, _contextFactory, _animal);
-                healthForm.Show();
+                MessageBox.Show("Health Record Form Will Show Here"); 
+                //TODO
+                //var healthForm = new HealthRecordForm(_parentForm, _contextFactory, _animal);
+                //healthForm.Show();
             };
 
             //navigation buttons
@@ -1657,6 +1667,7 @@ namespace RATAPP.Panels
         // to make changes
         //TODO get the values from the database just for testing right now FIXME 
         //TODO ID should be a string, but leaving it for now as db edits are annoying 
+        //TODO I need to go through and get rid of most of my async voids and turn them into async Tasks and handle them with lambdas 
         private async void InitializeTextBoxes(AnimalDto animal)
         {
             // First column (left side)
@@ -1669,13 +1680,16 @@ namespace RATAPP.Panels
 
             // Second column (right side)
             colorTextBox = CreateTextBox(490, 20, _animal.color);
-            genotypeTextBox = CreateTextBox(490, 60, "xxyyzz"); //TODO
+            genotypeTextBox = CreateTextBox(490, 60, _animal.genotype); //TODO will likely be removing this value eventually and using the appropriate model 
             markingsTextBox = CreateTextBox(490, 100, _animal.markings);
             breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
             earTypeTextBox = CreateTextBox(490, 180, _animal.earType);
             sireTextBox = CreateTextBox(490, 220, _sire.name);
 
-            inbredTextBox = CreateTextBox(150, 450, "TODO");
+            inbredTextBox = CreateTextBox(150, 450, "0"); //start with zero, set actual value below FIXME weird logic but works for now 
+            //set the % inbred, if any 
+            await GetInbredCoEfficient();
+
             // Move commentsTextBox below everything else and make it larger
             //FIXME should have a multi line text box option
             commentsTextBox = new TextBox
