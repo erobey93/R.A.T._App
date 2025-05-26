@@ -83,5 +83,21 @@ namespace RATAPPLibrary.Services.Genetics.Interfaces
         /// <param name="calculationId">ID of the breeding calculation</param>
         /// <returns>List of possible offspring</returns>
         Task<List<PossibleOffspring>> GetPossibleOffspringAsync(Guid calculationId);
+
+        /// <summary>
+        /// Calculates the inbreeding coefficient for potential offspring using Wright's path method.
+        /// The inbreeding coefficient (F) represents the probability that both alleles at any locus 
+        /// in an individual are identical by descent.
+        /// 
+        /// Formula: F = Σ (0.5)^(n+m+1) * (1 + FA)
+        /// Where:
+        /// - n = number of generations from sire to common ancestor
+        /// - m = number of generations from dam to common ancestor
+        /// - FA = inbreeding coefficient of common ancestor
+        /// </summary>
+        /// <param name="damId">ID of the female parent</param>
+        /// <param name="sireId">ID of the male parent</param>
+        /// <returns>Inbreeding coefficient as a decimal between 0 and 1</returns>
+        Task<double> CalculateInbreedingCoefficientAsync(int damId, int sireId);
     }
 }

@@ -27,6 +27,7 @@ namespace RATAPP.Forms
         private Button calculateButton;
         private Button closeButton;
         private Label compatibilityLabel;
+        private Label inbreedingLabel;
         private Panel resultPanel;
 
         private BreedingCalculation currentCalculation;
@@ -223,17 +224,31 @@ namespace RATAPP.Forms
             mainLayout.SetColumnSpan(buttonPanel, 2);
 
             // Results section
+            inbreedingLabel = new Label
+            {
+                AutoSize = false,
+                Width = 400,
+                Height = 30,
+                BorderStyle = BorderStyle.FixedSingle,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(5)
+            };
+
             var resultsLayout = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 ColumnCount = 2,
-                RowCount = 3,
+                RowCount = 4,
                 Visible = false
             };
 
             // Compatibility status
             resultsLayout.Controls.Add(new Label { Text = "Compatibility:", AutoSize = true }, 0, 0);
             resultsLayout.Controls.Add(compatibilityLabel, 1, 0);
+
+            // Inbreeding coefficient
+            resultsLayout.Controls.Add(new Label { Text = "Inbreeding Coefficient:", AutoSize = true }, 0, 1);
+            resultsLayout.Controls.Add(inbreedingLabel, 1, 1);
 
             // Trait probabilities
             var probabilitiesPanel = new Panel
@@ -357,7 +372,10 @@ namespace RATAPP.Forms
                 // Analyze genetic risks
                 var risks = await _breedingService.AnalyzeGeneticRisksAsync(currentCalculation.CalculationId);
 
-                DisplayResults(traitProbabilities, risks);
+                // Calculate inbreeding coefficient
+                var inbreedingCoefficient = await _breedingService.CalculateInbreedingCoefficientAsync(parent1.Id, parent2.Id);
+
+                DisplayResults(traitProbabilities, risks, inbreedingCoefficient);
             }
             catch (Exception ex)
             {
@@ -365,8 +383,12 @@ namespace RATAPP.Forms
             }
         }
 
-        private void DisplayResults(Dictionary<string, float> traitProbabilities, List<InheritanceRisk> risks)
+        private void DisplayResults(Dictionary<string, float> traitProbabilities, List<InheritanceRisk> risks, double inbreedingCoefficient)
         {
+            // Display inbreeding coefficient
+            inbreedingLabel.Text = $"{inbreedingCoefficient:P2}";
+            inbreedingLabel.ForeColor = inbreedingCoefficient > 0.125 ? Color.Red : Color.Green;
+
             // Display trait probabilities
             var traitRows = traitProbabilities.Select(tp => new
             {

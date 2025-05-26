@@ -412,6 +412,109 @@ namespace RATAPPLibrary.Services.Genetics
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Calculates the inbreeding coefficient for a potential offspring using Wright's path method.
+        /// The inbreeding coefficient (F) represents the probability that both alleles at any locus 
+        /// in an individual are identical by descent.
+        /// 
+        /// Formula: F = Σ (0.5)^(n+m+1) * (1 + FA)
+        /// Where:
+        /// - n = number of generations from sire to common ancestor
+        /// - m = number of generations from dam to common ancestor
+        /// - FA = inbreeding coefficient of common ancestor
+        /// </summary>
+        /// <param name="damId">ID of the female parent</param>
+        /// <param name="sireId">ID of the male parent</param>
+        /// <returns>Inbreeding coefficient as a decimal between 0 and 1</returns>
+        public async Task<double> CalculateInbreedingCoefficientAsync(int damId, int sireId)
+        {
+            return await ExecuteInTransactionAsync(async context =>
+            {
+                // Find all common ancestors between dam and sire
+                var commonAncestors = await FindCommonAncestorsAsync(damId, sireId);
+                
+                double totalCoefficient = 0;
+
+                // Calculate contribution from each common ancestor
+                foreach (var ancestor in commonAncestors)
+                {
+                    double pathContribution = Math.Pow(0.5, ancestor.damPath + ancestor.sirePath + 1);
+                    
+                    // Recursively calculate ancestor's own inbreeding coefficient
+                    double ancestorCoefficient = await GetAncestorInbreedingCoefficientAsync(ancestor.ancestor.Id);
+                    
+                    totalCoefficient += pathContribution * (1 + ancestorCoefficient);
+                }
+
+                return totalCoefficient;
+            });
+        }
+
+        /// <summary>
+        /// Finds all common ancestors between two animals and their path lengths.
+        /// </summary>
+        private async Task<List<(Animal ancestor, int damPath, int sirePath)>> FindCommonAncestorsAsync(int damId, int sireId)
+        {
+            return await ExecuteInContextAsync(async context =>
+            {
+                var commonAncestors = new List<(Animal ancestor, int damPath, int sirePath)>();
+
+                // Get all ancestors for both dam and sire
+                var damAncestors = await context.Lineages
+                    .Include(l => l.Ancestor)
+                    .Where(l => l.AnimalId == damId)
+                    .ToListAsync();
+
+                var sireAncestors = await context.Lineages
+                    .Include(l => l.Ancestor)
+                    .Where(l => l.AnimalId == sireId)
+                    .ToListAsync();
+
+                // Find common ancestors
+                foreach (var damLine in damAncestors)
+                {
+                    var matchingSireLine = sireAncestors
+                        .FirstOrDefault(s => s.AncestorId == damLine.AncestorId);
+
+                    if (matchingSireLine != null)
+                    {
+                        commonAncestors.Add((
+                            damLine.Ancestor,
+                            damLine.Generation,  // Path length from dam to ancestor
+                            matchingSireLine.Generation  // Path length from sire to ancestor
+                        ));
+                    }
+                }
+
+                return commonAncestors;
+            });
+        }
+
+        /// <summary>
+        /// Recursively calculates the inbreeding coefficient for an ancestor.
+        /// </summary>
+        private async Task<double> GetAncestorInbreedingCoefficientAsync(int ancestorId)
+        {
+            var parents = await ExecuteInContextAsync(async context =>
+            {
+                var lineages = await context.Lineages
+                    .Where(l => l.AnimalId == ancestorId && l.Generation == 1)
+                    .ToListAsync();
+
+                var damId = lineages.FirstOrDefault(l => l.RelationshipType == "Maternal")?.AncestorId;
+                var sireId = lineages.FirstOrDefault(l => l.RelationshipType == "Paternal")?.AncestorId;
+
+                return (damId, sireId);
+            });
+
+            // If ancestor has no parents recorded, assume inbreeding coefficient of 0
+            if (!parents.damId.HasValue || !parents.sireId.HasValue)
+                return 0;
+
+            // Recursively calculate ancestor's inbreeding coefficient
+            return await CalculateInbreedingCoefficientAsync(parents.damId.Value, parents.sireId.Value);
+        }
+
         //perform a test pairing to see possible outcomes 
         //TODO
         public IEnumerable<object> CalculateBreedingOutcomes(Animal dam, Animal sire)
