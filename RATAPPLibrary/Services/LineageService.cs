@@ -30,10 +30,62 @@ namespace RATAPPLibrary.Services
     public class LineageService : BaseService
     {
         private readonly RatAppDbContextFactory _contextFactory;
+        private readonly TraitService _traitService;
 
         public LineageService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
-            _contextFactory = contextFactory; 
+            _contextFactory = contextFactory;
+            _traitService = new TraitService(contextFactory);
+        }
+
+        /// <summary>
+        /// Retrieves all traits for all ancestors of a specified animal.
+        /// 
+        /// Returns a dictionary mapping each ancestor to their traits, where:
+        /// - Key: The ancestor animal (including generation and relationship info)
+        /// - Value: Dictionary of trait types to trait lists
+        /// 
+        /// Example structure:
+        /// {
+        ///    "Dam (Gen 1)": {
+        ///       "Color": ["Black", "White"],
+        ///       "Ear Type": ["Standard"]
+        ///    },
+        ///    "Dam's Dam (Gen 2)": {
+        ///       "Color": ["Agouti"],
+        ///       "Coat Type": ["Rex"]
+        ///    }
+        /// }
+        /// </summary>
+        /// <param name="animalId">ID of the animal to get ancestor traits for</param>
+        /// <returns>Dictionary mapping ancestor descriptions to their trait maps</returns>
+        public async Task<Dictionary<string, Dictionary<string, List<string>>>> GetAncestorTraitsAsync(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                var result = new Dictionary<string, Dictionary<string, List<string>>>();
+                
+                // Get all ancestors
+                var ancestors = await GetAncestorsByAnimalId(animalId);
+                
+                // For each ancestor, get their traits
+                foreach (var lineage in ancestors)
+                {
+                    if (lineage.Ancestor != null)
+                    {
+                        // Get traits for this ancestor
+                        var traits = await _traitService.GetTraitMapForSingleAnimal(lineage.AncestorId);
+                        
+                        // Create descriptive key based on relationship and generation
+                        string key = $"{lineage.RelationshipType} (Gen {lineage.Generation})";
+                        
+                        // Add to result dictionary
+                        result[key] = traits;
+                    }
+                }
+                
+                return result;
+            });
         }
 
         /// <summary>

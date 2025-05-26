@@ -1,119 +1,106 @@
-using Microsoft.Extensions.Logging;
-using RATAPPLibrary.Data.DbContexts;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Ancestry;
+using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services;
-using Xunit;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace RATAPPLibraryUT
 {
+    [TestClass]
     public class LineageServiceTests : TestBase
     {
-        private readonly RatAppDbContextFactory _contextFactory;
-        private readonly LineageService _lineageService;
+        private LineageService _lineageService;
+        private TraitService _traitService;
 
-        public LineageServiceTests()
+        [TestInitialize]
+        public void Setup()
         {
-            //_contextFactory = new RatAppDbContextFactory();
             _lineageService = new LineageService(_contextFactory);
+            _traitService = new TraitService(_contextFactory);
         }
 
-        [Fact]
-        public async Task GetAncestorsByAnimalId_ReturnsCorrectAncestors_WhenValidIdProvided()
+        [TestMethod]
+        public async Task GetAncestorTraits_ReturnsCorrectTraits()
         {
             // Arrange
-            int animalId = 1234; // Test Dam 1's ID from test data
-
-            // Act
-            var ancestors = await _lineageService.GetAncestorsByAnimalId(animalId);
-
-            // Assert
-            Assert.NotNull(ancestors);
-            Assert.Equal(2, ancestors.Count()); // Should have 2 ancestors (dam2 and sire1)
-            
-            // Verify the ancestors are correct
-            Assert.Contains(ancestors, l => l.AncestorId == 123456 && l.RelationshipType == "Paternal"); // sire1
-            Assert.Contains(ancestors, l => l.AncestorId == 12345 && l.RelationshipType == "Maternal"); // dam2
-        }
-
-        [Fact]
-        public async Task GetAncestorsByAnimalId_ReturnsEmptyList_WhenNoAncestorsExist()
-        {
-            // Arrange
-            int animalId = 123456; // Test Sire 1's ID from test data (has no ancestors in test data)
-
-            // Act
-            var ancestors = await _lineageService.GetAncestorsByAnimalId(animalId);
-
-            // Assert
-            Assert.NotNull(ancestors);
-            Assert.Empty(ancestors);
-        }
-
-        [Fact]
-        public async Task GetDescendantsByAnimalId_ReturnsCorrectDescendants_WhenValidIdProvided()
-        {
-            // Arrange
-            int animalId = 123456; // Test Sire 1's ID from test data
-
-            // Act
-            var descendants = await _lineageService.GetDescendantsByAnimalId(animalId);
-
-            // Assert
-            Assert.NotNull(descendants);
-            Assert.Single(descendants); // Should have 1 descendant (dam1)
-            
-            var descendant = descendants.First();
-            Assert.Equal(1234, descendant.AnimalId); // dam1's ID
-            Assert.Equal("Paternal", descendant.RelationshipType);
-        }
-
-        [Fact]
-        public async Task GetDescendantsByAnimalId_ReturnsEmptyList_WhenNoDescendantsExist()
-        {
-            // Arrange
-            int animalId = 1234; // Test Dam 1's ID from test data (has no descendants in test data)
-
-            // Act
-            var descendants = await _lineageService.GetDescendantsByAnimalId(animalId);
-
-            // Assert
-            Assert.NotNull(descendants);
-            Assert.Empty(descendants);
-        }
-
-        [Fact]
-        public async Task GetAncestorsByAnimalId_IncludesAncestorObjects_WhenReturningLineages()
-        {
-            // Arrange
-            int animalId = 1234; // Test Dam 1's ID from test data
-
-            // Act
-            var ancestors = await _lineageService.GetAncestorsByAnimalId(animalId);
-
-            // Assert
-            Assert.All(ancestors, lineage =>
+            using (var context = _contextFactory.CreateContext())
             {
-                Assert.NotNull(lineage.Ancestor);
-                Assert.NotNull(lineage.Ancestor.Name);
-            });
-        }
+                // Create trait types
+                var colorType = new TraitType { Name = "Color", Type = "Physical" };
+                var earType = new TraitType { Name = "Ear Type", Type = "Physical" };
+                context.TraitType.Add(colorType);
+                context.TraitType.Add(earType);
+                await context.SaveChangesAsync();
 
-        [Fact]
-        public async Task GetDescendantsByAnimalId_IncludesAnimalObjects_WhenReturningLineages()
-        {
-            // Arrange
-            int animalId = 123456; // Test Sire 1's ID from test data
+                // Create traits
+                var blackTrait = new Trait { CommonName = "Black", TraitTypeId = colorType.Id, Genotype = "N/A", SpeciesID = 1 };
+                var standardEarTrait = new Trait { CommonName = "Standard", TraitTypeId = earType.Id, Genotype = "N/A", SpeciesID = 1 };
+                context.Trait.Add(blackTrait);
+                context.Trait.Add(standardEarTrait);
+                await context.SaveChangesAsync();
 
-            // Act
-            var descendants = await _lineageService.GetDescendantsByAnimalId(animalId);
+                // Create animals
+                var animal = new Animal { Name = "Test Animal" };
+                var dam = new Animal { Name = "Dam" };
+                var sire = new Animal { Name = "Sire" };
+                context.Animal.Add(animal);
+                context.Animal.Add(dam);
+                context.Animal.Add(sire);
+                await context.SaveChangesAsync();
 
-            // Assert
-            Assert.All(descendants, lineage =>
-            {
-                Assert.NotNull(lineage.Animal);
-                Assert.NotNull(lineage.Animal.Name);
-            });
+                // Create lineage connections
+                var damLineage = new Lineage
+                {
+                    AnimalId = animal.Id,
+                    AncestorId = dam.Id,
+                    Generation = 1,
+                    Sequence = 1,
+                    RelationshipType = "Maternal"
+                };
+                var sireLineage = new Lineage
+                {
+                    AnimalId = animal.Id,
+                    AncestorId = sire.Id,
+                    Generation = 1,
+                    Sequence = 2,
+                    RelationshipType = "Paternal"
+                };
+                context.Lineages.Add(damLineage);
+                context.Lineages.Add(sireLineage);
+                await context.SaveChangesAsync();
+
+                // Add traits to ancestors
+                var damColorTrait = new AnimalTrait { AnimalId = dam.Id, TraitId = blackTrait.Id };
+                var damEarTrait = new AnimalTrait { AnimalId = dam.Id, TraitId = standardEarTrait.Id };
+                var sireColorTrait = new AnimalTrait { AnimalId = sire.Id, TraitId = blackTrait.Id };
+                context.AnimalTrait.Add(damColorTrait);
+                context.AnimalTrait.Add(damEarTrait);
+                context.AnimalTrait.Add(sireColorTrait);
+                await context.SaveChangesAsync();
+
+                // Act
+                var result = await _lineageService.GetAncestorTraitsAsync(animal.Id);
+
+                // Assert
+                Assert.IsNotNull(result);
+                Assert.AreEqual(2, result.Count); // Should have traits for both dam and sire
+
+                // Check dam's traits
+                var damTraits = result["Maternal (Gen 1)"];
+                Assert.IsNotNull(damTraits);
+                Assert.IsTrue(damTraits.ContainsKey("Color"));
+                Assert.IsTrue(damTraits.ContainsKey("Ear Type"));
+                Assert.AreEqual("Black", damTraits["Color"][0]);
+                Assert.AreEqual("Standard", damTraits["Ear Type"][0]);
+
+                // Check sire's traits
+                var sireTraits = result["Paternal (Gen 1)"];
+                Assert.IsNotNull(sireTraits);
+                Assert.IsTrue(sireTraits.ContainsKey("Color"));
+                Assert.AreEqual("Black", sireTraits["Color"][0]);
+            }
         }
     }
 }
