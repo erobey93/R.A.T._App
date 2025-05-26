@@ -732,14 +732,14 @@ namespace RATAPP.Panels
             try
             {
                 var speciesService = new SpeciesService(_contextFactory);
-                var species = await speciesService.GetAllSpeciesAsync();
+                var species = await speciesService.GetAllSpeciesObjectsAsync();//GetAllSpeciesAsync();
 
                 speciesFilter.Items.Clear();
                 speciesFilter.Items.Add("All Species");
 
                 foreach (var s in species)
                 {
-                    speciesFilter.Items.Add(s);
+                    speciesFilter.Items.Add(s.CommonName);
                 }
 
                 speciesFilter.SelectedIndex = 0;
