@@ -6,6 +6,7 @@ using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
+using System.Runtime.Serialization;
 
 namespace RATAPP.Panels
 {
@@ -80,6 +81,8 @@ namespace RATAPP.Panels
         private TextBox commentsTextBox, damTextBox, sireTextBox, inbredTextBox;
         private TextBox earTypeTextBox, markingsTextBox, dobTextBox, dodTextBox;
         private TextBox weightTextBox, cageNumberTextBox, numGensTextBox;
+        private DateTimePicker dobPicker;
+        private DateOnly dobDate; 
 
         private ComboBox speciesComboBox, sexComboBox, varietyComboBox, colorComboBox;
         private ComboBox genotypeComboBox, ancestryComboBox, damComboBox, sireComboBox;
@@ -188,10 +191,10 @@ namespace RATAPP.Panels
             string genotype = "";
             string marking = "";
             string breeder = "";
+            string dob = "";
             string earType = "";
             string dam = "";
             string sire = "";
-            string inbred = "";
             string imageUrl = "";
 
 
@@ -199,6 +202,8 @@ namespace RATAPP.Panels
             //if it does, then we need to get the data from the database and populate the text boxes with the values
             if (_animal != null)
             {
+                await GetInbredCoEfficient(); //get and set inbred coefficient
+
                 //TODO resetting dam and sire here but this won't always need to happen, so re-think this logic to be more efficient 
                 var defaultAnimal = await GetOrCreateDefaultAnimal(0);
                 _dam = defaultAnimal;
@@ -213,14 +218,15 @@ namespace RATAPP.Panels
                 sex = _animal.sex;
                 variety = _animal.variety;
                 color = _animal.color;
-                genotype = "xxyyzz";
+                genotype = "xxyyzz"; //TODO this should come from the traits entered! 
                 marking = _animal.markings;
                 breeder = _animal.breeder;
                 earType = _animal.earType;//_animal.earType; //TODO make ear type species specific 
                 dam = _dam.name;
                 sire = _sire.name;
                 imageUrl = _animal.imageUrl;
-                inbred = "TODO";
+                dob = _animal.DateOfBirth.Date.ToString(); 
+                //inbred = inbred; //should be set above 
 
                 InitializePhotoBox();
                 AddImageToAnimalTextbox(_animal);
@@ -229,6 +235,7 @@ namespace RATAPP.Panels
                 //animalPhotoBox.Image = Image.FromFile(imageUrl); //TODO clean up this logic 
 
             }
+           
             // First column (left side)
             regNumTextBox = CreateTextBox(150, 20, regNum);
             animalNameTextBox = CreateTextBox(150, 60, name);
@@ -250,14 +257,26 @@ namespace RATAPP.Panels
             genotypeComboBox.Name = "genotypeComboBox";
             markingComboBox = CreateComboBox(490, 100, marking);
             markingComboBox.Name = "markingComboBox";
-            breederInfoComboBox = CreateComboBox(490, 140, breeder);
-            breederInfoComboBox.Name = "breederInfoComboBox";
+            //breederInfoComboBox = CreateComboBox(490, 140, breeder);
+            //breederInfoComboBox.Name = "breederInfoComboBox";
+            dobPicker = new DateTimePicker();
+            dobPicker.Name = "dobPicker";
+            dobPicker.Format = DateTimePickerFormat.Short; // Display date as MM/DD/YYYY
+            dobPicker.Value = DateTime.Now; // Default to today's date
+
+            // Optional: Set the range to ensure valid dates for DOB
+            dobPicker.MinDate = new DateTime(1900, 1, 1); // Minimum DOB
+            dobPicker.MaxDate = DateTime.Now; // Maximum DOB is today
+            dobPicker.Location = new Point(490, 140); // Set location on the form
+            dobDate = DateOnly.FromDateTime(dobPicker.Value);
             earTypeComboBox = CreateComboBox(490, 180, earType);
             earTypeComboBox.Name = "earTypeComboBox";
             sireComboBox = CreateComboBox(490, 220, sire);
             sireComboBox.Name = "sireComboBox";
 
-            inbredTextBox = CreateTextBox(150, 450, "TODO");
+            inbredTextBox = CreateTextBox(150, 450, "0");
+            inbredTextBox.ReadOnly = true;
+            await GetInbredCoEfficient(); //get and set inbred coefficient
             // Move commentsTextBox below everything else and make it larger
             //FIXME should have a multi line text box option
             commentsTextBox = new TextBox
@@ -289,6 +308,7 @@ namespace RATAPP.Panels
             this.Controls.Add(earTypeComboBox);
             this.Controls.Add(inbredTextBox);
             this.Controls.Add(markingComboBox);
+            this.Controls.Add(dobPicker); 
 
 
             NewAnimal(); //new animal settings
@@ -1218,9 +1238,16 @@ namespace RATAPP.Panels
 
         private async Task GetInbredCoEfficient()
         {
-            // Logic to calculate inbreeding coefficient
-            double inbredCo = await _geneticsService.CalculateInbreedingCoefficientAsync(_dam.Id, _sire.Id);
-            inbredTextBox.Text = inbredCo.ToString();
+            if(_animal != null)
+            { 
+                // Logic to calculate inbreeding coefficient
+                double inbredCo = await _geneticsService.CalculateInbreedingCoefficientAsync(_dam.Id, _sire.Id);
+                inbredTextBox.Text = inbredCo.ToString();
+            }
+            else
+            {
+                inbredTextBox.Text = "No animal found";
+            }
         }
 
         private void SaveButton()
@@ -1441,7 +1468,7 @@ namespace RATAPP.Panels
                     markings = markingComboBox.Text,
                     earType = earTypeComboBox.Text,
                     breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
+                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO this should come from the phenotypes entered for now 
                 };
                 return animal;
             }
@@ -1623,7 +1650,8 @@ namespace RATAPP.Panels
             colorLabel = CreateLabel("Color", 380, 20, labelFont);
             genotypeLabel = CreateLabel("Genotype", 380, 60, labelFont);
             markingsLabel = CreateLabel("Markings", 380, 100, labelFont);
-            breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont);
+            //breederInfoLabel = CreateLabel("Breeder", 380, 140, labelFont); TODO
+            dobLabel = CreateLabel("DOB", 380, 140, labelFont);
             earTypeLabel = CreateLabel("Ear Type", 380, 180, labelFont);
             sireLabel = CreateLabel("Sire", 380, 220, labelFont);
             inbredLabel = CreateLabel("% Inbred", 10, 450, labelFont);
@@ -1640,7 +1668,7 @@ namespace RATAPP.Panels
             this.Controls.Add(colorLabel);
             this.Controls.Add(genotypeLabel);
             this.Controls.Add(markingsLabel);
-            this.Controls.Add(breederInfoLabel);
+            this.Controls.Add(dobLabel);
             this.Controls.Add(commentsLabel);
             this.Controls.Add(damLabel);
             this.Controls.Add(sireLabel);
@@ -1682,7 +1710,8 @@ namespace RATAPP.Panels
             colorTextBox = CreateTextBox(490, 20, _animal.color);
             genotypeTextBox = CreateTextBox(490, 60, _animal.genotype); //TODO will likely be removing this value eventually and using the appropriate model 
             markingsTextBox = CreateTextBox(490, 100, _animal.markings);
-            breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
+            //breederInfoTextBox = CreateTextBox(490, 140, _animal.breeder);
+            dobTextBox = CreateTextBox(490, 140, _animal.DateOfBirth.Date.ToString("yyyy-MM-dd"));
             earTypeTextBox = CreateTextBox(490, 180, _animal.earType);
             sireTextBox = CreateTextBox(490, 220, _sire.name);
 
@@ -1714,7 +1743,9 @@ namespace RATAPP.Panels
             this.Controls.Add(colorTextBox);
             this.Controls.Add(genotypeTextBox);
             this.Controls.Add(markingsTextBox);
-            this.Controls.Add(breederInfoTextBox);
+            //this.Controls.Add(breederInfoTextBox);
+
+            this.Controls.Add(dobTextBox);
             this.Controls.Add(commentsTextBox);
             this.Controls.Add(damTextBox);
             this.Controls.Add(sireTextBox);
