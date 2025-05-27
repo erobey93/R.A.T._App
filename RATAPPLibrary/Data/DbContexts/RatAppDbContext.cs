@@ -44,6 +44,7 @@ namespace RATAPPLibrary.Data.DbContexts
         //Animal Management
         public virtual DbSet<Animal> Animal { get; set; }
         public virtual DbSet<AnimalRecord> AnimalRecord { get; set; }
+        public virtual DbSet<AnimalImage> AnimalImage { get; set; }
         public virtual DbSet<Species> Species { get; set; }
 
         //Breeding

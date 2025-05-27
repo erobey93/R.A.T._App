@@ -568,6 +568,7 @@ namespace RATAPP.Panels
                                 _animal.AdditionalImages = new List<string>();
 
                             _animal.AdditionalImages.Add(normalizedPath);
+
                             // TODO: Update database with new image list
                         }
                     }

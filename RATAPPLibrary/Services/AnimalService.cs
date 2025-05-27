@@ -2,6 +2,7 @@
 using RATAPPLibrary.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using RATAPPLibrary.Data.Models.Animal_Management;
 
 namespace RATAPPLibrary.Services
 {
@@ -121,6 +122,23 @@ namespace RATAPPLibrary.Services
                 }
             });
         }
+
+        //add additional images for animal
+        //public async Task AddAdditionalAnimalImages(int animalId, string[] additionalImageURl)
+        //{
+        //    await ExecuteInContextAsync(async _context =>
+        //    {
+        //        //for each image path, add new entry in AnimalImage table 
+        //        foreach (string imageUrl in additionalImageURl)
+        //        {
+        //            //make entry
+        //            //_context.AnimalIma
+        //            //no errors, return true
+        //            //else, return false 
+        //        }
+        //    });
+                
+        //}
 
         //complete create process TODO just trying this out given the new re-factor 
         public async Task<Animal> CreateAnimalFullProcess(AnimalDto animal) {
