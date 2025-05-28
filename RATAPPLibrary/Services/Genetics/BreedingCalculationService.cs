@@ -390,9 +390,14 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        //TODO 
+        //this is an oversimplified version of determining phenotype with the phenotype being inside of the allele which really isn't correct
+        //I will be re-factoring my genetics db after my initial presentation this is just to get things working for now 
         private string DeterminePhenotype(Allele allele1, Allele allele2)
         {
             // If either allele is wild type, use its phenotype (dominant)
+            //FIXME is WildType is valid but I can't assume that this ALWAYS means dominant
+            //I have added a new Inheritance Pattern variable that I will wait to implement, but will take the place of this 
             if (allele1.IsWildType || allele2.IsWildType)
             {
                 return allele1.IsWildType ? allele1.Phenotype : allele2.Phenotype;

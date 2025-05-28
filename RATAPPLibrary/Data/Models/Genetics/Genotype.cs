@@ -21,8 +21,12 @@ namespace RATAPPLibrary.Data.Models.Genetics
         [Required]
         public DateTime UpdatedAt { get; set; }
 
+        [Required]
+        public int TraitId { get; set; }
+
         // Navigation properties
         public virtual Animal Animal { get; set; }
         public virtual ChromosomePair ChromosomePair { get; set; }
+        public virtual Trait Trait { get; set; }
     }
 }

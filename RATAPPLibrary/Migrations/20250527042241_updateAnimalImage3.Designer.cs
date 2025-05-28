@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250527042241_updateAnimalImage3")]
+    partial class updateAnimalImage3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,9 +491,6 @@ namespace RATAPPLibrary.Migrations
                     b.Property<Guid>("GeneId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("InheritancePattern")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsWildType")
                         .HasColumnType("bit");
 
@@ -724,17 +724,12 @@ namespace RATAPPLibrary.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("TraitId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("GenotypeId");
 
                     b.HasIndex("ChromosomePairId");
-
-                    b.HasIndex("TraitId");
 
                     b.HasIndex("AnimalId", "ChromosomePairId")
                         .IsUnique();
@@ -1237,17 +1232,9 @@ namespace RATAPPLibrary.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", "Trait")
-                        .WithMany()
-                        .HasForeignKey("TraitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Animal");
 
                     b.Navigation("ChromosomePair");
-
-                    b.Navigation("Trait");
                 });
 
             modelBuilder.Entity("RATAPPLibrary.Data.Models.Genetics.PossibleOffspring", b =>

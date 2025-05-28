@@ -124,21 +124,47 @@ namespace RATAPPLibrary.Services
         }
 
         //add additional images for animal
-        //public async Task AddAdditionalAnimalImages(int animalId, string[] additionalImageURl)
-        //{
-        //    await ExecuteInContextAsync(async _context =>
-        //    {
-        //        //for each image path, add new entry in AnimalImage table 
-        //        foreach (string imageUrl in additionalImageURl)
-        //        {
-        //            //make entry
-        //            //_context.AnimalIma
-        //            //no errors, return true
-        //            //else, return false 
-        //        }
-        //    });
-                
-        //}
+        public async Task<bool> AddAdditionalAnimalImagesAsync(int animalId, string[] additionalImageURl)
+        {
+           return  await ExecuteInContextAsync(async _context =>
+            {
+                try
+                {
+
+                    //for each image path, add new entry in AnimalImage table 
+                    foreach (string imageUrl in additionalImageURl)
+                    {
+                        //make a new object 
+                        AnimalImage image = new AnimalImage
+                        {
+                            AnimalId = animalId,
+                            ImageUrl = imageUrl,
+                            CreatedOn = DateTime.Now,
+                        };
+                        //make a new entry
+                        _context.AnimalImage.Add(image); //should maybe check that animal exists, but not a breaking change so nbd for now FIXME 
+                        //no errors, return true
+                        //else, return false 
+                        _context.SaveChanges();
+                    }
+
+                    return true;
+                }
+                catch (Exception ex) { return false;  }
+            });
+        }
+
+        //get all animal images 
+        public async Task<List<string>> GetAdditionalAnimalImages(AnimalDto animal)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+               return await _context.AnimalImage
+                .Where(i => i.AnimalId == animal.Id)
+                .Select(i => i.ImageUrl)
+                .ToListAsync();
+            }); 
+        }
 
         //complete create process TODO just trying this out given the new re-factor 
         public async Task<Animal> CreateAnimalFullProcess(AnimalDto animal) {
@@ -153,6 +179,12 @@ namespace RATAPPLibrary.Services
 
             //set available animal traits 
             await SetAnimalTraits(animalDtoWithReg);
+
+            if (animal.AdditionalImages != null)
+            {
+                //set additional images
+                _ = await AddAdditionalAnimalImagesAsync(animal1.Id, animal.AdditionalImages.ToArray());
+            }
 
             //get the animal object back with all new data attached (?) 
             //animalDtoWithReg = await 
@@ -507,7 +539,24 @@ namespace RATAPPLibrary.Services
                 // add updated traits if they don't already exist 
                 await SetAnimalTraits(animalDto);
 
-                int? damId = animalDto.damId;
+                    if (animalDto.AdditionalImages != null && animalDto.AdditionalImages.Any())
+                    {
+                        // Get existing image URLs for this animal
+                        var existingImages = await GetAdditionalAnimalImages(animalDto);
+
+                        // Find new images (not already in DB)
+                        var newImages = animalDto.AdditionalImages
+                            .Where(newImage => !existingImages.Contains(newImage))
+                            .ToArray();
+
+                        // Only add if there are new images
+                        if (newImages.Any())
+                        {
+                            await AddAdditionalAnimalImagesAsync(animalDto.Id, newImages);
+                        }
+                    }
+
+                    int? damId = animalDto.damId;
                 int? sireId = animalDto.sireId;
                 int animalId = animalDto.Id;
 
@@ -721,6 +770,7 @@ namespace RATAPPLibrary.Services
             });
         }
 
+       
         /// <summary>
         /// Retrieves all traits associated with an animal.
         /// 
