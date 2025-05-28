@@ -3,6 +3,7 @@ using RATAPPLibrary.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using RATAPPLibrary.Data.Models.Animal_Management;
+using RATAPPLibrary.Data.Models.Genetics;
 
 namespace RATAPPLibrary.Services
 {
@@ -151,6 +152,41 @@ namespace RATAPPLibrary.Services
                     return true;
                 }
                 catch (Exception ex) { return false;  }
+            });
+        }
+
+        //create animals genotype based on their phenotypes 
+        //get the trait id 
+        //go to the genotype in the genotype table
+        //find the genotype for the trait id (regardless of animal id)
+        //if it doesn't exist, make a new entry for that animal + genotype 
+        //this should actually be stored in the genome table 
+        //the animals genotype will be pulled 
+        //right now the tight couple of animal and genotype is messing things up, so my current hack is to have 1 animal attached to all genotypes so that I have access to these genotypes for other animals
+        //
+        //get animal genotype as a string 
+        public async Task<string> GetGenotypesAsStringAsync(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                var genotypes = await _context.Genotypes
+                .Where(g => g.AnimalId == animalId)
+                .ToListAsync();
+
+                return string.Join(" / ", genotypes); // Uses `ToString()` of each genotype - TODO I would like to increase complexity of return types eventualyl 
+            });
+
+        }
+
+        public async Task<List<Genotype>> GetGenotypesWithDetails(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                return await _context.Genotypes
+                .Where(g => g.AnimalId == animalId)
+                .Include(g => g.Trait) //return trait so that its easy to associate with Animal
+                .Include(g => g.Animal)
+                .ToListAsync();
             });
         }
 
