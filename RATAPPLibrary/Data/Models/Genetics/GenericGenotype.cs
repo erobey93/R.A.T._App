@@ -10,6 +10,9 @@ namespace RATAPPLibrary.Data.Models.Genetics
         public Guid GenotypeId { get; set; }
 
         [Required]
+        public required string GenotypeCode { get; set; }
+
+        [Required]
         public Guid ChromosomePairId { get; set; }
 
         [Required]

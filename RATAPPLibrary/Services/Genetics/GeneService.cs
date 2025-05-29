@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services.Genetics.Interfaces;
 using System;
@@ -299,13 +301,16 @@ namespace RATAPPLibrary.Services.Genetics
                 var existingGenericGenotype = await _context.GenericGenotype
                 .FirstOrDefaultAsync(g => g.ChromosomePairId == request.ChromosomePairId);
 
+                //this is temporary, there should just be a genericgenotype id in the genome (not genotype) table, but I don't want to change the structure right now so FIXME/TODO 
                 if (existingGenericGenotype == null)
                 {
+                   
                     //currently a hack until I re-factor to use a genome table for animals 
                     //I need genotypes and generic genotypes to sync up 
                     var genericGenotype = new GenericGenotype
                     {
                         GenotypeId = Guid.NewGuid(),
+                        GenotypeCode = request.GenotypeCode,
                         ChromosomePairId = request.ChromosomePairId,
                         TraitId = request.TraitId,
                         CreatedAt = DateTime.UtcNow,
@@ -317,6 +322,8 @@ namespace RATAPPLibrary.Services.Genetics
                 {
                     GenotypeId = Guid.NewGuid(),
                     AnimalId = request.AnimalId,
+                    GenotypeCode = request.GenotypeCode,
+                    TraitId = request.TraitId, 
                     ChromosomePairId = request.ChromosomePairId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -327,6 +334,68 @@ namespace RATAPPLibrary.Services.Genetics
 
                 return genotype;
             });
+        }
+
+        //get genotypes organized by type for animal 
+        //returns genotype codes with trait type names so that the genotype can be easily built 
+        public async Task<Dictionary<string, List<string>>> GetGenotypesOrganizedByType(int animalId)
+        {
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                //First, fetch all genotypes for the animal
+                var genotypes = await _context.Genotypes
+                .Where(ag => ag.AnimalId == animalId)
+                .Select(ag => new
+                {
+                    ag.GenotypeCode,
+                    ag.GenotypeId,
+                    ag.Trait.TraitTypeId,
+                    ag.Trait.TraitType.Name
+                })
+                .ToListAsync();
+
+                // Group the genotypes by their TraitTypeId
+                var groupedGenotypes = genotypes
+                    .GroupBy(g => g.Name)
+                    .ToDictionary(
+                        g => g.Key, // Key is the TraitTypeId
+                        g => g.Select(x => x.GenotypeCode).ToList() // Value is a list of genotypes
+                    );
+
+                // Return the organized genotypes
+                return groupedGenotypes;
+            });
+        }
+
+        //create genotype string
+        public async Task<string> CreateGenotypeString(int animalId, string separator = ", ", string typeSeparator = " | ")
+        {
+            // Fetch the genotypes organized by type
+            var organizedGenotypes = await GetGenotypesOrganizedByType(animalId);
+
+            // Handle the case where there are no genotypes
+            if (!organizedGenotypes.Any())
+            {
+                return "No genotypes available.";
+            }
+
+            // Build the genotype string
+            var genotypeString = organizedGenotypes
+                .Select(group =>
+                    $"{group.Key ?? "Unknown Type"}: {string.Join(separator, group.Value ?? new List<string>())}"
+                )
+                .Aggregate((current, next) => $"{current}{typeSeparator}{next}");
+
+            return genotypeString;
+        }
+
+        //set genotypes based on phenotypes 
+        //current case is very simple, simple dominant and recessive traits unless genotype is manually entered 
+        public async Task yyy()
+        {
+            //get the trait id of the selected phenotype
+            //get all the genotype with that trait id from the generic genotype table 
+            //make an entry into the genotype table for the animal associated with it 
         }
 
         public async Task<List<Gene>> GetGenesWithEffectAsync(string category, string impactLevel)
