@@ -68,6 +68,7 @@ namespace RATAPPLibrary.Data.DbContexts
         public virtual DbSet<Genotype> Genotypes { get; set; }
         public virtual DbSet<BreedingCalculation> BreedingCalculations { get; set; }
         public virtual DbSet<PossibleOffspring> PossibleOffspring { get; set; }
+        public virtual DbSet<GenericGenotype> GenericGenotype { get; set; }
         public DbContextOptions<RatAppDbContext> Options { get; internal set; }
 
         //Health
@@ -119,6 +120,7 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureGenotype(modelBuilder);
             ConfigureBreedingCalculation(modelBuilder);
             ConfigurePossibleOffspring(modelBuilder);
+            ConfigureGenericGenotype(modelBuilder);
 
             ConfigureAnimalImage(modelBuilder);
         }
@@ -224,6 +226,38 @@ namespace RATAPPLibrary.Data.DbContexts
                 .HasIndex(g => new { g.AnimalId, g.ChromosomePairId })
                 .IsUnique();
         }
+
+        private void ConfigureGenericGenotype(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<GenericGenotype>(entity =>
+            {
+                // Set primary key
+                entity.HasKey(gg => gg.GenotypeId);
+
+                // Define relationships and navigation properties
+                entity.HasOne(gg => gg.ChromosomePair)
+                      .WithMany(cp => cp.GenericGenotype)
+                      .HasForeignKey(gg => gg.ChromosomePairId)
+                      .OnDelete(DeleteBehavior.NoAction); // Prevent cascading delete
+
+                entity.HasOne(gg => gg.Trait)
+                      .WithMany(t => t.GenericGenotype)
+                      .HasForeignKey(gg => gg.TraitId)
+                      .OnDelete(DeleteBehavior.NoAction); // Prevent cascading delete
+
+                // Define unique constraints if needed
+                entity.HasIndex(gg => new { gg.ChromosomePairId, gg.TraitId })
+                      .IsUnique();
+
+                // Configure created and updated timestamps to default to the current date
+                entity.Property(gg => gg.CreatedAt)
+                      .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(gg => gg.UpdatedAt)
+                      .HasDefaultValueSql("GETDATE()");
+            });
+        }
+
 
         private void ConfigureBreedingCalculation(ModelBuilder modelBuilder)
         {

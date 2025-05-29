@@ -393,6 +393,14 @@ namespace RATAPPLibrary.Services
 
                     int traitId = trait.Id;
 
+                    //FIXME this is not correct but it works for now, lots of work to do on genetics still 
+                    //since I have the genotype in the trait currently, I can just use that
+                    //go to animal trait table
+                    //get all trait ids for that animal
+                    //go to genotype table
+                    //get all genotypes for those traits
+                    
+
                     //check if the trait already exists for the animal
                     var existingTrait = await _context.AnimalTrait.FirstOrDefaultAsync(t => t.TraitId == traitId && t.AnimalId == animalId);
                     if (existingTrait != null)
@@ -402,6 +410,10 @@ namespace RATAPPLibrary.Services
 
                     //make a new entry in the animal trait table for the color of the animal
                     await _traitService.CreateAnimalTraitAsync(traitId, animalId);
+
+                    //make a new entry in the genotype table for the trait + genotype
+                    //right now, the genotype is coming from the trait
+                    //await _traitService.
                 }
                 catch (Exception ex)
                 {
@@ -759,6 +771,7 @@ namespace RATAPPLibrary.Services
                     var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
 
                     //TODO can do above logic for all traits and then just loop through them to get
+                    var genotype = await GetGenotypesAsStringAsync(a.Id); 
 
                     //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
                     //int sireId = getSire.sire.;
@@ -795,6 +808,7 @@ namespace RATAPPLibrary.Services
                         variety = animalTraits.ContainsKey("Coat Type") ? animalTraits["Coat Type"].LastOrDefault() : null,
                         damId = damId != 0 ? damId : (int?)null,
                         sireId = sireId != 0 ? sireId : (int?)null,
+                        genotype = genotype, 
                     };
 
                     return result;

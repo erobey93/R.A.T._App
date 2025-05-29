@@ -39,6 +39,7 @@ namespace RATAPPLibrary.Services.Genetics.Interfaces
         public Guid ChromosomePairId { get; set; }
         public Guid MaternalAlleleId { get; set; }
         public Guid PaternalAlleleId { get; set; }
+        public int TraitId { get; set; }
     }
 
     public interface IGeneService

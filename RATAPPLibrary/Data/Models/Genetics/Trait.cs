@@ -17,5 +17,6 @@
 
         // Collections for related entities (if applicable)
         public virtual ICollection<AnimalTrait>? AnimalTraits { get; set; } // Association with animals
+        public virtual ICollection<GenericGenotype>? GenericGenotype { get; set; }
     }
 }

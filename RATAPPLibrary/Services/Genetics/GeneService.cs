@@ -272,7 +272,7 @@ namespace RATAPPLibrary.Services.Genetics
         {
             return await ExecuteInTransactionAsync(async _context =>
             {
-                // Check if genotype already exists
+                // Check if genotype already exists in animal genotype table 
                 var existingGenotype = await _context.Genotypes
                 .FirstOrDefaultAsync(g => g.AnimalId == request.AnimalId &&
                                         g.ChromosomePairId == request.ChromosomePairId);
@@ -294,6 +294,24 @@ namespace RATAPPLibrary.Services.Genetics
 
                 if (maternalAllele.Gene.GeneId != paternalAllele.Gene.GeneId)
                     throw new InvalidOperationException("Alleles must be from the same gene");
+
+                // Check if the generic genotype already exists in generic genotype table  FIXME FIXME FIXME 
+                var existingGenericGenotype = await _context.GenericGenotype
+                .FirstOrDefaultAsync(g => g.ChromosomePairId == request.ChromosomePairId);
+
+                if (existingGenericGenotype == null)
+                {
+                    //currently a hack until I re-factor to use a genome table for animals 
+                    //I need genotypes and generic genotypes to sync up 
+                    var genericGenotype = new GenericGenotype
+                    {
+                        GenotypeId = Guid.NewGuid(),
+                        ChromosomePairId = request.ChromosomePairId,
+                        TraitId = request.TraitId,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                }
 
                 var genotype = new Genotype
                 {
