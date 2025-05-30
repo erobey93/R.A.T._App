@@ -144,7 +144,7 @@ namespace RATAPP.Forms
             litterIdTextBox.Text = _currentLitter.LitterId;
             litterIdTextBox.ReadOnly = true; // Make litter ID read-only for updates
             litterNameTextBox.Text = _currentLitter.Name;
-            litterDatePicker.Value = _currentLitter.DateOfBirth;
+            litterDatePicker.Value = (DateTime)_currentLitter.DateOfBirth;
             numPups.Text = _currentLitter.NumPups?.ToString() ?? "";
             numLivePups.Text = _currentLitter.NumLivePups?.ToString() ?? "";
             numMales.Text = _currentLitter.NumMale?.ToString() ?? "";
@@ -653,11 +653,12 @@ namespace RATAPP.Forms
                     return;
                 }
 
+                var pair = pairComboBox.SelectedItem as Pairing;
                 var updatedLitter = new Litter
                 {
                     LitterId = litterIdTextBox.Text,
                     Name = litterNameTextBox.Text,
-                    PairId = ((Pairing)pairComboBox.SelectedItem).pairingId,
+                    PairId = (int)pair.Id,
                     DateOfBirth = litterDatePicker.Value,
                     NumPups = !string.IsNullOrWhiteSpace(numPups.Text) ? int.Parse(numPups.Text) : null,
                     NumLivePups = !string.IsNullOrWhiteSpace(numLivePups.Text) ? int.Parse(numLivePups.Text) : null,
