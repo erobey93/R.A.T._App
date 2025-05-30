@@ -336,6 +336,49 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        public async Task<Genotype> AssignGenericGenotypeToAnimalAsync( int animalId, int traitId)
+        {
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                // Step 1: Retrieve the Generic Genotype by TraitId
+                var genericGenotype = await _context.GenericGenotype
+                    .Where(gg => gg.TraitId == traitId)
+                    .FirstOrDefaultAsync();
+
+                // Step 2: Validate that the Generic Genotype exists
+                if (genericGenotype == null)
+                {
+                    throw new Exception($"No GenericGenotype found for TraitId {traitId}.");
+                }
+
+                // validate that the Animal exists
+                var animalExists = await _context.Animal
+                    .AnyAsync(a => a.Id == animalId);
+                if (!animalExists)
+                {
+                    throw new Exception($"Animal with ID {animalId} does not exist.");
+                }
+
+                // Step 3: Create a new Genotype entry
+                var newGenotype = new Genotype
+                {
+                    AnimalId = animalId,
+                    GenotypeCode = genericGenotype.GenotypeCode,
+                    ChromosomePairId = genericGenotype.ChromosomePairId,
+                    TraitId = traitId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                // Step 4: Add the new Genotype to the context and save changes
+                _context.Genotypes.Add(newGenotype);
+                await _context.SaveChangesAsync();
+
+                // Step 5: Return the created Genotype
+                return newGenotype;
+            });
+        }
+
         //get genotypes organized by type for animal 
         //returns genotype codes with trait type names so that the genotype can be easily built 
         public async Task<Dictionary<string, List<string>>> GetGenotypesOrganizedByType(int animalId)

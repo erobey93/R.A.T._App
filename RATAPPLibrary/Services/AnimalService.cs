@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Data;
 using RATAPPLibrary.Data.Models.Animal_Management;
 using RATAPPLibrary.Data.Models.Genetics;
+using RATAPPLibrary.Services.Genetics;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace RATAPPLibrary.Services
 {
@@ -33,6 +35,7 @@ namespace RATAPPLibrary.Services
         private readonly LineService _lineService;
         private readonly TraitService _traitService;
         private readonly LineageService _lineageService;
+        private readonly GeneService _geneService;
 
         public AnimalService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
@@ -40,6 +43,7 @@ namespace RATAPPLibrary.Services
             _lineService = new LineService(contextFactory);
             _traitService = new TraitService(contextFactory);
             _lineageService = new LineageService(contextFactory);
+            _geneService = new GeneService(contextFactory);
         }
 
         /// <summary>
@@ -408,6 +412,9 @@ namespace RATAPPLibrary.Services
                         throw new InvalidOperationException($"Trait with ID {traitId} already exists for animal with ID {animalId}.");
                     }
 
+                    //call set genericGenotype
+                    await _geneService.AssignGenericGenotypeToAnimalAsync(animalId, traitId);
+
                     //make a new entry in the animal trait table for the color of the animal
                     await _traitService.CreateAnimalTraitAsync(traitId, animalId);
 
@@ -563,9 +570,12 @@ namespace RATAPPLibrary.Services
             if (exists)
             {
                 // Retrieve the existing animal from the context
-                var existingAnimal = await _context.Animal.FindAsync(animalDto.Id);
+                var existingAnimal = await _context.Animal
+    .Include(a => a.Genotypes)
+    .Include (a => a.AdditionalImages)// Include the related entity
+    .FirstOrDefaultAsync(a => a.Id == animalDto.Id);
 
-                if (existingAnimal == null)
+                    if (existingAnimal == null)
                 {
                     throw new InvalidOperationException($"Animal with ID '{animalDto.Id}' not found.");
                 }
@@ -771,7 +781,8 @@ namespace RATAPPLibrary.Services
                     var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
 
                     //TODO can do above logic for all traits and then just loop through them to get
-                    var genotype = await GetGenotypesAsStringAsync(a.Id); 
+                    //var genotype = await GetGenotypesAsStringAsync(a.Id); 
+                    var genotype = _geneService.CreateGenotypeString(a.Id); 
 
                     //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
                     //int sireId = getSire.sire.;
@@ -808,7 +819,7 @@ namespace RATAPPLibrary.Services
                         variety = animalTraits.ContainsKey("Coat Type") ? animalTraits["Coat Type"].LastOrDefault() : null,
                         damId = damId != 0 ? damId : (int?)null,
                         sireId = sireId != 0 ? sireId : (int?)null,
-                        genotype = genotype, 
+                        genotype = genotype.Result, 
                     };
 
                     return result;
