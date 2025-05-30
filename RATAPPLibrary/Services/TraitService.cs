@@ -377,6 +377,7 @@ namespace RATAPPLibrary.Services
                     // query the AnimalTrait table by animal id
                     // if the animal has traits associated with it
                     //return the list of traits
+                    //TODO eventually will get rid of this table but works for now 
                     if (_context.AnimalTrait.Any(at => at.AnimalId == animalId))
                     {
                         traits = await _context.AnimalTrait

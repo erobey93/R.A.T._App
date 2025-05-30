@@ -354,7 +354,6 @@ namespace RATAPP.Panels
             if (animal == null) return;
 
             _currentAnimal = animal;
-            //titleLabel.Text = $"Ancestry Tree: {animal.name} (ID: {animal.Id})";
 
             // Clear existing tree
             ancestryTree.Nodes.Clear();

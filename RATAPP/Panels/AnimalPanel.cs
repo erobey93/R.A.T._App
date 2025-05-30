@@ -102,15 +102,6 @@ namespace RATAPP.Panels
         private Panel actionButtonPanel;
         private Panel featureButtonPanel;
 
-        // Test image paths (TODO: Move to configuration)
-        private List<string> imagePaths = new List<string>
-        {
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00S0S_e4sHXNFmkdY_0t20CI_1200x900.jpg",
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\00v0v_hu4XyatVj1Q_0t20CI_1200x900.jpg",
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_0214.JPG",
-            "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\AnimalPics\\IMG_5197.JPG"
-        };
-
         public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, AnimalDto[] allAnimals,AnimalDto currAnimal)
         {
             _contextFactory = contextFactory;
@@ -171,9 +162,17 @@ namespace RATAPP.Panels
             else
             {
                 InitializeComboBoxes();
+                //hide most buttons in edit mode 
+                documentsButton.Hide();
+                healthButton.Hide();
+                indAncestryButton.Hide();
+                prevButton.Hide();
+                nextButton.Hide();
+                geneticsButton.Hide();
+                breedingHistoryButton.Hide();
+
             }
 
-            
             InitializeLabels();
             InitializePhotoBox();
             InitializeThumbnailPanel();
@@ -202,6 +201,8 @@ namespace RATAPP.Panels
             //if it does, then we need to get the data from the database and populate the text boxes with the values
             if (_animal != null)
             {
+                //don't allow reg # to be changed once set right now 
+                regNumTextBox.ReadOnly = true; 
                 await GetInbredCoEfficient(); //get and set inbred coefficient
 
                 //TODO resetting dam and sire here but this won't always need to happen, so re-think this logic to be more efficient 
@@ -218,22 +219,18 @@ namespace RATAPP.Panels
                 sex = _animal.sex;
                 variety = _animal.variety;
                 color = _animal.color;
-                genotype = "xxyyzz"; //TODO this should come from the traits entered! 
+                genotype = _animal.genotype;
                 marking = _animal.markings;
                 breeder = _animal.breeder;
-                earType = _animal.earType;//_animal.earType; //TODO make ear type species specific 
+                earType = _animal.earType;
                 dam = _dam.name;
                 sire = _sire.name;
                 imageUrl = _animal.imageUrl;
                 dob = _animal.DateOfBirth.Date.ToString(); 
-                //inbred = inbred; //should be set above 
 
                 InitializePhotoBox();
                 AddImageToAnimalTextbox(_animal);
-                this.Refresh();
-
-                //animalPhotoBox.Image = Image.FromFile(imageUrl); //TODO clean up this logic 
-
+                Refresh();
             }
            
             // First column (left side)
@@ -383,31 +380,22 @@ namespace RATAPP.Panels
         private void AddImageToAnimalTextbox(AnimalDto animal)
         {
             //check that the image url exists 
-            if (animal.imageUrl != null)
+            if (animal.AdditionalImages != null)
             {
                 try
                 {
                     //get the correctly formatted image url and set the image 
-                    string imageUrl = CleanFilePath(animal.imageUrl);
+                    string imageUrl = CleanFilePath(animal.AdditionalImages.First());
                     animalPhotoBox.Image = Image.FromFile(imageUrl);
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show(e.Message);  //FIXME - for now, show the error but continue with the rest of the logic 
-                }
-
-                if (_isEditMode || !_isEditMode)
-                {
-                    animalPhotoBox.Click += AnimalImageClicked;
+                    animalPhotoBox.Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\R.A.T._APP\\RATAPP\\Resources\\RATAPPLogo.png");  //FIXME - for now, show the error but continue with the rest of the logic 
                 }
             }
             else
             {
-                if (_isEditMode)
-                {
-                    animalPhotoBox.Click += AnimalImageClicked;
-                    //TODO should probably handle photo carasol logic here as well 
-                }
+              
             }
         }
 
@@ -500,6 +488,10 @@ namespace RATAPP.Panels
 
             // Add picture box to the form or panel
             this.Controls.Add(animalPhotoBox);
+            if (_animal != null)
+            {
+                AddImageToAnimalTextbox(_animal); //FIXME might be an issue for new animals 
+            }
             Refresh();
         }
 
@@ -543,7 +535,7 @@ namespace RATAPP.Panels
         }
 
         // Handle adding a new thumbnail image
-        private void AddThumbnailImage(object sender, EventArgs e)
+        private async void AddThumbnailImage(object sender, EventArgs e)
         {
             OpenFileDialog dialog = new OpenFileDialog
             {
@@ -568,7 +560,8 @@ namespace RATAPP.Panels
                                 _animal.AdditionalImages = new List<string>();
 
                             _animal.AdditionalImages.Add(normalizedPath);
-                            // TODO: Update database with new image list
+                            await _animalService.AddAdditionalAnimalImagesAsync(_animal.Id, _animal.AdditionalImages.ToArray());
+                            Refresh(); //FIXME just trying this 
                         }
                     }
                 }
@@ -606,6 +599,9 @@ namespace RATAPP.Panels
 
                     // Add to panel after the add button
                     thumbnailPanel.Controls.Add(thumbnail);
+
+                    //refresh?
+                    Refresh();
                 }
             }
             catch (Exception ex)
@@ -1054,7 +1050,7 @@ namespace RATAPP.Panels
                 variety = "Unknown",
                 color = "Unknown",
                 breeder = "TLDR",
-                genotype = "XYZ"
+                genotype = "Xx/Yy/Zz"
             };
         }
 
@@ -1441,7 +1437,9 @@ namespace RATAPP.Panels
                     markings = markingComboBox.Text,
                     earType = earTypeComboBox.Text,
                     breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
+                    //genotype = "XYZ",//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
+                    AdditionalImages = _animal.AdditionalImages,
+                    
                 };
                 return animal;
             }
@@ -1783,7 +1781,7 @@ namespace RATAPP.Panels
             {
                 loadingSpinner.Visible = true;
                 CenterLoadingSpinner();
-                this.Refresh();
+                Refresh();
             }
         }
 
@@ -1792,7 +1790,7 @@ namespace RATAPP.Panels
             if (loadingSpinner != null)
             {
                 loadingSpinner.Visible = false;
-                this.Refresh();
+                Refresh();
             }
         }
 

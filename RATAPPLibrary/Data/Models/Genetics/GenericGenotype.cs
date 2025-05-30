@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using RATAPPLibrary.Data.Models;
 
 namespace RATAPPLibrary.Data.Models.Genetics
 {
-    public class Genotype
+    public class GenericGenotype
     {
         [Key]
         public Guid GenotypeId { get; set; }
@@ -13,10 +13,10 @@ namespace RATAPPLibrary.Data.Models.Genetics
         public required string GenotypeCode { get; set; }
 
         [Required]
-        public int AnimalId { get; set; }
+        public Guid ChromosomePairId { get; set; }
 
         [Required]
-        public Guid ChromosomePairId { get; set; }
+        public int TraitId { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; }
@@ -24,11 +24,7 @@ namespace RATAPPLibrary.Data.Models.Genetics
         [Required]
         public DateTime UpdatedAt { get; set; }
 
-        [Required]
-        public int TraitId { get; set; }
-
         // Navigation properties
-        public virtual Animal Animal { get; set; }
         public virtual ChromosomePair ChromosomePair { get; set; }
         public virtual Trait Trait { get; set; }
     }

@@ -30,5 +30,6 @@ namespace RATAPPLibrary.Data.Models.Genetics
         public virtual Chromosome PaternalChromosome { get; set; }
         public virtual ICollection<Gene> Genes { get; set; }
         public virtual ICollection<Genotype> Genotypes { get; set; }
+        public virtual ICollection<GenericGenotype> GenericGenotype { get; set; }
     }
 }

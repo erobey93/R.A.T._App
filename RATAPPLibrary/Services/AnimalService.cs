@@ -2,6 +2,10 @@
 using RATAPPLibrary.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using RATAPPLibrary.Data.Models.Animal_Management;
+using RATAPPLibrary.Data.Models.Genetics;
+using RATAPPLibrary.Services.Genetics;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 
 namespace RATAPPLibrary.Services
 {
@@ -31,6 +35,7 @@ namespace RATAPPLibrary.Services
         private readonly LineService _lineService;
         private readonly TraitService _traitService;
         private readonly LineageService _lineageService;
+        private readonly GeneService _geneService;
 
         public AnimalService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
@@ -38,6 +43,7 @@ namespace RATAPPLibrary.Services
             _lineService = new LineService(contextFactory);
             _traitService = new TraitService(contextFactory);
             _lineageService = new LineageService(contextFactory);
+            _geneService = new GeneService(contextFactory);
         }
 
         /// <summary>
@@ -122,6 +128,84 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        //add additional images for animal
+        public async Task<bool> AddAdditionalAnimalImagesAsync(int animalId, string[] additionalImageURl)
+        {
+           return  await ExecuteInContextAsync(async _context =>
+            {
+                try
+                {
+
+                    //for each image path, add new entry in AnimalImage table 
+                    foreach (string imageUrl in additionalImageURl)
+                    {
+                        //make a new object 
+                        AnimalImage image = new AnimalImage
+                        {
+                            AnimalId = animalId,
+                            ImageUrl = imageUrl,
+                            CreatedOn = DateTime.Now,
+                        };
+                        //make a new entry
+                        _context.AnimalImage.Add(image); //should maybe check that animal exists, but not a breaking change so nbd for now FIXME 
+                        //no errors, return true
+                        //else, return false 
+                        _context.SaveChanges();
+                    }
+
+                    return true;
+                }
+                catch (Exception ex) { return false;  }
+            });
+        }
+
+        //create animals genotype based on their phenotypes 
+        //get the trait id 
+        //go to the genotype in the genotype table
+        //find the genotype for the trait id (regardless of animal id)
+        //if it doesn't exist, make a new entry for that animal + genotype 
+        //this should actually be stored in the genome table 
+        //the animals genotype will be pulled 
+        //right now the tight couple of animal and genotype is messing things up, so my current hack is to have 1 animal attached to all genotypes so that I have access to these genotypes for other animals
+        //
+        //get animal genotype as a string 
+        public async Task<string> GetGenotypesAsStringAsync(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                var genotypes = await _context.Genotypes
+                .Where(g => g.AnimalId == animalId)
+                .ToListAsync();
+
+                return string.Join(" / ", genotypes); // Uses `ToString()` of each genotype - TODO I would like to increase complexity of return types eventualyl 
+            });
+
+        }
+
+        public async Task<List<Genotype>> GetGenotypesWithDetails(int animalId)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                return await _context.Genotypes
+                .Where(g => g.AnimalId == animalId)
+                .Include(g => g.Trait) //return trait so that its easy to associate with Animal
+                .Include(g => g.Animal)
+                .ToListAsync();
+            });
+        }
+
+        //get all animal images 
+        public async Task<List<string>> GetAdditionalAnimalImages(AnimalDto animal)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+               return await _context.AnimalImage
+                .Where(i => i.AnimalId == animal.Id)
+                .Select(i => i.ImageUrl)
+                .ToListAsync();
+            }); 
+        }
+
         //complete create process TODO just trying this out given the new re-factor 
         public async Task<Animal> CreateAnimalFullProcess(AnimalDto animal) {
             //first, create the animal
@@ -135,6 +219,12 @@ namespace RATAPPLibrary.Services
 
             //set available animal traits 
             await SetAnimalTraits(animalDtoWithReg);
+
+            if (animal.AdditionalImages != null)
+            {
+                //set additional images
+                _ = await AddAdditionalAnimalImagesAsync(animal1.Id, animal.AdditionalImages.ToArray());
+            }
 
             //get the animal object back with all new data attached (?) 
             //animalDtoWithReg = await 
@@ -307,6 +397,14 @@ namespace RATAPPLibrary.Services
 
                     int traitId = trait.Id;
 
+                    //FIXME this is not correct but it works for now, lots of work to do on genetics still 
+                    //since I have the genotype in the trait currently, I can just use that
+                    //go to animal trait table
+                    //get all trait ids for that animal
+                    //go to genotype table
+                    //get all genotypes for those traits
+                    
+
                     //check if the trait already exists for the animal
                     var existingTrait = await _context.AnimalTrait.FirstOrDefaultAsync(t => t.TraitId == traitId && t.AnimalId == animalId);
                     if (existingTrait != null)
@@ -314,8 +412,15 @@ namespace RATAPPLibrary.Services
                         throw new InvalidOperationException($"Trait with ID {traitId} already exists for animal with ID {animalId}.");
                     }
 
+                    //call set genericGenotype
+                    await _geneService.AssignGenericGenotypeToAnimalAsync(animalId, traitId);
+
                     //make a new entry in the animal trait table for the color of the animal
                     await _traitService.CreateAnimalTraitAsync(traitId, animalId);
+
+                    //make a new entry in the genotype table for the trait + genotype
+                    //right now, the genotype is coming from the trait
+                    //await _traitService.
                 }
                 catch (Exception ex)
                 {
@@ -465,9 +570,12 @@ namespace RATAPPLibrary.Services
             if (exists)
             {
                 // Retrieve the existing animal from the context
-                var existingAnimal = await _context.Animal.FindAsync(animalDto.Id);
+                var existingAnimal = await _context.Animal
+    .Include(a => a.Genotypes)
+    .Include (a => a.AdditionalImages)// Include the related entity
+    .FirstOrDefaultAsync(a => a.Id == animalDto.Id);
 
-                if (existingAnimal == null)
+                    if (existingAnimal == null)
                 {
                     throw new InvalidOperationException($"Animal with ID '{animalDto.Id}' not found.");
                 }
@@ -489,7 +597,24 @@ namespace RATAPPLibrary.Services
                 // add updated traits if they don't already exist 
                 await SetAnimalTraits(animalDto);
 
-                int? damId = animalDto.damId;
+                    if (animalDto.AdditionalImages != null && animalDto.AdditionalImages.Any())
+                    {
+                        // Get existing image URLs for this animal
+                        var existingImages = await GetAdditionalAnimalImages(animalDto);
+
+                        // Find new images (not already in DB)
+                        var newImages = animalDto.AdditionalImages
+                            .Where(newImage => !existingImages.Contains(newImage))
+                            .ToArray();
+
+                        // Only add if there are new images
+                        if (newImages.Any())
+                        {
+                            await AddAdditionalAnimalImagesAsync(animalDto.Id, newImages);
+                        }
+                    }
+
+                    int? damId = animalDto.damId;
                 int? sireId = animalDto.sireId;
                 int animalId = animalDto.Id;
 
@@ -575,7 +700,13 @@ namespace RATAPPLibrary.Services
         {
             return await ExecuteInContextAsync(async _context =>
             {
-                var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+                var animal = await _context.Animal
+    .Include(a => a.Line)                         // Include related Line
+    .Include(a => a.Litters)                      // Include related Litters
+    .Include(a => a.Traits)                       // Include related AnimalTraits
+    .Include(a => a.Genotypes)                    // Include related Genotypes
+    .Include(a => a.AdditionalImages)             // Include related AnimalImages
+    .FirstOrDefaultAsync(a => a.Id == id);        // Find the specific Animal by Id
                 if (animal == null)
                 {
                     throw new KeyNotFoundException($"Animal with ID {id} not found.");
@@ -599,6 +730,10 @@ namespace RATAPPLibrary.Services
                 // Start with base query
                 var animals = await _context.Animal
                     .Include(a => a.Line)
+                    .Include(a => a.AdditionalImages)
+                    .Include (a => a.Traits)
+                    .Include (a => a.Genotypes) 
+                    .Include (a => a.Litters)
                     .ToListAsync();
 
                 List<AnimalDto> animalDtos = new List<AnimalDto>();
@@ -656,6 +791,8 @@ namespace RATAPPLibrary.Services
                     var animalTraits = await GetAnimalTraits(a.Id); //FIXME this is a placeholder until I fix/implement trait logic
 
                     //TODO can do above logic for all traits and then just loop through them to get
+                    //var genotype = await GetGenotypesAsStringAsync(a.Id); 
+                    var genotype = _geneService.CreateGenotypeString(a.Id); 
 
                     //var getSire = await _lineageService.GetDamAndSireByAnimalId(a.Id); //TODO look into how I should be handling all of this lineage stuff and generally the database calls. To me, it feels like the service should handle checks and the controller should handle the logic, but I'm not sure if that's correct.
                     //int sireId = getSire.sire.;
@@ -668,13 +805,24 @@ namespace RATAPPLibrary.Services
 
                     var getSire = await _lineageService.GetSireByAnimalId(a.Id);
                     int sireId = 0;
+
                     if (getSire != null)
                     {
                         sireId = getSire.Id;
                     }
 
-                    // Map the animals to include string values for the related entities
-                    var result = new AnimalDto
+                    List<string> additionalImageUrls = new List<string> { };
+                    if (a.AdditionalImages != null)
+                    {
+                        //get the additional image urls 
+                        foreach (var image in a.AdditionalImages)
+                        {
+                            additionalImageUrls.Add(image.ImageUrl);
+                        }
+                    }
+                   
+                        // Map the animals to include string values for the related entities
+                        var result = new AnimalDto
                     {
                         Id = a.Id,
                         regNum = a.registrationNumber,
@@ -692,6 +840,8 @@ namespace RATAPPLibrary.Services
                         variety = animalTraits.ContainsKey("Coat Type") ? animalTraits["Coat Type"].LastOrDefault() : null,
                         damId = damId != 0 ? damId : (int?)null,
                         sireId = sireId != 0 ? sireId : (int?)null,
+                        genotype = genotype.Result, 
+                        AdditionalImages = additionalImageUrls
                     };
 
                     return result;
@@ -703,6 +853,7 @@ namespace RATAPPLibrary.Services
             });
         }
 
+       
         /// <summary>
         /// Retrieves all traits associated with an animal.
         /// 

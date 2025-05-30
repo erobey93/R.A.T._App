@@ -27,6 +27,9 @@ namespace RATAPPLibrary.Data.Models.Genetics
         public bool IsWildType { get; set; }
 
         [Required]
+        public bool InheritancePattern { get; set; }
+
+        [Required]
         [StringLength(20)]
         public string RiskLevel { get; set; } // none/low/medium/high
 

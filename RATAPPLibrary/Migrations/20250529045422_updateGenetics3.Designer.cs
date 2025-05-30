@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250529045422_updateGenetics3")]
+    partial class updateGenetics3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -578,12 +581,6 @@ namespace RATAPPLibrary.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Arm")
-                        .HasColumnType("nvarchar(1)");
-
-                    b.Property<int?>("Band")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -600,9 +597,6 @@ namespace RATAPPLibrary.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Region")
-                        .HasColumnType("int");
-
                     b.Property<int>("SpeciesId")
                         .HasColumnType("int");
 
@@ -611,9 +605,8 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasKey("ChromosomeId");
 
-                    b.HasIndex("SpeciesId", "Number", "Arm", "Region", "Band")
-                        .IsUnique()
-                        .HasFilter("[Arm] IS NOT NULL AND [Region] IS NOT NULL AND [Band] IS NOT NULL");
+                    b.HasIndex("SpeciesId", "Number")
+                        .IsUnique();
 
                     b.ToTable("Chromosomes");
                 });
