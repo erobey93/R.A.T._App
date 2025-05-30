@@ -700,7 +700,13 @@ namespace RATAPPLibrary.Services
         {
             return await ExecuteInContextAsync(async _context =>
             {
-                var animal = await _context.Animal.FirstOrDefaultAsync(a => a.Id == id);
+                var animal = await _context.Animal
+    .Include(a => a.Line)                         // Include related Line
+    .Include(a => a.Litters)                      // Include related Litters
+    .Include(a => a.Traits)                       // Include related AnimalTraits
+    .Include(a => a.Genotypes)                    // Include related Genotypes
+    .Include(a => a.AdditionalImages)             // Include related AnimalImages
+    .FirstOrDefaultAsync(a => a.Id == id);        // Find the specific Animal by Id
                 if (animal == null)
                 {
                     throw new KeyNotFoundException($"Animal with ID {id} not found.");
@@ -724,6 +730,10 @@ namespace RATAPPLibrary.Services
                 // Start with base query
                 var animals = await _context.Animal
                     .Include(a => a.Line)
+                    .Include(a => a.AdditionalImages)
+                    .Include (a => a.Traits)
+                    .Include (a => a.Genotypes) 
+                    .Include (a => a.Litters)
                     .ToListAsync();
 
                 List<AnimalDto> animalDtos = new List<AnimalDto>();
@@ -795,13 +805,24 @@ namespace RATAPPLibrary.Services
 
                     var getSire = await _lineageService.GetSireByAnimalId(a.Id);
                     int sireId = 0;
+
                     if (getSire != null)
                     {
                         sireId = getSire.Id;
                     }
 
-                    // Map the animals to include string values for the related entities
-                    var result = new AnimalDto
+                    List<string> additionalImageUrls = new List<string> { };
+                    if (a.AdditionalImages != null)
+                    {
+                        //get the additional image urls 
+                        foreach (var image in a.AdditionalImages)
+                        {
+                            additionalImageUrls.Add(image.ImageUrl);
+                        }
+                    }
+                   
+                        // Map the animals to include string values for the related entities
+                        var result = new AnimalDto
                     {
                         Id = a.Id,
                         regNum = a.registrationNumber,
@@ -820,6 +841,7 @@ namespace RATAPPLibrary.Services
                         damId = damId != 0 ? damId : (int?)null,
                         sireId = sireId != 0 ? sireId : (int?)null,
                         genotype = genotype.Result, 
+                        AdditionalImages = additionalImageUrls
                     };
 
                     return result;
