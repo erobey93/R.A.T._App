@@ -21,7 +21,7 @@ namespace RATAPPLibrary.Services.Genetics
     ///   * Trait probability calculations
     ///   * Genetic risk assessment
     /// 
-    /// Genetic Models:
+    /// Genetic Models:`
     /// - Basic Mendelian inheritance (0.25 probability)
     /// - Wild type dominance handling
     /// - Recessive trait expression

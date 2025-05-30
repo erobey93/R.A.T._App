@@ -20,6 +20,12 @@ namespace RATAPPLibrary.Data.Models.Genetics
         [Required]
         public int SpeciesId { get; set; }
 
+        public char? Arm { get; set; }
+
+        public int? Region { get; set; }
+
+        public int? Band { get; set; }
+
         [StringLength(1000)]
         public string Description { get; set; }
 

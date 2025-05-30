@@ -162,8 +162,9 @@ namespace RATAPPLibrary.Data.DbContexts
                 .HasForeignKey(c => c.SpeciesId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            // Update the unique index to include Arm, Region, and Band
             modelBuilder.Entity<Chromosome>()
-                .HasIndex(c => new { c.SpeciesId, c.Number })
+                .HasIndex(c => new { c.SpeciesId, c.Number, c.Arm, c.Region, c.Band })
                 .IsUnique();
         }
 
