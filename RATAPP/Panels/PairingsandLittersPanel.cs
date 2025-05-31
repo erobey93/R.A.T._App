@@ -577,8 +577,19 @@ namespace RATAPP.Panels
             infoPanel.Height = 120;
             infoPanel.Margin = new Padding(0, 0, 0, 10);
 
+            // Create grid container
+            Panel gridContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 130, 0, 0)
+            };
+
             containerPanel.Controls.Add(infoPanel);
+            containerPanel.Controls.Add(gridContainer);
             tabPage.Controls.Add(containerPanel);
+
+            // Store the grid container so the initialize methods can use it
+            tabPage.Tag = gridContainer;
 
             // Initialize the specific grid view
             initializeMethod();
@@ -718,12 +729,6 @@ namespace RATAPP.Panels
 
         private void InitializePairingDataGridView()
         {
-            Panel gridContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0, 130, 0, 0)
-            };
-
             pairingsGridView.Dock = DockStyle.Fill;
 
             pairingsGridView.Columns.AddRange(new DataGridViewColumn[]
@@ -737,8 +742,8 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "PairingPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            var gridContainer = pairingsTab.Tag as Panel;
             gridContainer.Controls.Add(pairingsGridView);
-            pairingsTab.Controls.Add(gridContainer);
 
             PopulatePairingDataDisplayArea();
         }
@@ -790,12 +795,6 @@ namespace RATAPP.Panels
 
         private void InitializeProjectDataGridView()
         {
-            Panel gridContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0, 130, 0, 0)
-            };
-
             projectGridView.Dock = DockStyle.Fill;
 
             projectGridView.Columns.AddRange(new DataGridViewColumn[]
@@ -810,8 +809,8 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "ProjectPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            var gridContainer = projectsTab.Tag as Panel;
             gridContainer.Controls.Add(projectGridView);
-            projectsTab.Controls.Add(gridContainer);
 
             PopulateProjectDataDisplayArea();
         }
@@ -847,12 +846,6 @@ namespace RATAPP.Panels
 
         private void InitializeLitterDataGridView()
         {
-            Panel gridContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0, 130, 0, 0)
-            };
-
             littersGridView.Dock = DockStyle.Fill;
 
             littersGridView.Columns.AddRange(new DataGridViewColumn[]
@@ -867,8 +860,8 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "LitterPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            var gridContainer = littersTab.Tag as Panel;
             gridContainer.Controls.Add(littersGridView);
-            littersTab.Controls.Add(gridContainer);
 
             PopulateLittersDataDisplayArea();
         }
@@ -904,12 +897,6 @@ namespace RATAPP.Panels
 
         private void InitializeLineDataGridView()
         {
-            Panel gridContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0, 130, 0, 0)
-            };
-
             linesGridView.Dock = DockStyle.Fill;
 
             linesGridView.Columns.AddRange(new DataGridViewColumn[]
@@ -923,8 +910,8 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "LinePage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            var gridContainer = linesTab.Tag as Panel;
             gridContainer.Controls.Add(linesGridView);
-            linesTab.Controls.Add(gridContainer);
 
             PopulateLineDataDisplayArea();
         }
