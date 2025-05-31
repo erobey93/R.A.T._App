@@ -909,12 +909,41 @@ namespace RATAPP.Panels
             //}
         }
 
-        //FIXME, form is not showing up correctly 
-        private void AssignTraitButton_Click(object sender, EventArgs e)
+        private async void AssignTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_contextFactory), _contextFactory))
+            if (traitRegistryGrid.SelectedRows.Count == 0)
             {
-                form.ShowDialog();
+                MessageBox.Show("Please select a trait to assign.", "No Selection",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selectedRow = traitRegistryGrid.SelectedRows[0];
+            var traitId = (int)selectedRow.Cells["Id"].Value;
+            
+            try
+            {
+                var trait = await _traitService.GetTraitByIdAsync(traitId);
+                if (trait == null)
+                {
+                    MessageBox.Show("Selected trait not found.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using (var form = new AssignTraitForm(_traitService, _geneService, 
+                    new AnimalService(_contextFactory), _contextFactory, trait))
+                {
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        await RefreshTraitGrid();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading trait: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
