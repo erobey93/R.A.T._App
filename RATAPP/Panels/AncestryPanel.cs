@@ -219,10 +219,18 @@ namespace RATAPP.Panels
         private void InitializeCustomComponents()
         {
             // Main form setup
-            this.Size = new Size(1300, 900);  // Increased form size
+            this.Dock = DockStyle.Fill;
             this.BackColor = Color.White;
 
-             // Add info panel at the top
+            // Create main container panel
+            Panel mainContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20)
+            };
+            this.Controls.Add(mainContainer);
+
+            // Add info panel at the top
             ancestryInfoPanel = CreateInfoPanel(
                 "Ancestry Viewer",
                 "• View detailed family trees for any animal in your colony\n" +
@@ -233,7 +241,7 @@ namespace RATAPP.Panels
             ancestryInfoPanel.Dock = DockStyle.Top;
             ancestryInfoPanel.Height = 120;
             ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
-            this.Controls.Add(ancestryInfoPanel);
+            mainContainer.Controls.Add(ancestryInfoPanel);
 
             // Create filter section
             Panel filterPanel = new Panel
@@ -263,7 +271,15 @@ namespace RATAPP.Panels
             generationsComboBox.SelectedIndex = 2;
             generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
             filterPanel.Controls.Add(generationsComboBox);
-            this.Controls.Add(filterPanel);
+            mainContainer.Controls.Add(filterPanel);
+
+            // Create content panel to hold tree and info
+            Panel contentPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0)
+            };
+            mainContainer.Controls.Add(contentPanel);
 
             // Create button panel
             Panel buttonPanel = new Panel
@@ -282,32 +298,48 @@ namespace RATAPP.Panels
             printButton.Click += PrintButton_Click;
            
             generatePedigree.Click += GeneratePedigree_Click;
-            this.Controls.Add(buttonPanel);
+            mainContainer.Controls.Add(buttonPanel);
 
-            // ENLARGED TreeView panel (left side)
+            // Create split container for tree and info
+            TableLayoutPanel splitContainer = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1,
+                Padding = new Padding(0),
+                Margin = new Padding(0)
+            };
+            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            contentPanel.Controls.Add(splitContainer);
+
+            // TreeView panel (left side)
             ancestryTree = new TreeView
             {
-                Location = new Point(20, 150),
-                Size = new Size(600, 650),  // Much larger width and height
+                Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.FixedSingle,
                 Font = new Font("Segoe UI", 9),
                 ShowNodeToolTips = true,
-                HideSelection = false,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+                HideSelection = false
             };
             ancestryTree.AfterSelect += AncestryTree_AfterSelect;
-            this.Controls.Add(ancestryTree);
 
-            // ENLARGED Info panel (right side)
+            Panel treeContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 0, 10, 0)
+            };
+            treeContainer.Controls.Add(ancestryTree);
+            splitContainer.Controls.Add(treeContainer, 0, 0);
+
+            // Info panel (right side)
             infoPanel = new Panel
             {
-                Location = new Point(630, 150),  // Moved right to accommodate larger tree
-                Size = new Size(600, 650),      // Larger size
+                Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.WhiteSmoke,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                BackColor = Color.WhiteSmoke
             };
-            this.Controls.Add(infoPanel);
+            splitContainer.Controls.Add(infoPanel, 1, 0);
 
             InitializeDataGridView();
         }
