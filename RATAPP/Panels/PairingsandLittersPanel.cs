@@ -467,81 +467,22 @@ namespace RATAPP.Panels
 
         private void InitializeCommonControls()
         {
-            // Initialize search and filter panel with consistent styling
-            Panel searchFilterPanel = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 60,
-                Padding = new Padding(20)
-            };
-
-            // Create filter section with improved layout
-            Panel filterSection = new Panel
-            {
-                Dock = DockStyle.Left,
-                Width = 600
-            };
-
-            Label filterLabel = new Label
-            {
-                Text = "Filter by:",
-                Font = new Font("Segoe UI", 10),
-                AutoSize = true,
-                Location = new Point(0, 8)
-            };
-
-            searchBox = new TextBox
-            {
-                Width = 200,
-                Font = new Font("Segoe UI", 10),
-                Location = new Point(70, 5)
-            };
-
-            filterComboBox = new ComboBox
-            {
-                Width = 150,
-                Font = new Font("Segoe UI", 10),
-                Location = new Point(290, 5),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            filterComboBox.Items.AddRange(new object[] { "All", "Current", "Past", "Future", "Species", "Line", "Project" });
-            filterComboBox.SelectedIndex = 0;
-
-            searchButton = CreateStyledButton("Search", 460, 2);
-            searchButton.Click += SearchButton_Click;
-
-            filterSection.Controls.Add(filterLabel);
-            filterSection.Controls.Add(searchBox);
-            filterSection.Controls.Add(filterComboBox);
-            filterSection.Controls.Add(searchButton);
-
-            searchFilterPanel.Controls.Add(filterSection);
-
-            // Action buttons panel with improved styling
+            // Initialize action buttons panel
             Panel actionButtonsPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
-                Height = 60,
-                Padding = new Padding(20)
+                Height = 50,
+                Padding = new Padding(10)
             };
 
-            addButton = CreateStyledButton("Add", 0, 0);
-            updateButton = CreateStyledButton("Update", 110, 0);
-            deleteButton = CreateStyledButton("Delete", 220, 0);
+            addButton = CreateStyledButton("Add", 10, 10);
+            updateButton = CreateStyledButton("Update", 120, 10);
+            deleteButton = CreateStyledButton("Delete", 230, 10);
 
-            Panel buttonContainer = new Panel
-            {
-                Dock = DockStyle.Left,
-                Width = 450
-            };
+            actionButtonsPanel.Controls.Add(addButton);
+            actionButtonsPanel.Controls.Add(updateButton);
+            actionButtonsPanel.Controls.Add(deleteButton);
 
-            buttonContainer.Controls.Add(addButton);
-            buttonContainer.Controls.Add(updateButton);
-            buttonContainer.Controls.Add(deleteButton);
-
-            actionButtonsPanel.Controls.Add(buttonContainer);
-
-            this.Controls.Add(searchFilterPanel);
             this.Controls.Add(actionButtonsPanel);
         }
 
@@ -577,14 +518,56 @@ namespace RATAPP.Panels
             infoPanel.Height = 120;
             infoPanel.Margin = new Padding(0, 0, 0, 10);
 
+            // Add filter panel
+            Panel filterPanel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 40,
+                Margin = new Padding(0, 0, 0, 10)
+            };
+
+            Label filterLabel = new Label
+            {
+                Text = "Filter by:",
+                Font = new Font("Segoe UI", 10),
+                AutoSize = true,
+                Location = new Point(0, 8)
+            };
+
+            searchBox = new TextBox
+            {
+                Width = 200,
+                Font = new Font("Segoe UI", 10),
+                Location = new Point(70, 5)
+            };
+
+            filterComboBox = new ComboBox
+            {
+                Width = 150,
+                Font = new Font("Segoe UI", 10),
+                Location = new Point(290, 5),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            filterComboBox.Items.AddRange(new object[] { "All", "Current", "Past", "Future", "Species", "Line", "Project" });
+            filterComboBox.SelectedIndex = 0;
+
+            searchButton = CreateStyledButton("Search", 460, 2);
+            searchButton.Click += SearchButton_Click;
+
+            filterPanel.Controls.Add(filterLabel);
+            filterPanel.Controls.Add(searchBox);
+            filterPanel.Controls.Add(filterComboBox);
+            filterPanel.Controls.Add(searchButton);
+
             // Create grid container
             Panel gridContainer = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(0, 130, 0, 0)
+                Padding = new Padding(0, 10, 0, 0)
             };
 
             containerPanel.Controls.Add(infoPanel);
+            containerPanel.Controls.Add(filterPanel);
             containerPanel.Controls.Add(gridContainer);
             tabPage.Controls.Add(containerPanel);
 
