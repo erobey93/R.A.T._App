@@ -226,7 +226,7 @@ namespace RATAPP.Panels
             Panel mainContainer = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(20)
+                Padding = new Padding(0)
             };
             this.Controls.Add(mainContainer);
 
@@ -238,26 +238,39 @@ namespace RATAPP.Panels
                 "• Analyze breeding history and relationships\n" +
                 "• Export pedigree charts for documentation"
             );
-            ancestryInfoPanel.Dock = DockStyle.Top;
-            ancestryInfoPanel.Height = 120;
-            ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
-            mainContainer.Controls.Add(ancestryInfoPanel);
-
-            // Create filter section
-            Panel filterPanel = new Panel
+            Panel infoPanelContainer = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 60
+                Height = 120,
+                Padding = new Padding(20, 0, 20, 0)
             };
-            // Generations selection (unchanged)
+            ancestryInfoPanel.Dock = DockStyle.Fill;
+            infoPanelContainer.Controls.Add(ancestryInfoPanel);
+            mainContainer.Controls.Add(infoPanelContainer);
+
+            // Create filter section with padding
+            Panel filterContainer = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 60,
+                Padding = new Padding(20, 10, 20, 10),
+                BackColor = Color.White
+            };
+
+            Panel filterPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.White
+            };
+
+            // Generations selection
             generationsLabel = new Label
             {
                 Text = "Generations:",
                 Font = new Font("Segoe UI", 10),
                 AutoSize = true,
-                Location = new Point(0, 10)
+                Location = new Point(0, 20)
             };
-            //this.Controls.Add(generationsLabel);
             filterPanel.Controls.Add(generationsLabel);
 
             generationsComboBox = new ComboBox
@@ -265,13 +278,23 @@ namespace RATAPP.Panels
                 Width = 200,
                 Font = new Font("Segoe UI", 10),
                 DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(100, 8)
+                Location = new Point(100, 18)
             };
             generationsComboBox.Items.AddRange(new object[] { "1", "2", "3", "4", "5" });
             generationsComboBox.SelectedIndex = 2;
             generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
             filterPanel.Controls.Add(generationsComboBox);
-            mainContainer.Controls.Add(filterPanel);
+
+            filterContainer.Controls.Add(filterPanel);
+            mainContainer.Controls.Add(filterContainer);
+
+            // Create content panel with padding
+            Panel contentContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20, 0, 20, 20)
+            };
+            mainContainer.Controls.Add(contentContainer);
 
             // Create content panel to hold tree and info
             Panel contentPanel = new Panel
@@ -279,7 +302,7 @@ namespace RATAPP.Panels
                 Dock = DockStyle.Fill,
                 Padding = new Padding(0)
             };
-            mainContainer.Controls.Add(contentPanel);
+            contentContainer.Controls.Add(contentPanel);
 
             // Create button panel
             Panel buttonPanel = new Panel
@@ -298,7 +321,7 @@ namespace RATAPP.Panels
             printButton.Click += PrintButton_Click;
            
             generatePedigree.Click += GeneratePedigree_Click;
-            mainContainer.Controls.Add(buttonPanel);
+            contentContainer.Controls.Add(buttonPanel);
 
             // Create split container for tree and info
             TableLayoutPanel splitContainer = new TableLayoutPanel
