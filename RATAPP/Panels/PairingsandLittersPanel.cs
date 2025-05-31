@@ -261,33 +261,82 @@ namespace RATAPP.Panels
                 Padding = new Point(12, 4)
             };
 
-            // Initialize DataGridViews with consistent styling
-            pairingsGridView = CreateStyledDataGridView();
-            littersGridView = CreateStyledDataGridView();
-            linesGridView = CreateStyledDataGridView();
-            projectGridView = CreateStyledDataGridView();
-
-            // Add helper method for consistent DataGridView styling
-            DataGridView CreateStyledDataGridView()
+            // Initialize DataGridViews
+            pairingsGridView = new DataGridView
             {
-                return new DataGridView
-                {
-                    AutoGenerateColumns = false,
-                    MultiSelect = false,
-                    SelectionMode = DataGridViewSelectionMode.FullRowSelect,
-                    BackgroundColor = Color.White,
-                    BorderStyle = BorderStyle.None,
-                    RowHeadersVisible = false,
-                    AllowUserToAddRows = false,
-                    AllowUserToDeleteRows = false,
-                    ReadOnly = true,
-                    Font = new Font("Segoe UI", 9),
-                    AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
-                    ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
-                    RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
-                    RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
-                };
-            }
+                Dock = DockStyle.Fill,
+                AutoGenerateColumns = false,
+                MultiSelect = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                BackgroundColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                RowHeadersVisible = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                Font = new Font("Segoe UI", 9),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+            };
+
+            littersGridView = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoGenerateColumns = false,
+                MultiSelect = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                BackgroundColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                RowHeadersVisible = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                Font = new Font("Segoe UI", 9),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+            };
+
+            linesGridView = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoGenerateColumns = false,
+                MultiSelect = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                BackgroundColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                RowHeadersVisible = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                Font = new Font("Segoe UI", 9),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+            };
+
+            projectGridView = new DataGridView
+            {
+                Dock = DockStyle.Fill,
+                AutoGenerateColumns = false,
+                MultiSelect = false,
+                SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                BackgroundColor = Color.White,
+                BorderStyle = BorderStyle.None,
+                RowHeadersVisible = false,
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                ReadOnly = true,
+                Font = new Font("Segoe UI", 9),
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+            };
 
             // Initialize tabs with containers and info panels
             pairingsTab = new TabPage("Pairings");
@@ -534,30 +583,58 @@ namespace RATAPP.Panels
                 Location = new Point(0, 8)
             };
 
-            searchBox = new TextBox
+            // Create filter controls for this tab
+            TextBox tabSearchBox = new TextBox
             {
                 Width = 200,
                 Font = new Font("Segoe UI", 10),
-                Location = new Point(70, 5)
+                Location = new Point(70, 8),
+                Height = 25
             };
 
-            filterComboBox = new ComboBox
+            ComboBox tabFilterCombo = new ComboBox
             {
                 Width = 150,
                 Font = new Font("Segoe UI", 10),
-                Location = new Point(290, 5),
+                Location = new Point(290, 8),
+                Height = 25,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
-            filterComboBox.Items.AddRange(new object[] { "All", "Current", "Past", "Future", "Species", "Line", "Project" });
-            filterComboBox.SelectedIndex = 0;
 
-            searchButton = CreateStyledButton("Search", 460, 2);
-            searchButton.Click += SearchButton_Click;
+            // Set filter items based on tab type
+            if (tabPage == pairingsTab)
+            {
+                tabFilterCombo.Items.AddRange(new object[] { "All", "Current", "Past" });
+                searchBox = tabSearchBox;
+                filterComboBox = tabFilterCombo;
+            }
+            else if (tabPage == littersTab)
+            {
+                tabFilterCombo.Items.AddRange(new object[] { "All", "Current", "Past" });
+            }
+            else if (tabPage == linesTab)
+            {
+                tabFilterCombo.Items.AddRange(new object[] { "All", "Species", "Project" });
+            }
+            else if (tabPage == projectsTab)
+            {
+                tabFilterCombo.Items.AddRange(new object[] { "All", "Active", "Completed" });
+            }
+            tabFilterCombo.SelectedIndex = 0;
+
+            Button tabSearchButton = CreateStyledButton("Search", 460, 5);
+            tabSearchButton.Height = 25;
+            tabSearchButton.Click += SearchButton_Click;
+
+            if (tabPage == pairingsTab)
+            {
+                searchButton = tabSearchButton;
+            }
 
             filterPanel.Controls.Add(filterLabel);
-            filterPanel.Controls.Add(searchBox);
-            filterPanel.Controls.Add(filterComboBox);
-            filterPanel.Controls.Add(searchButton);
+            filterPanel.Controls.Add(tabSearchBox);
+            filterPanel.Controls.Add(tabFilterCombo);
+            filterPanel.Controls.Add(tabSearchButton);
 
             // Create grid container
             Panel gridContainer = new Panel
@@ -583,44 +660,35 @@ namespace RATAPP.Panels
             // Implement search functionality
             //MessageBox.Show($"Searching for: {searchBox.Text}\nFilter: {filterComboBox.SelectedItem}");
 
-            string filter = filterComboBox.SelectedItem.ToString();
+            Button clickedButton = (Button)sender;
+            Panel filterPanel = clickedButton.Parent as Panel;
+            if (filterPanel == null) return;
+
+            TextBox searchBox = filterPanel.Controls.OfType<TextBox>().FirstOrDefault();
+            ComboBox filterCombo = filterPanel.Controls.OfType<ComboBox>().FirstOrDefault();
+            if (searchBox == null || filterCombo == null) return;
+
+            string filter = filterCombo.SelectedItem.ToString();
             string searchTerm = searchBox.Text.ToLower();
 
-            //if pairs tab
-            //if(tabControl.SelectedIndex == 0)
-            //{
-                if(filter == "Current") //get all current pairings 
-                {
-                    searchState = "current";
-                    PopulatePairingDataDisplayArea(); 
-                    
-                }
-                else if(filter == "Past")
+            searchState = filter.ToLower();
+
+            // Update the appropriate grid based on the current tab
+            switch (tabControl.SelectedTab.Text)
             {
-                searchState = "past";
-                PopulatePairingDataDisplayArea();
-            }else if(filter == "All"){
-                searchState = "all";
-                PopulatePairingDataDisplayArea();
+                case "Pairings":
+                    PopulatePairingDataDisplayArea();
+                    break;
+                case "Litters":
+                    PopulateLittersDataDisplayArea();
+                    break;
+                case "Line Management":
+                    PopulateLineDataDisplayArea();
+                    break;
+                case "Project Management":
+                    PopulateProjectDataDisplayArea();
+                    break;
             }
-            //}
-            //get pairs based on filter first
-            //then get based on search term
-            //if litters tab
-            //if lines tab 
-
-
-            //var filteredLitters = _animals.Where(animal =>
-            //    (speciesFilter == "All Species" || animal.species == speciesFilter) &&
-            //    (sexFilter == "All Sexes" || animal.sex == sexFilter) &&
-            //    (animal.name.ToLower().Contains(searchTerm) || animal.Id.ToString().Contains(searchTerm))
-            //);
-
-            //DataGridView(sender).Rows.Clear();
-            //foreach (var animal in filteredAnimals)
-            //{
-            //    dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
-            //}
         }
 
         //TODO 
