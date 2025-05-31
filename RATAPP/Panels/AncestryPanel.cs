@@ -23,7 +23,7 @@ namespace RATAPP.Panels
         private ComboBox generationsComboBox;
         private Label generationsLabel;
         private DataGridView animalCollectionDataGridView;
-        private
+        private PictureBox loadingSpinner;
 
         RATAppBaseForm _parentForm;
         private RATAPPLibrary.Services.AnimalService _animalService;
@@ -42,6 +42,7 @@ namespace RATAPP.Panels
             _animalService = new RATAPPLibrary.Services.AnimalService(contextFactory);
             _lineageService = new RATAPPLibrary.Services.LineageService(contextFactory);
 
+            InitializeLoadingSpinner();
             InitializeComponent();
             InitializeCustomComponents();
             InitializeHeaderPanel();
@@ -93,6 +94,49 @@ namespace RATAPP.Panels
             headerPanel.Controls.Add(titleLabel);
             headerPanel.Controls.Add(descriptionLabel);
             this.Controls.Add(headerPanel);
+        }
+
+        private void InitializeLoadingSpinner()
+        {
+            loadingSpinner = new PictureBox
+            {
+                Size = new Size(50, 50),
+                Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\Loading_2.gif"),
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Visible = false
+            };
+            this.Controls.Add(loadingSpinner);
+            this.Resize += (s, e) => CenterLoadingSpinner();
+        }
+
+        private void CenterLoadingSpinner()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Location = new Point(
+                    (ClientSize.Width - loadingSpinner.Width) / 2,
+                    (ClientSize.Height - loadingSpinner.Height) / 2
+                );
+            }
+        }
+
+        private void ShowLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = true;
+                CenterLoadingSpinner();
+                this.Refresh();
+            }
+        }
+
+        private void HideLoadingIndicator()
+        {
+            if (loadingSpinner != null)
+            {
+                loadingSpinner.Visible = false;
+                this.Refresh();
+            }
         }
 
         private async void InitializeDataGridView()
