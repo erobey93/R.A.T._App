@@ -1,110 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
-using RATAPP.Forms;
-using RATAPPLibrary.Data.DbContexts;
-using RATAPPLibrary.Data.Models;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace RATAPP.Panels
-{
-    public partial class AncestryPanel : Panel, INavigable
-    {
-        private TreeView ancestryTree;
-        private Panel infoPanel;
-        private Panel ancestryInfoPanel;
-        private Panel headerPanel; 
-        private Label titleLabel;
-        private Button printButton;
-        private Button generatePedigree;
-        private ComboBox generationsComboBox;
-        private Label generationsLabel;
-        private DataGridView animalCollectionDataGridView;
-        private
-
-        RATAppBaseForm _parentForm;
-        private RATAPPLibrary.Services.AnimalService _animalService;
-        private RATAPPLibrary.Services.LineageService _lineageService;
-        private AnimalDto[] _animals;
-        private RatAppDbContextFactory _contextFactory;
-
-        // The currently selected rodent
-        private AnimalDto _currentAnimal;
-        private bool isSingleAnimal = false;
-
-        public AncestryPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
-        {
-            _parentForm = parentForm;
-            _contextFactory = contextFactory;
-            _animalService = new RATAPPLibrary.Services.AnimalService(contextFactory);
-            _lineageService = new RATAPPLibrary.Services.LineageService(contextFactory);
-
-            InitializeComponent();
-            InitializeHeaderPanel();
-            InitializeCustomComponents();
-        }
-
-        //TODO not yet implemented but may make more sense to do this vs. a whole separate form? 
-        public AncestryPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, AnimalDto selectedAnimal) //TODO - , AnimalDto[] allAnimals, AnimalDto currAnimal
-        {
-            isSingleAnimal=true; //set flag so we know we're interested in 1 animal, not the whole collection 
-
-            _parentForm = parentForm;
-            _contextFactory = contextFactory;
-            _animalService = new RATAPPLibrary.Services.AnimalService(contextFactory);
-            _lineageService = new RATAPPLibrary.Services.LineageService(contextFactory);
-            _currentAnimal = selectedAnimal;
-
-            InitializeComponent();
-            InitializeHeaderPanel();
-            InitializeCustomComponents();
-        }
-
-        private void InitializeHeaderPanel()
-        {
-            headerPanel = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 70,
-                BackColor = Color.FromArgb(0, 120, 212)
-            };
-
-            Label titleLabel = new Label
-            {
-                Text = "Ancestry Management",
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 18, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(25, 10)
-            };
-
-            Label descriptionLabel = new Label
-            {
-                Text = "View family trees and create pedigrees",
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10),
-                AutoSize = true,
-                Location = new Point(25, 40)
-            };
-
-            headerPanel.Controls.Add(titleLabel);
-            headerPanel.Controls.Add(descriptionLabel);
-        }
+﻿[Previous content up to InitializeCustomComponents remains the same...]
 
         private async void InitializeDataGridView()
         {
             // Clear existing controls
             infoPanel.Controls.Clear();
-
-            // Create container panel with padding
-            var gridContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(10) // Adds inner spacing
-            };
 
             // Create and configure DataGridView
             animalCollectionDataGridView = new DataGridView
@@ -118,7 +17,7 @@ namespace RATAPP.Panels
                 RowHeadersVisible = false,
                 AllowUserToAddRows = false,
                 ReadOnly = true,
-                AutoGenerateColumns = false // Crucial for manual column control
+                AutoGenerateColumns = false
             };
 
             await GetAnimalData(); 
@@ -126,7 +25,7 @@ namespace RATAPP.Panels
             // Create columns with proper data binding
             animalCollectionDataGridView.Columns.Add(new DataGridViewTextBoxColumn
             {
-                DataPropertyName = "name", // Must match AnimalDto property name
+                DataPropertyName = "name",
                 HeaderText = "Name",
                 Name = "colName"
             });
@@ -148,7 +47,7 @@ namespace RATAPP.Panels
             // Create binding source
             var bindingSource = new BindingSource
             {
-                DataSource = _animals // Bind to full objects
+                DataSource = _animals
             };
 
             // Assign binding source to DataGridView
@@ -159,187 +58,6 @@ namespace RATAPP.Panels
 
             // Add to panel
             infoPanel.Controls.Add(animalCollectionDataGridView);
-
-            // Add container to main panel
-            infoPanel.Controls.Add(gridContainer);
-
-            // Configure anchoring for resizing
-            infoPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom 
-                             | AnchorStyles.Left | AnchorStyles.Right;
-        }
-
-        private async Task GetAnimalData()
-        {
-            if (!isSingleAnimal)
-            {
-                // Get data
-                _animals = await _animalService.GetAllAnimalsAsync();
-            }
-            else
-            {
-                // Create a single-element array with the current animal
-                _animals = new AnimalDto[] { _currentAnimal };
-            }
-        }
-
-        private void AnimalDataGridView_SelectionChanged(object sender, EventArgs e)
-        {
-            if (animalCollectionDataGridView.SelectedRows.Count == 0) return;
-
-            // Get the bound item directly
-            var selectedAnimal = (AnimalDto)animalCollectionDataGridView.SelectedRows[0].DataBoundItem;
-
-            // Update other UI elements or view models
-            _currentAnimal = selectedAnimal;
-            UpdateAnimalDetailsDisplay(selectedAnimal);
-        }
-
-        private void UpdateAnimalDetailsDisplay(AnimalDto animal)
-        {
-            // Your implementation to update detail views
-            // Example:
-            // lblName.Text = animal.name;
-            // lblRegNum.Text = animal.regNum;
-            // picAnimal.Image = LoadImage(animal.imagePath);
-        }
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-
-            // AncestryPanel
-            this.Name = "AncestryPanel";
-            this.Size = new Size(800, 600);
-            this.BackColor = Color.White;
-
-            this.ResumeLayout(false);
-        }
-
-        private void InitializeCustomComponents()
-        {
-            // Main panel setup
-            this.Dock = DockStyle.Fill;
-            this.BackColor = Color.White;
-
-            // Create main container panel
-            Panel mainContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0)
-            };
-
-            // Create content container
-            Panel contentContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(20)
-            };
-
-            // Add info panel at the top
-            ancestryInfoPanel = CreateInfoPanel(
-                "Ancestry Viewer",
-                "• View detailed family trees for any animal in your colony\n" +
-                "• Track lineage across multiple generations\n" +
-                "• Analyze breeding history and relationships\n" +
-                "• Export pedigree charts for documentation"
-            );
-            ancestryInfoPanel.Dock = DockStyle.Top;
-            ancestryInfoPanel.Height = 120;
-            ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
-
-            // Create filter section
-            Panel filterPanel = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 60
-            };
-
-            // Generations selection
-            generationsLabel = new Label
-            {
-                Text = "Generations:",
-                Font = new Font("Segoe UI", 10),
-                AutoSize = true,
-                Location = new Point(0, 20)
-            };
-            filterPanel.Controls.Add(generationsLabel);
-
-            generationsComboBox = new ComboBox
-            {
-                Width = 200,
-                Font = new Font("Segoe UI", 10),
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Location = new Point(100, 18)
-            };
-            generationsComboBox.Items.AddRange(new object[] { "1", "2", "3", "4", "5" });
-            generationsComboBox.SelectedIndex = 2;
-            generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
-            filterPanel.Controls.Add(generationsComboBox);
-            contentContainer.Controls.Add(filterPanel);
-
-            // Create split container for tree and info
-            TableLayoutPanel splitContainer = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 1
-            };
-            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            contentContainer.Controls.Add(splitContainer);
-
-            // TreeView panel (left side)
-            Panel treeContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0, 0, 10, 0)
-            };
-
-            ancestryTree = new TreeView
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 9),
-                ShowNodeToolTips = true,
-                HideSelection = false
-            };
-            ancestryTree.AfterSelect += AncestryTree_AfterSelect;
-            treeContainer.Controls.Add(ancestryTree);
-            splitContainer.Controls.Add(treeContainer, 0, 0);
-
-            // Info panel (right side)
-            infoPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.WhiteSmoke
-            };
-            splitContainer.Controls.Add(infoPanel, 1, 0);
-
-            // Create button panel
-            Panel buttonPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(0, 20, 0, 0)
-            };
-
-            printButton = CreateButton("Print Tree", 20);
-            generatePedigree = CreateButton("Generate Pedigree", 130);
-
-            buttonPanel.Controls.Add(printButton);
-            buttonPanel.Controls.Add(generatePedigree);
-    
-            printButton.Click += PrintButton_Click;
-            generatePedigree.Click += GeneratePedigree_Click;
-            contentContainer.Controls.Add(buttonPanel);
-
-            mainContainer.Controls.Add(ancestryInfoPanel);
-            mainContainer.Controls.Add(contentContainer);
-            this.Controls.Add(headerPanel);
-            this.Controls.Add(mainContainer);
-
-            InitializeDataGridView();
         }
 
         private Button CreateButton(string text, int x)
@@ -390,7 +108,27 @@ namespace RATAPP.Panels
             return panel;
         }
 
-        // Load ancestry data for a specific rodent
+        private async Task GetAnimalData()
+        {
+            if (!isSingleAnimal)
+            {
+                _animals = await _animalService.GetAllAnimalsAsync();
+            }
+            else
+            {
+                _animals = new AnimalDto[] { _currentAnimal };
+            }
+        }
+
+        private void AnimalDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (animalCollectionDataGridView.SelectedRows.Count == 0) return;
+
+            var selectedAnimal = (AnimalDto)animalCollectionDataGridView.SelectedRows[0].DataBoundItem;
+            _currentAnimal = selectedAnimal;
+            LoadAnimalAncestry(_currentAnimal);
+        }
+
         public void LoadAnimalAncestry(AnimalDto animal)
         {
             if (animal == null) return;
@@ -419,21 +157,17 @@ namespace RATAPP.Panels
         {
             if (currentGeneration >= maxGenerations || animal == null) return;
 
-            //get the animal's dam and sire FIXME library should return objects for this, just getting working for now 
-
             Animal dam = await _lineageService.GetDamByAnimalId(animal.Id);
             Animal sire = await _lineageService.GetSireByAnimalId(animal.Id);
 
             AnimalDto damDto = await _animalService.MapSingleAnimaltoDto(dam);
             AnimalDto sireDto = await _animalService.MapSingleAnimaltoDto(sire);
 
-            // Add father if available
             if (animal.sireId != null)
             {
-                
                 TreeNode fatherNode = CreateRodentNode(sireDto);
                 parentNode.Nodes.Add(fatherNode);
-                LoadParents(fatherNode,sireDto, currentGeneration + 1, maxGenerations);
+                LoadParents(fatherNode, sireDto, currentGeneration + 1, maxGenerations);
             }
             else
             {
@@ -442,7 +176,6 @@ namespace RATAPP.Panels
                 parentNode.Nodes.Add(unknownNode);
             }
 
-            // Add dam if available
             if (dam != null)
             {
                 TreeNode motherNode = CreateRodentNode(damDto);
@@ -461,7 +194,6 @@ namespace RATAPP.Panels
         {
             TreeNode node = new TreeNode($"{animal.name} (ID: {animal.Id})");
 
-            // Set node color based on gender
             if (animal.sex == "Male")
             {
                 node.ForeColor = Color.Blue;
@@ -471,32 +203,44 @@ namespace RATAPP.Panels
                 node.ForeColor = Color.DeepPink;
             }
 
-            var getTraits = _animalService.GetAnimalTraits(animal.Id); //FIXME this should come from the animal.Traits object but the data isn't available TODO
-            
-            // Set tooltip with additional information
             node.ToolTipText = $"Name: {animal.name}\n" +
                               $"ID: {animal.Id}\n" +
                               $"Gender: {animal.sex}\n" +
                               $"DOB: {animal.DateOfBirth.ToShortDateString()}\n" +
                               $"Coat: {animal.color}";
 
-            // Store the rodent object in the tag for later reference
             node.Tag = animal;
-
             return node;
+        }
+
+        private void AncestryTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node.Tag is AnimalDto selectedRodent)
+            {
+                DisplayAnimalInfo(selectedRodent);
+            }
+            else
+            {
+                infoPanel.Controls.Clear();
+                Label unknownLabel = new Label
+                {
+                    Text = "No information available",
+                    Location = new Point(10, 10),
+                    Size = new Size(260, 20),
+                    TextAlign = ContentAlignment.MiddleCenter
+                };
+                infoPanel.Controls.Add(unknownLabel);
+            }
         }
 
         private void DisplayAnimalInfo(AnimalDto animal)
         {
-            // Clear the info panel
             infoPanel.Controls.Clear();
 
             if (animal == null) return;
 
-            // Create labels for rodent information
             int yPos = 10;
 
-            // Add photo if available
             if (animal.imageUrl != null && File.Exists(animal.imageUrl))
             {
                 try
@@ -514,13 +258,11 @@ namespace RATAPP.Panels
                 }
                 catch
                 {
-                    // If image loading fails, just skip it
                     yPos += 10;
                 }
             }
             else
             {
-                // Placeholder for no image
                 Panel noImagePanel = new Panel
                 {
                     Location = new Point(90, yPos),
@@ -541,16 +283,13 @@ namespace RATAPP.Panels
                 yPos += 110;
             }
 
-            // Add basic information
             AddInfoLabel("Name:", animal.name, yPos); yPos += 25;
             AddInfoLabel("ID:", animal.Id.ToString(), yPos); yPos += 25;
             AddInfoLabel("Gender:", animal.sex, yPos); yPos += 25;
             AddInfoLabel("Date of Birth:", animal.DateOfBirth.ToShortDateString(), yPos); yPos += 25;
             AddInfoLabel("Age:", CalculateAge(animal.DateOfBirth), yPos); yPos += 25;
             AddInfoLabel("Coat Color:", animal.color, yPos); yPos += 25;
-            //AddInfoLabel("Weight:", $"{animal.Weight}g", yPos); yPos += 25; TODO
 
-            // Add separator
             Panel separator = new Panel
             {
                 Location = new Point(10, yPos),
@@ -560,15 +299,6 @@ namespace RATAPP.Panels
             infoPanel.Controls.Add(separator);
             yPos += 10;
 
-            // Add breeding information if available
-            //TODO 
-            //if (animal.LitterCount > 0)
-            //{
-            //    AddInfoLabel("Litter Count:", animal.LitterCount.ToString(), yPos); yPos += 25;
-            //    AddInfoLabel("Last Litter:", animal.LastLitterDate?.ToShortDateString() ?? "N/A", yPos); yPos += 25;
-            //}
-
-            // Add view details button
             Button viewDetailsButton = new Button
             {
                 Text = "View Animal's Page",
@@ -579,8 +309,6 @@ namespace RATAPP.Panels
             viewDetailsButton.Click += (sender, e) => ViewFullDetails(animal);
             infoPanel.Controls.Add(viewDetailsButton);
 
-            //Add clear selection button 
-            // Add view details button
             Button clearSelectionButton = new Button
             {
                 Text = "Clear Selection",
@@ -637,15 +365,9 @@ namespace RATAPP.Panels
             }
         }
 
-        //TODO
-        private async void ViewFullDetails(AnimalDto animal)
+        private void ViewFullDetails(AnimalDto animal)
         {
             MessageBox.Show("Will navigate to individual animal page");
-            //FIXME this shouldn't be here but just getting this to work 
-            //AnimalDto[] allAnimals = await _animalService.GetAllAnimalsAsync();
-            //AnimalPanel indAnimalPanel = new AnimalPanel(this._parentForm, _contextFactory, allAnimals, animal);
-            //this.Hide();
-            //indAnimalPanel.Show();
         }
 
         private async void ClearSelection()
@@ -657,30 +379,6 @@ namespace RATAPP.Panels
             InitializeComponent();
             InitializeHeaderPanel();
             InitializeCustomComponents();
-            
-        }
-
-        #region Event Handlers
-
-        private void AncestryTree_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            if (e.Node.Tag is AnimalDto selectedRodent)
-            {
-                DisplayAnimalInfo(selectedRodent);
-            }
-            else
-            {
-                // Clear the info panel if an "Unknown" node is selected
-                infoPanel.Controls.Clear();
-                Label unknownLabel = new Label
-                {
-                    Text = "No information available",
-                    Location = new Point(10, 10),
-                    Size = new Size(260, 20),
-                    TextAlign = ContentAlignment.MiddleCenter
-                };
-                infoPanel.Controls.Add(unknownLabel);
-            }
         }
 
         private void GenerationsComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -694,41 +392,17 @@ namespace RATAPP.Panels
         private void PrintButton_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Printing functionality would be implemented here.", "Print Tree", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // In a real implementation, you would create a print document and print the tree
-            //PrintDocument printDoc = new PrintDocument();
-            //printDoc.PrintPage += PrintDoc_PrintPage;
-            //PrintDialog printDialog = new PrintDialog();
-            //printDialog.Document = printDoc;
-            //if (printDialog.ShowDialog() == DialogResult.OK)
-            //{
-            //    printDoc.Print();
-            //}
         }
 
         private void GeneratePedigree_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Export functionality would be implemented here.", "Export Tree", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-            // In a real implementation, you would export the tree to a file
-            // SaveFileDialog saveDialog = new SaveFileDialog();
-            // saveDialog.Filter = "PDF Files (*.pdf)|*.pdf|Image Files (*.png)|*.png";
-            // if (saveDialog.ShowDialog() == DialogResult.OK)
-            // {
-            //     // Export logic based on selected format
-            // }
         }
 
         public async Task RefreshDataAsync()
         {
-            //show spinner 
             await GetAnimalData();
-            this.Refresh(); 
-            //stop spinner
-            //show success message 
-           
+            this.Refresh();
         }
-
-        #endregion
     }
 }
