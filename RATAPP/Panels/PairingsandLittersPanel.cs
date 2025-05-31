@@ -100,8 +100,8 @@ namespace RATAPP.Panels
             _projectService = new ProjectService(contextFactory);
 
             InitializeComponents();
+            InitializeHeaderPanel();
             InitializeLoadingSpinner();
-            InitializeHeaderPanel(); 
         }
 
 
@@ -261,9 +261,6 @@ namespace RATAPP.Panels
                 Padding = new Point(12, 4)
             };
 
-            // Initialize header panel
-            InitializeHeaderPanel();
-
             pairingsGridView = new DataGridView();
             littersGridView = new DataGridView();
             linesGridView = new DataGridView();
@@ -287,9 +284,10 @@ namespace RATAPP.Panels
 
             tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
 
-            // Add controls to main panel
+
+            // Add headerPanel first
+            //this.Controls.Add(headerPanel);
             this.Controls.Add(tabControl);
-            this.Controls.Add(headerPanel);
 
             // Initialize common controls
             InitializeCommonControls();
@@ -432,7 +430,7 @@ namespace RATAPP.Panels
             {
                 Dock = DockStyle.Top,
                 Height = 60,
-                Padding = new Padding(10)
+                Padding = new Padding(10),
             };
 
             searchBox = new TextBox
