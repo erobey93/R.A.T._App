@@ -220,7 +220,7 @@ namespace RATAPP.Panels
         {
             // Main form setup
             this.Dock = DockStyle.Fill;
-            this.BackColor = Color.White;
+            this.BackColor = Color.WhiteSmoke;
 
             // Create main container panel
             Panel mainContainer = new Panel
@@ -262,8 +262,7 @@ namespace RATAPP.Panels
             {
                 Dock = DockStyle.Fill,
                 Height = 60,
-                Margin = new Padding(0, 0, 0, 10),
-                BackColor = Color.DarkGray
+                Margin = new Padding(0, 0, 0, 10)
             };
             // Generations selection (unchanged)
             generationsLabel = new Label
@@ -333,7 +332,7 @@ namespace RATAPP.Panels
             {
                 Dock = DockStyle.Fill,
                 BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.WhiteSmoke
+                BackColor = Color.White
             };
             splitContainer.Controls.Add(infoPanel, 1, 0);
 
@@ -739,7 +738,7 @@ namespace RATAPP.Panels
         {
             //show spinner 
             await GetAnimalData();
-            this.Refresh(); 
+            Refresh(); 
             //stop spinner
             //show success message 
            
