@@ -43,8 +43,8 @@ namespace RATAPP.Panels
             _lineageService = new RATAPPLibrary.Services.LineageService(contextFactory);
 
             InitializeComponent();
-            InitializeCustomComponents();
             InitializeHeaderPanel();
+            InitializeCustomComponents();
         }
 
         //TODO not yet implemented but may make more sense to do this vs. a whole separate form? 
@@ -59,8 +59,8 @@ namespace RATAPP.Panels
             _currentAnimal = selectedAnimal;
 
             InitializeComponent();
+            InitializeHeaderPanel();
             InitializeCustomComponents();
-            InitializeHeaderPanel(); 
         }
 
         private void InitializeHeaderPanel()
@@ -92,7 +92,6 @@ namespace RATAPP.Panels
 
             headerPanel.Controls.Add(titleLabel);
             headerPanel.Controls.Add(descriptionLabel);
-            this.Controls.Add(headerPanel);
         }
 
         private async void InitializeDataGridView()
@@ -218,7 +217,7 @@ namespace RATAPP.Panels
 
         private void InitializeCustomComponents()
         {
-            // Main form setup
+            // Main panel setup
             this.Dock = DockStyle.Fill;
             this.BackColor = Color.White;
 
@@ -228,7 +227,13 @@ namespace RATAPP.Panels
                 Dock = DockStyle.Fill,
                 Padding = new Padding(0)
             };
-            this.Controls.Add(mainContainer);
+
+            // Create content container
+            Panel contentContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20)
+            };
 
             // Add info panel at the top
             ancestryInfoPanel = CreateInfoPanel(
@@ -238,29 +243,15 @@ namespace RATAPP.Panels
                 "• Analyze breeding history and relationships\n" +
                 "• Export pedigree charts for documentation"
             );
-            Panel infoPanelContainer = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 120,
-                Padding = new Padding(20, 0, 20, 0)
-            };
-            ancestryInfoPanel.Dock = DockStyle.Fill;
-            infoPanelContainer.Controls.Add(ancestryInfoPanel);
-            mainContainer.Controls.Add(infoPanelContainer);
+            ancestryInfoPanel.Dock = DockStyle.Top;
+            ancestryInfoPanel.Height = 120;
+            ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
 
-            // Create filter section with padding
-            Panel filterContainer = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = 60,
-                Padding = new Padding(20, 10, 20, 10),
-                BackColor = Color.White
-            };
-
+            // Create filter section
             Panel filterPanel = new Panel
             {
-                Dock = DockStyle.Fill,
-                BackColor = Color.White
+                Dock = DockStyle.Top,
+                Height = 60
             };
 
             // Generations selection
@@ -284,25 +275,46 @@ namespace RATAPP.Panels
             generationsComboBox.SelectedIndex = 2;
             generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
             filterPanel.Controls.Add(generationsComboBox);
+            contentContainer.Controls.Add(filterPanel);
 
-            filterContainer.Controls.Add(filterPanel);
-            mainContainer.Controls.Add(filterContainer);
-
-            // Create content panel with padding
-            Panel contentContainer = new Panel
+            // Create split container for tree and info
+            TableLayoutPanel splitContainer = new TableLayoutPanel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(20, 0, 20, 20)
+                ColumnCount = 2,
+                RowCount = 1
             };
-            mainContainer.Controls.Add(contentContainer);
+            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            contentContainer.Controls.Add(splitContainer);
 
-            // Create content panel to hold tree and info
-            Panel contentPanel = new Panel
+            // TreeView panel (left side)
+            Panel treeContainer = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(0)
+                Padding = new Padding(0, 0, 10, 0)
             };
-            contentContainer.Controls.Add(contentPanel);
+
+            ancestryTree = new TreeView
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 9),
+                ShowNodeToolTips = true,
+                HideSelection = false
+            };
+            ancestryTree.AfterSelect += AncestryTree_AfterSelect;
+            treeContainer.Controls.Add(ancestryTree);
+            splitContainer.Controls.Add(treeContainer, 0, 0);
+
+            // Info panel (right side)
+            infoPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.WhiteSmoke
+            };
+            splitContainer.Controls.Add(infoPanel, 1, 0);
 
             // Create button panel
             Panel buttonPanel = new Panel
@@ -319,50 +331,13 @@ namespace RATAPP.Panels
             buttonPanel.Controls.Add(generatePedigree);
     
             printButton.Click += PrintButton_Click;
-           
             generatePedigree.Click += GeneratePedigree_Click;
             contentContainer.Controls.Add(buttonPanel);
 
-            // Create split container for tree and info
-            TableLayoutPanel splitContainer = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 1,
-                Padding = new Padding(0),
-                Margin = new Padding(0)
-            };
-            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            contentPanel.Controls.Add(splitContainer);
-
-            // TreeView panel (left side)
-            ancestryTree = new TreeView
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 9),
-                ShowNodeToolTips = true,
-                HideSelection = false
-            };
-            ancestryTree.AfterSelect += AncestryTree_AfterSelect;
-
-            Panel treeContainer = new Panel
-            {
-                Dock = DockStyle.Fill,
-                Padding = new Padding(0, 0, 10, 0)
-            };
-            treeContainer.Controls.Add(ancestryTree);
-            splitContainer.Controls.Add(treeContainer, 0, 0);
-
-            // Info panel (right side)
-            infoPanel = new Panel
-            {
-                Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.WhiteSmoke
-            };
-            splitContainer.Controls.Add(infoPanel, 1, 0);
+            mainContainer.Controls.Add(ancestryInfoPanel);
+            mainContainer.Controls.Add(contentContainer);
+            this.Controls.Add(headerPanel);
+            this.Controls.Add(mainContainer);
 
             InitializeDataGridView();
         }
@@ -680,8 +655,8 @@ namespace RATAPP.Panels
             animalCollectionDataGridView.ClearSelection();
             this.Controls.Clear();
             InitializeComponent();
-            InitializeCustomComponents();
             InitializeHeaderPanel();
+            InitializeCustomComponents();
             
         }
 
