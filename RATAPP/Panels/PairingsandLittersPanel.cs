@@ -125,7 +125,7 @@ namespace RATAPP.Panels
 
             Label descriptionLabel = new Label
             {
-                Text = "View family trees and create pedigrees",
+                Text = "Manage breeding pairs, litters, lines, and projects",
                 ForeColor = Color.White,
                 Font = new Font("Segoe UI", 10),
                 AutoSize = true,
@@ -257,29 +257,70 @@ namespace RATAPP.Panels
             tabControl = new TabControl
             {
                 Dock = DockStyle.Fill,
-                Font = new Font("Segoe UI", 12F, FontStyle.Regular)
+                Font = new Font("Segoe UI", 11),
+                Padding = new Point(12, 4)
             };
 
-            pairingsGridView = new DataGridView();
-            littersGridView = new DataGridView(); //TODO need to better organize everything, i.e. come up with a common schema for how I initialize and pass around all controls 
-            linesGridView = new DataGridView();
-            projectGridView = new DataGridView(); 
+            // Initialize DataGridViews with consistent styling
+            pairingsGridView = CreateStyledDataGridView();
+            littersGridView = CreateStyledDataGridView();
+            linesGridView = CreateStyledDataGridView();
+            projectGridView = CreateStyledDataGridView();
 
-            // Initialize Pairings Tab
+            // Add helper method for consistent DataGridView styling
+            DataGridView CreateStyledDataGridView()
+            {
+                return new DataGridView
+                {
+                    AutoGenerateColumns = false,
+                    MultiSelect = false,
+                    SelectionMode = DataGridViewSelectionMode.FullRowSelect,
+                    BackgroundColor = Color.White,
+                    BorderStyle = BorderStyle.None,
+                    RowHeadersVisible = false,
+                    AllowUserToAddRows = false,
+                    AllowUserToDeleteRows = false,
+                    ReadOnly = true,
+                    Font = new Font("Segoe UI", 9),
+                    AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+                    ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                    RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+                    RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders
+                };
+            }
+
+            // Initialize tabs with containers and info panels
             pairingsTab = new TabPage("Pairings");
-            InitializePairingDataGridView();
+            InitializeTabWithContainer(pairingsTab, "Pairing Management", 
+                "• Create and manage breeding pairs\n" +
+                "• Track active and historical pairings\n" +
+                "• Monitor breeding success rates\n" +
+                "• Link pairings to projects and lines",
+                InitializePairingDataGridView);
 
-            // Initialize Litters Tab
             littersTab = new TabPage("Litters");
-            InitializeLitterDataGridView();
+            InitializeTabWithContainer(littersTab, "Litter Management",
+                "• Record and track litter information\n" +
+                "• Monitor litter development\n" +
+                "• Track pup counts and survival rates\n" +
+                "• Link litters to breeding pairs",
+                InitializeLitterDataGridView);
 
-            // Initialize Line management tab (may change the name, but fine for now)
             linesTab = new TabPage("Line Management");
-            InitializeLineDataGridView();
+            InitializeTabWithContainer(linesTab, "Line Management",
+                "• Manage breeding lines and strains\n" +
+                "• Track line characteristics\n" +
+                "• Monitor line progression\n" +
+                "• Link lines to projects",
+                InitializeLineDataGridView);
 
-            // Initialize Project management tab (may change the name, but fine for now)
             projectsTab = new TabPage("Project Management");
-            InitializeProjectDataGridView(); //need to make InitializeProjectDataGridView
+            InitializeTabWithContainer(projectsTab, "Project Management",
+                "• Organize breeding projects\n" +
+                "• Track project goals and progress\n" +
+                "• Manage project timelines\n" +
+                "• Link projects to lines and pairs",
+                InitializeProjectDataGridView);
 
             tabControl.TabPages.Add(pairingsTab);
             tabControl.TabPages.Add(littersTab);
@@ -426,77 +467,91 @@ namespace RATAPP.Panels
 
         private void InitializeCommonControls()
         {
-            // Search and Filter Panel
+            // Initialize search and filter panel with consistent styling
             Panel searchFilterPanel = new Panel
             {
                 Dock = DockStyle.Top,
                 Height = 60,
-                Padding = new Padding(10)
+                Padding = new Padding(20)
+            };
+
+            // Create filter section with improved layout
+            Panel filterSection = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 600
+            };
+
+            Label filterLabel = new Label
+            {
+                Text = "Filter by:",
+                Font = new Font("Segoe UI", 10),
+                AutoSize = true,
+                Location = new Point(0, 8)
             };
 
             searchBox = new TextBox
             {
                 Width = 200,
-                Font = new Font("Segoe UI", 10F),
-                Location = new Point(10, 15)
+                Font = new Font("Segoe UI", 10),
+                Location = new Point(70, 5)
             };
 
             filterComboBox = new ComboBox
             {
                 Width = 150,
-                Font = new Font("Segoe UI", 10F),
-                Location = new Point(220, 15),
+                Font = new Font("Segoe UI", 10),
+                Location = new Point(290, 5),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             filterComboBox.Items.AddRange(new object[] { "All", "Current", "Past", "Future", "Species", "Line", "Project" });
             filterComboBox.SelectedIndex = 0;
 
-            searchButton = new Button
-            {
-                Text = "Search",
-                Font = new Font("Segoe UI", 10F),
-                Height = 30,
-                Location = new Point(380, 13),
-                BackColor = Color.FromArgb(0, 120, 212),
-                ForeColor = Color.White,
-                FlatStyle = FlatStyle.Flat
-            };
-            searchButton.FlatAppearance.BorderSize = 0;
+            searchButton = CreateStyledButton("Search", 460, 2);
             searchButton.Click += SearchButton_Click;
 
-            searchFilterPanel.Controls.Add(searchBox);
-            searchFilterPanel.Controls.Add(filterComboBox);
-            searchFilterPanel.Controls.Add(searchButton);
+            filterSection.Controls.Add(filterLabel);
+            filterSection.Controls.Add(searchBox);
+            filterSection.Controls.Add(filterComboBox);
+            filterSection.Controls.Add(searchButton);
 
-            // Action Buttons Panel
+            searchFilterPanel.Controls.Add(filterSection);
+
+            // Action buttons panel with improved styling
             Panel actionButtonsPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
                 Height = 60,
-                Padding = new Padding(10)
+                Padding = new Padding(20)
             };
 
-            addButton = CreateActionButton("Add", 10);
-            updateButton = CreateActionButton("Update", 120);
-            deleteButton = CreateActionButton("Delete", 230);
-            //TODO bulk import button
-            //TODO export? 
+            addButton = CreateStyledButton("Add", 0, 0);
+            updateButton = CreateStyledButton("Update", 110, 0);
+            deleteButton = CreateStyledButton("Delete", 220, 0);
 
-            actionButtonsPanel.Controls.Add(addButton);
-            actionButtonsPanel.Controls.Add(updateButton);
-            actionButtonsPanel.Controls.Add(deleteButton);
+            Panel buttonContainer = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 450
+            };
+
+            buttonContainer.Controls.Add(addButton);
+            buttonContainer.Controls.Add(updateButton);
+            buttonContainer.Controls.Add(deleteButton);
+
+            actionButtonsPanel.Controls.Add(buttonContainer);
 
             this.Controls.Add(searchFilterPanel);
             this.Controls.Add(actionButtonsPanel);
         }
 
-        private Button CreateActionButton(string text, int x)
+        private Button CreateStyledButton(string text, int x, int y)
         {
             Button button = new Button
             {
                 Text = text,
-                Font = new Font("Segoe UI", 10F),
-                Location = new Point(x, 13),
+                Font = new Font("Segoe UI", 10),
+                Location = new Point(x, y),
                 Width = 100,
                 Height = 30,
                 BackColor = Color.FromArgb(0, 120, 212),
@@ -506,6 +561,27 @@ namespace RATAPP.Panels
             button.FlatAppearance.BorderSize = 0;
             button.Click += ActionButton_Click;
             return button;
+        }
+
+        private void InitializeTabWithContainer(TabPage tabPage, string title, string description, Action initializeMethod)
+        {
+            Panel containerPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20)
+            };
+
+            // Add info panel
+            Panel infoPanel = CreateInfoPanel(title, description);
+            infoPanel.Dock = DockStyle.Top;
+            infoPanel.Height = 120;
+            infoPanel.Margin = new Padding(0, 0, 0, 10);
+
+            containerPanel.Controls.Add(infoPanel);
+            tabPage.Controls.Add(containerPanel);
+
+            // Initialize the specific grid view
+            initializeMethod();
         }
 
         private async void SearchButton_Click(object sender, EventArgs e)
@@ -642,32 +718,29 @@ namespace RATAPP.Panels
 
         private void InitializePairingDataGridView()
         {
-            //get all pairings from db 
-            //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
+            Panel gridContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 130, 0, 0)
+            };
 
-            pairingsGridView.Location = new Point(0, topPanelHeight);
-            pairingsGridView.Width = 1000;
-            pairingsGridView.Height = 400;
-            pairingsGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            pairingsGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            pairingsGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            pairingsGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            pairingsGridView.ReadOnly = true;
+            pairingsGridView.Dock = DockStyle.Fill;
 
             pairingsGridView.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "PairingId", HeaderText = "Pairing ID" },
-                new DataGridViewTextBoxColumn { Name = "Doe", HeaderText = "Doe" },
-                new DataGridViewTextBoxColumn { Name = "Buck", HeaderText = "Buck" },
-                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" },
-                new DataGridViewTextBoxColumn { Name = "Pairing Date", HeaderText = "Pairing Date" },
-                new DataGridViewTextBoxColumn { Name = "Pairing End Date", HeaderText = "Pairing End Date" },
-                new DataGridViewButtonColumn { Name = "PairingPage", HeaderText = "Pairing Page", Text = "Go", UseColumnTextForButtonValue = true }
+                new DataGridViewTextBoxColumn { Name = "PairingId", HeaderText = "Pairing ID", Width = 80 },
+                new DataGridViewTextBoxColumn { Name = "Doe", HeaderText = "Doe", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "Buck", HeaderText = "Buck", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "PairingDate", HeaderText = "Pairing Date", Width = 120 },
+                new DataGridViewTextBoxColumn { Name = "PairingEndDate", HeaderText = "End Date", Width = 120 },
+                new DataGridViewButtonColumn { Name = "PairingPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
-            PopulatePairingDataDisplayArea();
+            gridContainer.Controls.Add(pairingsGridView);
+            pairingsTab.Controls.Add(gridContainer);
 
-            this.Controls.Add(pairingsGridView);
+            PopulatePairingDataDisplayArea();
         }
 
         private async void PopulatePairingDataDisplayArea()
@@ -711,42 +784,36 @@ namespace RATAPP.Panels
             }
             else
             {
-                MessageBox.Show("There are no pairings in your database.");
+                MessageBox.Show("No pairings found.", "Empty Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
         private void InitializeProjectDataGridView()
         {
-            //int topPanelHeight = 90;
+            Panel gridContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 130, 0, 0)
+            };
 
-            //get all projects from db 
-            //I'm not sure about getting breeding data every time the tabs change, this should happen once when the app is first loaded and then be cached FIXME need to think through this logic more 
-
-            projectGridView.Location = new Point(0, topPanelHeight);
-            projectGridView.Width = 1000;
-            projectGridView.Height = 400;
-            projectGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            projectGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            projectGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            projectGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            projectGridView.ReadOnly = true;
+            projectGridView.Dock = DockStyle.Fill;
 
             projectGridView.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "Project ID" },
-                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Project Name" },
-                new DataGridViewTextBoxColumn { Name = "LineId", HeaderText = "LineId" },
-                //new DataGridViewTextBoxColumn { Name = "LineName", HeaderText = "LineId" }, TODO would be nice to have Line name but need to add new variable for this 
-                new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description" },
-                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes" },
-                new DataGridViewTextBoxColumn { Name = "CreatedOn", HeaderText = "Created On" },
-                new DataGridViewTextBoxColumn { Name = "LastUpdated", HeaderText = "Last Updated" },
-                new DataGridViewButtonColumn { Name = "ProjectPage", HeaderText = "Project Page", Text = "Go", UseColumnTextForButtonValue = true }
+                new DataGridViewTextBoxColumn { Name = "Id", HeaderText = "ID", Width = 60 },
+                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Project Name", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "LineId", HeaderText = "Line ID", Width = 80 },
+                new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description", Width = 200 },
+                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes", Width = 200 },
+                new DataGridViewTextBoxColumn { Name = "CreatedOn", HeaderText = "Created", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "LastUpdated", HeaderText = "Updated", Width = 100 },
+                new DataGridViewButtonColumn { Name = "ProjectPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
-            PopulateProjectDataDisplayArea();
+            gridContainer.Controls.Add(projectGridView);
+            projectsTab.Controls.Add(gridContainer);
 
-            this.Controls.Add(projectGridView);
+            PopulateProjectDataDisplayArea();
         }
 
         private async void PopulateProjectDataDisplayArea()
@@ -774,39 +841,36 @@ namespace RATAPP.Panels
             }
             else
             {
-                MessageBox.Show("There are no pairings in your database.");
+                MessageBox.Show("No projects found.", "Empty Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
         private void InitializeLitterDataGridView()
         {
-            //int topPanelHeight = 90;
+            Panel gridContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 130, 0, 0)
+            };
 
-            littersGridView.Location = new Point(0, topPanelHeight);
-            littersGridView.Width = 1000;
-            littersGridView.Height = 400;
-            littersGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            littersGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            littersGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-            littersGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            littersGridView.ReadOnly = true;    
+            littersGridView.Dock = DockStyle.Fill;
 
             littersGridView.Columns.AddRange(new DataGridViewColumn[]
             {
-                new DataGridViewTextBoxColumn { Name = "LitterId", HeaderText = "Litter ID" },
-                new DataGridViewTextBoxColumn { Name = "LitterName", HeaderText = "Name/Theme" },
-                //new DataGridViewTextBoxColumn { Name = "Species", HeaderText = "Species" }, //TODO check out what's up here 
-                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project" }, //TODO or line if there is no project? probably just default project 
-                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam" },
-                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire" },
-                new DataGridViewTextBoxColumn { Name = "DOB", HeaderText = "DOB" },
-                new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "Num Pups" },
-                new DataGridViewButtonColumn { Name = "LitterPage", HeaderText = "Litter Page", Text = "Go", UseColumnTextForButtonValue = true }
+                new DataGridViewTextBoxColumn { Name = "LitterId", HeaderText = "ID", Width = 60 },
+                new DataGridViewTextBoxColumn { Name = "LitterName", HeaderText = "Name/Theme", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "Project", HeaderText = "Project", Width = 120 },
+                new DataGridViewTextBoxColumn { Name = "Dam", HeaderText = "Dam", Width = 120 },
+                new DataGridViewTextBoxColumn { Name = "Sire", HeaderText = "Sire", Width = 120 },
+                new DataGridViewTextBoxColumn { Name = "DOB", HeaderText = "DOB", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "NumPups", HeaderText = "Pups", Width = 60 },
+                new DataGridViewButtonColumn { Name = "LitterPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
-            PopulateLittersDataDisplayArea();
+            gridContainer.Controls.Add(littersGridView);
+            littersTab.Controls.Add(gridContainer);
 
-            this.Controls.Add(littersGridView);
+            PopulateLittersDataDisplayArea();
         }
 
         private async void PopulateLittersDataDisplayArea()
@@ -834,38 +898,35 @@ namespace RATAPP.Panels
             }
             else
             {
-                MessageBox.Show("There are no litters in your database."); //FIXME this is popping up before the page is loaded, I only want it to pop up once on the page add as bug 
+                MessageBox.Show("No litters found.", "Empty Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
-        //show all data related to lines 
-        private async void InitializeLineDataGridView()
+        private void InitializeLineDataGridView()
         {
-            linesGridView.Location = new Point(0, topPanelHeight); // Changed to linesGridView
-            linesGridView.Width = 1000; // Changed to linesGridView
-            linesGridView.Height = 400; // Changed to linesGridView
-            linesGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; // Changed to linesGridView
-            linesGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize; // Changed to linesGridView
-            linesGridView.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single; // Changed to linesGridView
-            linesGridView.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders; // Changed to linesGridView
-            linesGridView.ReadOnly = true;
-
-            linesGridView.Columns.Clear(); // Clear existing columns before adding new ones // Changed to linesGridView
-
-            linesGridView.Columns.AddRange(new DataGridViewColumn[] // Changed to linesGridView
+            Panel gridContainer = new Panel
             {
-                new DataGridViewTextBoxColumn { Name = "LineId", HeaderText = "Line ID" },
-                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Line Name" },
-                new DataGridViewTextBoxColumn { Name = "StockId", HeaderText = "Stock ID" }, // Assuming Stock ID is relevant
-                new DataGridViewTextBoxColumn { Name = "StockName", HeaderText = "Stock Name" }, // Displaying Stock Name
-                new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description" },
-                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes" },
-                new DataGridViewButtonColumn { Name = "LinePage", HeaderText = "Line Page", Text = "Go", UseColumnTextForButtonValue = true }
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 130, 0, 0)
+            };
+
+            linesGridView.Dock = DockStyle.Fill;
+
+            linesGridView.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn { Name = "LineId", HeaderText = "ID", Width = 60 },
+                new DataGridViewTextBoxColumn { Name = "Name", HeaderText = "Line Name", Width = 150 },
+                new DataGridViewTextBoxColumn { Name = "StockId", HeaderText = "Stock ID", Width = 80 },
+                new DataGridViewTextBoxColumn { Name = "StockName", HeaderText = "Stock", Width = 100 },
+                new DataGridViewTextBoxColumn { Name = "Description", HeaderText = "Description", Width = 200 },
+                new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes", Width = 200 },
+                new DataGridViewButtonColumn { Name = "LinePage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
-            PopulateLineDataDisplayArea(); // Assuming this method now populates Line data
+            gridContainer.Controls.Add(linesGridView);
+            linesTab.Controls.Add(gridContainer);
 
-            this.Controls.Add(linesGridView); // Changed to linesGridView
+            PopulateLineDataDisplayArea();
         }
 
         //populate line data grid view via line + stock service 
@@ -890,7 +951,7 @@ namespace RATAPP.Panels
 
             if (_lineService == null)
             {
-                MessageBox.Show("Line service is not initialized.");
+                MessageBox.Show("Line service initialization failed.", "Service Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -926,7 +987,7 @@ namespace RATAPP.Panels
                 }
                 else
                 {
-                    MessageBox.Show("There are no lines in your database.");
+                    MessageBox.Show("No breeding lines found.", "Empty Results", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
