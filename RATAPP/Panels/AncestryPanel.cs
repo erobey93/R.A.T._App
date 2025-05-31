@@ -230,6 +230,20 @@ namespace RATAPP.Panels
             };
             this.Controls.Add(mainContainer);
 
+            // Use TableLayoutPanel for stacking with proper spanning
+            TableLayoutPanel stackedPanels = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                RowCount = 3,
+                ColumnCount = 1,
+                Padding = new Padding(0),
+                Margin = new Padding(0)
+            };
+            stackedPanels.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // For ancestryInfoPanel
+            stackedPanels.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // For filterPanel
+            stackedPanels.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // For contentPanel
+            mainContainer.Controls.Add(stackedPanels);
+
             // Add info panel at the top
             ancestryInfoPanel = CreateInfoPanel(
                 "Ancestry Viewer",
@@ -238,16 +252,18 @@ namespace RATAPP.Panels
                 "• Analyze breeding history and relationships\n" +
                 "• Export pedigree charts for documentation"
             );
-            ancestryInfoPanel.Dock = DockStyle.Top;
+            ancestryInfoPanel.Dock = DockStyle.Fill;
             ancestryInfoPanel.Height = 120;
             ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
-            mainContainer.Controls.Add(ancestryInfoPanel);
+            stackedPanels.Controls.Add(ancestryInfoPanel, 0, 0);
 
             // Create filter section
             Panel filterPanel = new Panel
             {
-                Dock = DockStyle.Top,
-                Height = 60
+                Dock = DockStyle.Fill,
+                Height = 60,
+                Margin = new Padding(0, 0, 0, 10),
+                BackColor = Color.DarkGray
             };
             // Generations selection (unchanged)
             generationsLabel = new Label
@@ -257,7 +273,6 @@ namespace RATAPP.Panels
                 AutoSize = true,
                 Location = new Point(0, 10)
             };
-            //this.Controls.Add(generationsLabel);
             filterPanel.Controls.Add(generationsLabel);
 
             generationsComboBox = new ComboBox
@@ -271,7 +286,7 @@ namespace RATAPP.Panels
             generationsComboBox.SelectedIndex = 2;
             generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
             filterPanel.Controls.Add(generationsComboBox);
-            mainContainer.Controls.Add(filterPanel);
+            stackedPanels.Controls.Add(filterPanel, 0, 1);
 
             // Create content panel to hold tree and info
             Panel contentPanel = new Panel
@@ -279,26 +294,7 @@ namespace RATAPP.Panels
                 Dock = DockStyle.Fill,
                 Padding = new Padding(0)
             };
-            mainContainer.Controls.Add(contentPanel);
-
-            // Create button panel
-            Panel buttonPanel = new Panel
-            {
-                Dock = DockStyle.Bottom,
-                Height = 50,
-                Padding = new Padding(0, 20, 0, 0)
-            };
-
-            printButton = CreateButton("Print Tree", 20);
-            generatePedigree = CreateButton("Generate Pedigree", 130);
-
-            buttonPanel.Controls.Add(printButton);
-            buttonPanel.Controls.Add(generatePedigree);
-    
-            printButton.Click += PrintButton_Click;
-           
-            generatePedigree.Click += GeneratePedigree_Click;
-            mainContainer.Controls.Add(buttonPanel);
+            stackedPanels.Controls.Add(contentPanel, 0, 2);
 
             // Create split container for tree and info
             TableLayoutPanel splitContainer = new TableLayoutPanel
@@ -340,6 +336,24 @@ namespace RATAPP.Panels
                 BackColor = Color.WhiteSmoke
             };
             splitContainer.Controls.Add(infoPanel, 1, 0);
+
+            // Create button panel
+            Panel buttonPanel = new Panel
+            {
+                Dock = DockStyle.Bottom,
+                Height = 50,
+                Padding = new Padding(0, 20, 0, 0)
+            };
+
+            printButton = CreateButton("Print Tree", 20);
+            generatePedigree = CreateButton("Generate Pedigree", 130);
+
+            buttonPanel.Controls.Add(printButton);
+            buttonPanel.Controls.Add(generatePedigree);
+
+            printButton.Click += PrintButton_Click;
+            generatePedigree.Click += GeneratePedigree_Click;
+            mainContainer.Controls.Add(buttonPanel);
 
             InitializeDataGridView();
         }
