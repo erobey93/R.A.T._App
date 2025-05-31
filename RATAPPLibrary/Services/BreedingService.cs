@@ -241,6 +241,65 @@ namespace RATAPPLibrary.Services
                 LastUpdated = lastUpdated,
             };
         }
+
+        /// <summary>
+        /// Retrieves a specific pairing by its ID, including associated dam, sire,
+        /// and project information.
+        /// </summary>
+        /// <param name="pairingId">The ID of the pairing to retrieve</param>
+        /// <returns>The pairing if found, null otherwise</returns>
+        public async Task<Pairing> GetPairingByIdAsync(string pairingId)
+        {
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Pairing
+                    .Include(p => p.Dam)
+                    .Include(p => p.Sire)
+                    .Include(p => p.Project)
+                        .ThenInclude(proj => proj.Line)
+                            .ThenInclude(line => line.Stock)
+                                .ThenInclude(stock => stock.Species)
+                    .FirstOrDefaultAsync(p => p.pairingId == pairingId);
+            });
+        }
+
+        /// <summary>
+        /// Updates an existing pairing's information.
+        ///
+        /// Updateable Fields:
+        /// - Dam: Female animal
+        /// - Sire: Male animal
+        /// - Project: Associated project
+        /// - PairingStartDate: When the pairing begins
+        /// - PairingEndDate: When the pairing ends (optional)
+        ///
+        /// Note: LastUpdated timestamp is automatically updated
+        ///
+        /// Returns: True if update successful, false otherwise
+        /// </summary>
+        public async Task<bool> UpdatePairingAsync(Pairing updatedPairing)
+        {
+            return await ExecuteInTransactionAsync(async context =>
+            {
+                var existingPairing = await context.Pairing
+                    .FirstOrDefaultAsync(p => p.pairingId == updatedPairing.pairingId);
+
+                if (existingPairing == null)
+                {
+                    return false;
+                }
+
+                existingPairing.DamId = updatedPairing.DamId;
+                existingPairing.SireId = updatedPairing.SireId;
+                existingPairing.ProjectId = updatedPairing.ProjectId;
+                existingPairing.PairingStartDate = updatedPairing.PairingStartDate;
+                existingPairing.PairingEndDate = updatedPairing.PairingEndDate;
+                existingPairing.LastUpdated = DateTime.Now;
+
+                await context.SaveChangesAsync();
+                return true;
+            });
+        }
         #endregion
         #region Litter Management
 
