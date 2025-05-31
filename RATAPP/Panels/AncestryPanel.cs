@@ -15,6 +15,7 @@ namespace RATAPP.Panels
     {
         private TreeView ancestryTree;
         private Panel infoPanel;
+        private Panel ancestryInfoPanel;
         private Panel headerPanel; 
         private Label titleLabel;
         private Button printButton;
@@ -221,7 +222,20 @@ namespace RATAPP.Panels
             this.Size = new Size(1300, 900);  // Increased form size
             this.BackColor = Color.White;
 
-             // Create filter section
+             // Add info panel at the top
+            ancestryInfoPanel = CreateInfoPanel(
+                "Ancestry Viewer",
+                "• View detailed family trees for any animal in your colony\n" +
+                "• Track lineage across multiple generations\n" +
+                "• Analyze breeding history and relationships\n" +
+                "• Export pedigree charts for documentation"
+            );
+            ancestryInfoPanel.Dock = DockStyle.Top;
+            ancestryInfoPanel.Height = 120;
+            ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
+            this.Controls.Add(ancestryInfoPanel);
+
+            // Create filter section
             Panel filterPanel = new Panel
             {
                 Dock = DockStyle.Top,
@@ -294,8 +308,6 @@ namespace RATAPP.Panels
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
             this.Controls.Add(infoPanel);
-
-            CreateInfoPanel("$Ancestry Tree: {animal.name} (ID: {animal.Id})", "What's this"); 
 
             InitializeDataGridView();
         }
@@ -690,4 +702,3 @@ namespace RATAPP.Panels
         #endregion
     }
 }
-
