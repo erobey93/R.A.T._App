@@ -44,7 +44,7 @@ namespace RATAPPLibrary.Services.Genetics
     public class ChromosomeService : IChromosomeService
     {
         private readonly RatAppDbContext _context;
-        private readonly string[] _validInheritancePatterns = { "autosomal", "x-linked", "y-linked", "mitochondrial" };
+        private readonly string[] _validInheritancePatterns = { "autosomal", "x-linked", "y-linked", "mitochondrial", "autosomal-dominant","autosomal-recessive", "polygenic"  };
 
         public ChromosomeService(RatAppDbContext context)
         {
@@ -161,12 +161,31 @@ namespace RATAPPLibrary.Services.Genetics
                 .ToListAsync();
         }
 
+        public async Task<List<Chromosome>> GetAllChromosomesAsync()
+        {
+            return await _context.Chromosomes
+                .Include(c => c.Species)
+                .Include(c => c.SpeciesId)
+                .OrderBy(c => c.Number)
+                .ToListAsync();
+        }
+
         public async Task<ChromosomePair> GetChromosomePairAsync(Guid pairId)
         {
             return await _context.ChromosomePairs
                 .Include(cp => cp.MaternalChromosome)
                 .Include(cp => cp.PaternalChromosome)
                 .FirstOrDefaultAsync(cp => cp.PairId == pairId);
+        }
+
+        public async Task<List<ChromosomePair>> GetAllChromosomePairsAsync()
+        {
+            return await _context.ChromosomePairs
+                .Include(cp => cp.MaternalChromosome)
+                .Include(cp => cp.PaternalChromosome)
+                .Include(cp => cp.GenericGenotype)
+                .Include(cp => cp.MaternalChromosome.Species)
+                .ToListAsync();
         }
 
         public async Task<List<ChromosomePair>> GetChromosomePairsForAnimalAsync(int animalId)

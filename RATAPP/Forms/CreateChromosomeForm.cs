@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using RATAPP.Helpers;
 using RATAPPLibrary.Data.DbContexts;
+using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services.Genetics;
 
@@ -32,9 +33,9 @@ namespace RATAPP.Forms
         private CreateChromosomeForm(RatAppDbContextFactory contextFactory, Species species)
         {
             _contextFactory = contextFactory;
-            _chromosomeService = new ChromosomeService(contextFactory.CreateDbContext());
+            _chromosomeService = new ChromosomeService(contextFactory.CreateContext());
             _species = species;
-            _spinner = new LoadingSpinnerHelper(this, "Loading.gif");
+            _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\R.A.T._APP\\RATAPP\\Resources\\Loading_2.gif");
 
             InitializeComponents();
             RegisterEventHandlers();

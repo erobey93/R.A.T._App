@@ -6,6 +6,7 @@ using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services.Genetics;
 using RATAPPLibrary.Services;
+using RATAPPLibrary.Data.Models;
 
 namespace RATAPP.Forms
 {
@@ -29,8 +30,8 @@ namespace RATAPP.Forms
         private CreateChromosomePairForm(RatAppDbContextFactory contextFactory)
         {
             _contextFactory = contextFactory;
-            _chromosomeService = new ChromosomeService(contextFactory.CreateDbContext());
-            _spinner = new LoadingSpinnerHelper(this, "Loading.gif");
+            _chromosomeService = new ChromosomeService(contextFactory.CreateContext());
+            _spinner = new LoadingSpinnerHelper(this, @"C:\Users\earob\source\repos\R.A.T._APP\RATAPP\Resources\Loading_2.gif");
 
             InitializeComponents();
             RegisterEventHandlers();
@@ -47,7 +48,7 @@ namespace RATAPP.Forms
         {
             try
             {
-                _spinner.Show();
+                //_spinner.Show();
                 await LoadSpecies();
                 await LoadChromosomes();
                 LoadInheritancePatterns();
@@ -57,7 +58,6 @@ namespace RATAPP.Forms
                 _spinner.Hide();
             }
         }
-
         private void InitializeComponents()
         {
             // Form properties
@@ -69,12 +69,13 @@ namespace RATAPP.Forms
             // Create header
             var headerPanel = FormComponentFactory.CreateHeaderPanel("Create Chromosome Pair");
             headerPanel.Height = 50;
+            headerPanel.Dock = DockStyle.Top;
 
             // Create main container
             var mainContainer = new Panel
             {
                 Dock = DockStyle.Fill,
-                Padding = new Padding(20)
+                Padding = new Padding(0),
             };
 
             // Create species selection
@@ -94,16 +95,14 @@ namespace RATAPP.Forms
             // Create inheritance pattern selection
             inheritancePatternComboBox = new ComboBox();
             FormStyleHelper.ApplyComboBoxStyle(inheritancePatternComboBox);
+            inheritancePatternComboBox.Items.AddRange(new object[] {
+        "Autosomal Dominant",
+        "Autosomal Recessive",
+        "X-linked Dominant",
+        "X-linked Recessive",
+        "Mitochondrial"
+    });
             var inheritanceField = CreateRequiredFormField("Inheritance Pattern:", inheritancePatternComboBox);
-
-            // Create buttons
-            createButton = new Button { Text = "Create Pair" };
-            FormStyleHelper.ApplyButtonStyle(createButton, true);
-
-            cancelButton = new Button { Text = "Cancel" };
-            FormStyleHelper.ApplyButtonStyle(cancelButton, false);
-
-            var buttonPanel = FormComponentFactory.CreateButtonPanel(createButton, cancelButton);
 
             // Create info panel
             var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
@@ -113,21 +112,52 @@ namespace RATAPP.Forms
                 "• Maternal and paternal chromosomes must be from same species");
 
             // Add all components to main container
-            mainContainer.Controls.AddRange(new Control[] {
-                speciesField,
-                maternalField,
-                paternalField,
-                inheritanceField,
-                infoPanel,
-                buttonPanel
-            });
+    //        mainContainer.Controls.AddRange(new Control[] {
+    //        speciesField,
+    //        inheritanceField,
+    //        maternalField,
+    //        paternalField,
+    //        infoPanel,
+    //});
+
+            var layoutPanel = new TableLayoutPanel
+            {
+                Dock = DockStyle.Bottom,
+                RowCount = 6,
+                ColumnCount = 1,
+                AutoSize = true,
+                Padding = new Padding(0),
+                Margin = new Padding(5)
+            };
+
+            // Add fields to layout panel
+            layoutPanel.Controls.Add(speciesField, 0, 0);
+            layoutPanel.Controls.Add(maternalField, 0, 1);
+            layoutPanel.Controls.Add(paternalField, 0, 2);
+            layoutPanel.Controls.Add(inheritanceField, 0, 3);
+            layoutPanel.Controls.Add(infoPanel, 0, 4);
+
+            // Add layout panel to main container
+            mainContainer.Controls.Add(layoutPanel);
+
+            // Create buttons
+            createButton = new Button { Text = "Create Pair" };
+            FormStyleHelper.ApplyButtonStyle(createButton, true);
+
+            cancelButton = new Button { Text = "Cancel" };
+            FormStyleHelper.ApplyButtonStyle(cancelButton, false);
+
+            var buttonPanel = FormComponentFactory.CreateButtonPanel(createButton, cancelButton);
+            buttonPanel.Dock = DockStyle.Bottom;
 
             // Add components to form
             this.Controls.AddRange(new Control[] {
-                headerPanel,
-                mainContainer
-            });
+        headerPanel,
+        mainContainer,
+        buttonPanel
+    });
         }
+
 
         private Panel CreateRequiredFormField(string label, Control control)
         {
@@ -168,6 +198,7 @@ namespace RATAPP.Forms
             }
         }
 
+        //only allow 3 inhertance patterns 
         private void LoadInheritancePatterns()
         {
             inheritancePatternComboBox.Items.Clear();
@@ -216,6 +247,7 @@ namespace RATAPP.Forms
             await LoadChromosomes();
         }
 
+        //species decides which chromosomes can be selected
         private async Task HandleChromosomeSelectionChanged(bool isMaternal)
         {
             var comboBox = isMaternal ? maternalChromosomeComboBox : paternalChromosomeComboBox;

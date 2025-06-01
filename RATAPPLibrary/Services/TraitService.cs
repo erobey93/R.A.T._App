@@ -294,6 +294,63 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        public async Task<Trait> CreateTraitAsync_FromObject(Trait newTrait)
+        {
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                // Validate the provided Trait object
+                if (newTrait == null)
+                {
+                    throw new ArgumentNullException(nameof(newTrait), "Trait object must be provided.");
+                }
+
+                if (string.IsNullOrWhiteSpace(newTrait.CommonName))
+                {
+                    throw new InvalidOperationException("Trait name must be provided.");
+                }
+
+                if (newTrait.TraitTypeId <= 0)
+                {
+                    throw new InvalidOperationException("Valid TraitTypeId must be provided.");
+                }
+
+                if (newTrait.SpeciesID <= 0)
+                {
+                    throw new InvalidOperationException("Valid SpeciesID must be provided.");
+                }
+
+                // Default description if null or empty trait doesn't have description, but maybe it should? TODO 
+                //newTrait.des = string.IsNullOrWhiteSpace(newTrait.Description) ? "N/A" : newTrait.Description;
+
+                // Check if the species exists in the database
+                var speciesExists = await _context.Species
+                    .AnyAsync(s => s.Id == newTrait.SpeciesID);
+
+                if (!speciesExists)
+                {
+                    throw new InvalidOperationException($"Species with ID '{newTrait.SpeciesID}' does not exist.");
+                }
+
+                // Check if the trait already exists
+                var existingTrait = await _context.Trait
+                    .FirstOrDefaultAsync(t => t.CommonName.Equals(newTrait.CommonName, StringComparison.OrdinalIgnoreCase) && t.TraitTypeId == newTrait.TraitTypeId);
+
+                if (existingTrait != null)
+                {
+                    throw new InvalidOperationException($"Trait '{newTrait.CommonName}' already exists for TraitTypeId '{newTrait.TraitTypeId}'.");
+                }
+
+                // Set default Genotype if not provided
+                newTrait.Genotype ??= "N/A"; // Placeholder; implement genotype logic later
+
+                // Add the new Trait to the database
+                _context.Trait.Add(newTrait);
+                await _context.SaveChangesAsync();
+
+                return newTrait;
+            });
+        }
+
         // Get all traits available in the database (for all species)
         public async Task<IEnumerable<Trait>> GetAllTraitsAsync()
         {

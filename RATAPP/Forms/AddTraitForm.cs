@@ -41,8 +41,8 @@ namespace RATAPP.Forms
             _contextFactory = contextFactory;
             _traitService = traitService;
             _geneService = geneService;
-            _chromosomeService = new ChromosomeService(contextFactory.CreateDbContext());
-            _spinner = new LoadingSpinnerHelper(this, "Loading.gif");
+            _chromosomeService = new ChromosomeService(contextFactory.CreateContext());
+            _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\R.A.T._APP\\RATAPP\\Resources\\Loading_2.gif");
 
             InitializeComponents();
             RegisterEventHandlers();
@@ -76,7 +76,7 @@ namespace RATAPP.Forms
         {
             // Form properties
             this.Text = "Add Trait";
-            this.Size = new Size(800, 600);
+            this.Size = new Size(900, 700);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
 
@@ -109,7 +109,7 @@ namespace RATAPP.Forms
 
             // Create trait info group
             var traitInfoGroup = FormComponentFactory.CreateFormSection("Trait Information", DockStyle.Top, 150);
-            
+
             // Create trait name field
             traitNameTextBox = new TextBox();
             FormStyleHelper.ApplyTextBoxStyle(traitNameTextBox);
@@ -125,7 +125,8 @@ namespace RATAPP.Forms
             FormStyleHelper.ApplyTextBoxStyle(descriptionTextBox);
             var descriptionField = FormComponentFactory.CreateFormField("Description:", descriptionTextBox);
 
-            traitInfoGroup.Controls.AddRange(new Control[] {
+            traitInfoGroup.Controls.AddRange(new Control[]
+            {
                 traitNameField,
                 traitTypeField,
                 descriptionField
@@ -152,7 +153,8 @@ namespace RATAPP.Forms
             FormStyleHelper.ApplyTextBoxStyle(genotypeTextBox);
             var genotypeField = CreateRequiredFormField("Genotype:", genotypeTextBox);
 
-            geneticInfoGroup.Controls.AddRange(new Control[] {
+            geneticInfoGroup.Controls.AddRange(new Control[]
+            {
                 chromosomePairField,
                 speciesField,
                 genotypeField
@@ -166,6 +168,8 @@ namespace RATAPP.Forms
             FormStyleHelper.ApplyButtonStyle(cancelButton, false);
 
             var buttonPanel = FormComponentFactory.CreateButtonPanel(saveButton, cancelButton);
+            buttonPanel.Dock = DockStyle.Bottom;
+            //buttonPanel.Height = 50;
 
             // Create info panel
             var infoPanel = FormComponentFactory.CreateInfoPanel("Important Information",
@@ -173,21 +177,25 @@ namespace RATAPP.Forms
                 "• Chromosome pair must exist or be created\n" +
                 "• Genotype must follow the correct format\n" +
                 "• Trait name must be unique");
+            infoPanel.Dock = DockStyle.Top;
 
             // Add all components to main container
-            mainContainer.Controls.AddRange(new Control[] {
-                traitInfoGroup,
-                geneticInfoGroup,
-                infoPanel,
-                buttonPanel
+            mainContainer.Controls.AddRange(new Control[]
+            {
+        traitInfoGroup,
+        geneticInfoGroup,
+        infoPanel
             });
 
             // Add components to form
-            this.Controls.AddRange(new Control[] {
-                headerPanel,
-                mainContainer
+            this.Controls.AddRange(new Control[]
+            {
+        headerPanel,
+        mainContainer,
+        buttonPanel
             });
         }
+
 
         private Panel CreateRequiredFormField(string label, Control control)
         {
@@ -220,7 +228,7 @@ namespace RATAPP.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading trait types: {ex.Message}", "Error", 
+                MessageBox.Show($"Error loading trait types: {ex.Message}", "Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -233,7 +241,7 @@ namespace RATAPP.Forms
                 chromosomePairComboBox.Items.Add("Create New Pair");
 
                 // Load existing pairs
-                using (var context = _contextFactory.CreateDbContext())
+                using (var context = _contextFactory.CreateContext())
                 {
                     var pairs = await _chromosomeService.GetAllChromosomePairsAsync();
                     foreach (var pair in pairs)
@@ -242,7 +250,7 @@ namespace RATAPP.Forms
                     }
                 }
 
-                chromosomePairComboBox.DisplayMember = "Name";
+                chromosomePairComboBox.DisplayMember = "PairId";
                 chromosomePairComboBox.ValueMember = "PairId";
             }
             catch (Exception ex)
@@ -305,7 +313,7 @@ namespace RATAPP.Forms
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                await _traitService.CreateTraitAsync(trait);
+                await _traitService.CreateTraitAsync_FromObject(trait);
 
                 MessageBox.Show("Trait created successfully!", "Success",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
