@@ -522,9 +522,9 @@ namespace RATAPPLibrary.Services.Genetics
 
         //perform a test pairing to see possible outcomes 
         //TODO
-        public IEnumerable<object> CalculateBreedingOutcomes(Animal dam, Animal sire)
+        public IEnumerable<string> CalculateBreedingOutcomes(Animal dam, Animal sire)
         {
-            throw new NotImplementedException();
+            return null;
         }
     }
 }

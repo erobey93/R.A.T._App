@@ -258,7 +258,8 @@ namespace RATAPP.Panels
                 new DataGridViewTextBoxColumn { Name = "Sex", HeaderText = "Sex" },
                 new DataGridViewTextBoxColumn { Name = "DOB", HeaderText = "DOB" },
                 new DataGridViewTextBoxColumn { Name = "Variety", HeaderText = "Variety" },
-                new DataGridViewButtonColumn { Name = "Details", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true }
+                new DataGridViewButtonColumn { Name = "Details", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true },
+                new DataGridViewButtonColumn { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForButtonValue = true }
             });
 
             dataDisplayArea.CellContentClick += DataGridView_CellContentClick;
@@ -272,7 +273,7 @@ namespace RATAPP.Panels
             dataDisplayArea.Rows.Clear();
             foreach (var animal in _animals)
             {
-                dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
+                dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety, "View", "Delete");
             }
         }
 
@@ -467,11 +468,11 @@ namespace RATAPP.Panels
             dataDisplayArea.Rows.Clear();
             foreach (var animal in filteredAnimals)
             {
-                dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety);
+                dataDisplayArea.Rows.Add(animal.species, animal.Id, animal.name, animal.sex, animal.DateOfBirth, animal.variety, "View", "Delete");
             }
         }
 
-        private void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private async void DataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.ColumnIndex == dataDisplayArea.Columns["Details"].Index && e.RowIndex >= 0)
             {
@@ -481,6 +482,29 @@ namespace RATAPP.Panels
                 {
                     var animalDetailsPanel = new AnimalPanel(_parentForm, _contextFactory, _animals, animal);
                     _parentForm.ShowPanel(animalDetailsPanel);
+                }
+            }
+            else if (e.ColumnIndex == dataDisplayArea.Columns["Delete"].Index && e.RowIndex >= 0)
+            {
+                int animalId = Convert.ToInt32(dataDisplayArea.Rows[e.RowIndex].Cells["AnimalID"].Value);
+                var result = MessageBox.Show(
+                    "Are you sure you want to delete this animal?",
+                    "Confirm Delete",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+                
+                if (result == DialogResult.Yes)
+                {
+                    try
+                    {
+                        await _animalService.DeleteAnimalByIdAsync(animalId);
+                        await RefreshDataAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error deleting animal: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
