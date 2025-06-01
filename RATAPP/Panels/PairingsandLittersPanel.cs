@@ -592,11 +592,31 @@ namespace RATAPP.Panels
             {
                 if (currentTab == "Pairings")
                 {
-                    MessageBox.Show("Update Pairing Form Will Be Here");
-                    //TODO update is the same as add except for the data is filled in 
-                    //UpdatePairingForm updatePairing = new UpdatePairingForm(_contextFactory);
-                    //updatePairing.ShowDialog();
-                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                    // Get the selected pairing from the grid
+                    if (pairingsGridView.SelectedRows.Count > 0)
+                    {
+                        var selectedRow = pairingsGridView.SelectedRows[0];
+                        string pairingId = selectedRow.Cells["PairingId"].Value.ToString();
+                        
+                        // Get the pairing object from the database
+                        var pairing = await _breedingService.GetPairingByIdAsync(pairingId);
+                        if (pairing != null)
+                        {
+                            UpdatePairingForm updatePairing = await UpdatePairingForm.CreateAsync(_contextFactory, pairing);
+                            updatePairing.ShowDialog();
+                            await LoadTabDataAsync(tabControl.SelectedIndex);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not find the selected pairing.", "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please select a pairing to update.", "Information",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
                 else if (currentTab == "Litters")
                 {
