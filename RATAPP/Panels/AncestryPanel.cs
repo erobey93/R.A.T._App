@@ -15,6 +15,7 @@ namespace RATAPP.Panels
     {
         private TreeView ancestryTree;
         private Panel infoPanel;
+        private Panel ancestryInfoPanel;
         private Panel headerPanel; 
         private Label titleLabel;
         private Button printButton;
@@ -218,14 +219,50 @@ namespace RATAPP.Panels
         private void InitializeCustomComponents()
         {
             // Main form setup
-            this.Size = new Size(1300, 900);  // Increased form size
-            this.BackColor = Color.White;
+            this.Dock = DockStyle.Fill;
+            this.BackColor = Color.WhiteSmoke;
 
-             // Create filter section
+            // Create main container panel
+            Panel mainContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(20)
+            };
+            this.Controls.Add(mainContainer);
+
+            // Use TableLayoutPanel for stacking with proper spanning
+            TableLayoutPanel stackedPanels = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                RowCount = 3,
+                ColumnCount = 1,
+                Padding = new Padding(0),
+                Margin = new Padding(0)
+            };
+            stackedPanels.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // For ancestryInfoPanel
+            stackedPanels.RowStyles.Add(new RowStyle(SizeType.AutoSize)); // For filterPanel
+            stackedPanels.RowStyles.Add(new RowStyle(SizeType.Percent, 100F)); // For contentPanel
+            mainContainer.Controls.Add(stackedPanels);
+
+            // Add info panel at the top
+            ancestryInfoPanel = CreateInfoPanel(
+                "Ancestry Viewer",
+                "• View detailed family trees for any animal in your colony\n" +
+                "• Track lineage across multiple generations\n" +
+                "• Analyze breeding history and relationships\n" +
+                "• Export pedigree charts for documentation"
+            );
+            ancestryInfoPanel.Dock = DockStyle.Fill;
+            ancestryInfoPanel.Height = 120;
+            ancestryInfoPanel.Margin = new Padding(0, 0, 0, 10);
+            stackedPanels.Controls.Add(ancestryInfoPanel, 0, 0);
+
+            // Create filter section
             Panel filterPanel = new Panel
             {
-                Dock = DockStyle.Top,
-                Height = 60
+                Dock = DockStyle.Fill,
+                Height = 60,
+                Margin = new Padding(0, 0, 0, 10)
             };
             // Generations selection (unchanged)
             generationsLabel = new Label
@@ -235,7 +272,6 @@ namespace RATAPP.Panels
                 AutoSize = true,
                 Location = new Point(0, 10)
             };
-            //this.Controls.Add(generationsLabel);
             filterPanel.Controls.Add(generationsLabel);
 
             generationsComboBox = new ComboBox
@@ -249,7 +285,56 @@ namespace RATAPP.Panels
             generationsComboBox.SelectedIndex = 2;
             generationsComboBox.SelectedIndexChanged += GenerationsComboBox_SelectedIndexChanged;
             filterPanel.Controls.Add(generationsComboBox);
-            this.Controls.Add(filterPanel);
+            stackedPanels.Controls.Add(filterPanel, 0, 1);
+
+            // Create content panel to hold tree and info
+            Panel contentPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0)
+            };
+            stackedPanels.Controls.Add(contentPanel, 0, 2);
+
+            // Create split container for tree and info
+            TableLayoutPanel splitContainer = new TableLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                ColumnCount = 2,
+                RowCount = 1,
+                Padding = new Padding(0),
+                Margin = new Padding(0)
+            };
+            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            splitContainer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            contentPanel.Controls.Add(splitContainer);
+
+            // TreeView panel (left side)
+            ancestryTree = new TreeView
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 9),
+                ShowNodeToolTips = true,
+                HideSelection = false
+            };
+            ancestryTree.AfterSelect += AncestryTree_AfterSelect;
+
+            Panel treeContainer = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(0, 0, 10, 0)
+            };
+            treeContainer.Controls.Add(ancestryTree);
+            splitContainer.Controls.Add(treeContainer, 0, 0);
+
+            // Info panel (right side)
+            infoPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.White
+            };
+            splitContainer.Controls.Add(infoPanel, 1, 0);
 
             // Create button panel
             Panel buttonPanel = new Panel
@@ -264,38 +349,10 @@ namespace RATAPP.Panels
 
             buttonPanel.Controls.Add(printButton);
             buttonPanel.Controls.Add(generatePedigree);
-    
+
             printButton.Click += PrintButton_Click;
-           
             generatePedigree.Click += GeneratePedigree_Click;
-            this.Controls.Add(buttonPanel);
-
-            // ENLARGED TreeView panel (left side)
-            ancestryTree = new TreeView
-            {
-                Location = new Point(20, 150),
-                Size = new Size(600, 650),  // Much larger width and height
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 9),
-                ShowNodeToolTips = true,
-                HideSelection = false,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
-            };
-            ancestryTree.AfterSelect += AncestryTree_AfterSelect;
-            this.Controls.Add(ancestryTree);
-
-            // ENLARGED Info panel (right side)
-            infoPanel = new Panel
-            {
-                Location = new Point(630, 150),  // Moved right to accommodate larger tree
-                Size = new Size(600, 650),      // Larger size
-                BorderStyle = BorderStyle.FixedSingle,
-                BackColor = Color.WhiteSmoke,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
-            };
-            this.Controls.Add(infoPanel);
-
-            CreateInfoPanel("$Ancestry Tree: {animal.name} (ID: {animal.Id})", "What's this"); 
+            mainContainer.Controls.Add(buttonPanel);
 
             InitializeDataGridView();
         }
@@ -681,7 +738,7 @@ namespace RATAPP.Panels
         {
             //show spinner 
             await GetAnimalData();
-            this.Refresh(); 
+            Refresh(); 
             //stop spinner
             //show success message 
            
@@ -690,4 +747,3 @@ namespace RATAPP.Panels
         #endregion
     }
 }
-
