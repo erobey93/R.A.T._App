@@ -493,8 +493,8 @@ namespace RATAPPLibrary.Services.Genetics
             if (string.IsNullOrWhiteSpace(request.CommonName))
                 throw new ArgumentException("Common name cannot be empty", nameof(request.CommonName));
 
-            if (request.Position <= 0)
-                throw new ArgumentException("Position must be positive", nameof(request.Position));
+            //if (request.Position <= 0)
+            //    throw new ArgumentException("Position must be positive", nameof(request.Position)); //will need another check here maybe just include every possible position and give them that list? FIXME 
 
             if (!_validCategories.Contains(request.Category.ToLower()))
                 throw new ArgumentException($"Invalid category: {request.Category}", nameof(request.Category));

@@ -507,6 +507,18 @@ namespace RATAPPLibrary.Data.DbContexts
                 .HasForeignKey(a => a.LineId) // Foreign key in Animal is LineId
                 .OnDelete(DeleteBehavior.NoAction); //I don't want the animal to be deleted if the line is deleted TODO
 
+            // Define the relationship between Animal and Genotype (One-to-Many)
+            modelBuilder.Entity<Animal>()
+                .HasMany(a => a.Genotypes) // An Animal can have many Genotypes
+                .WithOne(g => g.Animal) // Each Genotype belongs to one Animal
+                .HasForeignKey(g => g.AnimalId) // Foreign key in Genotype is AnimalId
+                .OnDelete(DeleteBehavior.Cascade); // Or your preferred delete behavior
+
+            // If you want to eager load the related data by default
+            modelBuilder.Entity<Animal>()
+                .Navigation(a => a.Genotypes)
+                .AutoInclude(); // This will include Genotypes when querying Animals
+
         }
 
         // Configure the Stock entity

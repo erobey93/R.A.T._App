@@ -78,8 +78,8 @@ namespace RATAPPLibrary.Services.Genetics
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name cannot be empty", nameof(name));
 
-            if (number <= 0)
-                throw new ArgumentException("Number must be positive", nameof(number));
+            if (number < -1)
+                throw new ArgumentException("Number must be -1 for Y, 0 for X or >0 for all other chromosomes", nameof(number));
 
             // Check if chromosome number already exists for this species
             var exists = await _context.Chromosomes
