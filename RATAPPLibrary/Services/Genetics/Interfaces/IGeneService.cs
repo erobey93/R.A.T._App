@@ -13,7 +13,7 @@ namespace RATAPPLibrary.Services.Genetics.Interfaces
         public string Name { get; set; }
         public string CommonName { get; set; }
         public Guid ChromosomePairId { get; set; }
-        public int Position { get; set; }
+        public string Position { get; set; }
         public string Category { get; set; }
         public string ImpactLevel { get; set; }
         public string ExpressionAge { get; set; }

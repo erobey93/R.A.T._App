@@ -410,6 +410,25 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        //get all genotype objects by animal id 
+        public async Task<List<Genotype>> GetAllGenotypesByAnimalId(int animalId)
+        {
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                //First, fetch all genotypes for the animal
+                var genotypes = await _context.Genotypes
+                 .Where(g => g.AnimalId == animalId)
+                 .Include(g => g.ChromosomePair)          // Load ChromosomePair
+                     .ThenInclude(cp => cp.Genes)         // Load Genes within ChromosomePair
+                        .ThenInclude(g => g.Alleles)
+                 .ToListAsync();
+
+
+                // Return the organized genotypes
+                return genotypes;
+            });
+        }
+
         //create genotype string
         public async Task<string> CreateGenotypeString(int animalId, string separator = ", ", string typeSeparator = " | ")
         {
@@ -493,8 +512,8 @@ namespace RATAPPLibrary.Services.Genetics
             if (string.IsNullOrWhiteSpace(request.CommonName))
                 throw new ArgumentException("Common name cannot be empty", nameof(request.CommonName));
 
-            if (request.Position <= 0)
-                throw new ArgumentException("Position must be positive", nameof(request.Position));
+            //if (request.Position <= 0)
+            //    throw new ArgumentException("Position must be positive", nameof(request.Position)); //will need another check here maybe just include every possible position and give them that list? FIXME 
 
             if (!_validCategories.Contains(request.Category.ToLower()))
                 throw new ArgumentException($"Invalid category: {request.Category}", nameof(request.Category));

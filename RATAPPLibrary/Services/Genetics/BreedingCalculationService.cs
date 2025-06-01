@@ -50,9 +50,13 @@ namespace RATAPPLibrary.Services.Genetics
     /// </summary>
     public class BreedingCalculationService : BaseService, IBreedingCalculationService
     {
+        AnimalService _animalService;
+        GeneService _geneService; 
 
         public BreedingCalculationService(RatAppDbContextFactory contextFactory) : base(contextFactory)
         {
+            _animalService = new AnimalService(contextFactory);
+            _geneService = new GeneService(contextFactory);
         }
 
         //using a pre-existing pairingId, create a "Breeding Calculation object that can be used to perform various calculations on that pair 
@@ -521,10 +525,112 @@ namespace RATAPPLibrary.Services.Genetics
         }
 
         //perform a test pairing to see possible outcomes 
-        //TODO
-        public IEnumerable<string> CalculateBreedingOutcomes(Animal dam, Animal sire)
+        public async Task <IEnumerable<string>> CalculateBreedingOutcomes(Animal dam, Animal sire)
         {
-            return null;
+            // Simple implementation for testing possible outcomes primarily testing recessive + dominant interactions right now will be increasing complexity in future implementations 
+            var possibleOutcomes = new List<string>();
+
+            if (dam == null || sire == null)
+            {
+                possibleOutcomes.Add("Invalid animals provided");
+                return possibleOutcomes;
+            }
+
+            // Check for basic compatibility issues
+            if (dam.StockId != sire.StockId)
+            {
+                possibleOutcomes.Add($"Warning: Different species - Dam: {dam.StockId}, Sire: {sire.StockId}");
+            }
+
+            //FIXME - for now have to make sure that I'm getting the full object back with all related objects 
+            var damGenotype = await _geneService.GetAllGenotypesByAnimalId(dam.Id);
+            var sireGenotype = await _geneService.GetAllGenotypesByAnimalId(sire.Id);
+
+            if (damGenotype.Count > 0 && sireGenotype.Count > 0)
+            {
+                var firstDamGenotype = damGenotype.First();
+                var firstSireGenotype = sireGenotype.First();
+
+                // Simple genotype combination examples
+                // This assumes a simplified model where we're just looking at one gene for demonstration
+                //var damGenotype = dam.Genotypes?.FirstOrDefault()?.ChromosomePair?.Genes?.FirstOrDefault();
+                //var sireGenotype = sire.Genotypes?.FirstOrDefault()?.ChromosomePair?.Genes?.FirstOrDefault();
+
+                if (damGenotype == null || sireGenotype == null)
+                {
+                    possibleOutcomes.Add("No genotype data available for one or both animals");
+                    return possibleOutcomes;
+                }
+
+                // Get alleles (simplified - in real implementation I will query the database)
+                var damAlleles = firstDamGenotype.ChromosomePair.Genes.First().Alleles ?? new List<Allele>();
+                var sireAlleles = firstSireGenotype.ChromosomePair.Genes.First().Alleles ?? new List<Allele>();
+
+                if (!damAlleles.Any() || !sireAlleles.Any())
+                {
+                    possibleOutcomes.Add("No allele data available for one or both animals");
+                    return possibleOutcomes;
+                }
+
+                // Calculate possible combinations (Mendelian inheritance)
+                possibleOutcomes.Add($"Possible allele combinations for gene {firstDamGenotype.ChromosomePair.Genes.First().Name}:");
+
+                foreach (var damAllele in damAlleles)
+                {
+                    foreach (var sireAllele in sireAlleles)
+                    {
+                        string phenotype = DeterminePhenotype(damAllele, sireAllele);
+                        possibleOutcomes.Add($"- {damAllele.Symbol}{sireAllele.Symbol}: {phenotype} (25% chance)");
+                    }
+                }
+
+                // Add basic trait probability summary
+                possibleOutcomes.Add("\nPotential trait probabilities:");
+
+                // Group by phenotype and calculate combined probabilities
+                var phenotypeGroups = new Dictionary<string, float>();
+                foreach (var damAllele in damAlleles)
+                {
+                    foreach (var sireAllele in sireAlleles)
+                    {
+                        string phenotype = DeterminePhenotype(damAllele, sireAllele);
+                        if (!phenotypeGroups.ContainsKey(phenotype))
+                        {
+                            phenotypeGroups[phenotype] = 0;
+                        }
+                        phenotypeGroups[phenotype] += 0.25f;
+                    }
+                }
+
+                foreach (var group in phenotypeGroups)
+                {
+                    possibleOutcomes.Add($"- {group.Key}: {group.Value * 100}% chance");
+                }
+
+                // Add basic compatibility check
+                var criticalGenes = dam.Genotypes?
+                    .SelectMany(g => g.ChromosomePair.Genes)
+                    .Where(g => g.ImpactLevel == "critical")
+                    .Union(sire.Genotypes?
+                        .SelectMany(g => g.ChromosomePair.Genes)
+                        .Where(g => g.ImpactLevel == "critical") ?? new List<Gene>())
+                    .Distinct();
+
+                if (criticalGenes?.Any() == true)
+                {
+                    possibleOutcomes.Add("\nCritical gene considerations:");
+                    foreach (var gene in criticalGenes)
+                    {
+                        possibleOutcomes.Add($"- {gene.Name} (Impact: {gene.ImpactLevel})");
+                    }
+                }
+
+                return possibleOutcomes;
+            }
+
+            else return null; 
+
+           
         }
     }
 }

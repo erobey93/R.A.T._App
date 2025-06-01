@@ -102,6 +102,8 @@ namespace RATAPP.Panels
         private Panel actionButtonPanel;
         private Panel featureButtonPanel;
 
+        private List<string> animalImageUrls; 
+
         public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, AnimalDto[] allAnimals,AnimalDto currAnimal)
         {
             _contextFactory = contextFactory;
@@ -296,7 +298,7 @@ namespace RATAPP.Panels
             this.Controls.Add(sexComboBox);
             this.Controls.Add(varietyComboBox);
             this.Controls.Add(colorComboBox);
-            this.Controls.Add(genotypeComboBox);
+            //this.Controls.Add(genotypeComboBox);
             this.Controls.Add(ancestryComboBox);
             this.Controls.Add(breederInfoComboBox);
             this.Controls.Add(commentsTextBox);
@@ -305,7 +307,9 @@ namespace RATAPP.Panels
             this.Controls.Add(earTypeComboBox);
             this.Controls.Add(inbredTextBox);
             this.Controls.Add(markingComboBox);
-            this.Controls.Add(dobPicker); 
+            this.Controls.Add(dobPicker);
+
+            genotypeComboBox.AllowDrop = false;
 
 
             NewAnimal(); //new animal settings
@@ -562,6 +566,13 @@ namespace RATAPP.Panels
                             _animal.AdditionalImages.Add(normalizedPath);
                             await _animalService.AddAdditionalAnimalImagesAsync(_animal.Id, _animal.AdditionalImages.ToArray());
                             Refresh(); //FIXME just trying this 
+                        }
+                        else
+                        {
+                            if (animalImageUrls == null)
+                                animalImageUrls = new List<string>();
+                            //add to local variable so that we still have the images 
+                            animalImageUrls.Add(normalizedPath);
                         }
                     }
                 }
@@ -1466,7 +1477,8 @@ namespace RATAPP.Panels
                     markings = markingComboBox.Text,
                     earType = earTypeComboBox.Text,
                     breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    genotype = "XYZ"//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO this should come from the phenotypes entered for now 
+                    genotype = "XYZ",//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO this should come from the phenotypes entered for now 
+                    AdditionalImages = animalImageUrls,
                 };
                 return animal;
             }
@@ -1501,6 +1513,7 @@ namespace RATAPP.Panels
         {
             AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
 
+            
             if (animalDto == null) //if the data is invalid, show an error message and return
             {
                 ShowMessage("Error: Animal data is invalid. Please check required fields.");
@@ -1716,6 +1729,8 @@ namespace RATAPP.Panels
             inbredTextBox = CreateTextBox(150, 450, "0"); //start with zero, set actual value below FIXME weird logic but works for now 
             //set the % inbred, if any 
             await GetInbredCoEfficient();
+
+            genotypeTextBox.ReadOnly = true;
 
             // Move commentsTextBox below everything else and make it larger
             //FIXME should have a multi line text box option

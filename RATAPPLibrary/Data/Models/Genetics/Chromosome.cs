@@ -15,7 +15,7 @@ namespace RATAPPLibrary.Data.Models.Genetics
         public string Name { get; set; }
 
         [Required]
-        public int Number { get; set; }
+        public int Number { get; set; } //NOTE: I am using 0 and -1 to represent X and Y chromsome numbers to avoid having to change the type 
 
         [Required]
         public int SpeciesId { get; set; }
@@ -24,7 +24,7 @@ namespace RATAPPLibrary.Data.Models.Genetics
 
         public int? Region { get; set; }
 
-        public int? Band { get; set; }
+        public string? Band { get; set; }
 
         [StringLength(1000)]
         public string Description { get; set; }

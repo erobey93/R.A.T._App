@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RATAPPLibrary.Data.DbContexts;
 
@@ -11,9 +12,11 @@ using RATAPPLibrary.Data.DbContexts;
 namespace RATAPPLibrary.Migrations
 {
     [DbContext(typeof(RatAppDbContext))]
-    partial class RatAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250601205913_updateGeneType")]
+    partial class updateGeneType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -612,7 +615,7 @@ namespace RATAPPLibrary.Migrations
                         .HasColumnType("nvarchar(1)");
 
                     b.Property<string>("Band")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -641,7 +644,9 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasKey("ChromosomeId");
 
-                    b.HasIndex("SpeciesId");
+                    b.HasIndex("SpeciesId", "Number", "Arm", "Region", "Band")
+                        .IsUnique()
+                        .HasFilter("[Arm] IS NOT NULL AND [Region] IS NOT NULL AND [Band] IS NOT NULL");
 
                     b.ToTable("Chromosomes");
                 });
@@ -811,11 +816,12 @@ namespace RATAPPLibrary.Migrations
 
                     b.HasKey("GenotypeId");
 
-                    b.HasIndex("AnimalId");
-
                     b.HasIndex("ChromosomePairId");
 
                     b.HasIndex("TraitId");
+
+                    b.HasIndex("AnimalId", "ChromosomePairId")
+                        .IsUnique();
 
                     b.ToTable("Genotypes");
                 });
@@ -1276,7 +1282,7 @@ namespace RATAPPLibrary.Migrations
                     b.HasOne("RATAPPLibrary.Data.Models.Species", "Species")
                         .WithMany()
                         .HasForeignKey("SpeciesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Species");
@@ -1336,19 +1342,19 @@ namespace RATAPPLibrary.Migrations
                     b.HasOne("RATAPPLibrary.Data.Models.Animal", "Animal")
                         .WithMany("Genotypes")
                         .HasForeignKey("AnimalId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.ChromosomePair", "ChromosomePair")
                         .WithMany("Genotypes")
                         .HasForeignKey("ChromosomePairId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("RATAPPLibrary.Data.Models.Genetics.Trait", "Trait")
                         .WithMany()
                         .HasForeignKey("TraitId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Animal");

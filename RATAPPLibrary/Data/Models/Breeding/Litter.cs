@@ -23,5 +23,6 @@
         // Navigation property to the Breeders associated with this litter
         public virtual ICollection<Breeder>? Breeders { get; set; } // Allows multiple breeders to be associated 
         public virtual ICollection<Animal>? Animals { get; set; } // The animals (offspring) in the litter
+        public virtual ICollection<LitterImage>? imageUrls { get; set; } // The images related to the litter 
     }
 }

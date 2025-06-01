@@ -21,7 +21,7 @@ namespace RATAPPLibrary.Data.Models.Genetics
         public string CommonName { get; set; }
 
         [Required]
-        public int Position { get; set; }
+        public string Position { get; set; }
 
         [StringLength(1000)]
         public string Description { get; set; }

@@ -985,7 +985,7 @@ namespace RATAPP.Panels
                 var sireAsAnimalObj = getSireAsAnimalObj;
 
                 // Calculate Possible Outcomes
-                var results = _breedingService.CalculateBreedingOutcomes(damAsAnimalObj, sireAsAnimalObj); //IDK why this was here because we want the possible phenotype/genotype outcomes 
+                var results = await _breedingService.CalculateBreedingOutcomes(damAsAnimalObj, sireAsAnimalObj); //IDK why this was here because we want the possible phenotype/genotype outcomes 
                 //var results = await _breedingService.CalculateOffspringProbabilitiesAsync();
 
                 if (results == null || !results.Any())

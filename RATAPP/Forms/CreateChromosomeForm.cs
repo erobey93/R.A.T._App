@@ -217,7 +217,7 @@ namespace RATAPP.Forms
                     SpeciesId = _species.Id,
                     Arm = GetSelectedArm(),
                     Region = regionInput.Value > 0 ? (int)regionInput.Value : null,
-                    Band = bandInput.Value > 0 ? (int)bandInput.Value : null,
+                    Band = bandInput.Value > 0 ? bandInput.Value.ToString() : null,
                     Description = descriptionTextBox.Text.Trim(),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow

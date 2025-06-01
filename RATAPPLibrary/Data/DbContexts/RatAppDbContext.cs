@@ -54,6 +54,7 @@ namespace RATAPPLibrary.Data.DbContexts
         public virtual DbSet<Stock> Stock { get; set; }
         public virtual DbSet<Line> Line { get; set; }
         public virtual DbSet<Litter> Litter { get; set; }
+        public virtual DbSet<LitterImage> LitterImage { get; set; }
         public virtual DbSet<Project> Project { get; set; }
         public virtual DbSet<Pairing> Pairing { get; set; }
 
@@ -123,7 +124,9 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureGenericGenotype(modelBuilder);
 
             ConfigureAnimalImage(modelBuilder);
+            ConfigureLitterImage(modelBuilder);
         }
+
         private void ConfigureAnimalImage(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AnimalImage>(entity =>
@@ -154,18 +157,83 @@ namespace RATAPPLibrary.Data.DbContexts
             });
         }
 
+        private void ConfigureLitterImage(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LitterImage>(entity =>
+            {
+                // Primary key configuration
+                entity.HasKey(li => li.Id);
+
+                // Relationship configuration: AnimalImage -> Animal
+                entity.HasOne(li => li.Litter)
+                      .WithMany(l => l.imageUrls) // Assuming Animal has a collection of AnimalImages
+                      .HasForeignKey(li => li.LitterId)
+                      .OnDelete(DeleteBehavior.Cascade); // Adjust behavior as needed
+
+                // Unique constraint: SpeciesId and Number
+                entity.HasIndex(li => new { li.LitterId, li.CreatedOn })
+                      .IsUnique();
+
+                // Property configurations
+                entity.Property(li => li.ImageUrl)
+                      .IsRequired()
+                      .HasMaxLength(2048); // Assuming URL maximum length
+
+                entity.Property(li => li.CreatedOn)
+                      .IsRequired();
+
+                entity.Property(li => li.LastUpdated)
+                      .IsRequired();
+            });
+        }
+
         private void ConfigureChromosome(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Chromosome>()
-                .HasOne(c => c.Species)
-                .WithMany()
-                .HasForeignKey(c => c.SpeciesId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<ChromosomePair>(entity =>
+            {
+                // Primary Key
+                entity.HasKey(cp => cp.PairId);
 
-            // Update the unique index to include Arm, Region, and Band
-            modelBuilder.Entity<Chromosome>()
-                .HasIndex(c => new { c.SpeciesId, c.Number, c.Arm, c.Region, c.Band })
-                .IsUnique();
+                // Properties configuration
+                entity.Property(cp => cp.MaternalChromosomeId).IsRequired();
+                entity.Property(cp => cp.PaternalChromosomeId).IsRequired();
+                entity.Property(cp => cp.InheritancePattern)
+                      .IsRequired()
+                      .HasMaxLength(50);
+                entity.Property(cp => cp.CreatedAt).IsRequired();
+                entity.Property(cp => cp.UpdatedAt).IsRequired();
+
+                // Relationships
+                // Maternal Chromosome (One-to-One)
+                entity.HasOne(cp => cp.MaternalChromosome)
+                      .WithMany()
+                      .HasForeignKey(cp => cp.MaternalChromosomeId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevent delete if chromosome is in use
+
+                // Paternal Chromosome (One-to-One)
+                entity.HasOne(cp => cp.PaternalChromosome)
+                      .WithMany()
+                      .HasForeignKey(cp => cp.PaternalChromosomeId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                // Genes (One-to-Many)
+                entity.HasMany(cp => cp.Genes)
+                      .WithOne() // Assuming Gene doesn't have navigation back to ChromosomePair
+                      .HasForeignKey(g => g.ChromosomePairId)
+                      .OnDelete(DeleteBehavior.Cascade); // Delete genes when pair is deleted
+
+                // Genotypes (One-to-Many)
+                entity.HasMany(cp => cp.Genotypes)
+                      .WithOne(g => g.ChromosomePair)
+                      .HasForeignKey(g => g.ChromosomePairId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevent delete if referenced by genotypes
+
+                // GenericGenotypes (One-to-Many)
+                entity.HasMany(cp => cp.GenericGenotype)
+                      .WithOne() // Assuming GenericGenotype doesn't have navigation back
+                      .HasForeignKey(gg => gg.ChromosomePairId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
         private void ConfigureChromosomePair(ModelBuilder modelBuilder)
@@ -181,6 +249,12 @@ namespace RATAPPLibrary.Data.DbContexts
                 .WithMany(c => c.PaternalPairs)
                 .HasForeignKey(cp => cp.PaternalChromosomeId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            // ChromosomePair -> Genes (One-to-Many)
+            modelBuilder.Entity<ChromosomePair>()
+                .HasMany(cp => cp.Genes)
+                .WithOne() // Assuming Gene has no back-reference
+                .HasForeignKey(g => g.ChromosomePairId);
         }
 
         private void ConfigureGene(ModelBuilder modelBuilder)
@@ -211,21 +285,51 @@ namespace RATAPPLibrary.Data.DbContexts
 
         private void ConfigureGenotype(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Genotype>()
-                .HasOne(g => g.Animal)
-                .WithMany(a => a.Genotypes)
-                .HasForeignKey(g => g.AnimalId)
-                .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Genotype>(entity =>
+            {
+                // Primary Key
+                entity.HasKey(g => g.GenotypeId);
 
-            modelBuilder.Entity<Genotype>()
-                .HasOne(g => g.ChromosomePair)
-                .WithMany(cp => cp.Genotypes)
-                .HasForeignKey(g => g.ChromosomePairId)
-                .OnDelete(DeleteBehavior.NoAction);
+                // Properties configuration
+                entity.Property(g => g.GenotypeCode)
+                      .IsRequired();
 
-            modelBuilder.Entity<Genotype>()
-                .HasIndex(g => new { g.AnimalId, g.ChromosomePairId })
-                .IsUnique();
+                entity.Property(g => g.AnimalId)
+                      .IsRequired();
+
+                entity.Property(g => g.ChromosomePairId)
+                      .IsRequired();
+
+                entity.Property(g => g.CreatedAt)
+                      .IsRequired();
+
+                entity.Property(g => g.UpdatedAt)
+                      .IsRequired();
+
+                entity.Property(g => g.TraitId)
+                      .IsRequired();
+
+                // Relationships
+                // Animal (Many-to-One)
+                entity.HasOne(g => g.Animal)
+                      .WithMany(a => a.Genotypes)
+                      .HasForeignKey(g => g.AnimalId)
+                      .OnDelete(DeleteBehavior.Cascade); // Delete genotypes when animal is deleted
+
+                // ChromosomePair (Many-to-One)
+                entity.HasOne(g => g.ChromosomePair)
+                      .WithMany(cp => cp.Genotypes)
+                      .HasForeignKey(g => g.ChromosomePairId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevent delete if referenced
+
+                // Trait (Many-to-One)
+                entity.HasOne(g => g.Trait)
+                      .WithMany() // Assuming Trait doesn't have navigation back to Genotype
+                      .HasForeignKey(g => g.TraitId)
+                      .OnDelete(DeleteBehavior.Restrict); // Prevent delete if referenced
+            });
+
+
         }
 
         private void ConfigureGenericGenotype(ModelBuilder modelBuilder)
@@ -473,6 +577,18 @@ namespace RATAPPLibrary.Data.DbContexts
                 .WithMany(l => l.Animals) // A Line can have many Animals
                 .HasForeignKey(a => a.LineId) // Foreign key in Animal is LineId
                 .OnDelete(DeleteBehavior.NoAction); //I don't want the animal to be deleted if the line is deleted TODO
+
+            // Define the relationship between Animal and Genotype (One-to-Many)
+            modelBuilder.Entity<Animal>()
+                .HasMany(a => a.Genotypes) // An Animal can have many Genotypes
+                .WithOne(g => g.Animal) // Each Genotype belongs to one Animal
+                .HasForeignKey(g => g.AnimalId) // Foreign key in Genotype is AnimalId
+                .OnDelete(DeleteBehavior.Cascade); // Or your preferred delete behavior
+
+            // If you want to eager load the related data by default
+            modelBuilder.Entity<Animal>()
+                .Navigation(a => a.Genotypes)
+                .AutoInclude(); // This will include Genotypes when querying Animals
 
         }
 
