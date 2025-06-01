@@ -952,7 +952,7 @@ namespace RATAPP.Panels
             await RefreshTraitGrid();
         }
 
-        private void CalculateButton_Click(object sender, EventArgs e)
+        private async void CalculateButton_Click(object sender, EventArgs e)
         {
             if (dam1Combo.SelectedItem == null || sire1Combo.SelectedItem == null)
             {
@@ -960,8 +960,8 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var dam = (AnimalDto)dam1Combo.SelectedItem;
-            var sire = (AnimalDto)sire1Combo.SelectedItem;
+            var dam = dam1Combo.SelectedItem as AnimalDto;
+            var sire = sire1Combo.SelectedItem as AnimalDto;
 
             // Clear previous results
             resultPanel.Controls.Clear();
@@ -978,11 +978,11 @@ namespace RATAPP.Panels
             try
             {
                 //get the animalDto objects for dam and sire back as Animal objects
-                var getDamAsAnimalObj = _animalService.MapAnimalDtoBackToAnimal(dam);
-                var getSireAsAnimalObj = _animalService.MapAnimalDtoBackToAnimal(sire);
+                var getDamAsAnimalObj = await _animalService.MapAnimalDtoBackToAnimal(dam);
+                var getSireAsAnimalObj = await _animalService.MapAnimalDtoBackToAnimal(sire);
 
-                var damAsAnimalObj = getDamAsAnimalObj.Result;
-                var sireAsAnimalObj = getSireAsAnimalObj.Result;
+                var damAsAnimalObj = getDamAsAnimalObj;
+                var sireAsAnimalObj = getSireAsAnimalObj;
 
                 // Calculate Possible Outcomes
                 var results = _breedingService.CalculateBreedingOutcomes(damAsAnimalObj, sireAsAnimalObj); //IDK why this was here because we want the possible phenotype/genotype outcomes 
