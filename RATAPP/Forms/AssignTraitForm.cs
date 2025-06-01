@@ -35,7 +35,7 @@ namespace RATAPP.Forms
             _animalService = animalService;
             _contextFactory = contextFactory;
             _selectedTrait = selectedTrait;
-            _spinner = new LoadingSpinnerHelper(this, "Loading.gif");
+            _spinner = new LoadingSpinnerHelper(this, "C:\\Users\\earob\\source\\repos\\R.A.T._APP\\RATAPP\\Resources\\Loading_2.gif");
 
             InitializeComponents();
             RegisterEventHandlers();

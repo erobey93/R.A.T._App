@@ -50,6 +50,70 @@ namespace RATAPPLibrary.Services
             });
         }
 
+        //get all trait names by type and species - don't return full object just the names
+        public async Task<List<string>> GetTraitsByTypeAndSpeciesAsync(string type, string species)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                List<string> traitList = new List<string>();
+                // search the traitType by name
+                var traitType = await _context.TraitType
+                    .FirstOrDefaultAsync(tt => tt.Name.ToLower() == type.ToLower());
+                if (traitType == null)
+                {
+                    throw new InvalidOperationException($"Trait type '{type}' does not exist.");
+                }
+
+                if (species != null && species != "Unknown")
+                { // search Traits by TraitTypeId and SpeciesID
+                    var speciesId = _context.Species
+                        .Where(s => s.CommonName.ToLower() == species.ToLower())
+                        .Select(s => s.Id)
+                        .FirstOrDefault();
+
+                    var traits = await _context.Trait
+                        .Where(t => t.TraitTypeId == traitType.Id && t.SpeciesID == speciesId)
+                        .ToListAsync();
+
+                    foreach (var trait in traits)
+                    {
+                        traitList.Add(trait.CommonName);
+                    }
+                }
+                else
+                {
+                    var traits = await _context.Trait
+                       .Where(t => t.TraitTypeId == traitType.Id)
+                       .ToListAsync();
+
+                    foreach (var trait in traits)
+                    {
+                        traitList.Add(trait.CommonName);
+                    }
+                }
+
+                return traitList;
+            });
+        }
+
+        public async Task<Trait> GetTraitByNameAsync(string traitName)
+        {
+            return await ExecuteInContextAsync(async context =>
+            {
+                var trait = await context.Trait
+                    .Include(t => t.TraitType)
+                    .Include(t => t.Species)
+                    .FirstOrDefaultAsync(t => t.CommonName == traitName);
+
+                if (trait == null)
+                {
+                    throw new KeyNotFoundException($"Trait with common name {traitName} not found.");
+                }
+
+                return trait;
+            });
+        }
+
         public async Task<Trait> CreateTraitAsync_FromObject(Trait newTrait)
         {
             return await ExecuteInTransactionAsync(async _context =>
@@ -108,23 +172,23 @@ namespace RATAPPLibrary.Services
         }
 
         // Get all traits available in the database (for all species)
-        public async Task<IEnumerable<Trait>> GetAllTraitsAsync()
-        {
-            return await ExecuteInContextAsync(async context =>
-            {
-                var trait = await context.Trait
-                    .Include(t => t.TraitType)
-                    .Include(t => t.Species)
-                    .FirstOrDefaultAsync(t => t.CommonName == name);
+        //public async Task<IEnumerable<Trait>> GetAllTraitsAsync()
+        //{
+        //    return await ExecuteInContextAsync(async context =>
+        //    {
+        //        var trait = await context.Trait
+        //            .Include(t => t.TraitType)
+        //            .Include(t => t.Species)
+        //            .FirstOrDefaultAsync(t => t.CommonName == name);
 
-                if (trait == null)
-                {
-                    throw new KeyNotFoundException($"Trait with name '{name}' not found.");
-                }
+        //        if (trait == null)
+        //        {
+        //            throw new KeyNotFoundException($"Trait with name '{name}' not found.");
+        //        }
 
-                return trait;
-            });
-        }
+        //        return trait;
+        //    });
+        //}
 
         public async Task<Dictionary<string, List<string>>> GetTraitMapForSingleAnimal(int animalId)
         {
@@ -171,8 +235,6 @@ namespace RATAPPLibrary.Services
                 {
                     TraitId = traitId,
                     AnimalId = animalId,
-                    CreatedOn = DateTime.UtcNow,
-                    LastUpdated = DateTime.UtcNow
                 };
 
                 context.AnimalTrait.Add(animalTrait);
