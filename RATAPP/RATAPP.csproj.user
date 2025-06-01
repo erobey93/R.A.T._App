@@ -28,6 +28,12 @@
     <Compile Update="Forms\CreateAccountForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\CreateChromosomeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\CreateChromosomePairForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\HealthRecord.cs">
       <SubType>Form</SubType>
     </Compile>
