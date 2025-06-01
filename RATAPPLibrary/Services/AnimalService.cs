@@ -263,6 +263,7 @@ namespace RATAPPLibrary.Services
                 int stockId = line.StockId;
                 var newAnimal = new Animal
                 {
+                    Id = animalDto.Id,
                     registrationNumber = animalDto.regNum,
                     StockId = stockId,
                     Name = animalDto.name,

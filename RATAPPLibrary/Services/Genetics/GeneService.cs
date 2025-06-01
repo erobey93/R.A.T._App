@@ -410,6 +410,25 @@ namespace RATAPPLibrary.Services.Genetics
             });
         }
 
+        //get all genotype objects by animal id 
+        public async Task<List<Genotype>> GetAllGenotypesByAnimalId(int animalId)
+        {
+            return await ExecuteInTransactionAsync(async _context =>
+            {
+                //First, fetch all genotypes for the animal
+                var genotypes = await _context.Genotypes
+                 .Where(g => g.AnimalId == animalId)
+                 .Include(g => g.ChromosomePair)          // Load ChromosomePair
+                     .ThenInclude(cp => cp.Genes)         // Load Genes within ChromosomePair
+                        .ThenInclude(g => g.Alleles)
+                 .ToListAsync();
+
+
+                // Return the organized genotypes
+                return genotypes;
+            });
+        }
+
         //create genotype string
         public async Task<string> CreateGenotypeString(int animalId, string separator = ", ", string typeSeparator = " | ")
         {
