@@ -360,36 +360,67 @@ namespace RATAPPLibrary.Services
         }
 
         /// <summary>
+        /// Retrieves a specific litter by its ID, including associated pairing
+        /// and parent information.
+        /// </summary>
+        /// <param name="litterId">The ID of the litter to retrieve</param>
+        /// <returns>The litter if found, null otherwise</returns>
+        public async Task<Litter> GetLitterByIdAsync(string litterId)
+        {
+            return await ExecuteInContextAsync(async context =>
+            {
+                return await context.Litter
+                    .Include(l => l.Pair)
+                        .ThenInclude(p => p.Dam)
+                    .Include(l => l.Pair)
+                        .ThenInclude(p => p.Sire)
+                    .Include(l => l.Pair)
+                        .ThenInclude(p => p.Project)
+                    .FirstOrDefaultAsync(l => l.LitterId == litterId);
+            });
+        }
+
+        /// <summary>
         /// Updates an existing litter's information.
         ///
         /// Updateable Fields:
         /// - Name: Litter identifier/name
-        /// - DOB: Date of birth
+        /// - PairId: Associated breeding pair
+        /// - DateOfBirth: Date of birth
         /// - NumPups: Number of pups in litter
+        /// - NumLivePups: Number of live pups
+        /// - NumMale: Number of male pups
+        /// - NumFemale: Number of female pups
+        /// - Notes: Additional information
         ///
         /// Note: LastUpdated timestamp is automatically updated
         ///
-        /// Throws:
-        /// - KeyNotFoundException if litter not found
+        /// Returns: True if update successful, false otherwise
         /// </summary>
-        /// <returns>Updated Litter object</returns>
-        public async Task<Litter> UpdateLitterAsync(int litterId, string name, DateTime dob, int numPups)
+        public async Task<bool> UpdateLitterAsync(Litter updatedLitter)
         {
             return await ExecuteInTransactionAsync(async context =>
             {
-                var litter = await context.Litter.FindAsync(litterId);
-                if (litter == null)
+                var existingLitter = await context.Litter
+                    .FirstOrDefaultAsync(l => l.LitterId == updatedLitter.LitterId);
+
+                if (existingLitter == null)
                 {
-                    throw new KeyNotFoundException($"Litter {litterId} not found");
+                    return false;
                 }
 
-                litter.Name = name;
-                litter.DateOfBirth = dob;
-                litter.NumPups = numPups;
-                litter.LastUpdated = DateTime.Now;
+                existingLitter.Name = updatedLitter.Name;
+                existingLitter.PairId = updatedLitter.PairId;
+                existingLitter.DateOfBirth = updatedLitter.DateOfBirth;
+                existingLitter.NumPups = updatedLitter.NumPups;
+                existingLitter.NumLivePups = updatedLitter.NumLivePups;
+                existingLitter.NumMale = updatedLitter.NumMale;
+                existingLitter.NumFemale = updatedLitter.NumFemale;
+                existingLitter.Notes = updatedLitter.Notes;
+                existingLitter.LastUpdated = DateTime.Now;
 
                 await context.SaveChangesAsync();
-                return litter;
+                return true;
             });
         }
 

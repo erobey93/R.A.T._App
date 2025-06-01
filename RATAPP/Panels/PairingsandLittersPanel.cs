@@ -620,11 +620,31 @@ namespace RATAPP.Panels
                 }
                 else if (currentTab == "Litters")
                 {
-                    MessageBox.Show("Update Litters Form Will Be Here");
-                    //TODO update is the same as add except for the data is filled in 
-                    //UpdateLitterForm updateLitter = await UpdateLitterForm.CreateAsync(_contextFactory);
-                    //updateLitter.ShowDialog();
-                    //await LoadTabDataAsync(tabControl.SelectedIndex);
+                    // Get the selected litter from the grid
+                    if (littersGridView.SelectedRows.Count > 0)
+                    {
+                        var selectedRow = littersGridView.SelectedRows[0];
+                        string litterId = selectedRow.Cells["LitterId"].Value.ToString();
+                        
+                        // Get the litter object from the database
+                        var litter = await _breedingService.GetLitterByIdAsync(litterId);
+                        if (litter != null)
+                        {
+                            UpdateLitterForm updateLitter = await UpdateLitterForm.CreateAsync(_contextFactory, litter);
+                            updateLitter.ShowDialog();
+                            await LoadTabDataAsync(tabControl.SelectedIndex);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Could not find the selected litter.", "Error",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Please select a litter to update.", "Information",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
                 }
                 else if (currentTab == "Line Management")
                 {
