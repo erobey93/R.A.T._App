@@ -54,6 +54,7 @@ namespace RATAPPLibrary.Data.DbContexts
         public virtual DbSet<Stock> Stock { get; set; }
         public virtual DbSet<Line> Line { get; set; }
         public virtual DbSet<Litter> Litter { get; set; }
+        public virtual DbSet<LitterImage> LitterImage { get; set; }
         public virtual DbSet<Project> Project { get; set; }
         public virtual DbSet<Pairing> Pairing { get; set; }
 
@@ -123,7 +124,9 @@ namespace RATAPPLibrary.Data.DbContexts
             ConfigureGenericGenotype(modelBuilder);
 
             ConfigureAnimalImage(modelBuilder);
+            ConfigureLitterImage(modelBuilder);
         }
+
         private void ConfigureAnimalImage(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AnimalImage>(entity =>
@@ -150,6 +153,36 @@ namespace RATAPPLibrary.Data.DbContexts
                       .IsRequired();
 
                 entity.Property(ai => ai.LastUpdated)
+                      .IsRequired();
+            });
+        }
+
+        private void ConfigureLitterImage(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<LitterImage>(entity =>
+            {
+                // Primary key configuration
+                entity.HasKey(li => li.Id);
+
+                // Relationship configuration: AnimalImage -> Animal
+                entity.HasOne(li => li.Litter)
+                      .WithMany(l => l.imageUrls) // Assuming Animal has a collection of AnimalImages
+                      .HasForeignKey(li => li.LitterId)
+                      .OnDelete(DeleteBehavior.Cascade); // Adjust behavior as needed
+
+                // Unique constraint: SpeciesId and Number
+                entity.HasIndex(li => new { li.LitterId, li.CreatedOn })
+                      .IsUnique();
+
+                // Property configurations
+                entity.Property(li => li.ImageUrl)
+                      .IsRequired()
+                      .HasMaxLength(2048); // Assuming URL maximum length
+
+                entity.Property(li => li.CreatedOn)
+                      .IsRequired();
+
+                entity.Property(li => li.LastUpdated)
                       .IsRequired();
             });
         }
