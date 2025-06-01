@@ -251,10 +251,10 @@ namespace RATAPP.Panels
             // Add info panel
             Panel infoPanel = CreateInfoPanel(
                 "Trait Management",
-                "• Add, edit, and delete genetic traits in your colony\n" +
-                "• Assign traits to individual animals\n" +
-                "• Filter traits by type and species\n" +
-                "• Traits are used in breeding calculations and pedigree analysis"
+                "â€¢ Add, edit, and delete genetic traits in your colony\n" +
+                "â€¢ Assign traits to individual animals\n" +
+                "â€¢ Filter traits by type and species\n" +
+                "â€¢ Traits are used in breeding calculations and pedigree analysis"
             );
             infoPanel.Dock = DockStyle.Top;
             infoPanel.Height = 120;
@@ -509,10 +509,10 @@ namespace RATAPP.Panels
             // Add info panel
             Panel infoPanel = CreateInfoPanel(
                 "Breeding Calculator",
-                "• Select dam and sire to calculate potential offspring traits\n" +
-                "• Results show probability of each trait appearing in offspring\n" +
-                "• Calculations are based on Mendelian inheritance\n" +
-                "• Only animals with assigned traits will show accurate results"
+                "â€¢ Select dam and sire to calculate potential offspring traits\n" +
+                "â€¢ Results show probability of each trait appearing in offspring\n" +
+                "â€¢ Calculations are based on Mendelian inheritance\n" +
+                "â€¢ Only animals with assigned traits will show accurate results"
             );
             infoPanel.Dock = DockStyle.Top;
             infoPanel.Height = 120;
@@ -616,10 +616,10 @@ namespace RATAPP.Panels
             // Add info panel
             Panel infoPanel = CreateInfoPanel(
                 "Pedigree Viewer",
-                "• View ancestry information for any animal in your colony\n" +
-                "• Trace genetic traits through multiple generations\n" +
-                "• Identify common ancestors and breeding lines\n" +
-                "• Export pedigree charts for documentation"
+                "â€¢ View ancestry information for any animal in your colony\n" +
+                "â€¢ Trace genetic traits through multiple generations\n" +
+                "â€¢ Identify common ancestors and breeding lines\n" +
+                "â€¢ Export pedigree charts for documentation"
             );
             infoPanel.Dock = DockStyle.Top;
             infoPanel.Height = 120;
@@ -847,14 +847,13 @@ namespace RATAPP.Panels
 
         private async void AddTraitButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Add Trait Functionality Not Yet Implemented");
-            //using (var form = new AddTraitForm(_traitService, _geneService, _contextFactory))
-            //{
-            //    if (form.ShowDialog() == DialogResult.OK)
-            //    {
-            //        await RefreshTraitGrid();
-            //    }
-            //}
+            using (var form = await AddTraitForm.CreateAsync(_contextFactory, _traitService, _geneService))
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    await RefreshTraitGrid();
+                }
+            }
         }
 
         //TODO
@@ -910,12 +909,41 @@ namespace RATAPP.Panels
             //}
         }
 
-        //FIXME, form is not showing up correctly 
-        private void AssignTraitButton_Click(object sender, EventArgs e)
+        private async void AssignTraitButton_Click(object sender, EventArgs e)
         {
-            using (var form = new AssignTraitForm(_traitService, _geneService, new AnimalService(_contextFactory), _contextFactory))
+            if (traitRegistryGrid.SelectedRows.Count == 0)
             {
-                form.ShowDialog();
+                MessageBox.Show("Please select a trait to assign.", "No Selection",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var selectedRow = traitRegistryGrid.SelectedRows[0];
+            var traitId = (int)selectedRow.Cells["Id"].Value;
+            
+            try
+            {
+                var trait = await _traitService.GetTraitByIdAsync(traitId);
+                if (trait == null)
+                {
+                    MessageBox.Show("Selected trait not found.", "Error",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                using (var form = new AssignTraitForm(_traitService, _geneService, 
+                    new AnimalService(_contextFactory), _contextFactory, trait))
+                {
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        await RefreshTraitGrid();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading trait: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -924,7 +952,7 @@ namespace RATAPP.Panels
             await RefreshTraitGrid();
         }
 
-        private void CalculateButton_Click(object sender, EventArgs e)
+        private async void CalculateButton_Click(object sender, EventArgs e)
         {
             if (dam1Combo.SelectedItem == null || sire1Combo.SelectedItem == null)
             {
@@ -932,8 +960,8 @@ namespace RATAPP.Panels
                 return;
             }
 
-            var dam = (AnimalDto)dam1Combo.SelectedItem;
-            var sire = (AnimalDto)sire1Combo.SelectedItem;
+            var dam = dam1Combo.SelectedItem as AnimalDto;
+            var sire = sire1Combo.SelectedItem as AnimalDto;
 
             // Clear previous results
             resultPanel.Controls.Clear();
@@ -950,11 +978,11 @@ namespace RATAPP.Panels
             try
             {
                 //get the animalDto objects for dam and sire back as Animal objects
-                var getDamAsAnimalObj = _animalService.MapAnimalDtoBackToAnimal(dam);
-                var getSireAsAnimalObj = _animalService.MapAnimalDtoBackToAnimal(sire);
+                var getDamAsAnimalObj = await _animalService.MapAnimalDtoBackToAnimal(dam);
+                var getSireAsAnimalObj = await _animalService.MapAnimalDtoBackToAnimal(sire);
 
-                var damAsAnimalObj = getDamAsAnimalObj.Result;
-                var sireAsAnimalObj = getSireAsAnimalObj.Result;
+                var damAsAnimalObj = getDamAsAnimalObj;
+                var sireAsAnimalObj = getSireAsAnimalObj;
 
                 // Calculate Possible Outcomes
                 var results = _breedingService.CalculateBreedingOutcomes(damAsAnimalObj, sireAsAnimalObj); //IDK why this was here because we want the possible phenotype/genotype outcomes 
