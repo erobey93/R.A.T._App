@@ -958,7 +958,7 @@ namespace RATAPPLibrary.Services
                     throw new KeyNotFoundException($"Animal with ID {id} not found.");
                 }
                 _context.Animal.Remove(animal);
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
             });
         }
 
