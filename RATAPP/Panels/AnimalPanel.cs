@@ -647,26 +647,41 @@ namespace RATAPP.Panels
         }
 
         // Delete a thumbnail
-        private void DeleteThumbnail(PictureBox thumbnail, string imagePath)
+        private async void DeleteThumbnail(PictureBox thumbnail, string imagePath)
         {
             if (MessageBox.Show("Are you sure you want to remove this image?", "Confirm Delete",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 try
                 {
-                    // Remove from UI
-                    if (thumbnail.Image != null)
-                    {
-                        thumbnail.Image.Dispose();
-                    }
-                    thumbnailPanel.Controls.Remove(thumbnail);
-                    thumbnail.Dispose();
-
                     // Remove from animal's additional images
                     if (_animal != null && _animal.AdditionalImages != null)
                     {
-                        _animal.AdditionalImages.Remove(imagePath);
-                        // TODO: Update database with new image list
+                        if(thumbnail != null)
+                        {
+                            thumbnail.Dispose();
+                            _animal.AdditionalImages.Remove(imagePath);
+                            if(_animal.AdditionalImages.Count > 0)
+                            {
+                                // Assuming _animal.AdditionalImages is a collection of image URLs or paths
+                                string firstImagePath = _animal.AdditionalImages.First();
+                                animalPhotoBox.Image = Image.FromFile(firstImagePath);
+                            }
+                            else
+                            {
+                                animalPhotoBox.Image = null;
+                            }
+                            
+                        }
+
+                       
+                        //await _animalService.RemoveAdditionalAnimalImageAsync(_animal.Id, imagePath);
+
+                        //_animal = await _animalService.GetAnimalByIdAsync(_animal.Id);
+
+                        Refresh(); 
+
+                       
                     }
                 }
                 catch (Exception ex)

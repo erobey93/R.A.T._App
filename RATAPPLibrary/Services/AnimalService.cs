@@ -6,6 +6,7 @@ using RATAPPLibrary.Data.Models.Animal_Management;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Services.Genetics;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+using PdfSharp.Snippets.Drawing;
 
 namespace RATAPPLibrary.Services
 {
@@ -156,6 +157,33 @@ namespace RATAPPLibrary.Services
                     return true;
                 }
                 catch (Exception ex) { return false;  }
+            });
+        }
+
+        //remove animal image (just 1)
+        public async Task<bool>RemoveAdditionalAnimalImageAsync(int animalId, string additionalImageURl)
+        {
+            return await ExecuteInContextAsync(async _context =>
+            {
+                try
+                {
+                    //find the animal image and delete it 
+                    var imageToDelete = await _context.AnimalImage
+                    .FirstOrDefaultAsync(i => i.AnimalId == animalId && i.ImageUrl == additionalImageURl);
+                    if (imageToDelete != null)
+                    {
+                        _context.AnimalImage.Remove(imageToDelete);
+                        await _context.SaveChangesAsync();
+                        return true;
+                    }
+
+                    return false; // Image not found
+                }
+                catch (Exception ex)
+                {
+                    // Consider logging the exception here
+                    return false;
+                }
             });
         }
 
