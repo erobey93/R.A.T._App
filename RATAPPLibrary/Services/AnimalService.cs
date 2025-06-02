@@ -132,7 +132,7 @@ namespace RATAPPLibrary.Services
         //add additional images for animal
         public async Task<bool> AddAdditionalAnimalImagesAsync(int animalId, string[] additionalImageURl)
         {
-           return  await ExecuteInContextAsync(async _context =>
+           return  await ExecuteInTransactionAsync(async _context =>
             {
                 try
                 {
@@ -140,18 +140,28 @@ namespace RATAPPLibrary.Services
                     //for each image path, add new entry in AnimalImage table 
                     foreach (string imageUrl in additionalImageURl)
                     {
-                        //make a new object 
-                        AnimalImage image = new AnimalImage
+                        //first make sure the image doesn't exist
+                        var imageFound = _context.AnimalImage.FirstOrDefault(i => i.AnimalId == animalId && i.ImageUrl == imageUrl);
+                        if(imageFound == null)
                         {
-                            AnimalId = animalId,
-                            ImageUrl = imageUrl,
-                            CreatedOn = DateTime.Now,
-                        };
-                        //make a new entry
-                        _context.AnimalImage.Add(image); //should maybe check that animal exists, but not a breaking change so nbd for now FIXME 
-                        //no errors, return true
-                        //else, return false 
-                        _context.SaveChanges();
+                            //make a new object 
+                            AnimalImage image = new AnimalImage
+                            {
+                                AnimalId = animalId,
+                                ImageUrl = imageUrl,
+                                CreatedOn = DateTime.Now,
+                            };
+                            //make a new entry
+                            _context.AnimalImage.Add(image); //should maybe check that animal exists, but not a breaking change so nbd for now FIXME 
+                                                             //no errors, return true
+                                                             //else, return false 
+                            _context.SaveChanges();
+                        }
+                        else
+                        {
+                            return false; 
+                        }
+                       
                     }
 
                     return true;
