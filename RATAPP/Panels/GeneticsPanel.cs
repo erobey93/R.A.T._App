@@ -1145,7 +1145,7 @@ namespace RATAPP.Panels
             {
                 //var animal = _animalService.MapSingleAnimaltoDto(selectedAnimal);
                 //var animalResult = animal.Result;
-                var animal = animalSelector.SelectedItem as RATAPPLibrary.Data.Models.AnimalDto; 
+                var animal = animalSelector.SelectedItem as AnimalDto; 
 
                 // Create a new form to display the pedigree in a larger view
                 var pedigreeForm = PedigreeForm.Create( _contextFactory, animal);

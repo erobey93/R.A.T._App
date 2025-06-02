@@ -158,12 +158,22 @@ namespace RATAPP.Forms
                 Size = new Size(200, 20)
             };
 
+
+            var genotypeLabel = new Label
+            {
+                Text = $"Genotype: {_currentAnimal.genotype ?? "Unknown"}",
+                Font = new Font("Times New Roman", 11),
+                Location = new Point(780, 35),
+                Size = new Size(200, 20)
+            };
+
             animalPanel.Controls.Add(animalTitle);
             animalPanel.Controls.Add(animalNameLabel);
             animalPanel.Controls.Add(registrationLabel);
             animalPanel.Controls.Add(dobLabel);
             animalPanel.Controls.Add(varietyLabel);
             animalPanel.Controls.Add(inbredCoLabel);
+            animalPanel.Controls.Add(genotypeLabel);
 
             // Tree Structure Panel
             var treePanel = new Panel
@@ -220,7 +230,7 @@ namespace RATAPP.Forms
 
                 if (dam != null || sire != null)
                 {
-                    int parentsY = startY + 100;
+                    int parentsY = startY + 200;
 
                     // Draw connecting lines
                     using (var g = treePanel.CreateGraphics())
@@ -230,7 +240,7 @@ namespace RATAPP.Forms
                         {
                             // Line to dam
                             if (dam != null)
-                                g.DrawLine(pen, centerX + 50, startY + 50, centerX - 100, parentsY);
+                                g.DrawLine(pen, centerX + 50, startY + 50, centerX , parentsY);
 
                             // Line to sire
                             if (sire != null)
@@ -271,7 +281,7 @@ namespace RATAPP.Forms
         {
             var panel = new Panel
             {
-                Size = new Size(200, 80),
+                Size = new Size(200, 160),
                 BorderStyle = BorderStyle.FixedSingle,
                 BackColor = Color.White
             };
@@ -308,43 +318,44 @@ namespace RATAPP.Forms
                 Size = new Size(190, 15)
             };
 
+            var getInbred = (0.5);//_breedingCalculationService.CalculateInbreedingCoefficientAsync((int)animal.damId, (int)animal.sireId); 
             var inbredLabel = new Label
             {
-                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Text = $"% Inbred: {getInbred.ToString() ?? "Unknown"}",
                 Font = new Font("Times New Roman", 9),
-                Location = new Point(5, 60),
+                Location = new Point(5, 75),
                 Size = new Size(190, 15)
             };
 
             var variety = new Label
             {
-                Text = $"Variety: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Text = $"Variety: {animal.variety ?? "Unknown"}",
                 Font = new Font("Times New Roman", 9),
-                Location = new Point(5, 60),
+                Location = new Point(5, 90),
                 Size = new Size(190, 15)
             };
 
             var color = new Label
             {
-                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Text = $"Color: {animal.color ?? "Unknown"}",
                 Font = new Font("Times New Roman", 9),
-                Location = new Point(5, 60),
+                Location = new Point(5, 105),
                 Size = new Size(190, 15)
             };
 
             var markings = new Label
             {
-                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Text = $"Markings: {animal.markings ?? "Unknown"}",
                 Font = new Font("Times New Roman", 9),
-                Location = new Point(5, 60),
+                Location = new Point(5, 120),
                 Size = new Size(190, 15)
             };
 
             var genotype = new Label
             {
-                Text = $"DOB: {animal.DateOfBirth.ToString("MM/dd/yyyy") ?? "Unknown"}",
+                Text = $"Genotype: {animal.genotype ?? "Unknown"}",
                 Font = new Font("Times New Roman", 9),
-                Location = new Point(5, 60),
+                Location = new Point(5, 135),
                 Size = new Size(190, 15)
             };
 
@@ -353,6 +364,10 @@ namespace RATAPP.Forms
             panel.Controls.Add(regLabel);
             panel.Controls.Add(dobLabel);
             panel.Controls.Add(inbredLabel);
+            panel.Controls.Add(variety);
+            panel.Controls.Add(color);
+            panel.Controls.Add(markings);
+            panel.Controls.Add(genotype); 
 
             return panel;
         }
