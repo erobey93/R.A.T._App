@@ -176,6 +176,8 @@ namespace RATAPP.Forms
         {
             // TODO: Implement logic to add a parent to the current animal
             MessageBox.Show("Add Parent functionality to be implemented.");
+            //drop down box with all dams 
+            //drop down box with all sires 
             // Open a new form or dialog to select/create a parent animal
         }
 

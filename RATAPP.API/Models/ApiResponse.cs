@@ -36,7 +36,7 @@ namespace RATAPP.API.Models
         /// <summary>
         /// Creates a successful response with data
         /// </summary>
-        public static ApiResponse<T> Success(T data, string message = "Request successful")
+        public static ApiResponse<T> Success_(T data, string message = "Request successful") //FIXME not sure what's up here with the repeated success error 
         {
             return new ApiResponse<T>
             {
