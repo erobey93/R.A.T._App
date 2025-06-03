@@ -68,6 +68,33 @@ R.A.T. App is a comprehensive animal management system designed specifically for
    dotnet ef database update
    ```
 
+### API Setup
+1. Configure the database connection string in `RATAPP.API/appsettings.json`:
+   ```json
+   {
+     "ConnectionStrings": {
+       "DefaultConnection": "Server=your_server;Database=your_db;..."
+     }
+   }
+   ```
+
+2. Run the API:
+   ```bash
+   dotnet run --project RATAPP.API
+   ```
+
+3. Access the API:
+   - HTTP endpoint: http://localhost:5053
+   - HTTPS endpoint: https://localhost:7155
+   - Swagger UI (in development): https://localhost:7155/swagger
+
+4. Available Endpoints:
+   - GET /api/animal - List all animals
+   - GET /api/animal/{id} - Get specific animal
+   - POST /api/animal - Create new animal
+   - PUT /api/animal/{id} - Update animal
+   - DELETE /api/animal/{id} - Delete animal
+
 ### Application Setup
 1. Clone the repository
 2. Restore NuGet packages:
