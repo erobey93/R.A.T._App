@@ -103,6 +103,8 @@ namespace RATAPPLibrary.Services
                 var trait = await context.Trait
                     .Include(t => t.TraitType)
                     .Include(t => t.Species)
+                    .Include(t => t.GenericGenotype)
+                    .Include(t => t.AnimalTraits)
                     .FirstOrDefaultAsync(t => t.CommonName == traitName);
 
                 if (trait == null)
