@@ -1,9 +1,11 @@
 ﻿using Microsoft.Azure.Amqp.Framing;
 using Microsoft.EntityFrameworkCore;
+using PdfSharp.Internal;
 using RATAPP.Forms;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
+using RATAPPLibrary.Migrations;
 using RATAPPLibrary.Services;
 using RATAPPLibrary.Services.Genetics;
 using System.Runtime.Serialization;
@@ -102,7 +104,13 @@ namespace RATAPP.Panels
         private Panel actionButtonPanel;
         private Panel featureButtonPanel;
 
-        private List<string> animalImageUrls; 
+        private List<string> animalImageUrls;
+
+        //private List<string> coatType;
+        //private List<string> color;
+        //private List<string> earType; 
+        //private List<string> markingType;
+
 
         public AnimalPanel(RATAppBaseForm parentForm, RatAppDbContextFactory contextFactory, AnimalDto[] allAnimals,AnimalDto currAnimal)
         {
@@ -313,7 +321,15 @@ namespace RATAPP.Panels
 
 
             NewAnimal(); //new animal settings
-            SetComboBoxes();
+            if(_animal == null)
+            {
+                SetComboBoxes("Rat"); //FIXME this may break the world 
+            }
+            else
+            {
+                SetComboBoxes(_animal.species);
+            }
+           
         }
 
         private async void AnimalImageClicked(object sender, EventArgs e)
@@ -394,12 +410,12 @@ namespace RATAPP.Panels
                 }
                 catch (Exception e)
                 {
-                    animalPhotoBox.Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\R.A.T._APP\\RATAPP\\Resources\\RATAPPLogo.png");  //FIXME - for now, show the error but continue with the rest of the logic 
+                    //animalPhotoBox.Image = Image.FromFile("C:\\Users\\earob\\source\\repos\\R.A.T._APP\\RATAPP\\Resources\\RATAPPLogo.png");  //FIXME - for now, show the error but continue with the rest of the logic 
                 }
             }
             else
             {
-              
+              //leave blank
             }
         }
 
@@ -634,6 +650,7 @@ namespace RATAPP.Panels
                         animalPhotoBox.Image.Dispose();
                     }
                     animalPhotoBox.Image = Image.FromFile(imagePath);
+                    _animal.imageUrl = imagePath; //reset the main image here
                 }
                 else
                 {
@@ -647,26 +664,42 @@ namespace RATAPP.Panels
         }
 
         // Delete a thumbnail
-        private void DeleteThumbnail(PictureBox thumbnail, string imagePath)
+        private async void DeleteThumbnail(PictureBox thumbnail, string imagePath)
         {
             if (MessageBox.Show("Are you sure you want to remove this image?", "Confirm Delete",
                 MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 try
                 {
-                    // Remove from UI
-                    if (thumbnail.Image != null)
-                    {
-                        thumbnail.Image.Dispose();
-                    }
-                    thumbnailPanel.Controls.Remove(thumbnail);
-                    thumbnail.Dispose();
-
                     // Remove from animal's additional images
                     if (_animal != null && _animal.AdditionalImages != null)
                     {
-                        _animal.AdditionalImages.Remove(imagePath);
-                        // TODO: Update database with new image list
+                        if(thumbnail != null)
+                        {
+                            thumbnail.Dispose();
+                            animalPhotoBox.Image.Dispose();
+                            _animal.AdditionalImages.Remove(imagePath);
+                            if(_animal.AdditionalImages.Count > 0)
+                            {
+                                // Assuming _animal.AdditionalImages is a collection of image URLs or paths
+                                string firstImagePath = _animal.AdditionalImages.First();
+                                animalPhotoBox.Image = Image.FromFile(firstImagePath);
+                                _animal.imageUrl = firstImagePath;
+
+                            }
+                            else
+                            {
+                                _animal.AdditionalImages = null;
+                                animalPhotoBox.Image = null;
+                                _animal.imageUrl = null;
+                            }
+                            
+                        }
+
+                       
+                        await _animalService.RemoveAdditionalAnimalImageAsync(_animal.Id, imagePath);
+
+                        _animal = await _animalService.GetAnimalByIdAsync(_animal.Id);
                     }
                 }
                 catch (Exception ex)
@@ -856,25 +889,47 @@ namespace RATAPP.Panels
             }
         }
 
-        private async void SetComboBoxes()
+        private async void SetComboBoxes(string species)
         {
-            // Iterate through all controls on the form
-            foreach (Control control in this.Controls)
+            if (species == "Rat")
             {
-                if (control is ComboBox comboBox)
+                // Iterate through all controls on the form
+                foreach (Control control in this.Controls)
                 {
-                    //get the list of values from the db 
-                    List<string> items = await GetComboBoxItemsFromDatabase(control); // Add database items
+                    if (control is ComboBox comboBox)
+                    {
+                        //get the list of values from the db 
+                        List<string> items = await GetComboBoxItemsFromDatabase(control); // Add database items
 
-                    // Add "Create New" as an option TODO need to set Create New as a button 
-                    comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
-                    comboBox.Items.AddRange(items.ToArray()); // Add database items
-                    comboBox.Items.Add("Create New");
+                        // Add "Create New" as an option TODO need to set Create New as a button 
+                        comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
+                        comboBox.Items.AddRange(items.ToArray()); // Add database items
 
-                    // Subscribe to the SelectedIndexChanged event
-                    comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+                        // Subscribe to the SelectedIndexChanged event
+                        comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+                    }
                 }
             }
+            else //for now assume mouse 
+            {
+                // Iterate through all controls on the form
+                foreach (Control control in this.Controls)
+                {
+                    if (control is ComboBox comboBox)
+                    {
+                        //get the list of values from the db 
+                        List<string> items = await GetComboBoxItemsFromDatabase_Mouse(control); // Add database items
+
+                        // Add "Create New" as an option TODO need to set Create New as a button 
+                        comboBox.Items.Clear(); // Clear existing items (optional, based on your use case)
+                        comboBox.Items.AddRange(items.ToArray()); // Add database items
+
+                        // Subscribe to the SelectedIndexChanged event
+                        comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+                    }
+                }
+            }
+            
         }
 
         // Event handler for "Create New" functionality
@@ -883,36 +938,19 @@ namespace RATAPP.Panels
             //create new option
             if (sender is ComboBox comboBox)
             {
-                //if create new
-                if (comboBox.SelectedItem?.ToString() == "Create New")
+                string name = comboBox.Name; 
+
+                if(name == "speciesComboBox")
                 {
-                    // Open a dialog to get the new item from the user
-                    string newItem = PromptForNewItem();
-
-                    if (!string.IsNullOrWhiteSpace(newItem))
-                    {
-                        // Add the new item to the database
-                        AddNewItemToDatabase(newItem);
-
-                        //get the updated data from the database 
-                        List<string> items = await GetComboBoxItemsFromDatabase(comboBox);
-
-                        // Refresh the combo box items
-                        comboBox.Items.Clear();
-                        comboBox.Items.AddRange(items.ToArray());
-                        comboBox.Items.Add("Create New"); //TODO
-
-                        // Optionally, select the newly added item
-                        comboBox.SelectedItem = newItem;
-                    }
-                    else
-                    {
-                        // Revert to a default selection if no new item is added
-                        comboBox.SelectedIndex = -1;
-                    }
+                    SetComboBoxes(comboBox.Text);
                 }
+
+                //if (speciesComboBox.SelectedIndex < 0) //no species means we don't what phenotypes and dams/sires to choose
+                //{
+                //    MessageBox.Show("Please enter a species");
+                //}
                 //if dam get the selected dam object and store to global dam variable FIXME I need to implement data binding here
-                else if (comboBox.Name == "damComboBox")
+                if (comboBox.Name == "damComboBox")
                 {
                     //get the animal object from the list of animal objects stored earlier 
                     foreach (var animal in _dams)
@@ -1071,7 +1109,8 @@ namespace RATAPP.Panels
             {
                 //await _loadingSemaphore.WaitAsync();
                 var options = new List<string>();
-                string animalSpecies = GetAnimalSpecies();
+                //string animalSpecies = GetAnimalSpecies();
+                string animalSpecies = "Rat"; 
 
                 switch (control.Name)
                 {
@@ -1086,31 +1125,28 @@ namespace RATAPP.Panels
                         break;
 
                     case "varietyComboBox":
-                        if (speciesComboBox.SelectedIndex == 0)
-                        {
-                            MessageBox.Show("Please enter a species");
-                            break;
-                        }
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
                         var animalCoats = await GetSpeciesTraitsByType(animalSpecies, "Coat Type");
                         options.AddRange(animalCoats);
                         break;
 
                     case "colorComboBox":
-                        if (speciesComboBox.SelectedIndex == 0)
-                        {
-                            MessageBox.Show("Please enter a species");
-                            break;
-                        }
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
                         var animalColors = await GetSpeciesTraitsByType(animalSpecies, "Color");
                         options.AddRange(animalColors);
                         break;
 
                     case "damComboBox":
-                        if (speciesComboBox.SelectedIndex == 0)
-                        {
-                            MessageBox.Show("Please enter a species");
-                            break;
-                        }
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
                         if (animalSpecies != "Unknown")
                         {
                             _dams = await _animalService.GetAnimalInfoBySexAndSpecies("Female", animalSpecies);
@@ -1126,11 +1162,10 @@ namespace RATAPP.Panels
                         break;
 
                     case "sireComboBox":
-                        if (speciesComboBox.SelectedIndex == 0)
-                        {
-                            MessageBox.Show("Please enter a species");
-                            break;
-                        }
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
                         if (animalSpecies != "Unknown")
                         {
                             _sires = await _animalService.GetAnimalInfoBySexAndSpecies("Male", animalSpecies);
@@ -1146,21 +1181,127 @@ namespace RATAPP.Panels
                         break;
 
                     case "earTypeComboBox":
-                        if (speciesComboBox.SelectedIndex == 0)
-                        {
-                            MessageBox.Show("Please enter a species");
-                            break;
-                        }
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
                         var animalEars = await GetSpeciesTraitsByType(animalSpecies, "Ear Type");
                         options.AddRange(animalEars);
                         break;
 
                     case "markingComboBox":
-                        if (speciesComboBox.SelectedIndex == 0)
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
+                        var animalMarkings = await GetSpeciesTraitsByType(animalSpecies, "Marking");
+                        options.AddRange(animalMarkings);
+                        break;
+
+                    default:
+                        options.AddRange(new[] { "Option1", "Option2", "Option3" });
+                        break;
+                }
+
+                return options;
+            }
+            finally
+            {
+                //_loadingSemaphore.Release();
+            }
+        }
+
+        private async Task<List<string>> GetComboBoxItemsFromDatabase_Mouse(Control control)
+        {
+            try
+            {
+                //await _loadingSemaphore.WaitAsync();
+                var options = new List<string>();
+                //string animalSpecies = GetAnimalSpecies();
+                string animalSpecies = "Mouse";
+
+                switch (control.Name)
+                {
+                    case "speciesComboBox":
+                        var species = await _speciesService.GetAllSpeciesAsync();
+                        //bind this data to the species combo box items
+                        options.AddRange((List<string>)species);
+                        break;
+
+                    case "sexComboBox":
+                        options.AddRange(new[] { "Male", "Female", "Unknown", "Other" });
+                        break;
+
+                    case "varietyComboBox":
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
+                        var animalCoats = await GetSpeciesTraitsByType(animalSpecies, "Coat Type");
+                        options.AddRange(animalCoats);
+                        break;
+
+                    case "colorComboBox":
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
+                        var animalColors = await GetSpeciesTraitsByType(animalSpecies, "Color");
+                        options.AddRange(animalColors);
+                        break;
+
+                    case "damComboBox":
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
+                        if (animalSpecies != "Unknown")
                         {
-                            MessageBox.Show("Please enter a species");
-                            break;
+                            _dams = await _animalService.GetAnimalInfoBySexAndSpecies("Female", animalSpecies);
                         }
+                        else
+                        {
+                            _dams = await _animalService.GetAnimalsBySex("Female");
+                        }
+                        foreach (var dam in _dams)
+                        {
+                            options.Add(dam.name);
+                        }
+                        break;
+
+                    case "sireComboBox":
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
+                        if (animalSpecies != "Unknown")
+                        {
+                            _sires = await _animalService.GetAnimalInfoBySexAndSpecies("Male", animalSpecies);
+                        }
+                        else
+                        {
+                            _sires = await _animalService.GetAnimalsBySex("Male");
+                        }
+                        foreach (var sire in _sires)
+                        {
+                            options.Add(sire.name);
+                        }
+                        break;
+
+                    case "earTypeComboBox":
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
+                        var animalEars = await GetSpeciesTraitsByType(animalSpecies, "Ear Type");
+                        options.AddRange(animalEars);
+                        break;
+
+                    case "markingComboBox":
+                        //if (speciesComboBox.SelectedIndex < 0)
+                        //{
+                        //    break;
+                        //}
                         var animalMarkings = await GetSpeciesTraitsByType(animalSpecies, "Marking");
                         options.AddRange(animalMarkings);
                         break;
@@ -1179,24 +1320,25 @@ namespace RATAPP.Panels
         }
 
         //find species
-        private string GetAnimalSpecies()
-        {
-            //first, check if _animal is populated
-            if (_animal != null)
-            {
-                return _animal.species;
-            }
-            else if (speciesComboBox.SelectedItem != null && speciesComboBox.Text != "Add New") //FIXME make sure this is the correct text
-            {
-                return speciesComboBox.SelectedItem.ToString(); //or .Text? FIXME 
-            }
-            else
-            {
-                //return unknown, use to tell the user that they need to fill out the species field first
-                return "Unknown";
-                //TODO handle case where species is unknown, this should be a pop up box that says "Please fill out the species field first"  MessageBox.Show("Please fill out the species field first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        //FIXME - have to hack together some logic to make this work, but will refactor after IdeaFest 
+        //private string GetAnimalSpecies()
+        //{
+        //    //first, check if _animal is populated
+        //    if (_animal != null)
+        //    {
+        //        return _animal.species;
+        //    }
+        //    else if (speciesComboBox.SelectedItem != null && speciesComboBox.Text != "Add New") //FIXME make sure this is the correct text
+        //    {
+        //        return speciesComboBox.SelectedItem.ToString(); //or .Text? FIXME 
+        //    }
+        //    else
+        //    {
+        //        //return unknown, use to tell the user that they need to fill out the species field first
+        //        return "Unknown";
+        //        //TODO handle case where species is unknown, this should be a pop up box that says "Please fill out the species field first"  MessageBox.Show("Please fill out the species field first", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
 
         private void IntializeButtons()
         {
@@ -1366,7 +1508,8 @@ namespace RATAPP.Panels
         public async Task RefreshDataAsync()
         {
             int id;
-            bool success = int.TryParse(regNumTextBox.Text, out id);
+            //bool success = int.TryParse(regNumTextBox.Text, out id);
+            bool success = true; 
             if (success)
             {
                 try
@@ -1439,7 +1582,7 @@ namespace RATAPP.Panels
                                                //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
                     species = speciesComboBox.Text,
                     comment = commentsTextBox.Text,
-                    imageUrl = _animal.imageUrl, //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
+                    imageUrl = _animal?.AdditionalImages?.FirstOrDefault(), //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
                     Line = line, // Assuming there's a TextBox for line
                     damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
                     sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
@@ -1448,9 +1591,8 @@ namespace RATAPP.Panels
                     markings = markingComboBox.Text,
                     earType = earTypeComboBox.Text,
                     breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    //genotype = "XYZ",//genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO
-                    AdditionalImages = _animal.AdditionalImages,
-                    
+                    genotype = genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO FIXME this may not work correctly, we'll see 
+                    AdditionalImages = _animal?.AdditionalImages,
                 };
                 return animal;
             }
@@ -1468,7 +1610,7 @@ namespace RATAPP.Panels
                                                //: DateTime.Parse(dodTextBox.Text), // Assuming dodTextBox contains the Date of Death
                     species = speciesComboBox.Text,
                     comment = commentsTextBox.Text,
-                    imageUrl = "C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png", //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
+                    imageUrl = animalImageUrls.First(),//"C:\\Users\\earob\\source\\repos\\RATAPP_2\\R.A.T._App\\RATAPP\\Resources\\RATAPPLogo.png", //FIXME this is being set inside of the click image box method so I think this should be fine like this TODO just hardcoded right now 
                     Line = line, // Assuming there's a TextBox for line
                     damId = _dam != null ? _dam.Id : (int?)null,//damComboBox.Text, // Assuming there's a TextBox for dam
                     sireId = _sire != null ? _sire.Id : (int?)null,//sireComboBox.Text, // Assuming there's a TextBox for sire
