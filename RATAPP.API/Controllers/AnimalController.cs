@@ -42,7 +42,7 @@ namespace RATAPP.API.Controllers
             try
             {
                 var animals = await _animalService.GetAllAnimalsAsync(species, sex, searchTerm);
-                return Ok(ApiResponse<AnimalDto[]>.Success(animals));
+                return Ok(ApiResponse<AnimalDto[]>.Success_(animals));
             }
             catch (ArgumentException ex)
             {
@@ -65,7 +65,7 @@ namespace RATAPP.API.Controllers
             try
             {
                 var animal = await _animalService.GetAnimalByIdAsync(id);
-                return Ok(ApiResponse<AnimalDto>.Success(animal));
+                return Ok(ApiResponse<AnimalDto>.Success_(animal));
             }
             catch (KeyNotFoundException ex)
             {
@@ -91,7 +91,7 @@ namespace RATAPP.API.Controllers
                 return CreatedAtAction(
                     nameof(GetAnimal),
                     new { id = animal.Id },
-                    ApiResponse<Animal>.Success(animal, "Animal created successfully")
+                    ApiResponse<Animal>.Success_(animal, "Animal created successfully")
                 );
             }
             catch (InvalidOperationException ex)
@@ -123,7 +123,7 @@ namespace RATAPP.API.Controllers
             try
             {
                 var animal = await _animalService.UpdateAnimalAsync(animalDto);
-                return Ok(ApiResponse<Animal>.Success(animal, "Animal updated successfully"));
+                return Ok(ApiResponse<Animal>.Success_(animal, "Animal updated successfully"));
             }
             catch (KeyNotFoundException ex)
             {
