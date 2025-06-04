@@ -607,7 +607,7 @@ namespace RATAPP.Panels
             {
                 Text = "View Genetic Family Tree",
                 Font = new Font("Segoe UI", 10),
-                Width = 150,
+                Width = 200,
                 Height = 30,
                 Location = new Point(370, 10),
                 BackColor = Color.FromArgb(0, 120, 212),

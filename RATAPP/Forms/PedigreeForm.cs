@@ -264,7 +264,7 @@ namespace RATAPP.Forms
                     saveDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
                     saveDialog.FilterIndex = 1;
                     saveDialog.DefaultExt = "txt";
-                    saveDialog.FileName = $"PedigreeReport_{DateTime.Now:yyyyMMdd}_currentAnimal.name";
+                    saveDialog.FileName = $"PedigreeReport_{DateTime.Now:yyyyMMdd}_{_currentAnimal.name}";
 
                     if (saveDialog.ShowDialog() == DialogResult.OK)
                     {
