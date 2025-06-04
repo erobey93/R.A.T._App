@@ -15,6 +15,8 @@ namespace RATAPP
         private IConfigurationRoot _configuration;
         private PasswordHashing _passwordHashing;
 
+        private Button btnLogin; 
+
         public LoginForm(RATAPPLibrary.Data.DbContexts.RatAppDbContextFactory contextFactory, IConfigurationRoot configuration, PasswordHashing passwordHashing)
         {
             _configuration = configuration;
@@ -22,6 +24,7 @@ namespace RATAPP
             _contextFactory = contextFactory;
 
             CreateLoginForm();
+            this.AcceptButton = btnLogin; 
         }
 
         private void CreateLoginForm()
@@ -48,7 +51,7 @@ namespace RATAPP
             var txtPassword = CreateTextBox("txtPassword", "Password", 330);
             txtPassword.PasswordChar = '•';
 
-            var btnLogin = CreateButton("Login", 410, Color.FromArgb(0, 120, 215));
+            btnLogin = CreateButton("Login", 410, Color.FromArgb(0, 120, 215));
             var btnCreateAccount = CreateButton("Create Account", 460, Color.FromArgb(0, 150, 136));
             var btnChangePassword = CreateButton("Change Password", 510, Color.FromArgb(158, 158, 158));
 
