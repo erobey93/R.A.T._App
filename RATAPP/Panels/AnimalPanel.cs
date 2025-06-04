@@ -1551,7 +1551,7 @@ namespace RATAPP.Panels
         }
 
         //parse textbox into animal dto object
-        private AnimalDto ParseAnimalData()
+        private async Task <AnimalDto> ParseAnimalData()
         {
             //FIXME just for now 
             DateTime dob = DateTime.Now;
@@ -1567,9 +1567,10 @@ namespace RATAPP.Panels
             {
                 line = "2";
             }
-
+           
             if (_animal != null)
             {
+                 _animal.genotype = await _animalService.GetGenotypesAsStringAsync(_animal.Id);
                 AnimalDto animal = new AnimalDto
                 {
                     Id = _animal.Id,
@@ -1591,7 +1592,7 @@ namespace RATAPP.Panels
                     markings = markingComboBox.Text,
                     earType = earTypeComboBox.Text,
                     breeder = "TLDR",//breeder, // Assuming there's a TextBox for breeder TODO this should take in a text name of the breeder, it should be converted to a breeder id in the backend and then that should be used to seach the database or create a new breeder if not found 
-                    genotype = genotypeTextBox.Text, // Assuming there's a TextBox for genotype TODO FIXME this may not work correctly, we'll see 
+                    genotype = _animal.genotype, // Assuming there's a TextBox for genotype TODO FIXME this may not work correctly, we'll see 
                     AdditionalImages = _animal?.AdditionalImages,
                 };
                 return animal;
@@ -1653,7 +1654,7 @@ namespace RATAPP.Panels
         /// </summary>
         private async Task SaveButtonClick(object sender, EventArgs e)
         {
-            AnimalDto animalDto = ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
+            AnimalDto animalDto = await ParseAnimalData(); //first, parse the data from the text boxes this doesn't work now because the animal doesn't exist yet, so the animal needs to exist first
 
             
             if (animalDto == null) //if the data is invalid, show an error message and return

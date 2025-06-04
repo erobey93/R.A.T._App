@@ -354,6 +354,7 @@ namespace RATAPP.Forms
 
         private Panel CreateAnimalBox(AnimalDto animal, string relation)
         {
+            gen++; //this should correctly track how many boxes we have 
             var panel = new Panel
             {
                 Size = new Size(200, 160),
@@ -458,7 +459,7 @@ namespace RATAPP.Forms
 
             if (damDto != null || sireDto != null)
             {
-                int grandParentsY = parentY + 100;
+                int grandParentsY = parentY + 175;
                 int offset = 150; // Horizontal offset for grandparents
 
                 // Draw connecting lines
@@ -468,9 +469,9 @@ namespace RATAPP.Forms
                     using (var pen = new Pen(Color.Black, 1))
                     {
                         if (dam != null)
-                            g.DrawLine(pen, parentX, parentY + 50, parentX - offset / 2, grandParentsY);
+                            g.DrawLine(pen, parentX, parentY + 50 , parentX - offset / 2, grandParentsY);
                         if (sire != null)
-                            g.DrawLine(pen, parentX, parentY + 50, parentX + offset / 2, grandParentsY);
+                            g.DrawLine(pen, parentX+50, parentY + 50, parentX + offset+100 / 2, grandParentsY);
                     }
                 }
 

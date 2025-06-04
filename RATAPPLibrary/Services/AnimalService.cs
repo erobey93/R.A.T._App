@@ -289,8 +289,6 @@ namespace RATAPPLibrary.Services
 
             return await ExecuteInTransactionAsync(async _context =>
             {
-                
-
                 // Find the species in the database by its scientific name
                 var species = await _context.Species.FirstOrDefaultAsync(s => s.CommonName == animalDto.species);
                 if (species == null)
@@ -619,6 +617,7 @@ namespace RATAPPLibrary.Services
                 var existingAnimal = await _context.Animal
     .Include(a => a.Genotypes)
     .Include (a => a.AdditionalImages)// Include the related entity
+    .Include(a => a.Traits)
     .FirstOrDefaultAsync(a => a.Id == animalDto.Id);
 
                     if (existingAnimal == null)
