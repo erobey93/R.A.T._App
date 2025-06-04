@@ -20,6 +20,7 @@ namespace RATAPPLibrary.Services
                 return await context.Trait
                     .Include(t => t.TraitType)
                     .Include(t => t.Species)
+                    .Include(t => t.AnimalTraits)
                     .ToListAsync();
             });
         }

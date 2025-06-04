@@ -7,6 +7,7 @@ using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Services;
 using System.Collections.Generic;
 using RATAPPLibrary.Services.Genetics;
+using System.Text;
 
 namespace RATAPP.Forms
 {
@@ -29,6 +30,7 @@ namespace RATAPP.Forms
         private Label registrationLabel;
         //private PictureBox logoPictureBox;
         private Button generatePdfButton;
+        private Button savePdfButton;
         private Button closeButton;
 
         private string inbred; 
@@ -70,7 +72,7 @@ namespace RATAPP.Forms
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat
             };
-            generatePdfButton.Click += GeneratePdfButton_Click;
+            generatePdfButton.Click += GeneratePedigreeReportButton_Click; //GeneratePdfButton_Click; FIXME hacky for now but will put back to nicer pedigree eventualyl 
 
             // Close Button
             closeButton = new Button
@@ -202,6 +204,79 @@ namespace RATAPP.Forms
 
             inbredCoLabel.Text = $"% Inbred: {toString}";
             this.Refresh(); 
+        }
+
+
+        private async Task AppendLineageReport(AnimalDto animal, StringBuilder report, int generation)
+        {
+            if (animal == null)
+                return;
+
+            string indent = new string(' ', generation * 4);
+            report.AppendLine($"{indent}Name: {animal.name}");
+            report.AppendLine($"{indent}ID: {animal.Id}");
+            report.AppendLine($"{indent}Generation: {generation}");
+            report.AppendLine();
+
+            // Load parents
+            var dam = await _lineageService.GetDamByAnimalId(animal.Id);
+            var sire = await _lineageService.GetSireByAnimalId(animal.Id);
+
+            if (dam != null)
+            {
+                report.AppendLine($"{indent}Dam:");
+                await AppendLineageReport(await _animalService.MapSingleAnimaltoDto(dam), report, generation + 1);
+            }
+
+            if (sire != null)
+            {
+                report.AppendLine($"{indent}Sire:");
+                await AppendLineageReport(await _animalService.MapSingleAnimaltoDto(sire), report, generation + 1);
+            }
+        }
+
+
+        private async void GeneratePedigreeReportButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_currentAnimal == null)
+                {
+                    MessageBox.Show("No animal selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                var report = new StringBuilder();
+                report.AppendLine("Pedigree Report");
+                report.AppendLine("================");
+                report.AppendLine($"Generated: {DateTime.Now}");
+                report.AppendLine();
+                report.AppendLine($"Subject: {_currentAnimal.name}");
+                report.AppendLine($"ID: {_currentAnimal.Id}");
+                report.AppendLine();
+
+                // Load and append lineage data
+                await AppendLineageReport(_currentAnimal, report, 0);
+
+                // Save the report
+                using (var saveDialog = new SaveFileDialog())
+                {
+                    saveDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                    saveDialog.FilterIndex = 1;
+                    saveDialog.DefaultExt = "txt";
+                    saveDialog.FileName = $"PedigreeReport_{DateTime.Now:yyyyMMdd}_currentAnimal.name";
+
+                    if (saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        await File.WriteAllTextAsync(saveDialog.FileName, report.ToString());
+                        MessageBox.Show("Pedigree report generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating pedigree report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async Task LoadPedigreeData(Panel treePanel)

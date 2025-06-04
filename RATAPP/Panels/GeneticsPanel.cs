@@ -12,6 +12,7 @@ using RATAPPLibrary.Data.Models;
 using RATAPPLibrary.Data.Models.Genetics;
 using RATAPPLibrary.Data.DbContexts;
 using RATAPP.Forms;
+using Org.BouncyCastle.Asn1;
 
 namespace RATAPP.Panels
 {
@@ -47,6 +48,7 @@ namespace RATAPP.Panels
         private Panel litterAnalysisPanel;
         private ComboBox analysisFilterCombo;
         private Button generateReportButton;
+        private Button saveReportButton; 
         private Label analysisDescriptionLabel;
 
         // Breeding Calculator Components
@@ -62,7 +64,14 @@ namespace RATAPP.Panels
         private ComboBox animalSelector;
         private Panel pedigreeDisplayPanel;
         private Button viewPedigreeButton;
+        private Button savePedigreeButton;
         private Label pedigreeDescriptionLabel;
+
+        private int numTraits = 0;
+        private int numAnimals = 0;
+        private string commonTrait = "Coat color: Himalayan";
+        private string choice;
+        private string resultsText; 
 
         public Action<object, EventArgs> Load { get; private set; }
 
@@ -311,11 +320,13 @@ namespace RATAPP.Panels
                 Location = new Point(100, 12)
             };
             analysisFilterCombo.Items.AddRange(new object[] {
+                "Trait Type Summary",
                 "Colony Trait Distribution",
                 "Breeding Line Analysis",
                 "Inheritance Patterns",
                 "Trait Frequency by Generation"
             });
+            //choice = "Trait Type Summary"; //hack for now, set users choice here 
             analysisFilterCombo.SelectedIndex = 0;
 
             generateReportButton = new Button
@@ -331,9 +342,24 @@ namespace RATAPP.Panels
             };
             generateReportButton.FlatAppearance.BorderSize = 0;
 
+            saveReportButton = new Button
+            {
+                Text = "Save Report",
+                Font = new Font("Segoe UI", 10),
+                Width = 150,
+                Height = 30,
+                Location = new Point(550, 10),
+                BackColor = Color.FromArgb(0, 120, 212),
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat
+            };
+            saveReportButton.FlatAppearance.BorderSize = 0;
+
+
             filterPanel.Controls.Add(filterLabel);
             filterPanel.Controls.Add(analysisFilterCombo);
             filterPanel.Controls.Add(generateReportButton);
+            filterPanel.Controls.Add(saveReportButton);
 
             // Create stats panel
             colonyStatsPanel = new Panel
@@ -346,7 +372,8 @@ namespace RATAPP.Panels
 
             Label statsTitle = new Label
             {
-                Text = "Colony Statistics",
+                //Text = "Colony Statistics", FIMXE put this back once implemented 
+                Text = "Trait Type Summary",
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 AutoSize = true,
                 Location = new Point(10, 10)
@@ -355,7 +382,7 @@ namespace RATAPP.Panels
             // Placeholder stats (would be populated with real data)
             Label statsContent = new Label
             {
-                Text = "Total Animals: 0\nTotal Traits: 0\nMost Common Trait: N/A",
+                Text = $"Total Animals: {numAnimals}\nTotal Traits: {numTraits}\nMost Common Trait:{commonTrait}",
                 Font = new Font("Segoe UI", 10),
                 AutoSize = true,
                 Location = new Point(10, 40)
@@ -398,6 +425,12 @@ namespace RATAPP.Panels
             containerPanel.Controls.Add(analysisDescriptionLabel);
 
             analysisTab.Controls.Add(containerPanel);
+        }
+
+        private void AnalysisFilterSelectedIndexChanged(object sender, EventArgs e)
+        {
+            var combo = sender as ComboBox;
+            choice = combo.SelectedItem.ToString(); 
         }
 
         private void InitializeBreedingCalculatorTab()
@@ -483,7 +516,8 @@ namespace RATAPP.Panels
             resultPanel = new Panel
             {
                 Dock = DockStyle.Fill,
-                BorderStyle = BorderStyle.FixedSingle
+                BorderStyle = BorderStyle.FixedSingle,
+                Text = resultsText
             };
 
             Label resultTitle = new Label
@@ -571,9 +605,9 @@ namespace RATAPP.Panels
 
             viewPedigreeButton = new Button
             {
-                Text = "View Pedigree",
+                Text = "View Genetic Family Tree",
                 Font = new Font("Segoe UI", 10),
-                Width = 120,
+                Width = 150,
                 Height = 30,
                 Location = new Point(370, 10),
                 BackColor = Color.FromArgb(0, 120, 212),
@@ -691,9 +725,12 @@ namespace RATAPP.Panels
             assignTraitButton.Click += AssignTraitButton_Click;
             calculateButton.Click += CalculateButton_Click;
             generateReportButton.Click += GenerateReportButton_Click;
+            saveReportButton.Click += SaveReportButton_Click; 
             viewPedigreeButton.Click += ViewPedigreeButton_Click;
+            //savePedigreeButton.Click += SavePedigreeButton_Click; 
             traitTypeFilter.SelectedIndexChanged += Filter_Changed;
             speciesFilter.SelectedIndexChanged += Filter_Changed;
+            analysisFilterCombo.SelectedIndexChanged += AnalysisFilterSelectedIndexChanged;
         }
 
         private async void GeneticsPanel_Load(object sender, EventArgs e)
@@ -709,6 +746,7 @@ namespace RATAPP.Panels
             try
             {
                 var traitTypes = await _traitService.GetAllTraitTypesAsync();
+                numTraits = traitTypes.Count; 
                 traitTypeFilter.Items.Clear();
                 traitTypeFilter.Items.Add("All Types");
 
@@ -758,6 +796,7 @@ namespace RATAPP.Panels
             {
                 var animalService = new AnimalService(_contextFactory);
                 var animals = await animalService.GetAllAnimalsAsync();
+                numAnimals = animals.Count(); //get the total number of animals 
 
                 // Populate dam and sire combos for breeding calculator
                 dam1Combo.Items.Clear();
@@ -844,7 +883,6 @@ namespace RATAPP.Panels
             }
         }
 
-
         private async void AddTraitButton_Click(object sender, EventArgs e)
         {
             using (var form = await AddTraitForm.CreateAsync(_contextFactory, _traitService, _geneService))
@@ -854,6 +892,11 @@ namespace RATAPP.Panels
                     await RefreshTraitGrid();
                 }
             }
+        }
+
+        private void SavePedigreeButton_Click(object sender, EventArgs e)
+        {
+
         }
 
         //TODO
@@ -1060,62 +1103,142 @@ namespace RATAPP.Panels
             }
         }
 
-        //TODO
         private async void GenerateReportButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Generate Report Functionality Not Yet Implemented");
-            //try
-            //{
-            //    var traits = await _traitService.GetAllTraitsAsync();
-            //    var traitTypes = await _traitService.GetAllTraitTypesAsync();
+            try
+            {
+                if (choice == "Trait Type Summary")
+                {
+                    var traits = await _traitService.GetAllTraitsAsync();
+                    var traitTypes = await _traitService.GetAllTraitTypesAsync();
 
-            //    var report = new StringBuilder();
-            //    report.AppendLine("Genetics Report");
-            //    report.AppendLine("==============");
-            //    report.AppendLine($"Generated: {DateTime.Now}");
-            //    report.AppendLine();
+                    // Update the colonyStatsPanel with the generated report
+                    var report = GenerateTraitReport(traits, traitTypes);
 
-            //    // Trait Type Summary
-            //    report.AppendLine("Trait Types Summary");
-            //    report.AppendLine("-----------------");
-            //    foreach (var traitType in traitTypes)
-            //    {
-            //        var typeTraits = traits.Where(t => t.TraitTypeId == traitType.Id).ToList();
-            //        report.AppendLine($"{traitType.Name}: {typeTraits.Count} traits");
-            //    }
-            //    report.AppendLine();
+                    //Clear existing controls in the panel
+                    litterAnalysisPanel.Controls.Clear();
 
-            //    // Trait Details
-            //    report.AppendLine("Trait Details");
-            //    report.AppendLine("-------------");
-            //    foreach (var trait in traits)
-            //    {
-            //        report.AppendLine($"Name: {trait.CommonName}");
-            //        report.AppendLine($"Type: {trait.TraitType?.Name ?? "Unknown"}");
-            //        report.AppendLine($"Genotype: {trait.Genotype ?? "Not specified"}");
-            //        report.AppendLine($"Description: {trait.TraitType.Name ?? "None"}"); //FIXME
-            //        report.AppendLine();
-            //    }
+                    // Add a new title label
+                    Label analysisTitle = new Label
+                    {
+                        //Text = "Trait Report",
+                        Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                        AutoSize = true,
+                        Location = new Point(10, 10)
+                    };
+                    litterAnalysisPanel.Controls.Add(analysisTitle);
 
-            //    // Save report
-            //    using (var saveDialog = new SaveFileDialog())
-            //    {
-            //        saveDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-            //        saveDialog.FilterIndex = 1;
-            //        saveDialog.DefaultExt = "txt";
-            //        saveDialog.FileName = $"GeneticsReport_{DateTime.Now:yyyyMMdd}";
+                    // Add a new TextBox to display the report content
+                    TextBox analysisContentBox = new TextBox
+                    {
+                        Text = report.ToString(),
+                        Font = new Font("Segoe UI", 10),
+                        Multiline = true,
+                        ScrollBars = ScrollBars.Vertical,
+                        Dock = DockStyle.Fill,
+                        ReadOnly = true
+                    };
 
-            //        if (saveDialog.ShowDialog() == DialogResult.OK)
-            //        {
-            //            await File.WriteAllTextAsync(saveDialog.FileName, report.ToString());
-            //            MessageBox.Show("Report generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //        }
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+                    // Adjust TextBox margins to avoid overlap with the title label
+                    analysisContentBox.Margin = new Padding(10, 40, 10, 10);
+
+                    litterAnalysisPanel.Controls.Add(analysisContentBox);
+                }
+                else
+                {
+                    MessageBox.Show("Report not yet implemented");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private string GenerateTraitReport(List<Trait> traits, List<TraitType> traitTypes)
+        {
+            var report = new StringBuilder();
+
+            // Add report header
+            report.AppendLine("Trait Distribution Report");
+            report.AppendLine($"Generated: {DateTime.Now}");
+            report.AppendLine();
+
+            // Group traits by Species.CommonName first (handle nulls gracefully)
+            var traitsBySpecies = traits
+                .GroupBy(t => t.Species?.CommonName ?? "Unknown Species")
+                .OrderBy(g => g.Key);
+
+            foreach (var speciesGroup in traitsBySpecies)
+            {
+                report.AppendLine($"Species: {speciesGroup.Key}");
+                report.AppendLine(new string('=', speciesGroup.Key.Length));
+
+                // Inside each species, group traits by TraitType.Name
+                var traitsByTraitType = speciesGroup
+                    .GroupBy(t => traitTypes.FirstOrDefault(tt => tt.Id == t.TraitTypeId)?.Name ?? "Unknown Trait Type")
+                    .OrderBy(g => g.Key);
+
+                foreach (var traitTypeGroup in traitsByTraitType)
+                {
+                    report.AppendLine(traitTypeGroup.Key);
+                    report.AppendLine(new string('-', traitTypeGroup.Key.Length));
+
+                    foreach (var trait in traitTypeGroup)
+                    {
+                        int animalCount = trait.AnimalTraits?.Count ?? 0;
+                        string genotype = trait.Genotype ?? "N/A";
+                        report.AppendLine($"- {trait.CommonName} (G: {genotype}) - Num Animals w/Trait: {animalCount}");
+                    }
+
+                    report.AppendLine(); // space after each trait type group
+                }
+
+                report.AppendLine(); // space after each species
+            }
+
+            return report.ToString();
+
+        }
+
+
+        private async void SaveReportButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //var text = analysisFilterCombo.SelectedValue.ToString();
+                if (choice == "Trait Type Summary")
+                {
+                    var traits = await _traitService.GetAllTraitsAsync();
+                    var traitTypes = await _traitService.GetAllTraitTypesAsync();
+
+                    // Update the colonyStatsPanel with the generated report
+                    var report = GenerateTraitReport(traits, traitTypes);
+                    // Save report
+                    using (var saveDialog = new SaveFileDialog())
+                    {
+                        saveDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                        saveDialog.FilterIndex = 1;
+                        saveDialog.DefaultExt = "txt";
+                        saveDialog.FileName = $"TraitReport_{DateTime.Now:yyyyMMdd}";
+
+                        if (saveDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            await File.WriteAllTextAsync(saveDialog.FileName, report.ToString());
+                            MessageBox.Show("Report generated successfully!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+
+                }
+                else
+                {
+                    MessageBox.Show("Report not yet implemented");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void ViewPedigreeButton_Click(object sender, EventArgs e)
@@ -1143,8 +1266,6 @@ namespace RATAPP.Panels
 
             try
             {
-                //var animal = _animalService.MapSingleAnimaltoDto(selectedAnimal);
-                //var animalResult = animal.Result;
                 var animal = animalSelector.SelectedItem as AnimalDto; 
 
                 // Create a new form to display the pedigree in a larger view
