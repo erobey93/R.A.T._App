@@ -344,18 +344,26 @@ namespace RATAPPLibrary.Services
         {
             return await ExecuteInTransactionAsync(async context =>
             {
-                var existingLitter = await context.Litter.FirstOrDefaultAsync(l => l.Id == litter.Id);
-                if (existingLitter != null)
+                try
                 {
-                    throw new InvalidOperationException($"Litter with ID {litter.Id} already exists.");
+                    var existingLitter = await context.Litter.FirstOrDefaultAsync(l => l.Id == litter.Id);
+                    if (existingLitter != null)
+                    {
+                        throw new InvalidOperationException($"Litter with ID {litter.Id} already exists.");
+                    }
+
+                    litter.CreatedOn = DateTime.Now;
+                    litter.LastUpdated = DateTime.Now;
+
+                    context.Litter.Add(litter);
+                    context.SaveChanges();
+                    return true;
+                }catch(Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    return false;
                 }
-
-                litter.CreatedOn = DateTime.Now;
-                litter.LastUpdated = DateTime.Now;
-
-                context.Litter.Add(litter);
-                await context.SaveChangesAsync();
-                return true;
+                
             });
         }
 

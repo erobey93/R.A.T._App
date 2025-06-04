@@ -775,9 +775,10 @@ namespace RATAPP.Panels
         {
             //show spinner 
             await GetAnimalData();
-            Refresh(); 
+            Refresh();
             //stop spinner
             //show success message 
+            MessageBox.Show("Refresh Data Complete!"); //FIXME need spinner
            
         }
 

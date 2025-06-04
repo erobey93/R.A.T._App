@@ -68,7 +68,7 @@ namespace RATAPP.Forms
         {
             // Set form properties
             this.Text = "Update Pairing";
-            this.Size = new Size(800, 600);
+            this.Size = new Size(1200, 900);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.BackColor = Color.White;
             this.AutoScroll = true;
@@ -109,15 +109,15 @@ namespace RATAPP.Forms
             var leftColumn = new Panel
             {
                 Dock = DockStyle.Left,
-                Width = 350,
-                Padding = new Padding(0, 0, 20, 0)
+                Width = 550,
+                Padding = new Padding(0, 50, 20, 0)
             };
 
             var rightColumn = new Panel
             {
                 Dock = DockStyle.Right,
-                Width = 350,
-                Padding = new Padding(10, 0, 0, 0)
+                Width = 550,
+                Padding = new Padding(10, 50, 0, 0)
             };
 
             // Create groups for related fields
