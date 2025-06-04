@@ -6,6 +6,7 @@ using RATAPPLibrary.Data.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Windows.Forms;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -197,11 +198,7 @@ namespace RATAPP.Panels
 
         private void UpdateAnimalDetailsDisplay(AnimalDto animal)
         {
-            // Your implementation to update detail views
-            // Example:
-            // lblName.Text = animal.name;
-            // lblRegNum.Text = animal.regNum;
-            // picAnimal.Image = LoadImage(animal.imagePath);
+            
         }
 
         private void InitializeComponent()
@@ -653,14 +650,27 @@ namespace RATAPP.Panels
         }
 
         //TODO
+        //It would be nice to have a way to go back to ancestry, but right now it just switches the panel 
         private async void ViewFullDetails(AnimalDto animal)
         {
-            MessageBox.Show("Will navigate to individual animal page");
-            //FIXME this shouldn't be here but just getting this to work 
-            //AnimalDto[] allAnimals = await _animalService.GetAllAnimalsAsync();
-            //AnimalPanel indAnimalPanel = new AnimalPanel(this._parentForm, _contextFactory, allAnimals, animal);
-            //this.Hide();
-            //indAnimalPanel.Show();
+            try
+            {
+                // Retrieve all animals from the service
+                AnimalDto[] allAnimals = await _animalService.GetAllAnimalsAsync();
+
+                // Create a new instance of the individual animal panel
+                AnimalPanel indAnimalPanel = new AnimalPanel(this._parentForm, _contextFactory, allAnimals, animal);
+
+                // Access the parent form's control to manage panels
+                if (_parentForm is RATAppBaseForm mainForm)
+                {
+                    mainForm.ShowPanel(indAnimalPanel);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while navigating to animal details: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void ClearSelection()
@@ -708,30 +718,57 @@ namespace RATAPP.Panels
 
         private void PrintButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Printing functionality would be implemented here.", "Print Tree", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Create a print document
+            PrintDocument printDoc = new PrintDocument();
 
-            // In a real implementation, you would create a print document and print the tree
-            //PrintDocument printDoc = new PrintDocument();
-            //printDoc.PrintPage += PrintDoc_PrintPage;
-            //PrintDialog printDialog = new PrintDialog();
-            //printDialog.Document = printDoc;
-            //if (printDialog.ShowDialog() == DialogResult.OK)
-            //{
-            //    printDoc.Print();
-            //}
+            // Subscribe to the PrintPage event
+            printDoc.PrintPage += PrintDoc_PrintPage;
+
+            // Display the print dialog to the user
+            PrintDialog printDialog = new PrintDialog
+            {
+                Document = printDoc
+            };
+
+            if (printDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Initiate the print operation
+                printDoc.Print();
+            }
         }
 
+        private void PrintDoc_PrintPage(object sender, PrintPageEventArgs e)
+        {
+            // Define what to print (example: a tree structure or custom text)
+            // In this example, we'll just print a simple string
+            string textToPrint = "This is a test print of the tree structure.";
+
+            // Define font and brush for printing
+            Font printFont = new Font("Arial", 12);
+            Brush printBrush = Brushes.Black;
+
+            // Set the position to start printing
+            PointF printLocation = new PointF(100, 100);
+
+            // Draw the string onto the print document
+            e.Graphics.DrawString(textToPrint, printFont, printBrush, printLocation);
+
+            // Indicate whether more pages need to be printed
+            e.HasMorePages = false;
+        }
+
+        //TODO this should not be the genetic pedigree but its okay for now 
         private void GeneratePedigree_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Export functionality would be implemented here.", "Export Tree", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            // In a real implementation, you would export the tree to a file
-            // SaveFileDialog saveDialog = new SaveFileDialog();
-            // saveDialog.Filter = "PDF Files (*.pdf)|*.pdf|Image Files (*.png)|*.png";
-            // if (saveDialog.ShowDialog() == DialogResult.OK)
-            // {
-            //     // Export logic based on selected format
-            // }
+            PedigreeForm pedigreeForm = new PedigreeForm(_contextFactory, _currentAnimal);
+            // Add the form to the pedigree panel
+            //pedigreeForm.TopLevel = false;
+            pedigreeForm.FormBorderStyle = FormBorderStyle.SizableToolWindow;
+            pedigreeForm.Dock = DockStyle.Fill;
+
+            //pedigreeDisplayPanel.Controls.Add(pedigreeForm);
+            pedigreeForm.Show();
         }
 
         public async Task RefreshDataAsync()
