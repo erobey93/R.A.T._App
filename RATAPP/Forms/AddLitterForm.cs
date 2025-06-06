@@ -326,6 +326,7 @@ namespace RATAPP.Forms
                 foreach (var p in pairs)
                 {
                     pairComboBox.Items.Add(p);
+
                 }
 
                 pairComboBox.SelectedIndex = 0;
@@ -746,12 +747,7 @@ namespace RATAPP.Forms
         {
             var selectedPair = pairComboBox.SelectedItem as Pairing;
             var selectedText = pairComboBox.Text;
-            //if (selectedText == "All Pairings") //FIXME this should be a switch statement 
-            //{
-            //    //reload all of the data again
-            //    await LoadInitialDataAsync();
-            //    return;
-            //}
+
             if (selectedText == "Add New Pairing")
             {
                 //reload all of the data again
@@ -873,6 +869,8 @@ namespace RATAPP.Forms
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+                Pairing pair =  pairComboBox.SelectedItem as Pairing;
+                pairId = (int)pair.Id; 
 
                 var litter = new Litter
                 {
@@ -957,11 +955,19 @@ namespace RATAPP.Forms
         //FIXME below is how I was previously doing it 
         private void InitializeEventHandlers()
         {
+            Pairing pair = pairComboBox.SelectedItem as Pairing;
+            int pairId = 0; 
+            if (pair != null)
+            {
+                pairId = (int)pair.Id; 
+            }
+
+
             // Remove LitterPanel_Load since we're using LoadInitialDataAsync
             addButton.Click += (s,e) => AddLitterClick(
                         litterIdTextBox.Text,
                         litterNameTextBox.Text,
-                        pairComboBox.SelectedIndex + 1,
+                        pairId,
                         litterDatePicker,
                         numPups,
                         numMales,
@@ -971,7 +977,7 @@ namespace RATAPP.Forms
             addToGridButton.Click += (s, e) => HandleAddLitterToGridClick(
                 litterIdTextBox.Text,
                 litterNameTextBox.Text,
-                pairComboBox.SelectedIndex + 1,
+                pairComboBox.SelectedIndex,
                 litterDatePicker,
                 numPups,
                 numMales,

@@ -226,14 +226,14 @@ namespace RATAPP.Forms
             {
                 Dock = DockStyle.Left,
                 Width = 550,
-                Padding = new Padding(0, 0, 20, 0)
+                Padding = new Padding(0, 60, 20, 0)
             };
 
             var rightColumn = new Panel
             {
                 Dock = DockStyle.Right,
                 Width = 550,
-                Padding = new Padding(10, 0, 0, 0)
+                Padding = new Padding(10, 60, 0, 0)
             };
 
             // Create groups for related fields

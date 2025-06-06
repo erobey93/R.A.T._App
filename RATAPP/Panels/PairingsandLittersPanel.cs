@@ -576,9 +576,10 @@ namespace RATAPP.Panels
                 }
                 else if (currentTab == "Line Management")
                 {
-                    AddLineForm addLine = new AddLineForm(_contextFactory);
-                    addLine.ShowDialog();
-                    await LoadTabDataAsync(tabControl.SelectedIndex);
+                    MessageBox.Show("Add Line Form Will Be Here");
+                    //AddLineForm addLine = new AddLineForm(_contextFactory);
+                    //addLine.ShowDialog();
+                    //await LoadTabDataAsync(tabControl.SelectedIndex);
                 }
                 else if(currentTab == "Project Management")
                 {
@@ -674,9 +675,11 @@ namespace RATAPP.Panels
 
         public async Task RefreshDataAsync()
         {
+           
             searchState = "all"; //TODO probably need to clear out the search box/filter drop down as well 
             // Implement data refresh logic TODO
             await GetAllBreedingData();
+            MessageBox.Show("Data Refresh Complete"); 
         }
 
         private void InitializePairingDataGridView()
@@ -729,6 +732,9 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "PairingPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            // Attach the event handler for button clicks
+            pairingsGridView.CellContentClick += GridViewButton_ContentClick;
+
             // Add components to container
             containerPanel.Controls.Add(pairingsGridView);
             containerPanel.Controls.Add(infoPanel);
@@ -737,6 +743,49 @@ namespace RATAPP.Panels
             pairingsTab.Controls.Add(containerPanel);
 
             PopulatePairingDataDisplayArea();
+        }
+
+        private void GridViewButton_ContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            // Ensure the click is on a valid row (not header row)
+            if (e.RowIndex >= 0)
+            {
+                DataGridView dataGridView = sender as DataGridView;
+                // Get the clicked column name
+                string columnName = dataGridView.Columns[e.ColumnIndex].Name;
+
+                // Use a switch statement to handle different button column clicks
+                switch (columnName)
+                {
+                    case "PairingPage":
+                        {
+                            var pairingId = pairingsGridView.Rows[e.RowIndex].Cells["PairingId"].Value;
+                            MessageBox.Show($"You clicked the PairingPage button for Pairing ID: {pairingId}", "Details Button Clicked - PairingPage");
+                            break;
+                        }
+                    case "LinePage":
+                        {
+                            var lineId = linesGridView.Rows[e.RowIndex].Cells["LineId"].Value;
+                            MessageBox.Show($"You clicked the LinePage button for Line ID: {lineId}", "Details Button Clicked - Line Page");
+                            break;
+                        }
+                    case "LitterPage":
+                        {
+                            var litterId = littersGridView.Rows[e.RowIndex].Cells["LitterId"].Value;
+                            MessageBox.Show($"You clicked the LitterPage button for Litter ID: {litterId}", "Details Button Clicked - Litter Page");
+                            break;
+                        }
+                    case "ProjectPage":
+                        {
+                            var projectId = projectGridView.Rows[e.RowIndex].Cells["Id"].Value;
+                            MessageBox.Show($"You clicked the Project Page button for Project ID: {projectId}", "Details Button Clicked - Project Page");
+                            break;
+                        }
+                    default:
+                        //MessageBox.Show($"Unknown column clicked: {columnName}", "Unexpected Column");
+                        break;
+                }
+            }
         }
 
         private async void PopulatePairingDataDisplayArea()
@@ -835,6 +884,9 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "ProjectPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            // Attach the event handler for button clicks
+            projectGridView.CellContentClick += GridViewButton_ContentClick;
+
             // Add components to container
             containerPanel.Controls.Add(projectGridView);
             containerPanel.Controls.Add(infoPanel);
@@ -925,6 +977,8 @@ namespace RATAPP.Panels
                 new DataGridViewButtonColumn { Name = "LitterPage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
 
+            littersGridView.CellContentClick += GridViewButton_ContentClick;
+
             // Add components to container
             containerPanel.Controls.Add(littersGridView);
             containerPanel.Controls.Add(infoPanel);
@@ -1014,6 +1068,9 @@ namespace RATAPP.Panels
                 new DataGridViewTextBoxColumn { Name = "Notes", HeaderText = "Notes", Width = 150 },
                 new DataGridViewButtonColumn { Name = "LinePage", HeaderText = "Details", Text = "View", UseColumnTextForButtonValue = true, Width = 80 }
             });
+
+            // Attach the event handler for button clicks
+            linesGridView.CellContentClick += GridViewButton_ContentClick;
 
             // Add components to container
             containerPanel.Controls.Add(linesGridView);
